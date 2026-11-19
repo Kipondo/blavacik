@@ -1,6 +1,6 @@
 // Načítanie dát mapy: ručná mapa (data/mapa/*.json) + voliteľne OSM (data/osm/bratislava.geojson).
 
-import { prevedOsm } from './osm.js';
+import { rozmiestniAuta } from './spawn-aut.js';
 
 async function nacitajJson(cesta, povinny = true) {
   try {
@@ -36,17 +36,19 @@ export async function nacitajDataMapy(KONFIG, priebeh = () => {}) {
   data.pamiatky = pamiatky?.pamiatky ?? [];
   data.miesta = (await nacitajJson('data/mapa/miesta.json', false)) ?? {};
 
-  // OSM – ak súbor existuje, nahradí ručné budovy, cesty a vodu
-  priebeh('Hľadám OSM dáta…');
+  // OSM – ak súbor existuje (vyrába ho tools/osm/prevod.mjs), nahradí ručné budovy, cesty a vodu
+  priebeh('Načítavam mapu z OpenStreetMap…');
   const osm = await nacitajJson(KONFIG.OSM_SUBOR, false);
-  if (osm?.features?.length) {
-    priebeh('Spracúvam OSM dáta…');
-    const z = prevedOsm(osm, KONFIG.OSM_STRED, data.pamiatky);
-    if (z.budovy.length) { data.budovy = z.budovy; data.stromy = []; }
-    if (z.cesty.length) data.cesty = z.cesty;
-    if (z.voda.length) data.voda = z.voda;
+  if (osm?.budovy?.length) {
+    for (const k of ['budovy', 'cesty', 'voda', 'mosty', 'stromy', 'chodniky', 'kolajnice', 'pokryvka', 'prvky']) {
+      if (osm[k]) data[k] = osm[k];
+    }
+    data.plochy = [];   // námestia sú v pokrývke (textúra zeme)
+    data.zony = [];
+    data.licencia = osm.licencia;
     data.zdroj = 'osm';
-    console.info(`OSM: ${z.budovy.length} budov, ${z.cesty.length} ciest, ${z.voda.length} vodných plôch`);
+    // autá na štarte postavíme na skutočné ulice
+    data.spawn = { ...data.spawn, auta: rozmiestniAuta(data.cesty, data.spawn?.ulice ?? []) };
   } else {
     data.zdroj = 'rucna';
   }

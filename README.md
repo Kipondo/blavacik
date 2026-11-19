@@ -21,9 +21,13 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 
 ## Čo je hotové
 - **Základ hry:** úvodné menu, pauza, herná slučka, modulárne jadro (`hra.pridajModul`).
-- **Mapa (zjednodušená):** Staré Mesto, nábrežie, Dunaj, Most SNP, Hradný kopec s hradom, Petržalka,
-  ~3 600 budov s oknami a strechami, ~3 700 stromov, námestia.
-- **Terén:** kopce, koryto Dunaja, nájazdy na most. Auto aj chodec idú po teréne (auto sa nakláňa).
+- **Mapa zo skutočnej Bratislavy (OpenStreetMap):** ~5 800 budov s reálnymi pôdorysmi a výškami,
+  ~2 000 ulíc s názvami, šírkami a jednosmerkami, chodníky, cyklotrasy, električkové trate,
+  parky, trávniky, námestia, ~14 000 stromov, Dunaj, Most SNP, Starý most, Most Apollo.
+  Oblasť: Staré Mesto, Hradný kopec, Palisády, nábrežie, Eurovea, Nivy, Petržalka po Aupark.
+- **Terén:** Hradný kopec (~50 m nad nábrežím), Palisády a Slavín, mierne stúpanie Starého Mesta,
+  Dunaj v koryte 5 m pod nábrežím s kamennými nábrežnými múrmi a zábradlím, nájazdy na mosty.
+  Auto aj chodec idú po teréne (auto sa nakláňa).
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
@@ -32,9 +36,9 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
-- `feature/teren-a-polohopis` – ulice a nábrežie podľa skutočných súradníc, nábrežné múry, OSM dáta.
 - `feature/pamiatky` – Most SNP s UFO, Dóm, Michalská brána, radnica, SND, Eurovea, Kamzík…
-- `feature/doprava-a-znacky` – jazdné pruhy, chodníky, prechody, koľaje, semafory, značky, graf ciest.
+- `feature/doprava-a-znacky` – jazdné pruhy, obrubníky, prechody, koľaje, semafory, značky, tabule s ulicami, graf ciest.
+- `feature/grafika` – krajšie autá, postavy, stromy, fasády, osvetlenie, denná doba.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
 
 ## Ako pridať vlastný modul
@@ -58,8 +62,10 @@ Nový súbor `js/mapa/pamiatky/<nazov>.js` + záznam v `data/mapa/pamiatky.json`
 Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pamiatky.js), príklad je `hrad.js`.
 
 ## Mapa
-- Ručná mapa: `data/mapa/zakladna.json` (cesty, Dunaj, mosty, kopce, námestia, štart).
-- Budovy a stromy generuje `node tools/generuj-mapu.mjs` do `data/mapa/budovy.json` – po zmene ciest ho spusti znova.
-- Ak existuje `data/osm/bratislava.geojson`, hra použije budovy, cesty a vodu z OpenStreetMap.
+- **OpenStreetMap:** `data/mapa/osm.json` – vyrába ho `node tools/osm/stiahni.mjs && node tools/osm/prevod.mjs`.
+  Návod (aj ručný export cez overpass-turbo) je v [data/osm/README.md](data/osm/README.md).
+- **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
+- **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
+- Mapové dáta © prispievatelia OpenStreetMap, licencia ODbL.
 
 Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md).

@@ -19,6 +19,7 @@ import { vytvorBudovy } from './budovy/budovy.js';
 import { vytvorCesty } from './cesty/cesty.js';
 import { vytvorPlochy } from './cesty/plochy.js';
 import { vytvorVodu } from './voda/voda.js';
+import { vytvorNabrezneMury } from './voda/nabrezne-mury.js';
 import { vytvorMosty } from './mosty/mosty.js';
 import { vytvorStromy } from './zelen/stromy.js';
 import { nacitajPamiatky } from './pamiatky/nacitaj-pamiatky.js';
@@ -34,11 +35,12 @@ export async function postavMapu(data, scena, KONFIG, priebeh = () => {}) {
   scena.add(svet);
 
   svet.add(vytvorZem(vyskopis, data, KONFIG));
-  svet.add(vytvorVodu(data.voda, KONFIG));
+  svet.add(vytvorVodu(data.voda, KONFIG, vyskopis));
+  svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
 
   priebeh('Staviam cesty a mosty…');
   svet.add(vytvorCesty(data.cesty ?? [], vyskopis));
-  svet.add(vytvorPlochy(data.plochy, vyskopis));
+  if (data.plochy?.length) svet.add(vytvorPlochy(data.plochy, vyskopis));
   svet.add(vytvorMosty(data.mosty, vyskopis, KONFIG));
 
   priebeh('Staviam budovy…');

@@ -6,7 +6,8 @@ Na projekte pracujú dvaja ľudia naraz (z dvoch rôznych Claude účtov) – pr
 
 ## Hra
 - Mapa: Staré Mesto, nábrežie Dunaja, Most SNP (s UFO), Bratislavský hrad, Eurovea.
-- Budovy a cesty z OpenStreetMap (vysunuté pôdorysy s výškou); kým nie sú OSM dáta, používa sa zjednodušená ručná mapa.
+- Budovy a cesty z OpenStreetMap (vysunuté pôdorysy s výškou) – `data/mapa/osm.json`; bez neho sa použije zjednodušená ručná mapa.
+- OSM dáta sú pod licenciou ODbL – v hre (menu) a v README musí ostať uvedené „© prispievatelia OpenStreetMap“.
 - Chodenie pešo, nastupovanie/vystupovanie z áut, jazda s jednoduchou fyzikou a kolíziami.
 - Kamera za postavou/autom, ovládanie klávesnicou aj dotykom na mobile.
 - Polícia s hviezdičkami, krátke vtipné misie s bratislavským humorom, minimapa, menu.
@@ -44,10 +45,10 @@ js/doprava/           NPC doprava, semafory
 js/ui/                HUD, minimapa, menu, názvy miest
 js/zvuk/              syntetizované zvuky (žiadna cudzia hudba)
 data/mapa/            ručná mapa (JSON), pamiatky, pomenované miesta
-data/osm/             export z OpenStreetMap (GeoJSON)
+data/osm/             návod na OSM dáta, prípadný GeoJSON export (spracovaná mapa je data/mapa/osm.json)
 data/misie/           jedna misia = jeden JSON súbor (formát v FORMAT.md)
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
-tools/                pomocné skripty (napr. generovanie ručnej mapy)
+tools/                pomocné skripty (generovanie ručnej mapy, tools/osm/ = stiahnutie a prevod OSM)
 vendor/               knižnice tretích strán (three.js)
 ```
 

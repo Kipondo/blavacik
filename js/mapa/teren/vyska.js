@@ -31,21 +31,22 @@ export function vytvorVyskopis(data, KONFIG) {
   const hlbka = Math.ceil((H.maxZ - H.minZ) / krok) + 1;
   const kopce = data.kopce ?? [];
   const svahy = data.svahy ?? [];
-  const voda = (data.voda ?? []).map((v) => ({ ...v, ohr: ohranicenie(v.body) }));
+  // len rieky vyrezávajú koryto; fontány a jazierka sú len plochy na zemi
+  const voda = (data.voda ?? []).filter((v) => v.reka !== false).map((v) => ({ ...v, ohr: ohranicenie(v.body) }));
   const mosty = (data.mosty ?? []).map(pripravMost);
 
-  // 1) maska vody (1 = voda)
-  const maska = new Float32Array(sirka * hlbka);
-  for (let j = 0; j < hlbka; j++) {
-    const z = H.minZ + j * krok;
-    for (let i = 0; i < sirka; i++) {
-      const x = H.minX + i * krok;
-      for (const v of voda) {
-        if (x < v.ohr.minX || x > v.ohr.maxX || z < v.ohr.minZ || z > v.ohr.maxZ) continue;
-        if (bodVPolygone(x, z, v.body)) { maska[j * sirka + i] = 1; break; }
-      }
+  // 1) maska vody (1 = voda) – riadkové vypĺňanie polygónov (rýchle aj pre veľké polygóny)
+  const maska = new Uint8Array(sirka * hlbka);
+  for (const v of voda) vyplnPolygon(maska, sirka, hlbka, v.body, H, krok);
+  // zúženie o 1 bunku: svah koryta je celý vo vode, nábrežný múr stojí presne na okraji
+  const zuzena = maska.slice();
+  for (let j = 1; j < hlbka - 1; j++) {
+    for (let i = 1; i < sirka - 1; i++) {
+      const k = j * sirka + i;
+      if (maska[k] && !(maska[k - 1] && maska[k + 1] && maska[k - sirka] && maska[k + sirka])) zuzena[k] = 0;
     }
   }
+  maska.set(zuzena);
 
   // 2) výšky: kopce + mierne svahy, koryto (strmé nábrežné múry = bez rozmazania)
   const dno = KONFIG.HLBKA_KORYTA;
@@ -135,4 +136,23 @@ function vyskaSvahov(x, z, svahy) {
     h += s.vyska * plynulo(n.t) * plynulo(Math.max(0, zoslab));
   }
   return h;
+}
+
+/** Vyplní polygón do mriežky (scanline). */
+function vyplnPolygon(maska, sirka, hlbka, body, H, krok) {
+  const n = body.length;
+  for (let j = 0; j < hlbka; j++) {
+    const z = H.minZ + j * krok;
+    const xs = [];
+    for (let a = 0, b = n - 1; a < n; b = a++) {
+      const [xa, za] = body[a], [xb, zb] = body[b];
+      if ((za > z) !== (zb > z)) xs.push(xa + ((z - za) * (xb - xa)) / (zb - za));
+    }
+    xs.sort((p, q) => p - q);
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+      const i0 = Math.max(0, Math.ceil((xs[k] - H.minX) / krok));
+      const i1 = Math.min(sirka - 1, Math.floor((xs[k + 1] - H.minX) / krok));
+      for (let i = i0; i <= i1; i++) maska[j * sirka + i] = 1;
+    }
+  }
 }

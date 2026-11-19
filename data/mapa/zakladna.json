@@ -1,5 +1,5 @@
 {
-  "popis": "Ručná mapa Bratislavy – zjednodušená. Súradnice v metroch, x = východ, z = juh, (0,0) = Hlavné námestie. Polohy zhruba sedia so skutočnosťou, aby neskôr pasovali na OSM dáta. Budovy a stromy generuje tools/generuj-mapu.mjs do budovy.json.",
+  "popis": "Základ mapy: Dunaj, mosty, kopce, svahy, štart. Ak existuje data/mapa/osm.json (OpenStreetMap), budovy, cesty, voda a mosty sa vezmú odtiaľ; tento súbor je potom zdroj výškopisu a štartu a záloha, keby OSM chýbalo. Súradnice v metroch, x = východ, z = juh, (0,0) = 48.1435 N, 17.1077 E.",
   "voda": [
     {
       "nazov": "Dunaj",
@@ -19,19 +19,35 @@
   "kopce": [
     {
       "nazov": "Hradný kopec",
-      "x": -572,
-      "z": 155,
-      "polomer": 190,
-      "vyska": 38,
-      "plato": 0.33
+      "x": -560,
+      "z": 140,
+      "polomer": 235,
+      "vyska": 52,
+      "plato": 0.3
+    },
+    {
+      "nazov": "Hradný kopec – sever",
+      "x": -640,
+      "z": -60,
+      "polomer": 260,
+      "vyska": 34,
+      "plato": 0.2
+    },
+    {
+      "nazov": "Palisády",
+      "x": -560,
+      "z": -560,
+      "polomer": 420,
+      "vyska": 42,
+      "plato": 0.15
     },
     {
       "nazov": "Slavín",
-      "x": -700,
-      "z": -420,
-      "polomer": 260,
-      "vyska": 30,
-      "plato": 0.15
+      "x": -690,
+      "z": -1110,
+      "polomer": 380,
+      "vyska": 70,
+      "plato": 0.12
     }
   ],
   "cesty": [
@@ -212,8 +228,8 @@
   ],
   "spawn": {
     "hrac": {
-      "x": 12,
-      "z": 18,
+      "x": 34,
+      "z": 14,
       "uhol": 3.1416
     },
     "auta": [
@@ -271,6 +287,16 @@
         "uhol": 3.1416,
         "farba": "#4dc3ff"
       }
-    ]
-  }
+    ],
+    "ulice": ["Rázusovo nábrežie", "Vajanského nábrežie", "Štúrova", "Staromestská", "Námestie SNP", "Pribinova", "Panónska cesta", "Jesenského", "Kollárovo námestie", "Mostová", "Karadžičova", "Einsteinova"]
+  },
+  "svahy": [
+    {
+      "nazov": "Stúpanie Starého Mesta na sever",
+      "od": [150, 420],
+      "do": [150, -900],
+      "sirka": 1100,
+      "vyska": 10
+    }
+  ]
 }

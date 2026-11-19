@@ -7,16 +7,17 @@ const jeDotykove = typeof window !== 'undefined' &&
 
 export const KONFIG = {
   // Hranice hracej plochy
-  HRANICE: { minX: -1300, maxX: 1700, minZ: -700, maxZ: 1500 },
+  HRANICE: { minX: -1300, maxX: 2000, minZ: -1250, maxZ: 1500 },
 
   // Terén
-  TEREN_KROK: 8,          // rozlíšenie výškovej mriežky (m)
+  TEREN_KROK: 4,          // rozlíšenie výškovej mriežky (m)
   TEREN_SIET: 10,         // rozlíšenie siete zeme na vykreslenie (m)
-  HLADINA: -2.2,          // výška hladiny Dunaja
-  HLBKA_KORYTA: -6,       // dno koryta
+  HLADINA: -5,            // výška hladiny Dunaja (nábrežie je na 0)
+  HLBKA_KORYTA: -10,      // dno koryta
 
   // OpenStreetMap – ak súbor existuje, použije sa namiesto ručnej mapy
-  OSM_SUBOR: 'data/osm/bratislava.geojson',
+  // (vyrába ho tools/osm/prevod.mjs, návod v data/osm/README.md)
+  OSM_SUBOR: 'data/mapa/osm.json',
   OSM_STRED: { lat: 48.1435, lon: 17.1077 }, // Hlavné námestie
 
   // Grafika
