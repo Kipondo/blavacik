@@ -1,36 +1,43 @@
-// Kamzík s televíznou vežou – na horizonte nad mestom (ďaleko za hranicou mapy,
-// preto bez hmly, v hmlistej modrej farbe ako vzdialené kopce).
+// Televízna veža na Kamzíku (194 m) – stojí na skutočnom teréne Malých Karpát.
+// Ak mapa nemá výškový model (len centrum), postaví sa aj zjednodušený kopec na obzore.
 
 import * as THREE from 'three';
 
-export default function postav(p) {
+export default function postav(p, { vyskopis, KONFIG }) {
   const g = new THREE.Group();
-  const mat = (farba) => new THREE.MeshBasicMaterial({ color: farba, fog: false });
-  // Malé Karpaty – zvlnené kopce
-  const kopce = [[0, 0, 1700, 300], [-1800, 300, 1500, 250], [1700, 600, 1500, 220], [-3400, 800, 1400, 200]];
-  for (const [dx, dz, r, h] of kopce) {
-    const k = new THREE.Mesh(new THREE.ConeGeometry(r, h, 24, 1, true), mat('#9db3bf'));
-    k.position.set(dx, h / 2 - 5, dz);
-    g.add(k);
+  const H = KONFIG.HRANICE;
+  const naMape = p.x > H.minX && p.x < H.maxX && p.z > H.minZ && p.z < H.maxZ;
+  const mat = (farba) => new THREE.MeshStandardMaterial({ color: farba, roughness: 0.6, metalness: 0.2 });
+
+  let y0 = naMape ? vyskopis.vyskaTerenu(p.x, p.z) : 290;
+  if (!naMape) {
+    // starý režim (len centrum): Malé Karpaty ako hmlistý kopec na obzore
+    const kopec = new THREE.Mesh(new THREE.ConeGeometry(1700, 300, 24, 1, true), new THREE.MeshBasicMaterial({ color: '#9db3bf', fog: false }));
+    kopec.position.y = 145;
+    g.add(kopec);
   }
-  // veža (194 m): driek, kabína, anténa
-  const VRCH = 290;
-  const driek = new THREE.Mesh(new THREE.CylinderGeometry(6, 14, 120, 12), mat('#c9d3d9'));
-  driek.position.y = VRCH + 60;
-  const kabina = new THREE.Mesh(new THREE.CylinderGeometry(18, 12, 26, 12), mat('#b9c4cb'));
-  kabina.position.y = VRCH + 125;
-  const antena = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 4, 70, 8), mat('#d4dce0'));
-  antena.position.y = VRCH + 172;
-  // nohy veže
-  for (const s of [-1, 1]) {
-    const noha = new THREE.Mesh(new THREE.BoxGeometry(6, 70, 6), mat('#c3cdd3'));
-    noha.position.set(s * 14, VRCH + 30, 0);
-    noha.rotation.z = s * 0.15;
+  const SIVA = '#c9d1d6';
+  // nohy (betónové piliere) a driek
+  for (let k = 0; k < 3; k++) {
+    const u = (k / 3) * Math.PI * 2;
+    const noha = new THREE.Mesh(new THREE.BoxGeometry(5, 60, 5), mat('#bfc7cc'));
+    noha.position.set(Math.cos(u) * 12, y0 + 28, Math.sin(u) * 12);
+    noha.rotation.set(Math.sin(u) * 0.18, 0, -Math.cos(u) * 0.18);
     g.add(noha);
   }
-  g.add(driek, kabina, antena);
+  const driek = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 8, 100, 16), mat(SIVA));
+  driek.position.y = y0 + 50;
+  const kabina = new THREE.Mesh(new THREE.CylinderGeometry(15, 11, 24, 20), mat('#b8c3ca'));
+  kabina.position.y = y0 + 108;
+  const okna = new THREE.Mesh(new THREE.CylinderGeometry(15.2, 14, 6, 20), mat('#2c3b46'));
+  okna.position.y = y0 + 104;
+  const strecha = new THREE.Mesh(new THREE.CylinderGeometry(9, 15, 6, 20), mat(SIVA));
+  strecha.position.y = y0 + 123;
+  const antena = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 3.5, 68, 8), mat('#dfe5e8'));
+  antena.position.y = y0 + 160;
+  const pruhy = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.4, 14, 8), mat('#c8102e'));
+  pruhy.position.y = y0 + 175;
+  g.add(driek, kabina, okna, strecha, antena, pruhy);
   g.position.set(p.x, 0, p.z);
-  g.traverse((o) => { o.castShadow = false; o.receiveShadow = false; });
-  g.userData.bezTiena = true;
   return { objekt: g };
 }

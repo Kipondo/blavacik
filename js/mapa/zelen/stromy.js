@@ -89,6 +89,7 @@ function geometrieStromov() {
   const k2 = new THREE.ConeGeometry(1.6, 3.4, 8).toNonIndexed(); k2.translate(0, 6.4, 0);
   const ihlicnaty = spojGeometrie([k1, k2], 2.4, 8);
 
+  for (const g of [listnaty, ihlicnaty, kmenGeo]) g.userData.zdielane = true;
   cacheGeo = { listnaty, ihlicnaty, kmenGeo };
   return cacheGeo;
 }

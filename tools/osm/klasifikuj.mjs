@@ -129,7 +129,8 @@ function vnutriHranic(body, H, okraj = 50) {
 }
 
 // --- hlavná funkcia ------------------------------------------------------
-export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 1 }) {
+export function klasifikuj(geo, moznosti) {
+  const { hranice: H, pamiatky = [], styly = [], seed = 1 } = moznosti;
   const rnd = nahodne(seed);
   const vynimky = pamiatky.filter((p) => p.model && p.zaber).map((p) => ({
     x: p.x, z: p.z, r: p.zaber.kruh ?? null, w: p.zaber.obdlznik?.[0], d: p.zaber.obdlznik?.[1],
@@ -151,11 +152,27 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 
   };
 
   // rieky (na vynechanie budov na vode – botely, pontóny)
-  const riekyPolygony = geo.polygony.filter((p) => p.t.natural === 'water' && ['river', 'harbour'].includes(p.t.water)).map((p) => p.body);
+  const riekyPolygony = geo.polygony.filter((p) => p.t.natural === 'water' && ['river', 'harbour'].includes(p.t.water)).map((p) => ({ body: p.body, o: ohranicenie(p.body) }));
 
   // --- budovy (časti budov majú prednosť pred obrysom celej budovy) ---
   const casti = geo.polygony.filter((p) => p.t['building:part'] && p.t['building:part'] !== 'no');
-  const stredyCasti = casti.map((p) => stredBodov(p.body));
+  // stredy častí budov v mriežke (rýchle hľadanie aj pre celé mesto)
+  const mriezkaCasti = new Map();
+  for (const p of casti) {
+    const [x, z] = stredBodov(p.body);
+    const k = `${Math.floor(x / 100)},${Math.floor(z / 100)}`;
+    if (!mriezkaCasti.has(k)) mriezkaCasti.set(k, []);
+    mriezkaCasti.get(k).push([x, z]);
+  }
+  const maCasti = (body) => {
+    const o = ohranicenie(body);
+    for (let i = Math.floor(o.minX / 100); i <= Math.floor(o.maxX / 100); i++) {
+      for (let j = Math.floor(o.minZ / 100); j <= Math.floor(o.maxZ / 100); j++) {
+        for (const [x, z] of mriezkaCasti.get(`${i},${j}`) ?? []) if (bodVPolygone(x, z, body)) return true;
+      }
+    }
+    return false;
+  };
   for (const p of geo.polygony) {
     const t = p.t;
     const jeCast = t['building:part'] && t['building:part'] !== 'no';
@@ -166,8 +183,8 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 
     if (plocha < 15) continue;
     const [cx, cz] = stredBodov(p.body);
     if (vPamiatke(cx, cz)) continue;
-    if (riekyPolygony.some((r) => bodVPolygone(cx, cz, r))) continue;
-    if (!jeCast && stredyCasti.some(([x, z]) => bodVPolygone(x, z, p.body))) continue;
+    if (riekyPolygony.some((r) => cx >= r.o.minX && cx <= r.o.maxX && cz >= r.o.minZ && cz <= r.o.maxZ && bodVPolygone(cx, cz, r.body))) continue;
+    if (!jeCast && maCasti(p.body)) continue;
 
     const st = stvrt(cx, cz);
     const i = Math.abs(Math.round(cx * 7 + cz * 13));
@@ -289,7 +306,7 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 
 
   // --- stromy v lesoch a parkoch (ak ich OSM nemá jednotlivo) ---
   const prekazky = vytvorMriezkuPrekazok(out, 20);
-  const hustota = { les: 1 / 70, trava: 1 / 450, cintorin: 1 / 200 };
+  const hustota = { les: 1 / (moznosti.riedkyLes ?? 70), trava: 1 / 450, cintorin: 1 / 200 };
   for (const p of out.pokryvka) {
     const h = hustota[p.k];
     if (!h) continue;

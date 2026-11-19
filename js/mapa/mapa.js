@@ -31,8 +31,11 @@ import { vytvorNabrezneMury } from './voda/nabrezne-mury.js';
 import { vytvorMosty } from './mosty/mosty.js';
 import { vytvorStromy } from './zelen/stromy.js';
 import { nacitajPamiatky } from './pamiatky/nacitaj-pamiatky.js';
+import { postavMesto } from './mesto.js';
 
-export async function postavMapu(data, scena, KONFIG, priebeh = () => {}) {
+export async function postavMapu(data, scena, KONFIG, priebeh = () => {}, posli) {
+  // celá Bratislava po dlaždiciach (ak sú dáta v data/mapa/mesto/)
+  if (data.zdroj === 'mesto') return postavMesto(data, scena, KONFIG, priebeh, posli);
   priebeh('Modelujem terén…');
   const vyskopis = vytvorVyskopis(data, KONFIG);
   const kolizie = new Kolizie(40);

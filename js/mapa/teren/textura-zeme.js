@@ -123,3 +123,69 @@ export function texturaDetailu() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
 }
+
+/**
+ * Textúra zeme pre jednu dlaždicu mesta (rect = { minX, minZ, maxX, maxZ }).
+ * rieky = globálne polygóny riek (vyrežú sa – alfa 0).
+ */
+export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
+  const c = document.createElement('canvas');
+  c.width = c.height = px;
+  const g = c.getContext('2d');
+  const mierka = px / (rect.maxX - rect.minX);
+  const sx = (x) => (x - rect.minX) * mierka, sz = (z) => (z - rect.minZ) * mierka;
+  const cesta = (body, uzavriet) => {
+    g.beginPath();
+    body.forEach(([x, z], i) => (i ? g.lineTo(sx(x), sz(z)) : g.moveTo(sx(x), sz(z))));
+    if (uzavriet) g.closePath();
+  };
+
+  g.fillStyle = FARBY_POKRYVKY.zaklad;
+  g.fillRect(0, 0, px, px);
+  for (const p of d.pokryvka ?? []) {
+    g.fillStyle = FARBY_POKRYVKY[p.k] ?? FARBY_POKRYVKY.zaklad;
+    cesta(p.body, true);
+    g.fill();
+  }
+  g.fillStyle = '#4f7f8f';
+  for (const v of d.voda ?? []) { cesta(v.body, true); g.fill(); }
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  for (const ch of d.chodniky ?? []) {
+    g.strokeStyle = FARBY_CHODNIKOV[ch.typ] ?? FARBY_CHODNIKOV.footway;
+    g.lineWidth = Math.max(1, ch.sirka * mierka);
+    cesta(ch.body, false);
+    g.stroke();
+  }
+  for (const k of d.kolajnice ?? []) {
+    g.strokeStyle = '#7a7268';
+    g.lineWidth = Math.max(1, 3.4 * mierka);
+    cesta(k.body, false);
+    g.stroke();
+  }
+  // jemný šum
+  const obr = g.getImageData(0, 0, px, px);
+  let seed = 12345 + Math.round(rect.minX * 7 + rect.minZ * 13);
+  for (let i = 0; i < obr.data.length; i += 4) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const n = ((seed >> 16) & 15) - 8;
+    obr.data[i] += n; obr.data[i + 1] += n; obr.data[i + 2] += n;
+  }
+  g.putImageData(obr, 0, 0);
+  // rieky vyrežeme
+  g.globalCompositeOperation = 'destination-out';
+  g.fillStyle = '#000';
+  for (const v of rieky ?? []) {
+    const o = v.ohr;
+    if (o && (o.maxX < rect.minX || o.minX > rect.maxX || o.maxZ < rect.minZ || o.minZ > rect.maxZ)) continue;
+    cesta(v.body, true);
+    g.fill();
+  }
+  g.globalCompositeOperation = 'source-over';
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.flipY = false;
+  t.anisotropy = 8;
+  return t;
+}

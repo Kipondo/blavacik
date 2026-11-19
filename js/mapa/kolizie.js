@@ -12,13 +12,12 @@ export class Kolizie {
   constructor(velkostBunky = 40) {
     this.bunka = velkostBunky;
     this.mriezka = new Map();
-    this.prekazky = [];
+    this.skupiny = new Map();
   }
 
   _kluc(i, j) { return i * 100003 + j; }
 
   _vloz(p) {
-    this.prekazky.push(p);
     const i0 = Math.floor(p.minX / this.bunka), i1 = Math.floor(p.maxX / this.bunka);
     const j0 = Math.floor(p.minZ / this.bunka), j1 = Math.floor(p.maxZ / this.bunka);
     for (let i = i0; i <= i1; i++) {
@@ -28,7 +27,41 @@ export class Kolizie {
         this.mriezka.get(k).push(p);
       }
     }
+    // prekážky dlaždice sa dajú naraz odstrániť (streamovanie mesta)
+    const sk = p.info?.dlazdica ?? '';
+    if (!this.skupiny.has(sk)) this.skupiny.set(sk, []);
+    this.skupiny.get(sk).push(p);
     return p;
+  }
+
+  /** Odstráni všetky prekážky, ktoré patria k dlaždici (info.dlazdica). */
+  odstranDlazdicu(kluc) {
+    const zoznam = this.skupiny.get(kluc);
+    if (!zoznam) return;
+    const zmazat = new Set(zoznam);
+    const bunky = new Set();
+    for (const p of zoznam) {
+      for (let i = Math.floor(p.minX / this.bunka); i <= Math.floor(p.maxX / this.bunka); i++) {
+        for (let j = Math.floor(p.minZ / this.bunka); j <= Math.floor(p.maxZ / this.bunka); j++) bunky.add(this._kluc(i, j));
+      }
+    }
+    for (const b of bunky) {
+      const z = this.mriezka.get(b);
+      if (z) this.mriezka.set(b, z.filter((p) => !zmazat.has(p)));
+    }
+    this.skupiny.delete(kluc);
+  }
+
+  /** Pohľad na kolízie, ktorý všetko pridané označí ako súčasť dlaždice. */
+  preDlazdicu(kluc) {
+    const k = this;
+    return {
+      pridajPolygon: (b, info = {}) => k.pridajPolygon(b, { ...info, dlazdica: kluc }),
+      pridajObdlznik: (x, z, w, d, u = 0, info = {}) => k.pridajObdlznik(x, z, w, d, u, { ...info, dlazdica: kluc }),
+      pridajKruh: (x, z, r, info = {}) => k.pridajKruh(x, z, r, { ...info, dlazdica: kluc }),
+      vytlac: (...a) => k.vytlac(...a),
+      jeVolne: (...a) => k.jeVolne(...a),
+    };
   }
 
   pridajPolygon(body, info = {}) {

@@ -1,0 +1,1 @@
+{"popis":"Výšky terénu (Int16, decimetre nad nábrežím = 139 m n. m.), zdroj Copernicus DEM GLO-30, spracované tools/mesto/teren.mjs","licencia":"Copernicus DEM © DLR e.V. 2010-2014 a © Airbus Defence and Space GmbH 2014-2018, poskytnuté v rámci programu COPERNICUS Európskou úniou a ESA","minX":-12508,"minZ":-14011,"krok":20,"sirka":1309,"hlbka":1487,"nula":139}
