@@ -150,6 +150,9 @@ dlh navždy“, energeťák, rozvoz jedla „Hladoš“, realitky s bytmi za neh
 - Koniec: príchod na **Hlavnú stanicu v Bratislave** → prvé „Vitajte v Blave“.
 
 **Výber školy prebehne na úplnom začiatku, ešte pred vlakom.**
+**Spolu s výberom školy si hráč upraví vzhľad postavy** (editor postavy): tvár, účes a farba vlasov,
+brada/fúzy, postava (chudý/normálny/pupkáč), farba pleti, oblečenie a doplnky. Meno, povaha a reč
+ostávajú – vždy je to Ďoďo. Predvolený vzhľad = „klasický Ďoďo“ (viď 2).
 Mini-hry (varenie na kuchynke, karty, beer pong, učenie pred skúškou…) – áno, postupne.
 
 ## 4. Kapitoly príbehu (kostra, príbeh ešte doladíme)
