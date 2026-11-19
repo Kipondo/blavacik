@@ -73,7 +73,10 @@ Východniarčina je korenie, nie terč.
 - **Čert** – zarastený bezdomovec (dlhé vlasy, brada), **hovorí po česky**. Filozof ulice,
   každému povie svoju pravdu o živote; môže dávať malé úlohy a tipy.
 - **Čertova frajerka** – vysoká, vždy v **čiapke s brmbolcom**; Čerta bráni pred celým svetom.
-- **Taškárka** – bezdomovkyňa s množstvom tašiek, ktoré nikdy nepustí z ruky; vie o meste všetko.
+- **Taškárka** – bezdomovkyňa s množstvom tašiek, ktoré nikdy nepustí z ruky. Nevyspytateľná
+  a obávaná: **len nadáva** (vymyslené, kvetnaté nadávky), **pľuje po ľuďoch**, keď ide okolo,
+  hádže po okoloidúcich, čo má po ruke. Ľudia sa jej obchádzajú oblúkom; keď sa k nej Ďoďo
+  priblíži, dostane spŕšku nadávok a musí uhnúť. Komická hrozba, nie zlá postava.
 - **Spievajúci kuriér jedla** – jazdí po meste a **vždy, keď ide okolo Čerta, jeho frajerky
   a Taškárky, začne spievať** (vlastné vymyslené pesničky, syntetizované).
 - **Architekt z kaviarne** – študent architektúry na Stavebnej fakulte; **každý deň vysedáva pred
@@ -106,6 +109,21 @@ letáky v schránkach, autá s ampliónmi.
 **Protesty:** veľké zhromaždenia na Námestí SNP a pred úradmi – vlajky, transparenty, píšťalky,
 sviečky; občas protest aj „protiprotest“ naraz. Mesto sa uzavrie, MHD ide obchádzkou, polícia je
 v pohotovosti; Ďoďo sa môže pridať, len sa pozerať, alebo predávať čaj a párky.
+
+**Slogany na bilbordoch (paródia štýlu politických kampaní, vymyslené, nekopírujú skutočné):**
+- „Robíme pre ľudí. Hlavne pre našich.“
+- „Poriadok musí byť! (Okrem papierov v našej strane.)“
+- „Zmena, ktorá nič nezmení.“
+- „Slovensko na prvom mieste. V poradí od konca.“
+- „Sľúbili sme. A sľúbime znova.“
+- „Dôchodcom 14. dôchodok. Študentom 13. komentár.“
+- „Bezpečné Slovensko – zamknite sa doma.“
+- „Hlas pre rozum. Rozum na dovolenke.“
+- „Mladí, zostaňte doma! Ale voliť príďte.“
+- „Diaľnica do Košíc do roku… budúceho.“
+- „My nie sme ako oni. Oni sú ako my.“
+- „Ruky preč od Slovenska! Peňaženky sem.“
+Rovnako sa smejeme zo všetkých strán – pri každom slogane si nemá byť jasné, ktorá strana to je.
 
 **Reklamy (vymyslené značky):** bilbordy, rádio, plagáty v MHD – nebankové pôžičky „Peniaze hneď,
 dlh navždy“, energeťák, rozvoz jedla „Hladoš“, realitky s bytmi za nehoráznu cenu, jazykové kurzy
