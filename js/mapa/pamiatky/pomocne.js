@@ -106,3 +106,124 @@ export function zakladna(vyskopis, x, z, sirka, hlbka) {
   }
   return min;
 }
+
+// --- rozšírené pomôcky (fasády s rôznymi oknami, rímsy, stĺpy, kupoly) ---
+import { texturaKlasickychOkien, texturaSkla } from './textury.js';
+
+const cacheFasad = new Map();
+function materialFasady(farba, druh) {
+  const kluc = `${farba}|${druh}`;
+  if (!cacheFasad.has(kluc)) {
+    const map = druh === 'sklo' ? texturaSkla() : druh === 'klasicke' ? texturaKlasickychOkien() : texturaOkien();
+    cacheFasad.set(kluc, new THREE.MeshStandardMaterial({
+      color: farba, map,
+      roughness: druh === 'sklo' ? 0.15 : 0.85,
+      metalness: druh === 'sklo' ? 0.55 : 0,
+    }));
+  }
+  return cacheFasad.get(kluc);
+}
+
+/**
+ * Kváder s fasádou: druh = 'klasicke' (barokové okná), 'sklo' (sklenená fasáda), 'okna' (bežné).
+ * okno = [šírka, výška] jednej dlaždice v metroch. Strecha (vrch) má farbu `strecha`.
+ */
+export function fasada(sirka, vyska, hlbka, farba, { druh = 'klasicke', okno = [3.6, 4.2], strecha = '#8a8780' } = {}) {
+  const geo = new THREE.BoxGeometry(sirka, vyska, hlbka);
+  const uv = geo.attributes.uv;
+  const rozmery = [[hlbka, vyska], [hlbka, vyska], [sirka, hlbka], [sirka, hlbka], [sirka, vyska], [sirka, vyska]];
+  for (let s = 0; s < 6; s++) {
+    const [w, h] = rozmery[s];
+    for (let k = 0; k < 4; k++) {
+      const i = s * 4 + k;
+      uv.setXY(i, Math.max(1, Math.round(w / okno[0])) * uv.getX(i), Math.max(1, Math.round(h / okno[1])) * uv.getY(i));
+    }
+  }
+  const stena = materialFasady(farba, druh);
+  const vrch = material(strecha);
+  const mesh = new THREE.Mesh(geo, [stena, stena, vrch, vrch, stena, stena]);
+  mesh.castShadow = mesh.receiveShadow = true;
+  return mesh;
+}
+
+/** Rímsa – tenký presahujúci pás okolo kvádra. */
+export function rimsa(sirka, hlbka, y, farba = '#f4f1ea', presah = 0.5, hrubka = 0.6) {
+  const m = kvader(sirka + presah * 2, hrubka, hlbka + presah * 2, farba);
+  m.position.y = y;
+  return m;
+}
+
+/** Rad stĺpov pozdĺž osi x (napr. portikus). */
+export function stlpy(pocet, rozostup, vyska, polomer, farba = '#f4f1ea') {
+  const g = new THREE.Group();
+  for (let i = 0; i < pocet; i++) {
+    const s = valec(polomer, polomer * 1.1, vyska, farba, 12);
+    s.position.x = (i - (pocet - 1) / 2) * rozostup;
+    g.add(s);
+  }
+  return g;
+}
+
+/** Kupola (pologuľa), voliteľne s lucernou. */
+export function kupola(polomer, farba, { vyskaPomer = 1, lucerna = true, farbaLucerny = '#e8e4da' } = {}) {
+  const g = new THREE.Group();
+  const geo = new THREE.SphereGeometry(polomer, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+  geo.scale(1, vyskaPomer, 1);
+  const k = new THREE.Mesh(geo, material(farba, { lesk: 0.3, kov: 0.3 }));
+  k.castShadow = true;
+  g.add(k);
+  if (lucerna) {
+    const l = valec(polomer * 0.18, polomer * 0.2, polomer * 0.45, farbaLucerny, 8);
+    l.position.y = polomer * vyskaPomer * 0.92;
+    g.add(l);
+    const h = valec(0.02, polomer * 0.2, polomer * 0.35, farba, 8);
+    h.position.y = polomer * vyskaPomer * 0.92 + polomer * 0.45;
+    g.add(h);
+  }
+  return g;
+}
+
+/** Trojuholníkový štít (tympanón) nad portikom. Šírka v x, hĺbka v z. */
+export function stit(sirka, vyska, hlbka, farba = '#f4f1ea') {
+  const tvar = new THREE.Shape([new THREE.Vector2(-sirka / 2, 0), new THREE.Vector2(sirka / 2, 0), new THREE.Vector2(0, vyska)]);
+  const geo = new THREE.ExtrudeGeometry(tvar, { depth: hlbka, bevelEnabled: false });
+  geo.translate(0, 0, -hlbka / 2);
+  const m = new THREE.Mesh(geo, material(farba));
+  m.castShadow = true;
+  return m;
+}
+
+/** Skupina umiestnená na mape podľa záznamu pamiatky (poloha, natočenie, výška terénu). */
+export function naMiesto(skupina, p, vyskopis, sirka = 10, hlbka = 10) {
+  skupina.position.set(p.x, zakladna(vyskopis, p.x, p.z, sirka, hlbka), p.z);
+  skupina.rotation.y = p.natocenie ?? 0;
+  return skupina;
+}
+
+/** Tenký trám (kváder) medzi dvoma bodmi [x,y,z]. */
+export function tram(a, b, hrubka, farba, moznosti = {}) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
+  const d = A.distanceTo(B);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(hrubka, hrubka, d), material(farba, moznosti));
+  m.position.copy(A).add(B).multiplyScalar(0.5);
+  m.lookAt(B);
+  m.castShadow = true;
+  return m;
+}
+
+/** Veľa trámov naraz (InstancedMesh) – laná, priehradové nosníky. */
+export function tramy(useky, hrubka, farba, moznosti = {}) {
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material(farba, moznosti), useky.length);
+  const o = new THREE.Object3D();
+  useky.forEach(([a, b], i) => {
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
+    o.position.copy(A).add(B).multiplyScalar(0.5);
+    o.scale.set(hrubka, hrubka, A.distanceTo(B));
+    o.lookAt(B);
+    o.updateMatrix();
+    im.setMatrixAt(i, o.matrix);
+  });
+  im.castShadow = true;
+  im.computeBoundingSphere();
+  return im;
+}

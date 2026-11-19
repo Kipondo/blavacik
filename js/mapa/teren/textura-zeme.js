@@ -51,10 +51,6 @@ export function vytvorTexturuZeme(data, KONFIG) {
   // ručná mapa: zóny a námestia
   for (const zn of data.zony ?? []) { g.fillStyle = zn.farba; polygon(zn.body); g.fill(); }
 
-  // koryto rieky (svahy pod hladinou)
-  g.fillStyle = FARBY_POKRYVKY.koryto;
-  for (const v of data.voda ?? []) if (v.reka !== false) { polygon(v.body); g.fill(); }
-
   for (const p of data.pokryvka ?? []) {
     g.fillStyle = FARBY_POKRYVKY[p.k] ?? FARBY_POKRYVKY.zaklad;
     polygon(p.body);
@@ -93,6 +89,12 @@ export function vytvorTexturuZeme(data, KONFIG) {
     d[i] += n; d[i + 1] += n; d[i + 2] += n;
   }
   g.putImageData(obr, 0, 0);
+
+  // rieka: v textúre „vyrežeme“ dieru (alfa = 0) – zem sa tam nevykreslí, vidno vodu
+  g.globalCompositeOperation = 'destination-out';
+  g.fillStyle = '#000';
+  for (const v of data.voda ?? []) if (v.reka !== false) { polygon(v.body); g.fill(); }
+  g.globalCompositeOperation = 'source-over';
 
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;

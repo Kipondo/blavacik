@@ -35,8 +35,8 @@ if (vstup && vstup.endsWith('json')) {
   geo = zostavGeometriu(db, KONFIG.OSM_STRED);
 }
 
-const pamiatky = JSON.parse(readFileSync(join(koren, 'data/mapa/pamiatky.json'), 'utf8')).pamiatky;
-const mapa = klasifikuj(geo, { hranice: KONFIG.HRANICE, pamiatky, seed: 20261119 });
+const { pamiatky, styly = [] } = JSON.parse(readFileSync(join(koren, 'data/mapa/pamiatky.json'), 'utf8'));
+const mapa = klasifikuj(geo, { hranice: KONFIG.HRANICE, pamiatky, styly, seed: 20261119 });
 
 const vystup = {
   popis: 'VYGENEROVANÉ z OpenStreetMap – needituj ručne. Spusti: node tools/osm/prevod.mjs',

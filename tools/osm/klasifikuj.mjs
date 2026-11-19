@@ -115,20 +115,29 @@ function vnutriHranic(body, H, okraj = 50) {
 }
 
 // --- hlavná funkcia ------------------------------------------------------
-export function klasifikuj(geo, { hranice: H, pamiatky = [], seed = 1 }) {
+export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 1 }) {
   const rnd = nahodne(seed);
   const vynimky = pamiatky.filter((p) => p.model && p.zaber).map((p) => ({
     x: p.x, z: p.z, r: p.zaber.kruh ?? null, w: p.zaber.obdlznik?.[0], d: p.zaber.obdlznik?.[1],
+    c: Math.cos(p.natocenie ?? 0), s: Math.sin(p.natocenie ?? 0),
   }));
-  const vPamiatke = (x, z) => vynimky.some((v) => (v.r !== null
-    ? Math.hypot(x - v.x, z - v.z) < v.r
-    : Math.abs(x - v.x) < v.w / 2 && Math.abs(z - v.z) < v.d / 2));
+  // bod v kruhu alebo v otočenom obdĺžniku (natočenie ako v js/mapa/geometria.js → obdlznik)
+  const vPamiatke = (x, z) => vynimky.some((v) => {
+    if (v.r !== null) return Math.hypot(x - v.x, z - v.z) < v.r;
+    const dx = x - v.x, dz = z - v.z;
+    const lx = dx * v.c - dz * v.s, lz = dx * v.s + dz * v.c;
+    return Math.abs(lx) < v.w / 2 && Math.abs(lz) < v.d / 2;
+  });
+  const stylPodlaMena = new Map(styly.map((s) => [s.nazov, s]));
 
   const out = {
     budovy: [], cesty: [], chodniky: [], kolajnice: [], pokryvka: [], voda: [], mosty: [], stromy: [],
     prvky: { semafory: [], prechody: [], stop: [], prednost: [], lampy: [], zastavky: [], lavicky: [] },
     nazvy: {},
   };
+
+  // rieky (na vynechanie budov na vode – botely, pontóny)
+  const riekyPolygony = geo.polygony.filter((p) => p.t.natural === 'water' && ['river', 'harbour'].includes(p.t.water)).map((p) => p.body);
 
   // --- budovy (časti budov majú prednosť pred obrysom celej budovy) ---
   const casti = geo.polygony.filter((p) => p.t['building:part'] && p.t['building:part'] !== 'no');
@@ -143,6 +152,7 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], seed = 1 }) {
     if (plocha < 15) continue;
     const [cx, cz] = stredBodov(p.body);
     if (vPamiatke(cx, cz)) continue;
+    if (riekyPolygony.some((r) => bodVPolygone(cx, cz, r))) continue;
     if (!jeCast && stredyCasti.some(([x, z]) => bodVPolygone(x, z, p.body))) continue;
 
     const st = stvrt(cx, cz);
@@ -160,6 +170,12 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], seed = 1 }) {
       b.strecha = /^#[0-9a-f]{6}$/.test(rc) ? rc : MENA_FARIEB[rc] ?? (st === 'stare' || st === 'vily' ? STRECHY.stare : STRECHY.ostatne)[i % 4];
     }
     if (t.name) b.nazov = t.name;
+    const styl = stylPodlaMena.get(t.name);
+    if (styl) {
+      if (styl.farba) b.farba = styl.farba;
+      if (styl.vyska) b.vyska = styl.vyska;
+      if (styl.sklo) { b.sklo = true; delete b.strecha; }
+    }
     out.budovy.push(b);
   }
 

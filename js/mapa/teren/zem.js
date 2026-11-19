@@ -32,6 +32,27 @@ export function vytvorZem(vyskopis, data, KONFIG) {
     if (h > 3) f.lerp(ZELEN_KOPCA, Math.min(1, (h - 3) / 10) * (bezPokryvky ? 1 : 0.6));
     farby[i * 3] = f.r; farby[i * 3 + 1] = f.g; farby[i * 3 + 2] = f.b;
   }
+  // vrcholy vo vode hneď pri brehu dostanú výšku brehu – zem pri nábrežnom múre
+  // tak neklesá; samotná voda sa zo zeme „vyreže“ cez priehľadnosť textúry
+  const vx = sx + 1, vz = sz + 1;
+  const voda = new Uint8Array(poz.count);
+  for (let i = 0; i < poz.count; i++) voda[i] = vyskopis.jeVoVode(poz.getX(i), poz.getZ(i)) ? 1 : 0;
+  const povodne = new Float32Array(poz.count);
+  for (let i = 0; i < poz.count; i++) povodne[i] = poz.getY(i);
+  for (let j = 0; j < vz; j++) {
+    for (let i = 0; i < vx; i++) {
+      const k = j * vx + i;
+      if (!voda[k]) continue;
+      let max = -Infinity;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) {
+        const ii = i + di, jj = j + dj;
+        if (ii < 0 || jj < 0 || ii >= vx || jj >= vz) continue;
+        const kk = jj * vx + ii;
+        if (!voda[kk]) max = Math.max(max, povodne[kk]);
+      }
+      if (max > -Infinity) poz.setY(k, max);
+    }
+  }
   geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
   geo.computeVertexNormals();
 
@@ -47,7 +68,7 @@ export function vytvorZem(vyskopis, data, KONFIG) {
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvDetailUv = position.xz * 0.35;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nuniform sampler2D detailMapa;\nvarying vec2 vDetailUv;')
-      .replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.7) * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 0.11).rgb * 2.0, 0.25);');
+      .replace('#include <map_fragment>', '#include <map_fragment>\nif (sampledDiffuseColor.a < 0.5) discard;\ndiffuseColor.a = 1.0;\ndiffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.7) * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 0.11).rgb * 2.0, 0.25);');
   };
 
   const mesh = new THREE.Mesh(geo, mat);

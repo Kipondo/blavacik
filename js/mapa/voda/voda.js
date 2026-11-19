@@ -7,7 +7,7 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
   const skupina = new THREE.Group();
   skupina.name = 'voda';
   const mat = new THREE.MeshStandardMaterial({
-    color: '#3f6f80', roughness: 0.15, metalness: 0.25, transparent: true, opacity: 0.92,
+    color: '#3f6f80', roughness: 0.15, metalness: 0.25,
   });
 
   for (const v of voda ?? []) {

@@ -41,7 +41,9 @@ export async function nacitajPamiatky(pamiatky, kontext) {
     const { p, vysledok } = r.value;
     if (!vysledok?.objekt) continue;
     vysledok.objekt.name = p.nazov ?? p.model;
-    vysledok.objekt.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    if (!vysledok.objekt.userData.bezTiena) {
+      vysledok.objekt.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    }
     skupina.add(vysledok.objekt);
     if (vysledok.update) aktualizacie.push(vysledok.update);
   }
