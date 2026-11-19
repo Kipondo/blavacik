@@ -27,7 +27,8 @@ js/config.js          spoločné konštanty
 js/moduly.js          zoznam modulov (nový modul = 1 import + 1 položka)
 js/jadro/hra.js       rozhranie hry: stav, moduly, udalosti (popis v komentári)
 js/vstup/             klávesnica, dotyk (joystick), spoločný stav ovládania
-js/kamera/            kamera za postavou/autom
+js/kamera/            kamera za postavou/autom, skrývanie vzdialených objektov
+js/grafika/           vzhľad: odrazy okolia (environment), neskôr deň/noc a efekty
 js/mapa/              načítanie mapy (ručná + OSM), kolízie, geometria, obloha
 js/mapa/teren/        výškopis (kopce, koryto Dunaja, mosty) a model zeme
 js/mapa/budovy/       vysunuté budovy, textúra okien

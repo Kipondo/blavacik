@@ -68,7 +68,7 @@ export function vytvorZem(vyskopis, data, KONFIG) {
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvDetailUv = position.xz * 0.35;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nuniform sampler2D detailMapa;\nvarying vec2 vDetailUv;')
-      .replace('#include <map_fragment>', '#include <map_fragment>\nif (sampledDiffuseColor.a < 0.5) discard;\ndiffuseColor.a = 1.0;\ndiffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.7) * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 0.11).rgb * 2.0, 0.25);');
+      .replace('#include <map_fragment>', '#include <map_fragment>\nif (sampledDiffuseColor.a < 0.5) discard;\ndiffuseColor.a = 1.0;\nfloat trava = smoothstep(0.02, 0.12, diffuseColor.g - diffuseColor.r);\ndiffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.45 + trava * 0.4) * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);');
   };
 
   const mesh = new THREE.Mesh(geo, mat);
