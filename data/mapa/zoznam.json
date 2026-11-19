@@ -1,0 +1,4 @@
+{
+  "popis": "Súbory ručnej mapy, ktoré sa načítajú a zlúčia (v tomto poradí).",
+  "subory": ["zakladna.json", "budovy.json"]
+}
