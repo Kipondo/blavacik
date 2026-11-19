@@ -7,7 +7,8 @@
     "stiahni": "node stiahni.mjs",
     "teren": "node teren.mjs",
     "dlazdice": "node --max-old-space-size=8000 dlazdice.mjs",
-    "vsetko": "npm run stiahni && npm run teren && npm run dlazdice"
+    "prehlad": "node prehlad.mjs",
+    "vsetko": "npm run stiahni && npm run dlazdice && npm run teren && npm run prehlad"
   },
   "dependencies": {
     "geotiff": "^2.1.3",
