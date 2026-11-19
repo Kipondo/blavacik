@@ -11,6 +11,8 @@ Na projekte pracujú dvaja ľudia naraz (z dvoch rôznych Claude účtov) – pr
 - Kamera za postavou/autom, ovládanie klávesnicou aj dotykom na mobile.
 - Polícia s hviezdičkami, krátke vtipné misie s bratislavským humorom, minimapa, menu.
 
+**Dizajn hry (príbeh, postava, systémy) je v [napady/dizajn-hry.md](napady/dizajn-hry.md) – pred novou funkciou si ho prečítaj.**
+
 ## Technológie
 - Three.js (súbor priamo v `vendor/`, žiadne CDN ani build proces).
 - Čisté HTML + JavaScript (ES moduly cez `importmap`), CSS.
@@ -35,6 +37,7 @@ data/mapa/            ručná mapa (JSON)
 data/osm/             export z OpenStreetMap (GeoJSON)
 data/misie/           jedna misia = jeden JSON súbor
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
+napady/               dizajn hry, príbeh, nápady (markdown)
 tools/                pomocné skripty (napr. generovanie ručnej mapy)
 vendor/               knižnice tretích strán (three.js)
 ```

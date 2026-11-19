@@ -8,6 +8,7 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 
 ## Čo je hotové
 - Pravidlá projektu (`CLAUDE.md`).
+- Dizajn hry: študent Ďoďo z Košíc prvýkrát v Bratislave ([napady/dizajn-hry.md](napady/dizajn-hry.md)).
 
 ## Čo ďalej
 - Hrateľný prototyp: mapa Starého Mesta, chodenie, autá, polícia, 2–3 misie, minimapa, menu.
