@@ -9,6 +9,8 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 ## Čo je hotové
 - Pravidlá projektu (`CLAUDE.md`).
 
+- Dialógy úvodnej scény vo vlaku (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch.
+
 ## Čo ďalej
 - Hrateľný prototyp: mapa Starého Mesta, chodenie, autá, polícia, 2–3 misie, minimapa, menu.
 - OSM dáta pre budovy a cesty.

@@ -1,0 +1,68 @@
+{
+  "id": "vlak-opity",
+  "postavy": {
+    "ujo": {
+      "meno": "Ujo s fľaškou",
+      "farba": "#8fbf5a"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "ujo",
+      "text": "Mladýýý! Ty si... ty si zrovna ten, koho som hľadal."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ja? Ja tu nikoho ňepoznam."
+    },
+    {
+      "kto": "ujo",
+      "text": "Ani ja! A pozri, ako si rozumieme. Dáš si jednu na cestu? Domáca."
+    },
+    {
+      "kto": "dodo",
+      "text": "Dakus śe bojim. O pol dvanastej mam byc na intraku pri vrátnici.",
+      "volby": [
+        {
+          "text": "„Ta ľem jednu, na zdravie!“",
+          "efekty": {
+            "opitost": 35,
+            "socializacia": 5
+          },
+          "skok": "opity-vypil"
+        },
+        {
+          "text": "„Ňe, dzekujem. Mama by ma zabila.“",
+          "skok": "opity-odmietol"
+        }
+      ]
+    },
+    {
+      "kto": "ujo",
+      "text": "Na zdravie! Na Bratislavu! Na tvoju mamu!",
+      "znacka": "opity-vypil"
+    },
+    {
+      "kto": "dodo",
+      "text": "Joj... to pali jak... jak... Ta to je silnejše jak naša."
+    },
+    {
+      "kto": "ujo",
+      "text": "Hehe. Prvá je na mňa. Druhá je tiež na mňa. Tretiu už nedám, tú si nechám pre seba.",
+      "koniec": true
+    },
+    {
+      "kto": "ujo",
+      "text": "Dobrý syn. Ja som tiež poslúchal mamu. Do štyridsiatky.",
+      "znacka": "opity-odmietol"
+    },
+    {
+      "kto": "ujo",
+      "text": "Keď stretneš revízora, povedz mu, že ja nie som tu."
+    }
+  ]
+}

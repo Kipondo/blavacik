@@ -1,0 +1,35 @@
+{
+  "id": "vlak-revizor",
+  "postavy": {
+    "revizor": {
+      "meno": "Revízor",
+      "farba": "#5b6c8f"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "revizor",
+      "text": "Dobrý deň, cestovné lístky, prosím."
+    },
+    {
+      "kto": "dodo",
+      "text": "Hej, mam, mam... ľem momentik... Bul tu. Prisahám, že bul tu."
+    },
+    {
+      "kto": "revizor",
+      "text": "Mladý pán, ja počúvam ‚bol tu‘ od Košíc. Dvanásť ráz denne."
+    },
+    {
+      "kto": "dodo",
+      "text": "Dajce mi minutku, ja ho najdzem!"
+    },
+    {
+      "kto": "revizor",
+      "text": "Prejdem vagón a vrátim sa. Kým sa vrátim, buď lístok, alebo pokuta."
+    }
+  ]
+}
