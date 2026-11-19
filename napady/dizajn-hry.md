@@ -92,7 +92,19 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 - **Prospech** (ako sa učí → ako zvláda skúšky)
 - **Bratislavskosť** (vývoj reči)
 - **Hviezdičky polície** (keď robí bordel)
-- **Hlad sa nerieši** (rozhodnuté – bez ukazovateľa hladu).
+- **Bez ukazovateľa hladu** – jesť sa dá, ale nič sa nestane, keď nebude jesť (viď 6a).
+
+## 6a. Jedlo, pitie a „pochutiny“ (rozhodnuté)
+Ďoďo môže jesť a piť, ale **hlad ani smäd sa nesleduje**. Veci majú len krátkodobé efekty:
+| Vec | Efekt |
+|---|---|
+| Jedlo (mamine rezne, menza, bufet) | malé doplnenie života, vtipná hláška |
+| Alkohol (pivo, borovička, „jedno na cestu“) | **opitá obrazovka** (rozmazanie, kývanie kamery, dvojité videnie, ťažšie ovládanie), vyššia socializácia; opitý za volantom = polícia |
+| Cigareta | krátky „pokoj“ (napr. menej stresu pred skúškou), kašeľ |
+| Energetický nápoj | dočasne doplní spánok, potom „pád“ (únava) |
+| Sladkosť | malý krátky boost energie |
+| Tráva | výrazný vizuálny efekt (farby, spomalenie), hlad na sladké 😄, riziko polície |
+Všetky veci sú v inventári, efekty definované v JSON (`data/predmety/*.json`), štýl karikatúry.
 
 ## 7. Čas
 - Deň/noc, týždne, semestre, skúškové obdobie.
@@ -103,15 +115,22 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 - **Skúšku musí spraviť.** Neúspech nie je koniec hry: riadny termín → 1. opravný → 2. opravný
   → zvláštna misia „prosba na dekanáte“ (posledná šanca). Medzi tým volá mama.
 - Skúška = mini-hra (otázky z JSON podľa fakulty; vyšší prospech = viac času/nápovedy).
-- **Výber školy (rozhodnuté):** na začiatku hráč volí z 3 škôl:
-  1. **Stavebná fakulta STU** (Radlinského ulica),
-  2. **Filozofická fakulta UK** (Gondova ulica na nábreží – priamo v pôvodnej mape),
-  3. **Ekonomická univerzita** (Dolnozemská cesta v Petržalke – cesta do školy cez most).
-  Tretia voľba je návrh, dá sa vymeniť.
+- **Výber školy (rozhodnuté):** na začiatku hráč volí školu/odbor:
+  1. **Stavebná fakulta STU** – Radlinského 11,
+  2. **Fakulta chemickej a potravinárskej technológie STU** (chemická) – Radlinského 9, hneď vedľa stavebnej,
+  3. **Filozofická fakulta UK** – Gondova 2 na nábreží; tu aj odbor **žurnalistika**,
+  4. **Fakulta telesnej výchovy a športu UK** (telesná) – na nábreží pod hradom,
+  5. **Pedagogická fakulta UK** – Račianska ulica,
+  6. **Fakulta informatiky a informačných technológií STU** (ajťácka) – Ilkovičova, v Mlynskej doline pri Átriakoch,
+  7. **Ekonomická univerzita** – Dolnozemská cesta v Petržalke (cesta do školy cez most).
+  (Adresy over podľa OSM pri modelovaní.)
 - **Hráč musí reálne prísť (pešo, MHD, vozidlom) k budove svojej školy** na mape.
 - **Vnútro školy je jedna spoločná šablóna** (vstupná hala, chodby, učebne, posluchárne,
-  študijné oddelenie, bufet) – rovnaká pre všetky školy, aby to nebolo náročné na modelovanie.
-  Líši sa len **učivo** (predmety, otázky na skúškach, typy spolužiakov a učiteľov) – všetko v JSON
+  študijné oddelenie, bufet), aby to nebolo náročné na modelovanie, **ale nie na chlp rovnaká:**
+  každá škola má vlastné farby stien, podláh a lavíc, iné nástenky, plagáty a rekvizity
+  (chemická – laboratórium a digestory, telesná – telocvičňa, ajťácka – počítačové učebne,
+  stavebná – modely budov, žurnalistika – štúdio s mikrofónom…). Paleta a rekvizity v JSON.
+  Líši sa aj **učivo** (predmety, otázky na skúškach, typy spolužiakov a učiteľov) – všetko v JSON
   (napr. `data/skoly/stavebna.json`, `filozoficka.json`, `ekonomicka.json`).
 - Exteriér každej školy je vlastná budova na mape (modul ako ostatné významné stavby).
 
@@ -154,15 +173,14 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
   **3 školy** (Stavebná fakulta STU – Radlinského, Filozofická fakulta UK – Gondova,
   Ekonomická univerzita – Dolnozemská v Petržalke), menza, zastávky MHD a trasy
   električiek/autobusov.
-- ❓ Košice na záver príbehu – stačí menšia mapa (napr. Hlavná ulica a okolie), alebo len scény.
+- **Košice na záver príbehu – len scény** (rozhodnuté). Košice ako hrateľná mapa = možné pokračovanie hry v budúcnosti.
 - ❓ Mapa sa zväčší – riešiť výkon (načítavanie po častiach).
 
 ## 13. Otvorené otázky (❓ súhrn)
 Rozhodnuté: 3 školy so spoločným interiérom · internát Átriaky · bez hladu ·
 finále = práca + Košice vs. Bratislava, potom voľná hra.
 
-1. Je tretia škola (Ekonomická univerzita) v poriadku?
-2. Košice v závere – malá mapa, alebo len scény?
+Rozhodnuté aj: 7 škôl/odborov · iné farby a rekvizity v školách · jedlo a pochutiny s efektmi · Košice len scény.
 5. Ako ďaleko ísť s cestou „pochybných kšeftov“ (štýlom karikatúry, s následkami)?
 6. Návšteva Košíc ako bonusová misia (vlak späť domov)?
 
@@ -172,7 +190,7 @@ finále = práca + Košice vs. Bratislava, potom voľná hra.
 3. HUD s ukazovateľmi + čas (deň/noc, kalendár).
 4. Úvodná scéna vo vlaku (samostatný „level“).
 5. Hlavná stanica → MHD → Átriaky (kapitola 1), interiér internátu.
-6. Budovy 3 škôl + spoločný interiér školy.
+6. Budovy škôl + spoločný interiér školy s paletami a rekvizitami podľa školy.
 7. Brigády (najprv kuriér, lebo využíva jazdu).
 8. Skúšky (mini-hra + opravné termíny).
 9. Polícia, revízor, zatknutie.
