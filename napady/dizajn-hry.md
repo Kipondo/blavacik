@@ -49,6 +49,24 @@ Východniarčina je korenie, nie terč.
 (napr. reštaurácie písané vo východniarčine), diskusie „Bratislava vs. východ“, internátne historky.
 Žiadne reálne osoby ani ich hlášky v hre.
 
+## 2a. Ľudia okolo Ďoďa (rozhodnuté)
+- **Sociálny status na začiatku = 0.** Ďoďo v Bratislave nikoho nepozná.
+- **Spolubývajúci – vždy náhodný** z 5 typov; každý rok sa losuje znova (môže padnúť aj ten istý):
+  1. **Smradoch** – zázračne sa vyhýba sprche, ponožky žijú vlastným životom,
+  2. **Ukrajinec** – pracovitý, popri škole robí, má najlepšie domáce jedlo na chodbe,
+  3. **Ind** – zahraničný študent, pre ktorého je Bratislava aj Ďoďova východniarčina úplná záhada,
+  4. **Trenčan** – stredoslovenský „normálny“ chalan, večne sa háda, kto hovorí správne,
+  5. **Gamer** – nevychádza z izby, ale **stane sa Ďoďovým najlepším kamošom**.
+  Humor zo situácií a povahy, nie z národnosti – každý spolubývajúci je sympatický a má svoj príbeh.
+- **Mama:** hlavne telefonáty (vždy v najhoršej chvíli); **raz príde na intrák osobne** a donesie jedlo.
+- **Frajerka:** viac možností, treba sa k nej dopracovať (socializácia, atraktivita, misie).
+  Stretnúť ju môže ako spolužiačku, na párty, vo vlaku, na ulici alebo v práci.
+- **Nepriatelia (viac naraz):** prísna vrátnička, vyučujúci, ktorý ho nemá rád, rival na intráku,
+  revízor v MHD (opakovaný minibos).
+- **NPC v meste:** typickí Bratislavčania a postavičky (bezdomovec s múdrosťami, dôchodcovia v MHD,
+  turisti, kurieri, holuby…), postupne sa budú pridávať. Herci a politici len ako **vymyslené
+  parodické typy** (herec z telenovely, politik na kampani) – žiadne skutočné osoby (pravidlo `CLAUDE.md`).
+
 ## 3. Úvod – vlak z Košíc (dlhšia interaktívna scéna, zároveň tutoriál)
 - Preplnený rýchlik Košice → Bratislava, Ďoďo stojí na chodbe s kufrom a taškou rezňov.
 - **Hlásenie:** klasické „vlak mešká približne 120 minút“ – a potom ešte raz s inou číslicou.
@@ -59,6 +77,9 @@ Východniarčina je korenie, nie terč.
   - **Fero, čo ide do roboty** (stavbár na týždňovky) – životné múdrosti o cenách v Bratislave.
   - **Revízor** – kontrola lístka; ak ho Ďoďo „stratil“, mini-úloha nájsť ho (pod sedadlom, u babky…).
 - Koniec: príchod na **Hlavnú stanicu v Bratislave** → prvé „Vitajte v Blave“.
+
+**Výber školy prebehne na úplnom začiatku, ešte pred vlakom.**
+Mini-hry (varenie na kuchynke, karty, beer pong, učenie pred skúškou…) – áno, postupne.
 
 ## 4. Kapitoly príbehu (kostra, príbeh ešte doladíme)
 0. **Vlak** (tutoriál).
@@ -82,7 +103,7 @@ Východniarčina je korenie, nie terč.
 | **Vzorný študent** | učí sa, chodí na prednášky | prospech, štipendium | nuda, nízka socializácia |
 | **Brigádnik** | robí veľa brigád | peniaze, auto skôr | spánok, prospech |
 | **Kráľ párty** | organizuje akcie na intráku | socializácia, atraktivita, peniaze | vrátnička, vyhodenie z intráku, polícia |
-| **Pochybné kšefty** | krádeže spolubývajúcim, predaj „pochybného tovaru“ | rýchle peniaze | polícia, zatknutie, vyhodenie, mama sa dozvie |
+| **Pochybné kšefty** | krádeže spolubývajúcim, predaj „zeleného“ a iných drog | rýchle peniaze | polícia, zatknutie, vyhodenie, mama sa dozvie |
 
 Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôvera mamy, ponuky brigád.
 
@@ -103,11 +124,25 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 | Cigareta | krátky „pokoj“ (napr. menej stresu pred skúškou), kašeľ |
 | Energetický nápoj | dočasne doplní spánok, potom „pád“ (únava) |
 | Sladkosť | malý krátky boost energie |
-| Tráva | výrazný vizuálny efekt (farby, spomalenie), hlad na sladké 😄, riziko polície |
+| Tráva („zelené“) | výrazný vizuálny efekt (farby, spomalenie), hlad na sladké 😄, riziko polície |
 Všetky veci sú v inventári, efekty definované v JSON (`data/predmety/*.json`), štýl karikatúry.
 
+## 6b. Mobil, peniaze, škola v mobile (rozhodnuté)
+- **Mobil** s aplikáciami: správy, mapa, bankovníctvo, ponuky brigád, intráková skupina,
+  telefonáty (mama), **eIndex so známkami**, rádio.
+- **Peniaze:** mama dáva **30 € týždenne** a na začiatku platí intrák a ostatné veci;
+  neskôr prestane → Ďoďo si musí zarábať.
+- **Štipendium** za dobrý prospech.
+
+## 6c. Ukladanie a „smrť“ (rozhodnuté)
+- Hra sa **ukladá kedykoľvek**.
+- Keď Ďoďo „zomrie“ (alebo omdlie), zobudí sa **v posteli na intráku alebo na stanici** a **stratí
+  peňaženku** (peniaze, doklady, študentský preukaz) → misia „vybavovačky“: nový preukaz,
+  doklady, karta… (úrady, fronty, formuláre – humor).
+
 ## 7. Čas
-- Deň/noc, týždne, semestre, skúškové obdobie.
+- Deň/noc, týždne, semestre, skúškové obdobie, **štyri ročné obdobia** (zima so snehom
+  a vianočnými trhmi, jar, leto pri Dunaji, jeseň).
 - Rozvrh: prednášky v určitom čase; vynechanie znižuje prospech.
 - Noc: večierky, vrátnička po 22:00 nepustí (→ okno, kamarát, úplatok koláčom).
 
@@ -157,6 +192,10 @@ Všetky veci sú v inventári, efekty definované v JSON (`data/predmety/*.json`
 3. **Auto** – najprv ojazdená stará rodinná káčka (vymyslený model, žiadne značky), neskôr lepšie.
    Opitý Ďoďo nemá šoférovať → polícia.
 - Polícia: hviezdičky za bordel, naháňačky, **zatknutie** (pokuta, noc na stanici, mama sa dozvie).
+
+## 10a. Rádio
+- V aute aj v mobile; **zosmiešnené názvy skutočných staníc** (paródia, bez ich log a znelkiek),
+  vymyslení moderátori, syntetizovaná hudba/ruchy, vtipné reklamy a dopravné správy.
 
 ## 11. Brigády (prepojené s jazdou a mestom)
 - **Kuriér rozvozu jedla** (vymyslená firma, napr. „Rozvoz Hladoš“) – bicykel/kolobežka/auto,
