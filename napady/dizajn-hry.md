@@ -63,9 +63,62 @@ Východniarčina je korenie, nie terč.
   Stretnúť ju môže ako spolužiačku, na párty, vo vlaku, na ulici alebo v práci.
 - **Nepriatelia (viac naraz):** prísna vrátnička, vyučujúci, ktorý ho nemá rád, rival na intráku,
   revízor v MHD (opakovaný minibos).
-- **NPC v meste:** typickí Bratislavčania a postavičky (bezdomovec s múdrosťami, dôchodcovia v MHD,
-  turisti, kurieri, holuby…), postupne sa budú pridávať. Herci a politici len ako **vymyslené
-  parodické typy** (herec z telenovely, politik na kampani) – žiadne skutočné osoby (pravidlo `CLAUDE.md`).
+- **NPC v meste:** typickí Bratislavčania a postavičky (dôchodcovia v MHD, turisti, holuby…),
+  postupne sa budú pridávať. Politici a herci len ako **vymyslené typy** (viď 2c) – žiadne skutočné osoby.
+
+## 2b. Stále postavy v meste (rozhodnuté, budeme pridávať)
+> Ak sú inšpirované skutočnými ľuďmi z ulice, len voľne – iný výzor a detaily, aby sa nikto nedal
+> spoznať. Bezdomovci sú sympatické postavy s vlastnou hrdosťou a múdrosťami, nie terč posmechu.
+
+- **Čert** – zarastený bezdomovec (dlhé vlasy, brada), **hovorí po česky**. Filozof ulice,
+  každému povie svoju pravdu o živote; môže dávať malé úlohy a tipy.
+- **Čertova frajerka** – vysoká, vždy v **čiapke s brmbolcom**; Čerta bráni pred celým svetom.
+- **Taškárka** – bezdomovkyňa s množstvom tašiek, ktoré nikdy nepustí z ruky; vie o meste všetko.
+- **Spievajúci kuriér jedla** – jazdí po meste a **vždy, keď ide okolo Čerta, jeho frajerky
+  a Taškárky, začne spievať** (vlastné vymyslené pesničky, syntetizované).
+- **Architekt z kaviarne** – študent architektúry na Stavebnej fakulte; **každý deň vysedáva pred
+  kaviarňou** s náčrtníkom, v lete na posedení na chodníku. Môže byť Ďoďov kamarát/rada pre
+  študentov stavebnej.
+  - Kaviareň: inšpirovaná kaviarňou **Blue Mondays na Dunajskej ulici v Starom Meste**
+    (malá výberová kaviareň s posedením na chodníku). V hre pod vymysleným názvom, napr.
+    **„Modrý pondelok“**, bez ich loga (pravidlo bez značiek firiem). Pri modelovaní pozrieť
+    fotky a street view, nech fasáda a posedenie sedia.
+- **Pentagon** – sídlisko vo Vrakuni (mimo pôvodnej mapy → rozšírenie mapy), kde si študent
+  môže kúpiť „zelené“; riziková zóna s vyššou šancou polície.
+
+## 2c. Politika, kampane, protesty, reklamy (rozhodnuté)
+**Princíp:** žiadni konkrétni politici ani prekrútené mená skutočných ľudí. **Vymyslené typy
+a situácie zo slovenskej politickej kultúry**, ktoré každý pozná – zosmiešňujú sa rovnako všetky
+strany. Mená opisujú typ (Sľubný, Bilbordová, Páska), nie skutočnú osobu.
+V titulkoch: *„Všetky postavy sú vymyslené. Ak sa v niektorej spoznáte, je to vaša vec.“*
+
+**Typy politikov:**
+- **premiér z bilbordov** – tvár na každom plote, ranné tlačovky na sociálnych sieťach, za všetko môžu „tí predtým“,
+- **večný opozičník** – live videá z auta, riešenie na všetko, kým sa nedostane k moci,
+- **rečník do rána** – 12-hodinové prejavy v parlamente pri hrade,
+- **minister pásky** – strihá pásku na diaľnici do poľa, na tej istej ceste už tretíkrát,
+- **regionálny barón** – tender vždy vyhrá švagrova firma, kosačka za cenu auta,
+- **kandidát, čo objavil mladých** – týždeň pred voľbami chodí po intrákoch s perami a energeťákmi.
+
+**Bilbordy a kampane:** vymyslené bilbordy po celom meste (menia sa pred voľbami), stánky na Hlavnom,
+letáky v schránkach, autá s ampliónmi.
+
+**Protesty:** veľké zhromaždenia na Námestí SNP a pred úradmi – vlajky, transparenty, píšťalky,
+sviečky; občas protest aj „protiprotest“ naraz. Mesto sa uzavrie, MHD ide obchádzkou, polícia je
+v pohotovosti; Ďoďo sa môže pridať, len sa pozerať, alebo predávať čaj a párky.
+
+**Reklamy (vymyslené značky):** bilbordy, rádio, plagáty v MHD – nebankové pôžičky „Peniaze hneď,
+dlh navždy“, energeťák, rozvoz jedla „Hladoš“, realitky s bytmi za nehoráznu cenu, jazykové kurzy
+„Nauč sa bratislavčinu za víkend“ atď.
+
+**Situácie na misie:**
+- brigáda: roznášať letáky dvoch súperiacich strán naraz a nepomýliť si schránky,
+- niekto domaľuje bilbordom fúzy a podozrievajú Ďoďa,
+- Ďoďo sa ocitne v pozadí živého vysielania z tlačovky – mama ho vidí v telke,
+- rádio: každý týždeň nová „kauza“, moderátori čoraz unavenejší,
+- politická debata na intrákovej kuchynke → týždeň sa nikto nebaví,
+- sľub rýchlika Košice – Bratislava za dve hodiny, ktorý sa nikdy nesplní,
+- spolubývajúci Ind sa snaží pochopiť slovenskú politiku, Ďoďo mu to vysvetľuje po východniarsky.
 
 ## 3. Úvod – vlak z Košíc (dlhšia interaktívna scéna, zároveň tutoriál)
 - Preplnený rýchlik Košice → Bratislava, Ďoďo stojí na chodbe s kufrom a taškou rezňov.
