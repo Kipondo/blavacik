@@ -69,7 +69,12 @@ Východniarčina je korenie, nie terč.
 3. **Peniaze dochádzajú** – prvá brigáda, prvý veľký výdavok (bicykel/kolobežka).
 4. **Rozcestie** – hráč si volí smer (viď 5), mesto sa otvára.
 5. **Skúškové** – skúšky, opravné termíny, mama volá.
-6. **Ďalšie semestre** – dlhšie hranie, príbeh sa mení podľa rozhodnutí; ❓ finále (štátnice?).
+6. **Ďalšie semestre** – dlhšie hranie, príbeh sa mení podľa rozhodnutí.
+7. **Finále (rozhodnuté):** Ďoďo dokončí školu a **nájde si prácu**. Veľká záverečná časť
+   gameplayu: pohovory, ponuky v Bratislave aj v Košiciach, tlak mamy, kamaráti, frajerka…
+   a nakoniec rozhodnutie: **žiť v Košiciach, alebo v Bratislave?** (rôzne záverečné scény).
+8. **Po príbehu:** hra pokračuje ako voľný open world po Bratislave – dá sa hrať ďalej,
+   robiť brigády, jazdiť, robiť bordel.
 
 ## 5. Cesty hráča (hráč sa rozhoduje sám)
 | Cesta | Čo robí | Plusy | Riziká |
@@ -87,7 +92,7 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 - **Prospech** (ako sa učí → ako zvláda skúšky)
 - **Bratislavskosť** (vývoj reči)
 - **Hviezdičky polície** (keď robí bordel)
-- ❓ **Hlad** – mamine rezne a menza by mali zmysel; zvážiť.
+- **Hlad sa nerieši** (rozhodnuté – bez ukazovateľa hladu).
 
 ## 7. Čas
 - Deň/noc, týždne, semestre, skúškové obdobie.
@@ -98,14 +103,25 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 - **Skúšku musí spraviť.** Neúspech nie je koniec hry: riadny termín → 1. opravný → 2. opravný
   → zvláštna misia „prosba na dekanáte“ (posledná šanca). Medzi tým volá mama.
 - Skúška = mini-hra (otázky z JSON podľa fakulty; vyšší prospech = viac času/nápovedy).
-- **❓ Výber školy:** odporúčanie – na začiatku výber z 3 fakúlt (napr. technika, ekonomika,
-  filozofia), ktorý mení len predmety, otázky na skúškach a typy spolužiakov (všetko dáta).
-  Hru to nezahltí a pridá znovuhrateľnosť.
+- **Výber školy (rozhodnuté):** na začiatku hráč volí z 3 škôl:
+  1. **Stavebná fakulta STU** (Radlinského ulica),
+  2. **Filozofická fakulta UK** (Gondova ulica na nábreží – priamo v pôvodnej mape),
+  3. **Ekonomická univerzita** (Dolnozemská cesta v Petržalke – cesta do školy cez most).
+  Tretia voľba je návrh, dá sa vymeniť.
+- **Hráč musí reálne prísť (pešo, MHD, vozidlom) k budove svojej školy** na mape.
+- **Vnútro školy je jedna spoločná šablóna** (vstupná hala, chodby, učebne, posluchárne,
+  študijné oddelenie, bufet) – rovnaká pre všetky školy, aby to nebolo náročné na modelovanie.
+  Líši sa len **učivo** (predmety, otázky na skúškach, typy spolužiakov a učiteľov) – všetko v JSON
+  (napr. `data/skoly/stavebna.json`, `filozoficka.json`, `ekonomicka.json`).
+- Exteriér každej školy je vlastná budova na mape (modul ako ostatné významné stavby).
 
 ## 9. Internát
-- **❓ Výber internátu:** odporúčanie – zatiaľ **jeden** internát inšpirovaný Mlynmi v Mlynskej
-  doline (najznámejší bratislavský intrák, 6000+ študentov, každý ho pozná). Výber viacerých
-  internátov až neskôr, ak bude chuť.
+- **Internát (rozhodnuté): Átriaky** – Átriové domky v Mlynskej doline (areál Mlyny UK,
+  architekt Vladimír Dedeček). Nízke bloky označené písmenami (napr. F, G, J, M) okolo átrií.
+- **Modelovať podrobnejšie, aby sa tam dalo chodiť:** areál s blokmi a átriami, vchod s vrátnicou,
+  chodby, izby (Ďoďova izba so spolubývajúcimi), spoločná kuchynka, sprchy/WC, práčovňa,
+  študovňa; v okolí zastávka MHD, obchod, menza, bufet, ihrisko.
+- Ostatné internáty (Mladosť, Družba…) môžu byť na mape len zvonka ako kulisa.
 - Strasti (misie aj náhodné udalosti):
   - jedlo/hrnček zmizne z kuchynky → detektívna misia po chodbe,
   - nočný kľud po 22:00, vrátnička,
@@ -134,15 +150,19 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 
 ## 12. Mapa – čo pribudne oproti pôvodnému plánu
 - Pôvodne: Staré Mesto, nábrežie, Most SNP, hrad, Eurovea.
-- **Nové pre príbeh:** **Hlavná stanica** (príchod), **Mlynská dolina / internát** (domov),
-  **fakulta(y)**, menza, zastávky MHD a trasy električiek/autobusov.
+- **Nové pre príbeh:** **Hlavná stanica** (príchod), **Mlynská dolina s Átriakmi** (domov),
+  **3 školy** (Stavebná fakulta STU – Radlinského, Filozofická fakulta UK – Gondova,
+  Ekonomická univerzita – Dolnozemská v Petržalke), menza, zastávky MHD a trasy
+  električiek/autobusov.
+- ❓ Košice na záver príbehu – stačí menšia mapa (napr. Hlavná ulica a okolie), alebo len scény.
 - ❓ Mapa sa zväčší – riešiť výkon (načítavanie po častiach).
 
 ## 13. Otvorené otázky (❓ súhrn)
-1. Výber školy na začiatku – áno (3 fakulty, len dáta), alebo jedna pevná?
-2. Jeden internát, alebo výber?
-3. Ukazovateľ hladu – áno/nie?
-4. Finále príbehu – štátnice, koniec 1. ročníka, alebo nekonečno?
+Rozhodnuté: 3 školy so spoločným interiérom · internát Átriaky · bez hladu ·
+finále = práca + Košice vs. Bratislava, potom voľná hra.
+
+1. Je tretia škola (Ekonomická univerzita) v poriadku?
+2. Košice v závere – malá mapa, alebo len scény?
 5. Ako ďaleko ísť s cestou „pochybných kšeftov“ (štýlom karikatúry, s následkami)?
 6. Návšteva Košíc ako bonusová misia (vlak späť domov)?
 
@@ -151,8 +171,9 @@ Rozhodnutia majú **následky**: povesť na intráku, hviezdičky polície, dôv
 2. Formát misií a dialógov s variantmi reči (`vychod`/`mix`/`blava`).
 3. HUD s ukazovateľmi + čas (deň/noc, kalendár).
 4. Úvodná scéna vo vlaku (samostatný „level“).
-5. Hlavná stanica → MHD → internát (kapitola 1).
-6. Brigády (najprv kuriér, lebo využíva jazdu).
-7. Skúšky (mini-hra + opravné termíny).
-8. Polícia, revízor, zatknutie.
-9. Ďalšie vozidlá a auto.
+5. Hlavná stanica → MHD → Átriaky (kapitola 1), interiér internátu.
+6. Budovy 3 škôl + spoločný interiér školy.
+7. Brigády (najprv kuriér, lebo využíva jazdu).
+8. Skúšky (mini-hra + opravné termíny).
+9. Polícia, revízor, zatknutie.
+10. Ďalšie vozidlá a auto.
