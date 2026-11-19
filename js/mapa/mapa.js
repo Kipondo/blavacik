@@ -18,6 +18,14 @@ import { Kolizie } from './kolizie.js';
 import { vytvorBudovy } from './budovy/budovy.js';
 import { vytvorCesty } from './cesty/cesty.js';
 import { vytvorPlochy } from './cesty/plochy.js';
+import { najdiKrizovatky } from './cesty/krizovatky.js';
+import { vytvorPlochyKrizovatiek } from './cesty/plochy-krizovatiek.js';
+import { vytvorChodniky } from './cesty/chodniky.js';
+import { vytvorPrechody } from './cesty/prechody.js';
+import { vytvorKolajnice } from './cesty/kolajnice.js';
+import { vytvorZnacky } from './znacky/znacky.js';
+import { vytvorTabuleUlic } from './znacky/tabule-ulic.js';
+import { vytvorLampy } from './vybavenie/lampy.js';
 import { vytvorVodu } from './voda/voda.js';
 import { vytvorNabrezneMury } from './voda/nabrezne-mury.js';
 import { vytvorMosty } from './mosty/mosty.js';
@@ -39,7 +47,13 @@ export async function postavMapu(data, scena, KONFIG, priebeh = () => {}) {
   svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
 
   priebeh('Staviam cesty a mosty…');
-  svet.add(vytvorCesty(data.cesty ?? [], vyskopis));
+  const cesty = data.cesty ?? [];
+  const { krizovatky } = najdiKrizovatky(cesty);
+  svet.add(vytvorCesty(cesty, vyskopis));
+  svet.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
+  svet.add(vytvorChodniky(cesty, krizovatky, vyskopis));
+  svet.add(vytvorPrechody(data.prvky?.prechody, cesty, vyskopis));
+  svet.add(vytvorKolajnice(data.kolajnice, vyskopis));
   if (data.plochy?.length) svet.add(vytvorPlochy(data.plochy, vyskopis));
   svet.add(vytvorMosty(data.mosty, vyskopis, KONFIG));
 
@@ -47,6 +61,11 @@ export async function postavMapu(data, scena, KONFIG, priebeh = () => {}) {
   for (const b of data.budovy ?? []) kolizie.pridajPolygon(b.body, { typ: 'budova' });
   svet.add(vytvorBudovy(data.budovy ?? [], vyskopis, KONFIG));
   svet.add(vytvorStromy(data.stromy, vyskopis, kolizie));
+
+  priebeh('Osádzam značky a lampy…');
+  svet.add(vytvorZnacky(data, krizovatky, vyskopis));
+  svet.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
+  svet.add(vytvorLampy(data.prvky?.lampy, vyskopis, kolizie));
 
   priebeh('Staviam pamiatky…');
   const pamiatky = await nacitajPamiatky(data.pamiatky ?? [], { vyskopis, kolizie, KONFIG });
@@ -71,6 +90,7 @@ export async function postavMapu(data, scena, KONFIG, priebeh = () => {}) {
       if (typeof m === 'string') return miesta[m] ? { x: miesta[m].x, z: miesta[m].z } : null;
       return { x: m.x, z: m.z };
     },
+    krizovatky,
     update(cas) { for (const o of animovane) o.userData.update(cas); },
     objekt: svet,
   };

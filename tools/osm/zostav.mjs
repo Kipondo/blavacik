@@ -67,7 +67,7 @@ export function zostavGeometriu(db, stred) {
     bodyCesty.set(id, pts);
     const uzavreta = w.nd.length > 3 && w.nd[0] === w.nd[w.nd.length - 1];
     if (jePlocha(w.t, uzavreta)) polygony.push({ id, t: w.t, body: pts.slice(0, -1) });
-    else ciary.push({ id, t: w.t, body: pts, uzavreta });
+    else ciary.push({ id, t: w.t, body: pts, nd: w.nd, uzavreta });
   }
 
   // multipolygóny – vonkajšie obrysy pospájame z členov

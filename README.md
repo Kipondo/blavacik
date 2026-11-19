@@ -33,6 +33,10 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
   Reduta, Prezidentský palác, Modrý kostolík, Most SNP s pylónom, UFO a lanami, Starý most (priehradový),
   Most Apollo (oblúk), Nová SND, mrakodrap pri Eurovei, Slovenský rozhlas (obrátená pyramída),
   Kamzík s televíznou vežou na horizonte. Sklenené fasády pre Eurovea, Aupark, Tower 115, Nivy…
+- **Doprava a značky:** cesty s jazdnými pruhmi a značením (prerušovaná/dvojitá plná, krajnice), čisté plochy
+  križovatiek, chodníky s obrubníkmi, zebry (~900 z OSM), električkové koľaje, ~215 semaforov so striedaním fáz,
+  značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
+  ~780 pouličných lámp. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
@@ -41,7 +45,7 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
-- `feature/doprava-a-znacky` – jazdné pruhy, obrubníky, prechody, koľaje, semafory, značky, tabule s ulicami, graf ciest.
+- NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - `feature/grafika` – krajšie autá, postavy, stromy, fasády, osvetlenie, denná doba.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
 
@@ -60,6 +64,10 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 
 Všetko, čo modul môže použiť (`hra.stav`, `hra.mapa`, `hra.ui`, `hra.pridajAuto`, udalosti…),
 je popísané v komentári na začiatku [js/jadro/hra.js](js/jadro/hra.js).
+
+## Doprava pre ďalšie moduly
+- `hra.doprava.graf` – uzly a hrany ciest (pruhy, jednosmerky, max. rýchlosť), `hra.doprava.hranyZUzla(i)`, `hra.doprava.najblizsiUzol(x, z)`
+- `hra.doprava.semafor(x, z, smerX, smerZ)` → `'zelena' | 'oranzova' | 'cervena' | null` pre vozidlo, ktoré sa blíži ku križovatke
 
 ## Ako pridať stavbu (pamiatku)
 Nový súbor `js/mapa/pamiatky/<nazov>.js` + záznam v `data/mapa/pamiatky.json`.

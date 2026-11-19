@@ -72,3 +72,6 @@ function geometriaZGeojson(gj, stred) {
   }
   return { ciary, polygony, body };
 }
+
+// graf ciest pre NPC dopravu
+await import('./graf.mjs');
