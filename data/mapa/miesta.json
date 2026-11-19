@@ -1,0 +1,22 @@
+{
+  "hlavne-namestie":         { "nazov": "Hlavné námestie",         "x": 0,    "z": 0 },
+  "stara-radnica":           { "nazov": "Stará radnica",           "x": 82,   "z": -22 },
+  "primacialny-palac":       { "nazov": "Primaciálny palác",       "x": 119,  "z": -56 },
+  "michalska-brana":         { "nazov": "Michalská brána",         "x": -89,  "z": -156 },
+  "dom":                     { "nazov": "Dóm sv. Martina",         "x": -223, "z": 200 },
+  "hrad":                    { "nazov": "Bratislavský hrad",       "x": -572, "z": 145 },
+  "parlament":               { "nazov": "Parlament",               "x": -609, "z": 56 },
+  "hviezdoslavovo-namestie": { "nazov": "Hviezdoslavovo námestie", "x": 97,   "z": 222 },
+  "historicke-snd":          { "nazov": "Historická budova SND",   "x": 201,  "z": 189 },
+  "reduta":                  { "nazov": "Reduta",                  "x": 282,  "z": 256 },
+  "namestie-snp":            { "nazov": "Námestie SNP",            "x": 245,  "z": -167 },
+  "prezidentsky-palac":      { "nazov": "Prezidentský palác",      "x": -59,  "z": -545 },
+  "modry-kostolik":          { "nazov": "Modrý kostolík",          "x": 632,  "z": -11 },
+  "nove-snd":                { "nazov": "Nové SND",                "x": 1025, "z": 334 },
+  "eurovea":                 { "nazov": "Eurovea",                 "x": 1211, "z": 322 },
+  "most-snp":                { "nazov": "Most SNP",                "x": -238, "z": 590 },
+  "ufo":                     { "nazov": "UFO",                     "x": -238, "z": 778 },
+  "stary-most":              { "nazov": "Starý most",              "x": 760,  "z": 560 },
+  "sad-janka-krala":         { "nazov": "Sad Janka Kráľa",         "x": 230,  "z": 990 },
+  "petrzalka":               { "nazov": "Petržalka",               "x": 300,  "z": 1250 }
+}

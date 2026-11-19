@@ -1,0 +1,15 @@
+{
+  "id": "strycek-jozo-halusky",
+  "postavy": {
+    "jozo": { "meno": "Strýko Jožo", "farba": "#f2c14e" },
+    "hrac": { "meno": "Ty", "farba": "#ffffff" }
+  },
+  "repliky": [
+    { "kto": "jozo", "text": "No konečne! Počuj, máš vodičák?" },
+    { "kto": "hrac", "text": "Niečo také." },
+    { "kto": "jozo", "text": "To mi stačí. Mám tu porciu bryndzových halušiek pre kamoša na Eurovei." },
+    { "kto": "jozo", "text": "Ale pozor, o dve minúty vychladnú. A studené halušky, to je horšie ako zápcha na Mlynských nivách." },
+    { "kto": "hrac", "text": "A prečo ich nezanesieš sám?" },
+    { "kto": "jozo", "text": "Lebo ja som už v roku 1998 povedal, že sa za volant nesadnem. A slovo držím. Choď!" }
+  ]
+}
