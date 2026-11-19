@@ -1,0 +1,100 @@
+/* Blava City – vzhľad UI */
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: #1b2430;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #fff; -webkit-user-select: none; user-select: none; touch-action: none;
+}
+#hra, #hra canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* --- HUD --- */
+.ui-vrstva { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.ui-vrstva > * { pointer-events: none; }
+.ui-pokyn {
+  position: absolute; top: max(16px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+  background: rgba(15, 20, 28, 0.72); padding: 10px 18px; border-radius: 10px;
+  font-size: 17px; max-width: 90vw; text-align: center; text-shadow: 0 1px 2px #000;
+}
+.ui-sprava {
+  position: absolute; top: 28%; left: 50%; transform: translateX(-50%);
+  font-size: 26px; font-weight: 800; text-align: center; max-width: 90vw;
+  text-shadow: 0 2px 4px #000, 0 0 12px rgba(0,0,0,.6);
+}
+.ui-sprava.animuj { animation: vyskoc .35s ease-out; }
+.ui-napoveda {
+  position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+  background: rgba(15, 20, 28, 0.65); padding: 7px 14px; border-radius: 8px; font-size: 15px;
+}
+.ui-rychlomer {
+  position: absolute; right: 24px; bottom: 22px; text-align: right;
+  font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 6px rgba(0,0,0,.7);
+}
+.ui-rychlomer small { font-size: 15px; margin-left: 4px; opacity: .8; }
+.ui-lokalita {
+  position: absolute; right: 28px; bottom: 90px; font-size: 30px; font-weight: 800;
+  font-style: italic; color: #fff6dc; text-shadow: 0 2px 0 #3b2d12, 0 0 10px rgba(0,0,0,.6);
+}
+.ui-lokalita.animuj { animation: lokalita 3.5s ease-out forwards; }
+
+@keyframes vyskoc { from { transform: translateX(-50%) scale(.7); opacity: 0; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
+@keyframes lokalita {
+  0% { opacity: 0; transform: translateX(20px); }
+  10%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+/* --- Menu --- */
+.menu {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(20,28,40,.55), rgba(10,14,20,.88));
+  padding: 16px;
+}
+.menu[hidden] { display: none; }
+.menu-okno { max-width: 520px; width: 100%; text-align: center; }
+.menu h1 {
+  margin: 0; font-size: clamp(48px, 11vw, 84px); font-weight: 900; letter-spacing: -2px; line-height: .95;
+  color: #fff; text-shadow: 0 4px 0 #b4442d, 0 8px 18px rgba(0,0,0,.5);
+}
+.menu h1 span { display: block; color: #f2c14e; font-style: italic; }
+.menu-podtitul { margin: 14px 0 22px; font-size: 18px; opacity: .85; }
+.menu-stav { min-height: 1.3em; opacity: .75; font-size: 14px; }
+.menu-stav.chyba { color: #ff8a80; opacity: 1; }
+.menu-hrat {
+  pointer-events: auto; margin: 10px 0 22px; padding: 14px 54px; font-size: 22px; font-weight: 800;
+  border: 0; border-radius: 12px; cursor: pointer; color: #1b2430; background: #f2c14e;
+  box-shadow: 0 5px 0 #b48a22; transition: transform .08s;
+}
+.menu-hrat:active { transform: translateY(3px); box-shadow: 0 2px 0 #b48a22; }
+.menu-hrat:disabled { opacity: .4; cursor: wait; }
+.menu-ovladanie { font-size: 14px; opacity: .85; line-height: 1.5; }
+.menu-ovladanie p { margin: 4px 0; }
+.menu-pata { margin-top: 22px; font-size: 12px; opacity: .5; }
+
+/* --- Dotykové ovládanie --- */
+.dotyk { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
+.joystick {
+  pointer-events: auto; position: absolute; left: max(24px, env(safe-area-inset-left)); bottom: 28px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.3);
+}
+.joystick-hlavicka {
+  position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px;
+  border-radius: 50%; background: rgba(255,255,255,.45);
+}
+.dotyk-tlacidla {
+  position: absolute; right: max(20px, env(safe-area-inset-right)); bottom: 26px;
+  display: grid; grid-template-columns: repeat(2, 66px); gap: 12px;
+}
+.dotyk-tl {
+  pointer-events: auto; width: 66px; height: 66px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4);
+  background: rgba(20,28,40,.45); color: #fff; font-size: 24px; font-weight: 800;
+}
+.dotyk-tl.maly { width: 46px; height: 46px; font-size: 14px; justify-self: center; align-self: center; }
+.dotyk-tl.aktivne { background: rgba(242,193,78,.7); }
+@media (pointer: coarse) {
+  .ui-rychlomer { bottom: auto; top: 18px; right: 18px; font-size: 34px; }
+  .ui-lokalita { bottom: auto; top: 70px; right: 18px; font-size: 22px; }
+  .ui-napoveda { bottom: 190px; }
+}

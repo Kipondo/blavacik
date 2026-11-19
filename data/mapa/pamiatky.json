@@ -1,0 +1,13 @@
+{
+  "popis": "Významné stavby a pomenované oblasti. Záznam s \"model\" postaví js/mapa/pamiatky/<model>.js. Návod je v js/mapa/pamiatky/nacitaj-pamiatky.js.",
+  "pamiatky": [
+    {"model": "hrad", "nazov": "Bratislavský hrad", "x": -572, "z": 155, "natocenie": 0, "zaber": {"kruh": 0}, "dosah": 140},
+    {"nazov": "Dóm sv. Martina", "x": -205, "z": 205, "zaber": {"kruh": 42}, "dosah": 70},
+    {"nazov": "Michalská brána", "x": -45, "z": -175, "zaber": {"kruh": 12}, "dosah": 50},
+    {"nazov": "Most SNP a UFO", "x": -230, "z": 838, "zaber": {"kruh": 34}, "dosah": 120},
+    {"nazov": "Eurovea", "x": 1155, "z": 322, "zaber": {"obdlznik": [280, 85]}, "dosah": 170},
+    {"nazov": "Mrakodrap pri Dunaji", "x": 1400, "z": 250, "zaber": {"kruh": 28}, "dosah": 60},
+    {"nazov": "Hlavné námestie", "x": 0, "z": 0, "dosah": 55},
+    {"nazov": "Sad Janka Kráľa", "x": 230, "z": 990, "zaber": {"kruh": 175}, "dosah": 170}
+  ]
+}

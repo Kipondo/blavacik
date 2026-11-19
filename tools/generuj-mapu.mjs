@@ -59,15 +59,16 @@ const STVRTE = [
   },
 ];
 
-// Miesta, kde nesmú byť budovy (pamiatky majú vlastné modely)
-const VYNIMKY = [
-  { typ: 'obdlznik', minX: 1015, maxX: 1295, minZ: 280, maxZ: 365 }, // Eurovea
-  { typ: 'kruh', x: 1400, z: 250, r: 28 },  // mrakodrap
-  { typ: 'kruh', x: -205, z: 205, r: 42 },  // Dóm
-  { typ: 'kruh', x: -45, z: -175, r: 12 },  // Michalská brána
-  { typ: 'kruh', x: -230, z: 838, r: 34 },  // UFO pylón
-  { typ: 'kruh', x: 230, z: 990, r: 175 },  // Sad Janka Kráľa
-];
+// Miesta, kde nesmú byť budovy – berú sa zo "zaber" v pamiatky.json
+const pamiatky = JSON.parse(readFileSync(join(koren, 'data/mapa/pamiatky.json'), 'utf8')).pamiatky;
+const VYNIMKY = [];
+for (const p of pamiatky) {
+  if (p.zaber?.kruh) VYNIMKY.push({ typ: 'kruh', x: p.x, z: p.z, r: p.zaber.kruh });
+  if (p.zaber?.obdlznik) {
+    const [w, d] = p.zaber.obdlznik;
+    VYNIMKY.push({ typ: 'obdlznik', minX: p.x - w / 2, maxX: p.x + w / 2, minZ: p.z - d / 2, maxZ: p.z + d / 2 });
+  }
+}
 
 const hradnyKopec = zakladna.kopce.find((k) => k.nazov === 'Hradný kopec');
 const H = { minX: -1300, maxX: 1700, minZ: -700, maxZ: 1500 };
