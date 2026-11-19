@@ -278,6 +278,12 @@ Všetky veci sú v inventári, efekty definované v JSON (`data/predmety/*.json`
 - Šedé/čierne „brigády“ viď cesta *Pochybné kšefty*.
 
 ## 12. Mapa – čo pribudne oproti pôvodnému plánu
+- **Rozhodnuté: celá Bratislava, hra len pre PC.** Mapa z OSM pre celé mesto, načítavanie po
+  častiach (len okolie hráča). Najvyšší detail v centre a na miestach z príbehu, vzdialené štvrte
+  jednoduchšie (procedurálne fasády podľa typu budovy: historické, paneláky, rodinné domy, moderné).
+- Google Photorealistic 3D Tiles sa **nepoužijú** (platené API, kľúč by bol verejný, podmienky
+  zakazujú ukladanie a odvodený obsah, fotogrametria sa nedá rozdeliť na budovy, interiéry ani
+  presné kolízie). Textúry: vlastné/procedurálne + voľné CC0 materiály (napr. ambientCG, Poly Haven).
 - Pôvodne: Staré Mesto, nábrežie, Most SNP, hrad, Eurovea.
 - **Nové pre príbeh:** **Hlavná stanica** (príchod), **Mlynská dolina s Átriakmi** (domov),
   **3 školy** (Stavebná fakulta STU – Radlinského, Filozofická fakulta UK – Gondova,
