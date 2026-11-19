@@ -21,6 +21,22 @@ Východniarčina je korenie, nie terč.
 - **Povaha:** dobrák, ktorý sa rád ukazuje; v Bratislave ho všetko prekvapuje (ceny, tempo,
   „bratislavčina“). Občas naivný, ale nikdy hlúpy – často je najmúdrejší v miestnosti, len to tak neznie.
 
+### Vzhľad (predvolený „klasický Ďoďo“)
+- vlasy **na ježka** (krátke, tmavé, postavené), **hladko oholený**,
+- postava **skinny fat** – chudé ruky a nohy, malé bruško od maminých rezňov,
+- okrúhla tvár, červené líca, široký úsmev,
+- **východniarsky štýl:** tmavé tepláky s pruhmi (bez značky), otvorená športová bunda,
+  tričko, zlatá retiazka, biele tenisky, v ruke igelitka s rezňami.
+
+### Šatník – prezliekanie v hre
+Ďoďo sa môže prezliekať (skriňa na intráku, obchody s oblečením). Oblečenie má aj herný efekt:
+- **oblek na skúšku** – lepší dojem u skúšajúceho (bonus k prospechu), Ďoďo v ňom nervózne potí,
+- **pracovné oblečenie na brigády** (kuriér, barista, čašník, predavač, stavba),
+- **párty outfit** – bonus k atraktivite a socializácii,
+- **zimné / letné** veci podľa ročného obdobia,
+- **„bratislavský“ štýl** (flanelka, minimalistické tenisky) – odomkne sa s Bratislavskosťou.
+Kúsky sa kupujú, dostávajú od mamy alebo sa dajú „požičať“ od spolubývajúceho.
+
 ### Reč a jej vývoj („pobratislavčenie“)
 Ďoďo začína hovoriť po východniarsky a postupne sa „pobratislavčí“. Riadi to ukazovateľ
 **Bratislavskosť** (0–100), ktorý rastie s časom v meste a so socializáciou s Bratislavčanmi.
