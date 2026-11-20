@@ -65,6 +65,10 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
   (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
   Na mobile sa automaticky vypnú tiene a drahšie materiály.
+- **Pamiatky z Blendera** (issue #31, etapa G3): `tools/blender/` – generátory modelov v Blenderi cez Python
+  (`pip install bpy`, bez okna), zapečené zatienenie (AO) do textúry, export `.glb` a zmenšenie cez gltfpack (meshopt).
+  Hra ich načíta cez `js/mapa/pamiatky/model-glb.js` (pri chybe postaví starý model z telies). Zatiaľ Michalská brána
+  (87 kB + 316 kB AO): `python3 tools/blender/michalska_brana.py <cesta k gltfpack>` (gltfpack: `npm i gltfpack`).
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
