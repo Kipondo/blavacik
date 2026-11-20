@@ -108,6 +108,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Dlažba v celom meste:** chodníky a námestia mimo historického jadra sú zo svetlých betónových dlaždíc 50 × 50 cm
   (`assets/textury/beton`, procedurálna CC0), v jadre kamenné dosky a kocky; dlažba a tráva z CC0 materiálov sú vo
   všetkých podrobných dlaždiciach (mimo laserového výrezu s mapou tried 512 px).
+- **Podchody** (`js/mapa/podchody/`, dáta z `tools/mesto/podchody.mjs`): pešie chodby pod zemou z OSM (`tunnel=yes`,
+  `layer`/`level` < 0) so schodmi a eskalátormi, ktoré do nich vedú – len siete, do ktorých vedú schody (priechod
+  pod násypom ostáva na povrchu). Chodby majú obklad, strop a svietidlá, podlaha je 3,8 m pod najnižším terénom
+  nad sieťou; schody sú v jame so zábradlím, parapetom a obrubou (terén sa v jame vyreže). Hráč nimi prejde
+  (`hra.podchody` – výška podlahy, steny chodby, kamera pod stropom), chodníky na povrchu nad chodbami sa odstránia.
+  131 chodieb a 166 schodov (Hlavná stanica, Hodžovo nám., Trnavské mýto, Patrónka…).
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
@@ -212,6 +218,7 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
 - **Údaje o obchodoch a type budov z OSM** do hotových dlaždíc: `cd tools/mesto && node --max-old-space-size=8000 osm-doplnky.mjs`.
 - **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`.
+- **Podchody z OSM** do hotových dlaždíc: `node --max-old-space-size=8000 podchody.mjs`.
 - **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
   (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
 - **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).

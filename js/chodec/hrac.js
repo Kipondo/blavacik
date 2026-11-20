@@ -122,8 +122,9 @@ export default {
       h.pozicia.z += Math.cos(h.uhol) * h.rychlost * dt;
     }
 
-    // kolízie s budovami a autami
-    const r = hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER);
+    // kolízie s budovami a autami (pod zemou v podchode len steny chodby – js/mapa/podchody/)
+    const podZemou = hra.podchody?.jePodZemou(h.pozicia);
+    const r = podZemou ? hra.podchody.oprav(staraX, staraZ, h.pozicia.x, h.pozicia.z, h.pozicia.y, K.POLOMER) : hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER);
     h.pozicia.x = r.x; h.pozicia.z = r.z;
     for (const a of hra.auta) {
       for (const k of a.kruhy()) {
@@ -140,7 +141,7 @@ export default {
     }
 
     // skok a gravitácia
-    const zem = hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
+    const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
     if (h.naZemi && hra.vstup.drzi('skok')) {
       h.vy = K.SKOK;
       h.naZemi = false;

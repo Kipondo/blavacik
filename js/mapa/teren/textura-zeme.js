@@ -3,6 +3,7 @@
 // Cesty pre autá sa kreslia zvlášť ako 3D pásy (js/mapa/cesty/).
 
 import * as THREE from 'three';
+import { dieryPodchodov } from '../podchody/tuby.js';
 
 export const FARBY_POKRYVKY = {
   zaklad: '#8c887d',
@@ -179,6 +180,11 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
     const o = v.ohr;
     if (o && (o.maxX < rect.minX || o.minX > rect.maxX || o.maxZ < rect.minZ || o.minZ > rect.maxZ)) continue;
     cesta(v.body, true);
+    g.fill();
+  }
+  // jamy schodísk do podchodov (js/mapa/podchody/)
+  for (const d_ of dieryPodchodov(d.podchody)) {
+    cesta(d_, true);
     g.fill();
   }
   g.globalCompositeOperation = 'source-over';

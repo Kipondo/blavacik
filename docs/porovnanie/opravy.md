@@ -320,7 +320,7 @@ Odkazy:
   over, či je to Kyjev a či sa vykresľuje v plnej výške.
 - [ ] [1] **Obchodný dom Tesco (bývalý Prior)** — *čiastočne: horné poschodia (časť od 4 do 16 m) chýbali z rovnakého dôvodu ako Kyjev, teraz sú; tmavočervenohnedá fasáda so zvislými lamelami (štýl „hala“ – zvislé vlny, `opravy-budov.json`)* – v hre veľký biely kváder → v skutočnosti modernistická budova
   s **tmavočervenohnedými zvislými lamelami/pásmi** na hornej fasáde a presklenými vstupmi v prízemí.
-- [ ] [1] **Podchod a schodiská** – v Street View je pri Tescu schodisko/rampa vedúca do nižšej úrovne. Over, či vedie do podchodu
+- [ ] [1] **Podchod a schodiská** — *čiastočne: podchody z OSM v celom meste (`tools/mesto/podchody.mjs` → `podchody` v dlaždiciach, `js/mapa/podchody/`): podzemné chodby s obkladom, stropom a svietidlami, schody so zábradlím v jame s parapetom a obrubou, hráč nimi prejde (kamera ostáva v chodbe). Na Kamennom nám. je zahĺbený vstup s eskalátorom do podzemného podlažia obchodného domu (OSM `level=-1;0`), samotná chodba pod Špitálskou v OSM nie je; Hodžovo nám. (vstup v Zelenej kocke), Hlavná stanica (podchod pod nástupištiami) fungujú. Nadchody a lávky ešte nie* – v Street View je pri Tescu schodisko/rampa vedúca do nižšej úrovne. Over, či vedie do podchodu
   (OSM `tunnel=yes`/`layer=-1` chodníky, `highway=steps`). Ak áno, modeluj **zahĺbený vstup so schodmi, zábradlím a stropom**,
   podchod pod cestou s osvetlením a vchodmi do obchodov. Rovnako over ďalšie podchody a nadchody v meste (napr. pri Hlavnej stanici,
   Trnavské mýto, Patrónka) – teraz sa `tunnel`/`bridge` pre chodníky v kóde mapy vôbec nerieši.
