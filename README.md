@@ -93,6 +93,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   kreslenia (InstancedMesh). Pre ostatné moduly: `hra.mhd.vozidla`.
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
+- **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
+  po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie).
+  Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),
+  na križovatkách bez semaforov sa striedajú, brzdia pred električkou, autobusom, chodcom aj autom hráča,
+  stojace auto alebo autobus na zastávke obídu. Po náraze NPC šofér chvíľu stojí. **Klávesou E sa dá nastúpiť
+  aj do idúceho NPC auta.** Kreslené cez InstancedMesh (12 volaní kreslenia pre všetky autá).
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom: na PC sa pohľad ovláda myšou bez držania tlačidla (Pointer Lock, `js/vstup/mys.js`),
@@ -118,7 +124,6 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
-- NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia, minimapa.
 
