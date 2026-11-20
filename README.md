@@ -81,6 +81,16 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   V hre ich stavia `js/mapa/pamiatky/vyskova-budova.js` (záznam `"model": "vyskova-budova", "subor": …` v `pamiatky.json`):
   kolízie z pôdorysov, z dlaždíc sa vynechajú bežné vysunuté budovy, ktoré model nahrádza
   (`js/mapa/pamiatky/nahradene-budovy.js`), z diaľky (> 260 m) sa nekreslia drobné prvky (menej moaré a trojuholníkov).
+- **Mosty z Blendera:** Most SNP (A-pylón sklonený k Petržalke, UFO s presklenou reštauráciou a vyhliadkou,
+  laná v troch bodoch hlavného poľa a zadné kotvenie, komorový nosník s chodníkmi dolného podlažia pod konzolami),
+  Starý most (priehradové nosníky so zakriveným horným pásom, zvislice, diagonály, horné kríže, kamenné piliere,
+  zeleno-sivý náter), Most Apollo (dve sklonené oblúkové rebrá 231 m / 36 m, 66 závesov do vejára, tiahla),
+  Prístavný most (dvojpodlažný, priehradový nosník Warren s železničnou doskou dole) a Most Lafranconi
+  (betónový komorový nosník s náběhmi nad riečnymi piliermi). Os a šírka z OSM (`data/mapa/mesto/index.json`),
+  úseky nad riekou určujú polohu pilierov. Generovanie: `python3 tools/blender/mosty_blender.py [most …]`
+  (`tools/blender/mosty/`). V hre `js/mapa/pamiatky/most-glb.js` (záznam `"model": "most-glb", "nahradzaMost": …`):
+  model sa položí na výšku mostovky, časti pri mostovke sa v nábehoch ohnú podľa výškového profilu, všeobecný
+  model mosta (`js/mapa/mosty/mosty.js`) sa pre ne nestavia (`js/mapa/mesto.js`); ak sa model nenačíta, postaví sa on.
 - **Odrazy okolia opravené:** mapa okolia (`js/grafika/prostredie.js`) predtým nezachytila oblohu (guľa oblohy bola
   za `far` kamery) – sklo, autá a voda odrážali len čiernu; teraz odrážajú bledšiu oblohu.
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
@@ -124,7 +134,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
-- Mosty z Blendera (Most SNP s UFO, Starý most, Apollo, Prístavný, Lafranconi) a hrad s okolím, pamiatky Starého Mesta.
+- Ďalšie výškové budovy zo zoznamu (CBC I, Glória, Millennium Tower II, Aupark Tower, Technopol, Incheba, Matadorka,
+  Centrál, Lakeside Park, Manderlák, Kamzík), hrad s okolím a Devín, pamiatky Starého Mesta (kostoly, paláce, brány).
+- Chodníky dolného podlažia Mosta SNP sú zatiaľ len na pohľad (nedá sa po nich chodiť).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).

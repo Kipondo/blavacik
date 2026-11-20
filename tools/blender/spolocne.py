@@ -205,7 +205,7 @@ def zapec_ao_vrcholy(ob, vzorky=32, vzdialenost=4.0, minimum=0.3, ku_stredu=0.15
     ca.data.foreach_set('color', hodnoty)
 
 
-def exportuj(ob, cesta_glb, gltfpack=None, farby_vrcholov=False):
+def exportuj(ob, cesta_glb, gltfpack=None, farby_vrcholov=False, bity_pozicii=14):
     for o in bpy.context.scene.objects:
         o.select_set(o == ob)
     docasne = cesta_glb.replace('.glb', '.surove.glb')
@@ -213,7 +213,7 @@ def exportuj(ob, cesta_glb, gltfpack=None, farby_vrcholov=False):
                               export_texcoords=not farby_vrcholov, export_normals=True, export_apply=True,
                               export_vertex_color='ACTIVE' if farby_vrcholov else 'MATERIAL')
     if gltfpack and os.path.exists(gltfpack):
-        subprocess.run([gltfpack, '-i', docasne, '-o', cesta_glb, '-cc', '-kv', '-km', '-vp', '14', '-vt', '12'], check=True)
+        subprocess.run([gltfpack, '-i', docasne, '-o', cesta_glb, '-cc', '-kv', '-km', '-vp', str(bity_pozicii), '-vt', '12'], check=True)
         if os.environ.get('SUROVE_DO'):          # nekomprimovaná kópia na náhľad v Blenderi (nevie meshopt)
             os.replace(docasne, os.path.join(os.environ['SUROVE_DO'], os.path.basename(cesta_glb)))
         else:
