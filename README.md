@@ -106,6 +106,10 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   dráhou), Slovenská národná galéria (Vodné kasárne a premostenie), Národný futbalový štadión (tribúny okolo ihriska
   s čiarami a bránami, biela strecha s osvetlením, fasáda z lamiel), zimný štadión (klenutá strecha) a **stavenisko
   Istropolis** (oplotenie, výkop, rozostavaný skelet, dva vežové žeriavy, bunky).
+- **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
+  z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
+  hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
+  skala pod Devínom s puklinami; odtiene kameňov, škáry, stekance a lišajník. Snímky: `docs/snimky/pamiatky-3/kamen-*.jpg`.
 - **Sochy a pamätníky v celom meste** (`js/mapa/vybavenie/sochy-modul.js`, dáta `node tools/mesto/sochy.mjs` →
   `data/mapa/sochy.json`): 853 sôch, búst a skulptúr z OSM (Hviezdoslav, Štúr, Čumil, Schöne Náci, Napoleonský
   vojak, svätci…). Postava je model chodca v pokojnej póze „odliaty“ do bronzu (aj s patinou) alebo vytesaný

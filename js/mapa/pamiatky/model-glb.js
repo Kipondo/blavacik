@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { jeKamen, kamenNaMaterial } from './kamen-material.js';
 
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
@@ -39,6 +40,7 @@ export async function nacitajModelPamiatky(meno, { ao: sAo = true, gz = false } 
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
         if (ao) { m.aoMap = ao; m.aoMapIntensity = 1; }
         m.envMapIntensity = m.name.startsWith('sklo') ? 1.3 : 0.8;
+        if (jeKamen(m)) kamenNaMaterial(m);
         m.needsUpdate = true;
       }
     });
