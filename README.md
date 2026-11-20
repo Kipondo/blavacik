@@ -14,4 +14,4 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - Hrateľný prototyp: mapa Starého Mesta, chodenie, autá, polícia, 2–3 misie, minimapa, menu.
 - OSM dáta pre budovy a cesty.
 
-Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md).
+Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md). **Stav projektu a ako pokračovať:** [napady/POKRACOVANIE.md](napady/POKRACOVANIE.md).
