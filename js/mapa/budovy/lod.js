@@ -28,8 +28,10 @@ export function vytvorBudovyLod(budovy, vyskopis) {
       for (const v of t) { poz.push(...v); farby.push(c.r, c.g, c.b); }
     }
     const kontura = body.map(([x, z]) => new THREE.Vector2(x, z));
-    for (const [i, j, k] of THREE.ShapeUtils.triangulateShape(kontura, [])) {
-      const P = [body[i][0], y1, body[i][1]], Q = [body[j][0], y1, body[j][1]], R = [body[k][0], y1, body[k][1]];
+    const diery = (b.diery ?? []).filter((d) => d.length >= 3);
+    const vsetky = [...body, ...diery.flat()];
+    for (const [i, j, k] of THREE.ShapeUtils.triangulateShape(kontura, diery.map((d) => d.map(([x, z]) => new THREE.Vector2(x, z))))) {
+      const P = [vsetky[i][0], y1, vsetky[i][1]], Q = [vsetky[j][0], y1, vsetky[j][1]], R = [vsetky[k][0], y1, vsetky[k][1]];
       const ny = (Q[2] - P[2]) * (R[0] - P[0]) - (Q[0] - P[0]) * (R[2] - P[2]);
       for (const v of ny >= 0 ? [P, Q, R] : [P, R, Q]) { poz.push(...v); farby.push(cs.r, cs.g, cs.b); }
     }

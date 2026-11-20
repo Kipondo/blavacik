@@ -23,11 +23,24 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
+  od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
+  - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
+    vo výreze detailný terén po 2 m,
+  - výšky budov z lasera (`zdrojVysky`: `lidar` / `osm` / `odhad`), strechy rozložené na roviny (LOD2) so škridlou
+    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+  - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
+    na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
+  - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch, tráva v parkoch,
+  - ~3 000 stromov na skutočných miestach so skutočnou výškou a šírkou koruny (z lasera), zblízka s listami,
+  - lavičky z OSM natočené k chodníku, v historickom jadre lucerny (na stĺpe alebo na konzole na stene),
+  - asfalt ciest a dlažba chodníkov s CC0 štruktúrou, mäkké zatienenie zeme pri päte budov.
+  - Postup a zdroje: [data/lidar/README.md](data/lidar/README.md), snímky pred/po: `docs/snimky/etapa-a2/`.
 - **Celá Bratislava (etapa a z issue #8):** 367 km², ~117 000 budov, ~23 000 úsekov ciest, 72 000 chodníkov,
   ~200 000 stromov, parky, lesy, voda – rozdelené do 1 791 dlaždíc 500 × 500 m. Okolo hráča sa do 900 m
   stavajú podrobné dlaždice (fasády, cesty, značky, kolízie), do 3,2 km jednoduché bloky budov,
   ďalej vzdialený terén (Malé Karpaty, Kamzík s vežou, Devínska Kobyla). Stavba dlaždíc je rozložená do snímok.
-- **Výškový model** celej Bratislavy (Copernicus DEM, vyčistený od budov), hladina Dunaja podľa toku,
+- **Výškový model** celej Bratislavy (laserové skenovanie ÚGKK DMR 6.0, na okraji Copernicus DEM), hladina Dunaja podľa toku,
   koryto s nábrežnými múrmi v centre a prírodnými brehmi mimo neho, 17 mostov s nájazdmi.
 - **Základ hry:** úvodné menu, pauza, herná slučka, modulárne jadro (`hra.pridajModul`).
 - **Mapa zo skutočnej Bratislavy (OpenStreetMap):** ~5 800 budov s reálnymi pôdorysmi a výškami,
@@ -52,40 +65,18 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
   (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
   Na mobile sa automaticky vypnú tiene a drahšie materiály.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
-- **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
-  z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
-  šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
-  účesy a brady, vlastné animácie (stoj, chôdza, beh, skok, opitá chôdza, sedenie, nastup/vystup z auta, mávanie).
-  **Editor postavy:** `editor-postavy.html`, odkaz je aj v menu hry (uloží vzhľad, hra ho použije). Generátor: `tools/postava/` (Blender bpy).
-  **Nastupovanie do auta s animáciou** (`js/chodec/nastupovanie.js`): Ďoďo po E dôjde k dverám vodiča (aj okolo auta),
-  sadne si dnu; pri vystupovaní auto najprv zabrzdí. Ďalšie E počas cesty k autu to zruší. Keď pri dverách nie je miesto, nastúpi/vystúpi hneď.
-  Licencie: MakeHuman/MPFB2 dáta CC0, animácie a textúry vlastné (procedurálne), písmo nápisu DejaVu (len zapečené v textúre).
-- **NPC postavy a davy** (`data/postavy/npc.json`, `assets/postavy/npc/*.glb`, kód `js/chodec/npc/`): z rovnakého generátora
-  ako Ďoďo – 4 telá (muž, žena, dôchodca, dôchodkyňa) a 8 profilov (študent, korporátnik z Twin City, turista na rozlúčke so slobodou,
-  kuriér, študentka, manažérka z Eurovey, dôchodca, babka s fialovým melírom). Z profilu sa náhodne poskladá chodec
-  (variant oblečenia a účesu, farby z paliet, tvar tela, výška, rýchlosť; turista býva opitý). Animácie sa berú z Ďoďa.
-  **LOD pre davy** (`js/chodec/npc/dav.js`): plný model do 14 m (max. 8), zlúčená sieť 3 500 trojuholníkov do 45 m (max. 40),
-  hrubá sieť 700 trojuholníkov do 140 m, ďalej a mimo pohľadu nič. 150 chodcov = ~250 volaní kreslenia.
-  Skúška a snímky: `tools/postava/dav.html` (návod v `tools/postava/README.md`). Do hry ich zatiaľ nikto nevypúšťa – to je ďalší krok.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
-- **MHD – etapa a (`feature/mhd`):** všetky linky DPB podľa oficiálneho cestovného poriadku (GTFS): 90 liniek
-  (4 električkové, 15 trolejbusových, 54 denných autobusových, 17 nočných), 582 zastávok s 1 370 nástupišťami,
-  35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
-  a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
-- Dialógy úvodnej scény vo vlaku (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch.
-
 ## Čo ďalej
-- Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
-- Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
-- NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
+- Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
+- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
+- NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
-- MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
 
 ## Ako pridať vlastný modul
 1. Vytvor súbor, napr. `js/policia/policia.js`:
@@ -122,17 +113,9 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
   Návod (aj ručný export cez overpass-turbo) je v [data/osm/README.md](data/osm/README.md).
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
+- **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
+  (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
+- **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).
 - Mapové dáta © prispievatelia OpenStreetMap, licencia ODbL.
-
-## MHD
-- Dáta: `data/mhd/` (formát v [data/mhd/README.md](data/mhd/README.md)), kód hry: `js/mhd/` (modul `mhd`).
-- Zdroj: *Cestovné poriadky MHD vo formáte GTFS* – Dopravný podnik Bratislava, a. s. / hl. m. SR Bratislava
-  ([data.bratislava.sk](https://data.bratislava.sk/datasets/aba12fd2cbac4843bc7406151bc66106/about)), licencia **CC BY 4.0**.
-  Trasy po cestách a koľajach sú vypočítané z mapy (© prispievatelia OpenStreetMap, ODbL).
-- Obnovenie dát: `node tools/mhd/stiahni.mjs && node --max-old-space-size=4000 tools/mhd/spracuj.mjs` (bez npm balíkov).
-- Prehľad siete (2D, na kontrolu): `http://localhost:8000/tools/mhd/prehlad.html`.
-- Pre ostatné moduly: `hra.mhd.data`, `hra.mhd.teraz()`, `hra.mhd.najblizsiaZastavka(x, z)`, `hra.mhd.odchody(id)`,
-  `hra.mhd.typDna()` (popis v [js/mhd/modul.js](js/mhd/modul.js)). Ak iný modul zapisuje herný čas do
-  `hra.stav.datumCas` (Date), MHD sa riadi ním.
 
 Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md).

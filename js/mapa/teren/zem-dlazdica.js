@@ -1,14 +1,14 @@
-// Zem jednej dlaždice mesta (500 × 500 m, sieť po 5 m) s vlastnou textúrou pokrývky.
+// Zem jednej dlaždice mesta (500 × 500 m, sieť po 5 m, s detailným terénom z lasera po 2 m) s vlastnou textúrou pokrývky.
 
 import * as THREE from 'three';
-import { vytvorTexturuDlazdice } from './textura-zeme.js';
+import { vytvorTexturuDlazdice, vytvorTriedyDlazdice } from './textura-zeme.js';
 import { materialZeme } from './material-zeme.js';
 
-const KROK = 5;
+const KROK = 5, KROK_DETAIL = 2;
 
 export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   const w = rect.maxX - rect.minX, h = rect.maxZ - rect.minZ;
-  const n = Math.round(w / KROK);
+  const n = Math.round(w / (d._detailTerenu ? KROK_DETAIL : KROK));
   const geo = new THREE.PlaneGeometry(w, h, n, n);
   geo.rotateX(-Math.PI / 2);
   geo.translate(rect.minX + w / 2, 0, rect.minZ + h / 2);
@@ -38,7 +38,11 @@ export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   const farby = new Float32Array(poz.count * 3).fill(1);
   geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, materialZeme(vytvorTexturuDlazdice(d, rieky, rect)));
+  // detailné dlaždice (laserový terén): ostrejšia textúra a dlažba z CC0 materiálov
+  const mat = d._detailTerenu
+    ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024))
+    : materialZeme(vytvorTexturuDlazdice(d, rieky, rect));
+  const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = 'zem';
   return mesh;

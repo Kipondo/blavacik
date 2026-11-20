@@ -44,7 +44,8 @@ const MENA_FARIEB = {
   ochre: '#d3a85a', tan: '#d2b48c', ivory: '#f6f1df', maroon: '#7a3a30', silver: '#c0c4c8', gold: '#d9b04a',
 };
 const PALETY = {
-  stare: ['#ecd9a3', '#f1e3c6', '#e8c4a0', '#f3d1c4', '#d9e4c8', '#f4efe4', '#e6cf8f', '#d8c3a5', '#e9d4bd', '#f6e7b8'],
+  // Staré Mesto: pastelové omietky (okrová, lososová, pistáciová, sivomodrá, krémová, biela)
+  stare: ['#ecd28f', '#f1e3c6', '#e9b98f', '#f0c4b4', '#cfdcae', '#f4efe4', '#e6c46f', '#d8c3a5', '#f2d6b0', '#f6e7a8', '#c9d6dc', '#e8a98c', '#f5f0e0', '#dcc89a'],
   mesto: ['#d6d0c2', '#c9c6bd', '#e0dbd0', '#c2b59b', '#d8cbb4', '#bfc4c0', '#e4ddcf'],
   moderne: ['#8fa7b8', '#a3b9c7', '#c8d3da', '#9ea7ad', '#d5d8d6', '#b6c2c8'],
   panelaky: ['#f2f0ea', '#e9e5da', '#f6d28b', '#a8d0e6', '#f4a6a6', '#b8e0b0', '#d9c2f0', '#ffd8a8', '#fff2a8'],
@@ -70,6 +71,11 @@ function stvrt(x, z) {
 function cislo(v) {
   if (v === undefined) return NaN;
   return parseFloat(String(v).replace(',', '.'));
+}
+
+/** Zdroj výšky budovy: 'osm' (značka height alebo building:levels), inak 'odhad' podľa typu. */
+function zdrojVysky(t) {
+  return cislo(t.height) > 0 || cislo(t['building:levels']) > 0 ? 'osm' : 'odhad';
 }
 
 function vyskaBudovy(t) {
@@ -191,8 +197,13 @@ export function klasifikuj(geo, moznosti) {
     const b = {
       body: zjednodus(p.body, 0.3).map(bodR),
       vyska: Math.max(3, Math.round(vyskaBudovy(t))),
+      zdrojVysky: zdrojVysky(t),
       farba: farba(t) ?? PALETY[st][i % PALETY[st].length],
     };
+    // vnútorné dvory (vnútorné obrysy multipolygónu)
+    const diery = (p.diery ?? []).filter((d) => d.length >= 3 && Math.abs(plochaPolygonu(d)) >= 15).map((d) => zjednodus(d, 0.3).map(bodR));
+    if (diery.length) b.diery = diery;
+    if (t['roof:shape']) b.tvarOsm = t['roof:shape'];
     const tvar = t['roof:shape'];
     const sikma = ['gabled', 'hipped', 'pyramidal', 'half-hipped', 'mansard', 'gambrel'].includes(tvar)
       || (!tvar && (st === 'stare' || st === 'vily') && b.vyska < 25);
