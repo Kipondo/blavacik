@@ -187,3 +187,46 @@ https://earth.google.com/web/@48.14215,17.10530,150a,250d,35y,220h,55t,0r
 
 ## Pokračovanie
 Ďalšia etapa: Hviezdoslavovo námestie, SND, Reduta, nábrežie po Eurovea.
+
+---
+
+# Etapa 3: Hviezdoslavovo námestie, SND, Reduta, nábrežie
+
+Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. Snímky z hry: `docs/snimky/porovnanie/e3-hra-mozaika.jpg`
+(vľavo hore SND, vpravo hore promenáda Hviezdoslavovho námestia, vľavo dole Reduta, vpravo dole nábrežie).
+
+## Historická budova SND a priestor pred ňou
+Odkaz (pohľad na východ k SND):
+https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14225,17.10940&heading=95&pitch=8&fov=85
+
+- [ ] [1] **Vysoká štítová budova uprostred pohľadu** – v hre stojí na mieste 48.14225, 17.10940 → smer východ asi 30–50 m
+  vysoká krémová budova so štítom (6 podlaží). V skutočnosti je tam otvorený priestor pred divadlom s fontánou
+  Ganymedes, kvetinovými záhonmi a lampami. Over, či nejde o zle umiestnenú budovu alebo zdvojený pôdorys
+  (OSM budova a zároveň model pamiatky).
+- [ ] [1] **SND (historická budova)** – v hre je vidieť len malú zelenú kupolu v diaľke za stromami → v skutočnosti
+  dominantná neorenesančná budova blízko pohľadu: krémovobiela fasáda, stĺpy a lodžia v priečelí, sochy,
+  zdobená strecha s kupolou. Over polohu a mierku modelu `snd.js` voči OSM pôdorysu.
+- [ ] [2] **Fontána Ganymedes** pred divadlom – v hre chýba.
+- [ ] [2] **Kandelábre** – pred SND stoja historické lampy s viacerými svietidlami na jednom stĺpe. V hre sú jednoduché lampy.
+- [ ] [3] **Rad domov vľavo (Hviezdoslavovo nám., severná strana)** – v skutočnosti 5-podlažné historizujúce domy
+  s bohatými fasádami, kaviarne s terasami a slnečníkmi v prízemí.
+
+## Promenáda Hviezdoslavovho námestia
+Odkaz (pohľad na východ po promenáde):
+https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14160,17.10760&heading=80&pitch=5&fov=85
+
+- [ ] [1] **Voda na promenáde** – v hre je to kľukatý potôčik s trávnatými brehmi → v skutočnosti pravouhlé **kamenné
+  vodné jazierko/kanál** s nízkym kamenným okrajom a zábradlím, okolo dláždená plocha a lavičky.
+- [ ] [2] **Stromy** – v hre sú medzi listnatými aj ihličnany (kužeľovité). V skutočnosti sú na promenáde len veľké listnaté
+  stromy (platany/javory) s hustou súvislou korunou, ktorá vytvára tieň nad celou promenádou.
+- [ ] [2] **Povrch promenády** – v skutočnosti svetlá dlažba/mlat, v hre tmavé kocky a pásy trávy. Trávu nechaj len v záhonoch.
+
+## Reduta a nábrežie
+Street View je tu z blízkych bodov len z interiérov (reštaurácie), preto **neoverené**. Porovnaj na leteckom pohľade:
+https://earth.google.com/web/@48.14100,17.11050,150a,350d,35y,30h,55t,0r
+- [ ] [2] Reduta – v hre dlhá krémová 4-podlažná budova s jednou zelenou kupolou na nároží. Over tvar strechy, nárožné vežičky
+  a farbu fasády (v skutočnosti neobaroková, bohato zdobená).
+- [ ] [3] Nábrežie (Rázusovo/Fajnorovo) – over stromoradie, električku a nábrežný múr.
+
+## Pokračovanie
+Ďalšia etapa: 4 – Hrad, Podhradie, Parlament.

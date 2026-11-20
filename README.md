@@ -154,7 +154,7 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 
 ## Mapa
 - **Porovnanie so skutočnosťou:** [docs/porovnanie/opravy.md](docs/porovnanie/opravy.md) – zoznam chýb po etapách
-  (Hlavné námestie, Michalská, Ventúrska, Primaciálne…) s prioritami a odkazmi na pozretie v Street View.
+  (Hlavné námestie, Michalská, Ventúrska, Primaciálne, Hviezdoslavovo námestie…) s prioritami a odkazmi na pozretie v Street View.
 - **Prehľad mapy (2D, na kontrolu):** `nastroje/prehlad/` – otvor `http://localhost:8000/nastroje/prehlad/`.
   Vrstvy budov, ciest, zelene a vody celého mesta, klik na budovu ukáže výšku a farbu, pripomienky sa dajú skopírovať do issue.
 - **Celé mesto:** `cd tools/mesto && npm install && npm run vsetko` (stiahne OSM a výškový model,
