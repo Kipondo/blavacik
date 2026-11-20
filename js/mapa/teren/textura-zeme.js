@@ -85,7 +85,7 @@ export function vytvorTexturuZeme(data, KONFIG) {
   let seed = 12345;
   for (let i = 0; i < d.length; i += 4) {
     seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    const n = ((seed >> 16) & 31) - 16;
+    const n = ((seed >> 16) & 15) - 8;
     d[i] += n; d[i + 1] += n; d[i + 2] += n;
   }
   g.putImageData(obr, 0, 0);
@@ -119,13 +119,6 @@ export function texturaDetailu() {
     obr.data[i + 3] = 255;
   }
   g.putImageData(obr, 0, 0);
-  // pár väčších škvŕn
-  for (let i = 0; i < 40; i++) {
-    g.fillStyle = `rgba(${i % 2 ? 255 : 0},${i % 2 ? 255 : 0},${i % 2 ? 255 : 0},0.035)`;
-    g.beginPath();
-    g.arc((i * 37) % 128, (i * 71) % 128, 6 + (i % 5) * 3, 0, Math.PI * 2);
-    g.fill();
-  }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;

@@ -6,6 +6,7 @@
 // Ako napísať modul: pozri komentár v js/jadro/hra.js.
 
 // --- základ hry ---
+import prostredie from './grafika/prostredie.js';
 import hrac from './chodec/hrac.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
@@ -25,6 +26,7 @@ import semafory from './doprava/semafory.js';
 // import minimapa from './ui/minimapa.js';
 
 export default [
+  prostredie,
   hrac,
   riadenieHracom,
   auta,

@@ -37,6 +37,11 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
   križovatiek, chodníky s obrubníkmi, zebry (~900 z OSM), električkové koľaje, ~215 semaforov so striedaním fáz,
   značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
   ~780 pouličných lámp. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
+- **Grafika:** obloha so slnkom a pohyblivými oblakmi, odrazy okolia (sklo, autá, voda), Dunaj s vlnkami,
+  4 typy fasád (staromestské okná s okenicami, obytné s balkónmi, kancelárie, jednoduché) a sklenené fasády,
+  tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
+  (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
+  Na mobile sa automaticky vypnú tiene a drahšie materiály.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
@@ -48,7 +53,7 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 
 ## Čo ďalej
 - NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
-- `feature/grafika` – krajšie autá, postavy, stromy, fasády, osvetlenie, denná doba.
+- Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
 
 ## Ako pridať vlastný modul

@@ -5,11 +5,11 @@ import { valec, material } from './pomocne.js';
 
 export default function postav(p, { vyskopis, kolizie }) {
   const g = new THREE.Group();
-  const nadrz = valec(5, 5.2, 1, '#cfc6b4', 24);
+  const nadrz = valec(5, 5.2, 0.8, '#cfc6b4', 24);
   g.add(nadrz);
   const voda = new THREE.Mesh(new THREE.CircleGeometry(4.6, 24), material('#4f8396', { lesk: 0.85 }));
   voda.rotation.x = -Math.PI / 2;
-  voda.position.y = 0.85;
+  voda.position.y = 0.82;
   g.add(voda);
   const podstavec = valec(1.2, 1.4, 2.5, '#d6cdb9', 8);
   podstavec.position.y = 0.8;

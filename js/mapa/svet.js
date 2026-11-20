@@ -9,37 +9,62 @@ export function vytvorSvet(scena, KONFIG) {
   scena.background = HORIZONT.clone();
   scena.fog = new THREE.Fog(HORIZONT, KONFIG.DOHLAD * 0.35, KONFIG.DOHLAD);
 
-  // obloha – guľa s farebným prechodom
-  const oblohaGeo = new THREE.SphereGeometry(4000, 24, 12);
+  // obloha – guľa s farebným prechodom, slnkom a oblakmi (shader)
+  const smerSlnka = new THREE.Vector3(-0.5, 0.62, 0.35).normalize();
+  const oblohaGeo = new THREE.SphereGeometry(4000, 32, 16);
   const oblohaMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
     fog: false,
-    uniforms: { vrch: { value: VRCH }, horizont: { value: HORIZONT } },
+    uniforms: {
+      vrch: { value: VRCH }, horizont: { value: HORIZONT },
+      slnko: { value: smerSlnka }, cas: { value: 0 },
+    },
     vertexShader: `
-      varying vec3 vPoz;
+      varying vec3 vSmer;
       void main() {
-        vPoz = (modelMatrix * vec4(position, 1.0)).xyz - cameraPosition;
+        vSmer = normalize((modelMatrix * vec4(position, 1.0)).xyz - cameraPosition);
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: `
-      uniform vec3 vrch; uniform vec3 horizont;
-      varying vec3 vPoz;
+      uniform vec3 vrch; uniform vec3 horizont; uniform vec3 slnko; uniform float cas;
+      varying vec3 vSmer;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float sum(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+      }
+      float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * sum(p); p *= 2.03; a *= 0.5; } return v; }
       void main() {
-        float h = normalize(vPoz).y;
-        gl_FragColor = vec4(mix(horizont, vrch, smoothstep(0.0, 0.45, h)), 1.0);
+        vec3 d = normalize(vSmer);
+        float h = d.y;
+        vec3 farba = mix(horizont, vrch, smoothstep(0.0, 0.5, h));
+        // slnko a žiara okolo neho
+        float s = max(dot(d, slnko), 0.0);
+        farba += vec3(1.0, 0.92, 0.75) * (pow(s, 900.0) * 6.0 + pow(s, 12.0) * 0.18);
+        // oblaky – premietnuté na „strop“ nad nami
+        if (h > 0.02) {
+          vec2 uv = d.xz / (h + 0.12) * 1.4 + vec2(cas * 0.004, cas * 0.002);
+          float o = smoothstep(0.52, 0.78, fbm(uv));
+          vec3 oblak = mix(vec3(0.82, 0.85, 0.9), vec3(1.0), smoothstep(0.55, 0.9, fbm(uv + 0.3)));
+          farba = mix(farba, oblak, o * smoothstep(0.02, 0.2, h) * 0.85);
+        }
+        gl_FragColor = vec4(farba, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
       }`,
   });
   const obloha = new THREE.Mesh(oblohaGeo, oblohaMat);
   obloha.renderOrder = -1;
   obloha.frustumCulled = false;
+  obloha.name = 'obloha';
   scena.add(obloha);
 
-  const hemi = new THREE.HemisphereLight('#dfefff', '#6b6150', 1.1);
+  const hemi = new THREE.HemisphereLight('#dfefff', '#6b6150', 0.7);
   scena.add(hemi);
 
-  const slnko = new THREE.DirectionalLight('#fff3dd', 2.4);
-  const smerSlnka = new THREE.Vector3(-0.5, 0.8, 0.35).normalize();
+  const slnko = new THREE.DirectionalLight('#fff1d6', 2.6);
   slnko.position.copy(smerSlnka).multiplyScalar(200);
   if (KONFIG.TIENE) {
     slnko.castShadow = true;
@@ -53,11 +78,12 @@ export function vytvorSvet(scena, KONFIG) {
   scena.add(slnko, slnko.target);
 
   /** Slnko a obloha idú za kamerou, aby tiene boli vždy okolo hráča. */
-  function update(ciel, kamera) {
+  function update(ciel, kamera, cas = 0) {
     obloha.position.copy(kamera.position);
+    oblohaMat.uniforms.cas.value = cas;
     slnko.target.position.copy(ciel);
     slnko.position.copy(ciel).addScaledVector(smerSlnka, 250);
   }
 
-  return { update, slnko, hemi };
+  return { update, slnko, hemi, obloha, smerSlnka };
 }
