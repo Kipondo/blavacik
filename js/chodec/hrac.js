@@ -5,6 +5,7 @@ import { KONFIG } from '../config.js';
 import { vytvorRealistickuPostavu } from './postava/realisticka-postava.js';
 import { nacitajUlozenyVzhlad } from './postava/ulozenie.js';
 import { zacniNastup, zacniVystup, aktualizujAkciu, zrusAkciu } from './nastupovanie.js';
+import { pohybPodlaKamery, zastavPohyb } from './pohyb-podla-kamery.js';
 
 const K = KONFIG.HRAC;
 
@@ -82,7 +83,7 @@ export default {
     const h = hra.hrac;
 
     // prebieha nastupovanie / vystupovanie s animáciou (nastupovanie.js)
-    if (h.akcia) { aktualizujAkciu(dt, hra); return; }
+    if (h.akcia) { zastavPohyb(h); aktualizujAkciu(dt, hra); return; }
 
     // E – nastúpiť / vystúpiť (s animáciou, ak sa dá; inak hneď)
     if (hra.vstup.stlacil('akcia')) {
@@ -100,6 +101,7 @@ export default {
       // hráč sa vezie s autom
       h.pozicia.copy(hra.stav.auto.pozicia);
       h.uhol = hra.stav.auto.uhol;
+      zastavPohyb(h);
       return;
     }
 
@@ -107,13 +109,18 @@ export default {
     const p = hra.vstup.pohyb();
     const beh = hra.vstup.drzi('beh');
     const maxV = beh ? K.BEH : K.CHODZA;
-    // dopredu/dozadu podľa smeru postavy, doľava/doprava otáča
-    h.uhol -= p.x * K.OTACANIE * dt * (p.y < -0.1 ? -1 : 1);
-    const cielV = p.y * maxV;
-    h.rychlost += (cielV - h.rychlost) * Math.min(1, dt * 10);
     const staraX = h.pozicia.x, staraZ = h.pozicia.z;
-    h.pozicia.x += Math.sin(h.uhol) * h.rychlost * dt;
-    h.pozicia.z += Math.cos(h.uhol) * h.rychlost * dt;
+    if (!hra.vstup.dotyk && hra.stav.smerKamery !== undefined) {
+      // PC: W = tam, kam sa pozerá kamera, A/D = úkrok (pohyb-podla-kamery.js)
+      pohybPodlaKamery(h, p, maxV, dt, hra.stav.smerKamery);
+    } else {
+      // mobil: dopredu/dozadu podľa smeru postavy, doľava/doprava otáča
+      h.uhol -= p.x * K.OTACANIE * dt * (p.y < -0.1 ? -1 : 1);
+      const cielV = p.y * maxV;
+      h.rychlost += (cielV - h.rychlost) * Math.min(1, dt * 10);
+      h.pozicia.x += Math.sin(h.uhol) * h.rychlost * dt;
+      h.pozicia.z += Math.cos(h.uhol) * h.rychlost * dt;
+    }
 
     // kolízie s budovami a autami
     const r = hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER);

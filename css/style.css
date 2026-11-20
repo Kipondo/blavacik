@@ -71,6 +71,11 @@ html, body {
 .menu-editor { margin: -12px 0 16px; }
 .menu-editor a { pointer-events: auto; display: inline-block; padding: 8px 12px; color: #f2c14e; font-weight: 700; font-size: 15px; text-decoration: none; }
 .menu-editor a:hover, .menu-editor a:focus-visible { text-decoration: underline; }
+.menu-mys { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; margin: 0 0 14px; font-size: 14px; }
+.menu-mys-riadok { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.menu-mys-citlivost { width: 130px; accent-color: #f2c14e; cursor: pointer; }
+.menu-mys-hodnota { min-width: 2.2em; text-align: left; font-variant-numeric: tabular-nums; }
+.menu-mys input[type="checkbox"] { width: 16px; height: 16px; accent-color: #f2c14e; cursor: pointer; }
 .menu-ovladanie { font-size: 14px; opacity: .85; line-height: 1.5; }
 .menu-ovladanie p { margin: 4px 0; }
 .menu-pata { margin-top: 22px; font-size: 12px; opacity: .5; }

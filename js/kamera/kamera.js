@@ -1,5 +1,7 @@
 // Modul: kamera za postavou alebo autom.
-// Ťahaním myšou / prstom sa dá kamera otočiť, po chvíli sa sama vráti za hráča.
+// Na PC pešo ovláda smer pohľadu len myš (mys.js) a postava chodí tam, kam sa pozerá kamera
+// (hra.stav.smerKamery). V aute a na mobile sa kamera drží za hráčom – myšou / prstom sa dá
+// rozhliadnuť a po chvíli sa sama vráti späť.
 
 import * as THREE from 'three';
 import { KONFIG } from '../config.js';
@@ -25,26 +27,37 @@ export default {
     const objekt = vAute ? hra.stav.auto : hra.hrac;
     dt = Math.min(dt, 0.1);
 
+    // pešo na PC: voľný pohľad myšou (bez návratu za postavu)
+    const volnyPohlad = !vAute && !hra.vstup.dotyk;
+
     // otočenie hráčom
     const { dx, dy } = hra.vstup.kameraPosun();
     this.posunUhla -= dx * 0.005;
-    this.sklon = THREE.MathUtils.clamp(this.sklon + dy * 0.003, -0.1, 0.9);
-    // návrat za hráča
-    if (performance.now() - hra.vstup.poslednyPohybKamery > K.NAVRAT_PO * 1000) {
-      this.posunUhla *= Math.exp(-dt * 2.5);
-      this.sklon += ((vAute ? 0.16 : 0.2) - this.sklon) * Math.min(1, dt * 1.5);
-    }
+    this.sklon = THREE.MathUtils.clamp(this.sklon + dy * 0.003, volnyPohlad ? -0.45 : -0.1, volnyPohlad ? 1.05 : 0.9);
 
-    // kamera sa plynulo otáča za smerom objektu
     const smer = objekt.uhol;
     if (this.prvy) this.uhol = smer + Math.PI;
-    let rozdiel = smer + Math.PI - this.uhol;
-    rozdiel = Math.atan2(Math.sin(rozdiel), Math.cos(rozdiel));
-    this.uhol += rozdiel * Math.min(1, dt * (vAute ? 4 : 3));
+    if (volnyPohlad) {
+      // posun myšou sa pripočíta natrvalo, kamera sa za postavou neotáča
+      this.uhol += this.posunUhla;
+      this.posunUhla = 0;
+    } else {
+      // návrat za hráča
+      if (performance.now() - hra.vstup.poslednyPohybKamery > K.NAVRAT_PO * 1000) {
+        this.posunUhla *= Math.exp(-dt * 2.5);
+        this.sklon += ((vAute ? 0.16 : 0.2) - this.sklon) * Math.min(1, dt * 1.5);
+      }
+      // kamera sa plynulo otáča za smerom objektu
+      let rozdiel = smer + Math.PI - this.uhol;
+      rozdiel = Math.atan2(Math.sin(rozdiel), Math.cos(rozdiel));
+      this.uhol += rozdiel * Math.min(1, dt * (vAute ? 4 : 3));
+    }
 
     const vzd = vAute ? K.AUTO_VZDIALENOST + Math.min(4, objekt.rychlostKmh / 30) : K.PESO_VZDIALENOST;
     const vys = vAute ? K.AUTO_VYSKA : K.PESO_VYSKA;
     const u = this.uhol + this.posunUhla;
+    // smer, ktorým sa kamera pozerá (0 = na juh, rovnako ako hra.stav.uhol) – podľa neho chodí postava
+    hra.stav.smerKamery = Math.atan2(Math.sin(u + Math.PI), Math.cos(u + Math.PI));
     const horiz = Math.cos(this.sklon) * vzd;
 
     this.ciel.set(objekt.pozicia.x, objekt.pozicia.y + (vAute ? 1.4 : 1.6), objekt.pozicia.z);

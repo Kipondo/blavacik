@@ -17,6 +17,7 @@ import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
+import mys from './vstup/mys.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -30,6 +31,7 @@ import mhd from './mhd/modul.js';
 
 export default [
   hodiny,
+  mys,
   prostredie,
   hrac,
   riadenieHracom,
