@@ -2,6 +2,7 @@
 // Pri križovatkách sa chodník preruší, aby nezasahoval do vozovky.
 
 import * as THREE from 'three';
+import { pridajStrukturu } from './struktura.js';
 import { zjemni } from './cesty.js';
 import { kluc } from './krizovatky.js';
 
@@ -75,7 +76,7 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.computeVertexNormals();
-  const vrchy = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: dlazba(), roughness: 0.95 }));
+  const vrchy = new THREE.Mesh(geo, pridajStrukturu(new THREE.MeshStandardMaterial({ map: dlazba(), roughness: 0.95 }), 'chodnik', 2.2, 1, 0.5));
   vrchy.receiveShadow = true;
   const geoO = new THREE.BufferGeometry();
   geoO.setAttribute('position', new THREE.Float32BufferAttribute(obrPoz, 3));
