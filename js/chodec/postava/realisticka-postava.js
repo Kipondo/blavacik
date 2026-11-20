@@ -3,7 +3,7 @@
 // modelom: group.userData.animuj(dt, rychlost, voVzduchu).
 
 import * as THREE from 'three';
-import { vytvorInstanciu } from './nacitaj-postavu.js';
+import { vytvorInstanciu, nacitajGlb } from './nacitaj-postavu.js';
 import { Animacie } from './animacie.js';
 import { nacitajSatnik, oblec } from './satnik.js';
 import { nastavVzhlad, nastavMorph, Mimika } from './vzhlad.js';
@@ -17,7 +17,7 @@ export const URL_DODO = new URL('../../../assets/postavy/dodo.glb', import.meta.
  * @param {string} [o.oblecenie]  id oblečenia zo satnik.json (napr. 'klasicky', 'oblek')
  * @param {object} [o.vzhlad]     pozri vzhlad.js
  */
-export function vytvorRealistickuPostavu({ url = URL_DODO, oblecenie = 'klasicky', vzhlad = null } = {}) {
+export function vytvorRealistickuPostavu({ url = URL_DODO, oblecenie = 'klasicky', vzhlad = null, klipy = null } = {}) {
   const g = new THREE.Group();
   g.name = 'postava';
   const nahradna = vytvorModelPostavy({ tricko: '#e8e8e8', nohavice: '#1d2230', vlasy: '#2b1d14' });
@@ -26,9 +26,11 @@ export function vytvorRealistickuPostavu({ url = URL_DODO, oblecenie = 'klasicky
   let inst = null, anim = null, mimika = null, satnik = null;
   const ud = g.userData;
   ud.opity = false;
+  ud.voVode = false; // nastavuje hráč (plavanie.js) – prepne na animácie plávania
   ud.efektyOblecenia = {};
 
-  ud.pripravena = Promise.all([vytvorInstanciu(url), nacitajSatnik()]).then(([i, s]) => {
+  ud.pripravena = Promise.all([vytvorInstanciu(url), nacitajSatnik(), klipy ? nacitajGlb(klipy) : null]).then(([i, s, k]) => {
+    if (k) i.animacie = k.animations; // náhradné animácie (ladenie)
     inst = i; satnik = s;
     g.remove(nahradna);
     g.add(inst.koren);
@@ -61,7 +63,7 @@ export function vytvorRealistickuPostavu({ url = URL_DODO, oblecenie = 'klasicky
 
   ud.animuj = (dt, rychlost = 0, voVzduchu = false) => {
     if (!inst) { nahradna.userData.animuj(dt, rychlost, voVzduchu); return; }
-    if (!ud.vynutena) anim.podlaPohybu(rychlost, voVzduchu, ud.opity);
+    if (!ud.vynutena) anim.podlaPohybu(rychlost, voVzduchu, ud.opity, ud.voVode);
     anim.update(dt);
     mimika.update(dt);
   };

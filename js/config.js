@@ -45,8 +45,10 @@ export const KONFIG = {
 
   // Hráč pešo
   HRAC: {
-    CHODZA: 4.2,
-    BEH: 8.5,
+    CHODZA: 2.0,          // m/s – realistická svižná chôdza (animácie Ďoďa sú na ňu nastavené)
+    BEH: 6.0,
+    PLAVANIE: 1.3,
+    PLAVANIE_RYCHLO: 2.1,
     OTACANIE: 2.8,
     SKOK: 6.5,
     GRAVITACIA: 20,

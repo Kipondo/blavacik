@@ -37,7 +37,7 @@ pod.receiveShadow = true;
 scena.add(pod);
 
 const kam = new THREE.PerspectiveCamera(+q.get('fov') || 30, W / H, 0.05, 50);
-const postava = vytvorRealistickuPostavu({ url: q.get('model') || '../../assets/postavy/dodo.glb', oblecenie: q.get('oblecenie') || 'klasicky' });
+const postava = vytvorRealistickuPostavu({ url: q.get('model') || '../../assets/postavy/dodo.glb', oblecenie: q.get('oblecenie') || 'klasicky', klipy: q.get('klipy') });
 scena.add(postava);
 
 const uhol = (+q.get('uhol') || 0) * Math.PI / 180;

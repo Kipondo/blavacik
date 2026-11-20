@@ -1,10 +1,11 @@
 // Prepínanie animácií postavy (AnimationMixer) s plynulým prechodom.
-// Názvy klipov z .glb: stoj, chodza, beh, skok, opita_chodza, sedenie, nastup_auto, vystup_auto, mavanie.
+// Názvy klipov z .glb: stoj, chodza, klus, beh, skok, opita_chodza, plavanie, plavanie_stoj, sedenie,
+// nastup_auto, vystup_auto, mavanie.
 
 import * as THREE from 'three';
 
 // prirodzená rýchlosť klipu (m/s) – podľa nej sa zrýchľuje/spomaľuje prehrávanie, aby nohy „nekĺzali“
-const RYCHLOST_KLIPU = { chodza: 1.45, beh: 4.6, opita_chodza: 1.1 };
+const RYCHLOST_KLIPU = { chodza: 1.8, klus: 3.6, beh: 5.6, opita_chodza: 1.2, plavanie: 1.3 };
 const JEDNORAZOVE = new Set(['skok', 'nastup_auto', 'vystup_auto', 'mavanie']);
 
 export class Animacie {
@@ -39,15 +40,20 @@ export class Animacie {
   }
 
   /** Automatický výber podľa pohybu (hráč pešo, NPC chodci). */
-  podlaPohybu(rychlost, voVzduchu, opity = false) {
+  podlaPohybu(rychlost, voVzduchu, opity = false, voVode = false) {
     let meno;
-    if (voVzduchu) meno = 'skok';
+    if (voVode) meno = rychlost > 0.25 && this.ma('plavanie') ? 'plavanie' : 'plavanie_stoj';
+    else if (voVzduchu) meno = 'skok';
     else if (rychlost < 0.15) meno = 'stoj';
     else if (opity && this.ma('opita_chodza')) meno = 'opita_chodza';
-    else meno = rychlost < 3.0 ? 'chodza' : 'beh';
-    const a = this.hraj(meno, meno === 'skok' ? 0.12 : 0.25);
+    else if (rychlost < 2.6) meno = 'chodza';
+    else if (rychlost < 4.6 && this.ma('klus')) meno = 'klus';
+    else meno = 'beh';
+    if (!this.ma(meno)) meno = voVode ? 'stoj' : meno === 'klus' ? 'beh' : meno;
+    const a = this.hraj(meno, meno === 'skok' ? 0.12 : 0.3);
     const v = RYCHLOST_KLIPU[meno];
-    if (a && v) a.setEffectiveTimeScale(THREE.MathUtils.clamp(rychlost / v, 0.5, 1.8));
+    // prehrávanie podľa rýchlosti, aby sa nohy nešmýkali (v malom rozsahu, inak by to pôsobilo trhane)
+    if (a && v) a.setEffectiveTimeScale(THREE.MathUtils.clamp(rychlost / v, 0.6, 1.35));
   }
 
   update(dt) { this.mixer.update(dt); }

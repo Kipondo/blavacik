@@ -6,6 +6,7 @@ import { vytvorRealistickuPostavu } from './postava/realisticka-postava.js';
 import { nacitajUlozenyVzhlad } from './postava/ulozenie.js';
 import { zacniNastup, zacniVystup, aktualizujAkciu, zrusAkciu } from './nastupovanie.js';
 import { pohybPodlaKamery, zastavPohyb } from './pohyb-podla-kamery.js';
+import { maxRychlost, smiePrejst, aktualizujVodu } from './plavanie.js';
 
 const K = KONFIG.HRAC;
 
@@ -16,6 +17,7 @@ class Hrac {
     this.vy = 0;
     this.naZemi = true;
     this.rychlost = 0;
+    this.pliva = false; // vo vode (plavanie.js)
     // realistický Ďoďo z assets/postavy/dodo.glb (vzhľad a oblečenie z editora postavy)
     this.mesh = vytvorRealistickuPostavu(nacitajUlozenyVzhlad());
   }
@@ -91,7 +93,7 @@ export default {
         if (hra.stav.auto.rychlostKmh >= 25) hra.ui.sprava('Najprv spomaľ!', 1.5);
         else if (!zacniVystup(hra)) vystup(hra);
       } else {
-        const auto = najblizsieAuto(hra);
+        const auto = h.pliva ? null : najblizsieAuto(hra);
         if (auto && !zacniNastup(hra, auto)) nastup(hra, auto);
       }
       if (h.akcia) { aktualizujAkciu(dt, hra); return; }
@@ -108,7 +110,7 @@ export default {
     // --- chôdza ---
     const p = hra.vstup.pohyb();
     const beh = hra.vstup.drzi('beh');
-    const maxV = beh ? K.BEH : K.CHODZA;
+    const maxV = maxRychlost(h, beh);
     const staraX = h.pozicia.x, staraZ = h.pozicia.z;
     if (!hra.vstup.dotyk && hra.stav.smerKamery !== undefined) {
       // PC: W = tam, kam sa pozerá kamera, A/D = úkrok (pohyb-podla-kamery.js)
@@ -135,20 +137,28 @@ export default {
         }
       }
     }
-    if (hra.mapa.jeVoVode(h.pozicia.x, h.pozicia.z) || hra.mapa.jeMimo(h.pozicia.x, h.pozicia.z)) {
+    // do vody sa dá vojsť alebo spadnúť z nábrežia; z vody len na nízky breh (plavanie.js)
+    if (hra.mapa.jeMimo(h.pozicia.x, h.pozicia.z) || !smiePrejst(hra, h, h.pozicia.x, h.pozicia.z)) {
       h.pozicia.x = staraX; h.pozicia.z = staraZ;
     }
 
-    // skok a gravitácia
+    // skok a gravitácia (vo vode sa pláva – výšku rieši plavanie.js)
     const zem = hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
-    if (h.naZemi && hra.vstup.drzi('skok')) {
+    const pliva = aktualizujVodu(dt, hra, h);
+    if (pliva) {
+      // nič – postava drží pri hladine
+    } else if (h.naZemi && hra.vstup.drzi('skok')) {
       h.vy = K.SKOK;
       h.naZemi = false;
       hra.posli('skok');
     }
-    h.vy -= K.GRAVITACIA * dt;
-    h.pozicia.y += h.vy * dt;
-    if (h.pozicia.y <= zem) {
+    if (!pliva) {
+      h.vy -= K.GRAVITACIA * dt;
+      h.pozicia.y += h.vy * dt;
+    }
+    if (pliva) {
+      // vo vode
+    } else if (h.pozicia.y <= zem) {
       h.pozicia.y = zem;
       h.vy = 0;
       h.naZemi = true;
@@ -161,6 +171,7 @@ export default {
     h.mesh.position.copy(h.pozicia);
     h.mesh.rotation.y = h.uhol;
     h.mesh.userData.opity = !!hra.stav.opity;
-    h.mesh.userData.animuj(dt, Math.abs(h.rychlost), !h.naZemi);
+    h.mesh.userData.voVode = h.pliva;
+    h.mesh.userData.animuj(dt, Math.abs(h.rychlost), !h.naZemi && !h.pliva);
   },
 };
