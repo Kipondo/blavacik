@@ -120,6 +120,32 @@ function stena(p, e, n, zb, typ, znaky) {
       stvor(bod(sm, y1, o1), bod(s1, y0, o1), bod(s1, y0, o0), bod(sm, y1, o0), uv, uv, uv, uv, [sm, y1], [s1, y0], [s1, y0 + 0.2], [sm, y1 + 0.2], f);
       stvor(bod(s0, y0, o1), bod(sm, y1, o1), bod(sm, y1, o0), bod(s0, y0, o0), uv, uv, uv, uv, [s0, y0], [sm, y1], [sm, y1 + 0.2], [s0, y0 + 0.2], f);
     },
+    /** Oblúkový (segmentový) frontón nad oknom: čelo ako vejár + zaoblený vrch. */
+    oblukovyFronton(s0, s1, y0, vyska, o0, o1, f, v) {
+      const uv = SLEPA(v), sm = (s0 + s1) / 2, r = (s1 - s0) / 2, N = 7;
+      const bodOblúka = (i) => { const a = Math.PI * (i / N); return [sm - Math.cos(a) * r, y0 + Math.sin(a) * vyska]; };
+      for (let i = 0; i < N; i++) {
+        const [sa, ya] = bodOblúka(i), [sb, yb] = bodOblúka(i + 1);
+        troj(bod(sm, y0, o1), bod(sb, yb, o1), bod(sa, ya, o1), uv, uv, uv, [sm, y0], [sb, yb], [sa, ya], f);
+        stvor(bod(sa, ya, o1), bod(sb, yb, o1), bod(sb, yb, o0), bod(sa, ya, o0), uv, uv, uv, uv, [sa, ya], [sb, yb], [sb, yb + 0.2], [sa, ya + 0.2], f);
+      }
+    },
+    /** Rovinný mnohouholník na líci (o = o1) s hrúbkou dozadu po o0 – štít nad rímsou. body = [[s, y], …] proti smeru hod. ručičiek. */
+    stit(body, o0, o1, f, v) {
+      const uv = SLEPA(v);
+      const trojuholniky = THREE.ShapeUtils.triangulateShape(body.map(([x, y]) => new THREE.Vector2(x, y)), []);
+      for (const t of trojuholniky) {
+        // jednotný smer obehu (proti smeru hodinových ručičiek = čelo pozerá von)
+        const [a, b, c] = (body[t[1]][0] - body[t[0]][0]) * (body[t[2]][1] - body[t[0]][1]) - (body[t[1]][1] - body[t[0]][1]) * (body[t[2]][0] - body[t[0]][0]) >= 0 ? t : [t[0], t[2], t[1]];
+        const A = body[a], B = body[b], C = body[c];
+        troj(bod(A[0], A[1], o1), bod(B[0], B[1], o1), bod(C[0], C[1], o1), uv, uv, uv, A, B, C, f);
+        troj(bod(A[0], A[1], o0), bod(C[0], C[1], o0), bod(B[0], B[1], o0), uv, uv, uv, A, C, B, f);
+      }
+      for (let i = 0; i < body.length; i++) {
+        const A = body[i], B = body[(i + 1) % body.length];
+        stvor(bod(B[0], B[1], o1), bod(A[0], A[1], o1), bod(A[0], A[1], o0), bod(B[0], B[1], o0), uv, uv, uv, uv, B, A, [A[0] + 0.2, A[1]], [B[0] + 0.2, B[1]], f);
+      }
+    },
     /** Zvislé zakončenie plášťa na konci steny (s = konšt.), pozerá v smere sm (−1 / +1). */
     koniec(s, y0, y1, sm, f, v) {
       const uv = SLEPA(v), H = HRUBKA;
@@ -166,6 +192,11 @@ export function planFasad3d(budovy, vyskopis) {
     const r = rozlozenieBudovy(b, vyskopis);
     if (r.typ !== STYLY.stare) continue;
     const obvod = r.kruhy[0];
+    // paláce (podľa mena v OSM alebo pamiatky) majú v 1. poschodí frontóny; balkóny a štíty z opravy-budov.json
+    const znacky = {
+      palac: /pal[áa]c|kúria|kuria/i.test(b.nazov ?? '') || !!b.pamiatkaOsm,
+      balkony: !!b.balkony, stity: !!b.stity,
+    };
     const info = obvod.steny.map(({ p, q, d, osi }) => {
       const e = [(q[0] - p[0]) / d, (q[1] - p[1]) / d];
       const lavo = [-e[1], e[0]];
@@ -187,7 +218,7 @@ export function planFasad3d(budovy, vyskopis) {
       const kluc = `${Math.floor(mx / DIEL)},${Math.floor(mz / DIEL)}`;
       if (!diely.has(kluc)) diely.set(kluc, { x: (Math.floor(mx / DIEL) + 0.5) * DIEL, z: (Math.floor(mz / DIEL) + 0.5) * DIEL, steny: [] });
       diely.get(kluc).steny.push({
-        r, w, predOk: pred.ok, poOk: po.ok,
+        r, w, predOk: pred.ok, poOk: po.ok, znacky,
         ex0: predlzenie(pred, w, HRUBKA, obvod.vonJeVlavo), ex1: predlzenie(w, po, HRUBKA, obvod.vonJeVlavo),
         exR0: predlzenie(pred, w, HRUBKA + 0.32, obvod.vonJeVlavo), exR1: predlzenie(w, po, HRUBKA + 0.32, obvod.vonJeVlavo),
       });
@@ -197,7 +228,7 @@ export function planFasad3d(budovy, vyskopis) {
 }
 
 /** Plášť jednej steny. */
-function plastSteny(zb, { r, w, predOk, poOk, ex0, ex1, exR0, exR1 }) {
+function plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 }) {
   const { typ, seed, seedInt, farba: c, znaky, pasy, vrch } = r;
   const S = stena(w.p, w.e, w.n, zb, typ + seed, znaky);
   const cRimsa = c.clone().multiplyScalar(1.07);
@@ -236,7 +267,13 @@ function plastSteny(zb, { r, w, predOk, poOk, ex0, ex1, exR0, exR1 }) {
         const R = O.rimsa;
         S.kvader(sx(R.x0), sx(R.x1), ly(R.y0), ly(R.y1), HRUBKA, HRUBKA + 0.1, cRimsa, vStred, { spodok: 0.62 });
         if (O.fronton) S.fronton(sx(R.x0), sx(R.x1), ly(R.y1), ly(O.fronton), HRUBKA, HRUBKA + 0.08, cRimsa, vStred);
+        else if (znacky.palac && Math.floor(vj + 0.001) === 1) {
+          // barokový palác: v 1. poschodí striedavo trojuholníkové a oblúkové frontóny
+          if (k % 2 === 0) S.fronton(sx(R.x0), sx(R.x1), ly(R.y1), ly(R.y1) + 0.1 * hf, HRUBKA, HRUBKA + 0.08, cRimsa, vStred);
+          else S.oblukovyFronton(sx(R.x0), sx(R.x1), ly(R.y1), 0.09 * hf, HRUBKA, HRUBKA + 0.08, cRimsa, vStred);
+        }
       }
+      if (znacky.balkony && Math.floor(vj + 0.001) === 1 && w.osi >= 3) balkon(S, w.osi, sw, ya, vStred, KAMEN);
       // podlažná rímsa na spodku podlažia (v atlase je nakreslená na rovnakom mieste)
       S.kvader(sA, sB, ya + 0.012 * hf, ya + 0.05 * hf, HRUBKA, HRUBKA + 0.07, cRimsa, vStred, { boky: false, spodok: 0.6 });
     }
@@ -248,7 +285,54 @@ function plastSteny(zb, { r, w, predOk, poOk, ex0, ex1, exR0, exR1 }) {
     const boky = !(predOk && poOk);
     S.kvader(sA, sB, najvyssie, najvyssie + ha * 0.45, 0, HRUBKA + 0.1, cRimsa, 100.7, { boky, spodok: 0.6 });
     S.kvader(-exR0, w.d + exR1, najvyssie + ha * 0.45, vrch, 0, HRUBKA + 0.32, cRimsa, 100.7, { boky, spodok: 0.5 });
+    if (znacky.stity && w.osi >= 5) S.stit(obrysStitu(w.d / 2, Math.min(3 * sw, w.d * 0.5), vrch), HRUBKA - 0.25, HRUBKA + 0.05, cRimsa, 100.7);
   }
+}
+
+const ZELEZO = new THREE.Color('#2a2a2c');
+
+/** Balkón v 1. poschodí pred strednou osou (pri širších fasádach pred tromi): doska, konzoly, kované zábradlie. */
+function balkon(S, osi, sw, ya, v, kamen) {
+  const tri = osi >= 5;
+  const k0 = Math.floor((osi - (tri ? 3 : 1)) / 2), k1 = k0 + (tri ? 3 : 1);
+  const s0 = k0 * sw + 0.15, s1 = k1 * sw - 0.15, o0 = HRUBKA, o1 = HRUBKA + 0.95;
+  S.kvader(s0, s1, ya - 0.18, ya, o0, o1, kamen, v, { spodok: 0.55 });                    // doska
+  for (const s of [s0 + 0.25, s1 - 0.25]) S.kvader(s - 0.1, s + 0.1, ya - 0.55, ya - 0.18, o0, o1 - 0.2, kamen, v, { spodok: 0.6 });   // konzoly
+  const yz = ya + 1.0;
+  S.kvader(s0 + 0.03, s1 - 0.03, yz - 0.06, yz, o1 - 0.09, o1 - 0.03, ZELEZO, v, { boky: true });  // madlo vpredu
+  S.kvader(s0 + 0.03, s0 + 0.09, yz - 0.06, yz, o0, o1 - 0.03, ZELEZO, v, { boky: true });        // madlá na bokoch
+  S.kvader(s1 - 0.09, s1 - 0.03, yz - 0.06, yz, o0, o1 - 0.03, ZELEZO, v, { boky: true });
+  S.kvader(s0 + 0.03, s1 - 0.03, ya + 0.1, ya + 0.14, o1 - 0.08, o1 - 0.04, ZELEZO, v, { boky: false });
+  const n = Math.max(3, Math.round((s1 - s0) / 0.22));
+  for (let i = 0; i <= n; i++) {
+    const s = s0 + 0.06 + ((s1 - s0 - 0.12) * i) / n;
+    S.kvader(s - 0.012, s + 0.012, ya, yz - 0.06, o1 - 0.075, o1 - 0.05, ZELEZO, v, { boky: true });
+  }
+}
+
+/** Obrys zvlneného (secesného) štítu nad hlavnou rímsou: stred sm, šírka W, päta y0. */
+function obrysStitu(sm, W, y0) {
+  const H = W * 0.55, body = [];
+  const N = 12;
+  // pravá polovica zdola nahor: konkávna vlna k ramenu, schodík, konvexný oblúk k vrcholu
+  const prava = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const x = 0.5 - 0.22 * t;                                   // od 0,5 W k 0,28 W
+    const y = 0.42 * (1 - Math.cos((t * Math.PI) / 2)) ** 0.8;  // konkávny nábeh
+    prava.push([x, y]);
+  }
+  prava.push([0.28, 0.5], [0.24, 0.5]);
+  const koniecOblúka = Math.acos(0.035 / 0.24);           // oblúk končí pri vrcholovom nástavci
+  for (let i = 1; i <= N; i++) {
+    const a = (i / N) * koniecOblúka;
+    prava.push([0.24 * Math.cos(a), 0.5 + 0.42 * Math.sin(a)]);
+  }
+  prava.push([0.035, 1.0], [0, 1.0]);
+  // celý obrys proti smeru hodinových ručičiek (s doprava, y hore): pravá strana nahor, ľavá nadol
+  for (const [x, y] of prava) body.push([sm + x * W, y0 + y * H]);
+  for (let i = prava.length - 2; i >= 0; i--) { const [x, y] = prava[i]; body.push([sm - x * W, y0 + y * H]); }
+  return body;
 }
 
 /** Postaví sieť jedného dielu (steny z plánu) – generátor, vráti riadenie po každej stene; výsledok = sieť alebo null. */

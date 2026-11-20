@@ -67,7 +67,7 @@ Odkazy na strany námestia:
 - [x] [1] **Vikiere** – takmer všetky šikmé škridlové strechy okolo námestia majú rad vikierov, v hre nemá vikiere žiadna. — *opravené: `js/mapa/budovy/vikiere.js` – rad vikierov na šikmých strechách historických budov, len tam, kde strecha z lasera naozaj stúpa (nie na štítoch a spoločných stenách)*
 - [x] [2] **Okná** – v skutočnosti sú okná vyššie, hlavne v 1. poschodí (piano nobile), s bielymi šambránami a rímsami nad oknami. — *opravené: 1. poschodie historických budov je o 20 % vyššie (piano nobile), bohatšie okná s rímsou*
   V hre sú všetky podlažia rovnaké. Navrhni 1. poschodie o ~20 % vyššie s výraznejšou rímsou nad oknom.
-- [ ] [2] **Rámy okien** – v skutočnosti biele alebo svetlé. V hre sú tmavé, a preto fasády pôsobia smutnejšie.
+- [ ] [2] **Rámy okien** – v skutočnosti biele alebo svetlé. V hre sú tmavé, a preto fasády pôsobia smutnejšie. — *čiastočne: rámy historických okien sú v atlase svetlé (`#f2efe8`), tmavý dojem robilo nakreslené tmavé ostenie; v 3D fasádach (`js/mapa/budovy/fasady-3d.js`) je ostenie skutočné, v omietke*
 
 ## Priorita 1 – najviac viditeľné
 
@@ -94,7 +94,7 @@ Odkazy na strany námestia:
 - [x] [2] **Strechy domov na severnej a západnej strane námestia** – v hre hladké škridlové plochy — *opravené spolu s vikiermi (priorita 1)*
   → takmer každý dom má rad vikierov (malé okná v streche). Pridaj vikiere pre historické budovy so šikmou strechou
   (podľa LiDARu sa dajú nájsť ako výstupky v streche, inak pravidlom pre `historické` budovy).
-- [ ] [2] **Južná strana námestia** – v hre ploché fasády so svetlomodrou/bielou farbou
+- [ ] [2] **Južná strana námestia** – v hre ploché fasády so svetlomodrou/bielou farbou — *čiastočne: 3D fasády (zapustené okná, rímsy), balkóny s kovaným zábradlím v 1. poschodí a zvlnený secesný štít (príznaky `balkony` / `stity` v `data/mapa/opravy-budov.json`); mansarda a nárožná vežička ešte nie*
   → mohutné historizujúce paláce (4–5 podlaží), bohato zdobené fasády s balkónmi, štítmi a nárožnou vežičkou,
   tmavé mansardové strechy. Farby: krémová, svetlosivá, biela. Doplň aspoň balkóny, výraznejšie rímsy a mansardu.
 - [ ] [2] **Františkánske námestie – stromy** – v hre aleja 6+ stromov a veľa lavičiek
@@ -156,7 +156,7 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.144729,17.10676
 Odkaz (pohľad na juh):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14400,17.10668&heading=190&pitch=8&fov=80
 
-- [ ] [2] **Barokové paláce** – v skutočnosti majú okná s **frontónmi** (trojuholníkové a oblúkové rímsy nad oknami),
+- [x] [2] **Barokové paláce** – v skutočnosti majú okná s **frontónmi** (trojuholníkové a oblúkové rímsy nad oknami), — *opravené: 3D fasády historických budov – okná zapustené 20 cm, kamenné parapety, nadokenné rímsy; budovy s „palác“ v mene (alebo pamiatka v OSM) majú v 1. poschodí striedavo trojuholníkové a oblúkové frontóny*
   vysoké okná v 1. poschodí, zdobené portály a balkóny. V hre sú okná ploché s rovnakou rímsou.
   Pridaj typ okna „frontón“ pre historické paláce (OSM `historic`, názov s „palác“ alebo podľa veku).
 - [ ] [2] **Dom na konci pohľadu** – v hre biely s modrastým nádychom → v skutočnosti krémový/svetložltý, 3 podlažia,
@@ -172,7 +172,7 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14395,17.10945&
   a nesú balkón v 1. poschodí. Stĺpy musia ísť od dlažby po balkón, nad nimi balkón so zábradlím.
 - [x] [2] **Farba Primaciálneho paláca** – v hre ružová/fialkastá a tmavšia → v skutočnosti svetlá krémová omietka — *opravené: svetlá krémová omietka (klobúk na štíte ostáva)*
   s bielymi pilastrami a šambránami. Na štíte navrchu je známy kardinálsky klobúk – over v hre.
-- [ ] [2] **Okná paláca** – vysoké, so šambránami a rímsami. V 1. poschodí výrazne vyššie ako ostatné.
+- [ ] [2] **Okná paláca** – vysoké, so šambránami a rímsami. V 1. poschodí výrazne vyššie ako ostatné. — *čiastočne: 1. poschodie historických budov je o 20 % vyššie, okná sú v 3D zapustené s rímsami a frontónmi (Primaciálny palác je samostatný model)*
 
 ## Okolie Dómu sv. Martina
 Street View je pri Dóme len z interiéru, preto som porovnával len to, čo bolo vidieť v hre. Over to na leteckom pohľade:
