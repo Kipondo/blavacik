@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { DRUHY, VYSKA_MODELU, modelStromu } from './model-stromu.js';
 import { materialKory, materialListov, materialKmenaDaleko, materialKorunyDaleko } from './materialy-stromov.js';
 
-const CHUNK = 125;
+const CHUNK = 250;      // m – veľkosť skupiny (menej volaní kreslenia; blízke stromy sa vyberajú po jednom)
 const DOHLAD = 650;     // ďalej ako toto sa stromy skryjú (aj tak sú v opare)
 const BLIZKO = 125;     // m – bližšie podrobný model
 const POSUN = 6;        // m – po takom posune kamery sa prepočíta, ktoré stromy sú blízko
@@ -111,7 +111,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       b.listy = new THREE.InstancedMesh(geo.listy, materialListov(DRUHY[meno].ihlicnan ? 'ihlice' : 'listy'), b.kapacita);
       b.listy.setColorAt(0, farba.setRGB(1, 1, 1));
       for (const im of [b.kora, b.listy]) {
-        im.count = 0; im.visible = false; im.frustumCulled = false;
+        im.count = 0; im.visible = false;
         im.castShadow = true; im.receiveShadow = true;
         im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         chunk.add(im);
@@ -127,8 +127,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       minX, maxX, minZ, maxZ,
       povodneKmene: kmene.instanceMatrix.array.slice(), povodneKoruny: koruny.instanceMatrix.array.slice(), povodneIhlice: ihlice.instanceMatrix.array.slice(),
     };
-    // pri kreslení chunku sa prepočíta, ktoré stromy sú blízko (kmene sa kreslia vždy, aby sa to volalo)
-    kmene.frustumCulled = false;
+    // pri kreslení chunku (keď je v zábere) sa prepočíta, ktoré stromy sú blízko – prejaví sa od ďalšieho snímku
     kmene.onBeforeRender = (renderer, scena, kamera) => { if (kamera.isPerspectiveCamera) aktualizujDetail(stav, kamera.position); };
     chunk.userData.dohlad = { x: sx / n, z: sz / n, max: DOHLAD };
     skupina.add(chunk);
@@ -174,7 +173,11 @@ function aktualizujDetail(st, kam) {
   for (const b of st.blizke.values()) {
     b.kora.count = b.listy.count = b.n;
     b.kora.visible = b.listy.visible = b.n > 0;
-    if (b.n) { b.kora.instanceMatrix.needsUpdate = true; b.listy.instanceMatrix.needsUpdate = true; b.listy.instanceColor.needsUpdate = true; }
+    if (b.n) {
+      b.kora.instanceMatrix.needsUpdate = true; b.listy.instanceMatrix.needsUpdate = true; b.listy.instanceColor.needsUpdate = true;
+      // obal len okolo blízkych stromov (aby sa mimo záberu nekreslili)
+      b.kora.computeBoundingSphere(); b.listy.computeBoundingSphere();
+    }
   }
   if (zmena) for (const im of [st.kmene, st.koruny, st.ihlice]) im.instanceMatrix.needsUpdate = true;
 }
