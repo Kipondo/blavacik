@@ -11,11 +11,14 @@
 // "sklo" = sklenená fasáda (mrakodrapy, nákupné centrá).
 // Fasády (okná s rámom, rímsy, výklady, dvere) sú v js/mapa/budovy/fasady.js – tu sa ráta UV v jednotkách
 // okenných osí a podlaží, aby sa okná na rohoch nerezali a podlažia sedeli s výškou budovy.
+// Typ budovy (panelák, rodinný dom, hala, garáž…) a štýl fasády určí js/mapa/budovy/typ-budovy.js
+// ("typ", "styl", "podlazia"; pri odhadnutej výške ju aj prispôsobí typu).
 
 import * as THREE from 'three';
 import { bodVPolygone, stredBodov } from '../geometria.js';
 import { materialFasad, STYLY, PARAMETRE } from './fasady.js';
 import { texturaSkla } from '../pamiatky/textury.js';
+import { typizujBudovy } from './typ-budovy.js';
 
 let materialy = null;
 function ziskajMaterialy() {
@@ -28,6 +31,7 @@ function ziskajMaterialy() {
 }
 
 export function vytvorBudovy(budovy, vyskopis, KONFIG) {
+  typizujBudovy(budovy);
   const chunky = new Map();
   for (const b of budovy) {
     if (!b.body || b.body.length < 3) continue;
@@ -48,8 +52,9 @@ export function vytvorBudovy(budovy, vyskopis, KONFIG) {
   return skupina;
 }
 
-/** Štýl fasády podľa výšky, strechy a polohy (deterministicky). */
+/** Štýl fasády: z typu budovy (typ-budovy.js), inak podľa výšky, strechy a polohy (deterministicky). */
 function typFasady(b, cx, cz) {
+  if (b.styl !== undefined) return b.styl;
   if (b.strecha) return STYLY.stare;
   const h = Math.abs(Math.round(cx * 3 + cz * 5));
   if (b.vyska >= 22 && cz > 780) return STYLY.obytne;           // Petržalka
@@ -57,18 +62,31 @@ function typFasady(b, cx, cz) {
   return [STYLY.jednoduche, STYLY.obytne, STYLY.jednoduche, STYLY.stare][h % 4];
 }
 
-/** Pásy steny podľa výšky: sokel, prízemie, poschodia, atika → [y0, y1, v0, v1]. */
-function pasyFasady(spodok, zaklad, vrch, par) {
+/** Pásy steny podľa výšky: sokel, prízemie, poschodia, atika → [y0, y1, v0, v1].
+ *  podlazia – známy počet nadzemných podlaží (z OSM); výška sa medzi ne rozdelí v pomere prízemie : podlažie. */
+function pasyFasady(spodok, zaklad, vrch, par, podlazia) {
   const H = vrch - zaklad;
   const pasy = [];
   if (zaklad > spodok) pasy.push([spodok, zaklad, (spodok - zaklad) / par.prizemie, 0]);
   if (H <= 0.5) return pasy;
+  if (podlazia >= 1 && H > podlazia * 2.2) {
+    const atika = Math.min(1.1, Math.max(0.4, H * 0.06));
+    const f = podlazia - 1;
+    const hp = ((H - atika) * par.prizemie) / (par.prizemie + f * par.podlazie);
+    const y1 = zaklad + hp, y2 = vrch - atika;
+    pasy.push([zaklad, y1, 0, 1]);
+    if (f > 0) pasy.push([y1, y2, 1, 1 + f]);
+    pasy.push([y2, vrch, 100, 101]);
+    return pasy;
+  }
   if (H < par.prizemie + 1.2) {                       // prízemná budova: prízemie + nízka atika
     const hp = Math.max(0.5, H - 0.45);
     pasy.push([zaklad, zaklad + hp, 0, 1], [zaklad + hp, vrch, 100, 101]);
     return pasy;
   }
-  const f = Math.max(0, Math.floor((H - par.prizemie - 0.55) / par.podlazie));
+  let f = Math.max(0, Math.floor((H - par.prizemie - 0.55) / par.podlazie));
+  // zvyšok nad prízemím by bola vysoká atika – radšej jedno nižšie podlažie (napr. hala 9 m)
+  if (f === 0 && H - par.prizemie - 1.1 > par.podlazie * 0.6) f = 1;
   const atika = Math.min(1.1, Math.max(0.55, H - par.prizemie - f * par.podlazie));
   const hf = f > 0 ? (H - par.prizemie - atika) / f : 0;
   const y1 = zaklad + par.prizemie, y2 = y1 + f * hf;
@@ -108,7 +126,8 @@ function postavGeometriu(budovy, vyskopis) {
     if (b.strecha) cs.set(b.strecha); else cs.copy(c).multiplyScalar(0.55).lerp(new THREE.Color('#77736c'), 0.5);
 
     const vnutri = (x, z) => bodVPolygone(x, z, body) && !diery.some((d) => bodVPolygone(x, z, d));
-    const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : pasyFasady(spodok, hMax, vrch, par);
+    const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : pasyFasady(spodok, hMax, vrch, par, b.podlazia);
+    const slepa = b.typ === 'garaz';                    // garáže a kôlne bez okien
 
     for (const kruh of [body, ...diery]) {
       // smer von (od hmoty budovy): otestujeme prvú stenu kruhu
@@ -120,7 +139,7 @@ function postavGeometriu(budovy, vyskopis) {
         const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
         if (d < 0.05) continue;
         // okenné osi: celé číslo na stenu (krátke steny bez okien)
-        const osi = d < par.os * 0.6 ? 0 : Math.max(1, Math.round(d / par.os));
+        const osi = slepa || d < par.os * 0.6 ? 0 : Math.max(1, Math.round(d / par.os));
         // slepá stena (bez okien) má u od 200 – spojitá UV kvôli normálovej mape, shader v nej okná nekreslí
         const u0 = osi === 0 && !b.sklo ? 200 : 0, u1 = b.sklo ? d / 3 : osi === 0 ? 200 + d / par.os : osi;
         for (const [y0, y1, v0, v1] of pasy) {
