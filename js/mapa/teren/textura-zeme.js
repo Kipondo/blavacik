@@ -262,6 +262,21 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
     cesta(c_.body, false);
     g.stroke();
   }
+  // kanál G: zatienenie zeme pri budovách (mäkký tieň pri päte domov – ulice nepôsobia „vznášajúco“)
+  const obr = g.getImageData(0, 0, px, px);
+  const t2 = document.createElement('canvas'); t2.width = t2.height = px;
+  const g2 = t2.getContext('2d', { willReadFrequently: true });
+  g2.fillStyle = '#000'; g2.fillRect(0, 0, px, px);
+  g2.filter = `blur(${Math.max(1, 2.2 * mierka)}px)`;
+  g2.fillStyle = '#fff';
+  for (const b of d.budovy ?? []) {
+    g2.beginPath();
+    b.body.forEach(([x, z], i) => (i ? g2.lineTo(sx(x), sz(z)) : g2.moveTo(sx(x), sz(z))));
+    g2.closePath(); g2.fill();
+  }
+  const ao = g2.getImageData(0, 0, px, px).data;
+  for (let i = 0; i < obr.data.length; i += 4) obr.data[i + 1] = ao[i];
+  g.putImageData(obr, 0, 0);
   const t = new THREE.CanvasTexture(c);
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;

@@ -72,7 +72,8 @@ function materialZemeDlazba(mapa, triedy) {
         vec2 vDetailUv = vSvet * 0.35;
         diffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.45 + trava * 0.4)
                           * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);
-        float trieda = texture2D(triedy, vMapUv).r;
+        vec2 tr2 = texture2D(triedy, vMapUv).rg;
+        float trieda = tr2.r;
         float wK = smoothstep(0.72, 0.92, trieda);
         float wC = smoothstep(0.38, 0.46, trieda) * (1.0 - wK);
         float wT = smoothstep(0.12, 0.2, trieda) * (1.0 - smoothstep(0.3, 0.38, trieda));
@@ -84,7 +85,9 @@ function materialZemeDlazba(mapa, triedy) {
         diffuseColor.rgb = mix(diffuseColor.rgb, chodnik, wC);
         // tráva: CC0 textúra v dvoch mierkach (bez opakovania) a farba z mapy pokrývky (park vs. lúka)
         vec3 travnik = texture2D(travaF, vSvet / 3.1).rgb * 0.6 + texture2D(travaF, vSvet / 11.3).rgb * 0.4;
-        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.1, wT);`)
+        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.1, wT);
+        // mäkké zatienenie pri päte budov (kanál G mapy tried)
+        diffuseColor.rgb *= 1.0 - 0.38 * tr2.g;`)
       .replace('#include <normal_fragment_maps>', `
         vec3 mapN = vec3(0.0, 0.0, 1.0);
         mapN.xy += (texture2D(kockyN, vSvet / 2.4).xy * 2.0 - 1.0) * wK * 1.2;
