@@ -55,7 +55,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorStromy(d.stromy, vyskopis, k));
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
-  g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k));
+  g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
   g.userData.krizovatky = krizovatky;
   return g;
