@@ -1,15 +1,32 @@
 // Michalská brána – štíhla veža (51 m) s cibuľovitou medenou strechou
 // a sochou sv. Michala navrchu. Dolná časť má priechod.
+// Model je z Blendera (tools/blender/michalska_brana.py → assets/pamiatky/michalska-brana.glb so zapečeným AO);
+// ak sa nenačíta, postaví sa jednoduchý model z telies nižšie.
 
 import * as THREE from 'three';
 import { fasada, kvader, valec, material, naMiesto } from './pomocne.js';
+import { nacitajModelPamiatky } from './model-glb.js';
 
 const OMIETKA = '#f0e6cf';
 const MED = '#5f9a84';
 
-export default function postav(p, { vyskopis, kolizie }) {
-  const g = new THREE.Group();
+export default async function postav(p, { vyskopis, kolizie }) {
   const S = 8.5;
+  const model = await nacitajModelPamiatky('michalska-brana');
+  const g = model ?? jednoduchyModel(S);
+  naMiesto(g, p, vyskopis, S, S);
+  // kolízia len pre piliere – priechod (pozdĺž lokálnej osi z) je voľný
+  const u = p.natocenie ?? 0;
+  const ox = Math.cos(u), oz = -Math.sin(u); // lokálna os x vo svete
+  for (const s of [-1, 1]) {
+    kolizie.pridajObdlznik(p.x + ox * s * (S / 2 - 1.1), p.z + oz * s * (S / 2 - 1.1), 2.2, S, u, { typ: "pamiatka" });
+  }
+  return { objekt: g };
+}
+
+/** Pôvodný model z jednoduchých telies (záloha, keď sa .glb nenačíta). */
+function jednoduchyModel(S) {
+  const g = new THREE.Group();
   // spodná časť s priechodom (dva piliere + preklad)
   for (const s of [-1, 1]) {
     const pil = kvader(2.2, 6, S, '#d9cdb2');
@@ -47,12 +64,5 @@ export default function postav(p, { vyskopis, kolizie }) {
   socha.position.y = 50.5;
   g.add(socha);
 
-  naMiesto(g, p, vyskopis, S, S);
-  // kolízia len pre piliere – priechod (pozdĺž lokálnej osi z) je voľný
-  const u = p.natocenie ?? 0;
-  const ox = Math.cos(u), oz = -Math.sin(u); // lokálna os x vo svete
-  for (const s of [-1, 1]) {
-    kolizie.pridajObdlznik(p.x + ox * s * (S / 2 - 1.1), p.z + oz * s * (S / 2 - 1.1), 2.2, S, u, { typ: 'pamiatka' });
-  }
-  return { objekt: g };
+  return g;
 }
