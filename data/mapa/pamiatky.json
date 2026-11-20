@@ -1,7 +1,12 @@
 {
   "popis": "Významné stavby (súradnice, natočenie a rozmery z OpenStreetMap). Záznam s \"model\" postaví js/mapa/pamiatky/<model>.js a z OSM sa v jeho \"zaber\" (kruh alebo otočený obdĺžnik) vynechajú budovy. Záznam bez modelu je len pomenovaná oblasť. \"styly\" upravia vzhľad OSM budov podľa mena. Návod: js/mapa/pamiatky/nacitaj-pamiatky.js.",
   "pamiatky": [
-    {"model": "hrad", "nazov": "Bratislavský hrad", "x": -563, "z": 134, "natocenie": -0.09, "zaber": {"obdlznik": [98, 84]}, "dosah": 140},
+    {"model": "vyskova-budova", "subor": "hrad-palac", "nazov": "Bratislavský hrad", "x": -564.08, "z": 133.71, "zaber": {"obdlznik": [98, 84]}, "dosah": 140},
+    {"model": "vyskova-budova", "subor": "hrad-okolie", "nazov": "Hradby a Baroková záhrada", "x": -564.08, "z": 133.71},
+    {"model": "vyskova-budova", "subor": "hrad-brana-viedenska", "nazov": "Viedenská brána", "x": -682.71, "z": 161.79, "dosah": 30},
+    {"model": "vyskova-budova", "subor": "hrad-brana-leopoldova", "nazov": "Leopoldova brána", "x": -600.41, "z": 241.02, "dosah": 30},
+    {"model": "vyskova-budova", "subor": "hrad-brana-zigmundova", "nazov": "Žigmundova brána", "x": -422.53, "z": 255.56, "dosah": 30},
+    {"model": "vyskova-budova", "subor": "hrad-brana-mikulasska", "nazov": "Mikulášska brána", "x": -424.38, "z": 17.94, "dosah": 30},
     {"model": "parlament", "nazov": "Národná rada SR", "x": -601, "z": 70, "natocenie": -0.115, "zaber": {"obdlznik": [94, 56]}, "dosah": 60},
     {"model": "katedrala", "nazov": "Katedrála sv. Martina", "x": -196, "z": 167, "natocenie": 0.303, "zaber": {"obdlznik": [80, 40]}, "dosah": 70},
     {"model": "michalska-brana", "nazov": "Michalská brána", "x": -70, "z": -181, "natocenie": -0.06, "zaber": {"kruh": 7}, "dosah": 45},

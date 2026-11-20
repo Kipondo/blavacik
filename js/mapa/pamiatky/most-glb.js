@@ -9,42 +9,25 @@
 // (js/mapa/mesto.js). Keď sa model nenačíta, postaví sa ten všeobecný.
 
 import * as THREE from 'three';
-import { nacitajModelPamiatky } from './model-glb.js';
+import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
 import { vytvorMosty } from '../mosty/mosty.js';
 
 const OHYB_DO = 12;     // do tejto výšky nad mostovkou sa časti ohýbajú s nábehom celé
 const OHYB_NAD = 22;    // od tejto výšky už vôbec (medzi tým plynulo)
 const VZDIALENOST_DETAILU = 320;
 
-/** Geometrie modelu prevedie do súradníc koreňa (bez kvantovania) a ohne ich podľa profilu. */
+/** Model rozbalí na Float32 geometrie a časti pri mostovke ohne podľa profilu posun(s). */
 function ohni(model, posun) {
-  model.updateMatrixWorld(true);
-  const inv = new THREE.Matrix4().copy(model.matrixWorld).invert();
-  const vystup = new THREE.Group();
-  model.traverse((o) => {
-    if (!o.isMesh) return;
-    const m = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
-    const g = new THREE.BufferGeometry();
-    for (const meno of ['position', 'normal', 'color']) {
-      const a = o.geometry.getAttribute(meno);
-      if (!a) continue;
-      const v = new Float32Array(a.count * a.itemSize);
-      for (let i = 0; i < a.count; i++) for (let k = 0; k < a.itemSize; k++) v[i * a.itemSize + k] = a.getComponent(i, k);
-      g.setAttribute(meno, new THREE.BufferAttribute(v, a.itemSize));
-    }
-    if (o.geometry.index) g.setIndex(o.geometry.index.clone());
-    g.applyMatrix4(m);
-    const p = g.getAttribute('position');
+  const vystup = rozbalModel(model);
+  for (const mesh of vystup.children) {
+    const p = mesh.geometry.getAttribute('position');
     for (let i = 0; i < p.count; i++) {
       const y = p.getY(i);
       const w = y <= OHYB_DO ? 1 : y >= OHYB_NAD ? 0 : (OHYB_NAD - y) / (OHYB_NAD - OHYB_DO);
       if (w > 0) p.setY(i, y + w * posun(p.getX(i)));
     }
-    g.computeBoundingSphere();
-    const mesh = new THREE.Mesh(g, o.material);
-    mesh.castShadow = mesh.receiveShadow = true;
-    vystup.add(mesh);
-  });
+    mesh.geometry.computeBoundingSphere();
+  }
   return vystup;
 }
 

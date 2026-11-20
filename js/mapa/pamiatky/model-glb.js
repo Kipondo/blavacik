@@ -48,3 +48,33 @@ export async function nacitajModelPamiatky(meno, { ao: sAo = true, gz = false } 
     return null;
   }
 }
+
+/**
+ * Geometrie modelu prevedie do súradníc jeho koreňa ako Float32 (bez kvantovania meshopt)
+ * – aby sa dali vrcholy posúvať (ohnutie mosta v nábehu, model kopírujúci terén).
+ * Vracia skupinu sietí; každá geometria má v userData.povodne kópiu pôvodných polôh.
+ */
+export function rozbalModel(model) {
+  model.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(model.matrixWorld).invert();
+  const vystup = new THREE.Group();
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const m = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
+    const g = new THREE.BufferGeometry();
+    for (const meno of ['position', 'normal', 'color']) {
+      const a = o.geometry.getAttribute(meno);
+      if (!a) continue;
+      const v = new Float32Array(a.count * a.itemSize);
+      for (let i = 0; i < a.count; i++) for (let k = 0; k < a.itemSize; k++) v[i * a.itemSize + k] = a.getComponent(i, k);
+      g.setAttribute(meno, new THREE.BufferAttribute(v, a.itemSize));
+    }
+    if (o.geometry.index) g.setIndex(o.geometry.index.clone());
+    g.applyMatrix4(m);
+    g.userData.povodne = g.getAttribute('position').array.slice();
+    const mesh = new THREE.Mesh(g, o.material);
+    mesh.castShadow = mesh.receiveShadow = true;
+    vystup.add(mesh);
+  });
+  return vystup;
+}

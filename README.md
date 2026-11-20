@@ -81,6 +81,14 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   V hre ich stavia `js/mapa/pamiatky/vyskova-budova.js` (záznam `"model": "vyskova-budova", "subor": …` v `pamiatky.json`):
   kolízie z pôdorysov, z dlaždíc sa vynechajú bežné vysunuté budovy, ktoré model nahrádza
   (`js/mapa/pamiatky/nahradene-budovy.js`), z diaľky (> 260 m) sa nekreslia drobné prvky (menej moaré a trojuholníkov).
+- **Bratislavský hrad z Blendera** (`python3 tools/blender/hrad_blender.py`, dáta `node tools/blender/osm_hrad.mjs`):
+  Kráľovský palác podľa častí z OSM – štyri krídla s pravidelnými barokovými oknami (šambrány, parapety,
+  kordónové a hlavná rímsa, sokel), strmá strecha s vikiermi a komínmi, rohové veže prečnievajúce nad strechu
+  („obrátený stôl“, Korunná veža najvyššia, ~47 m), portál čestného vstupu, studňa na nádvorí; brány Viedenská,
+  Leopoldova, Žigmundova a Mikulášska (prejazd s kamenným rámom); hradby a múry z OSM s krycou doskou a živé ploty
+  barokovej záhrady pozdĺž chodníkov parteru s fontánou. Hradby a záhrada **kopírujú terén** (`"podlaTerenu": true`):
+  každý vrchol sa položí na výšku terénu a po načítaní podrobného terénu z lasera sa výšky prepočítajú; aj pevné
+  modely (palác, výškové budovy) si pri zmene terénu upravia výšku päty. Hradby majú kolízie.
 - **Ďalšie výškové budovy z 3D tagov OSM** (`tools/blender/vyskove/z_osm.py`): City Business Center I, centrála VÚB,
   Glória, Millennium Tower I a II (myhive Vajnorská), Aupark Tower, Technopol I a II, Incheba, Matadorka, Centrál,
   Lakeside Park a Manderlák. Každá časť budovy (`building:part`) sa postaví od `min_height` po `height` a dostane
@@ -140,7 +148,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
-- Hrad s okolím a Devín, pamiatky Starého Mesta (kostoly, paláce, brány, hradby, fontány, pomníky).
+- Hrad Devín, pamiatky Starého Mesta (Dóm, Stará radnica, Primaciálny palác, kostoly, paláce, brány, fontány, pomníky)
+  – rovnakým postupom ako palác hradu (`tools/blender/hrad/stavebne.py`).
 - TV veža Kamzík ostáva zatiaľ pôvodný model z telies (tvar päty veže treba overiť podľa fotografií).
 - Chodníky dolného podlažia Mosta SNP sú zatiaľ len na pohľad (nedá sa po nich chodiť).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
