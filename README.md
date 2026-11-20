@@ -99,6 +99,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   a rytierom, **Brána slobody** a Pamätník železnej opony pod Devínom; historickým generátorom aj Kostol sv. Kríža
   v Devíne, Rusovský kaštieľ, Mauzóleum Chatama Sofera, Uršulínsky kostol, Notre Dame, kostol na Blumentáli,
   Kostol Svätej rodiny, Ortodoxná synagóga, Galéria Nedbalka, gréckokatolícka katedrála a Vodárenské múzeum.
+- **Pamiatky 3. dávka z Blendera** (`python3 tools/blender/vyskove_budovy.py kamzik rozhlas nr_sr nove_snd nivy sng
+  stadion_tehelne_pole zimny_stadion istropolis`): **prerobené staré modely** – TV veža Kamzík (tri šikmé nohy, kabína
+  s reštauráciou a vyhliadkou, červeno-biely stožiar so svetlami), Slovenský rozhlas (obrátená pyramída po podlažiach
+  z OSM), Národná rada SR a Nové SND (časti, výšky a materiály z OSM); **nové** – Nivy (park na streche s bežeckou
+  dráhou), Slovenská národná galéria (Vodné kasárne a premostenie), Národný futbalový štadión (tribúny okolo ihriska
+  s čiarami a bránami, biela strecha s osvetlením, fasáda z lamiel), zimný štadión (klenutá strecha) a **stavenisko
+  Istropolis** (oplotenie, výkop, rozostavaný skelet, dva vežové žeriavy, bunky).
 - **Sochy a pamätníky v celom meste** (`js/mapa/vybavenie/sochy-modul.js`, dáta `node tools/mesto/sochy.mjs` →
   `data/mapa/sochy.json`): 853 sôch, búst a skulptúr z OSM (Hviezdoslav, Štúr, Čumil, Schöne Náci, Napoleonský
   vojak, svätci…). Postava je model chodca v pokojnej póze „odliaty“ do bronzu (aj s patinou) alebo vytesaný
