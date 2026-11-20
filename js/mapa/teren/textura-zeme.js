@@ -196,7 +196,8 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
   return t;
 }
 
-// Trieda povrchu pre materiál zeme (kanál R): 0 = iný povrch (farba z textúry pokrývky), 0,25 = tráva,
+// Trieda povrchu pre materiál zeme (kanál R; G = zatienenie pri budovách, B = asfaltový chodník):
+// 0 = iný povrch (farba z textúry pokrývky), 0,25 = tráva,
 // 0,5 = chodník z kamenných dlaždíc, 0,75 = veľké svetlé kamenné dosky (námestia a pešia zóna),
 // 1 = drobné žulové kocky (uličky a dvory historického jadra); 0,63 = veľké svetlé betónové dlaždice (moderné
 // námestia a pešie zóny mimo historického jadra, napr. Kamenné námestie).
@@ -230,19 +231,33 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.fillRect(0, 0, px, px);
   g.lineCap = 'round';
   g.lineJoin = 'round';
-  // okolie budov a ciest (chodníky): v historickom jadre kamenné dlaždice, inde svetlé betónové dlaždice
+  // kanál B: asfaltový chodník (mimo historického jadra sú chodníky popri cestách väčšinou asfaltové);
+  // maska sa kreslí do zvláštneho plátna a pri námestiach, pešej zóne a jadre sa zmaže
+  const m = document.createElement('canvas'); m.width = m.height = px;
+  const gm = m.getContext('2d', { willReadFrequently: true });
+  gm.fillStyle = '#000'; gm.fillRect(0, 0, px, px);
+  gm.lineCap = 'round'; gm.lineJoin = 'round';
+  const maska = (body, uzavriet, biela, sirka) => {
+    gm.beginPath();
+    body.forEach(([x, z], i) => (i ? gm.lineTo(sx(x), sz(z)) : gm.moveTo(sx(x), sz(z))));
+    if (uzavriet) gm.closePath();
+    gm.fillStyle = gm.strokeStyle = biela ? '#fff' : '#000';
+    if (sirka) { gm.lineWidth = sirka; gm.stroke(); } else gm.fill();
+  };
+  // okolie budov (chodník pri dome zo sivej zámkovej dlažby) a ciest (chodník popri ceste – asfalt)
   // (jadro aj tak prekreslí elipsa dosiek nižšie)
-  g.strokeStyle = g.fillStyle = seda(BETON);
+  g.strokeStyle = g.fillStyle = seda(128);
   for (const b of d.budovy ?? []) {
-    g.lineWidth = 14 * mierka;
+    g.lineWidth = 8 * mierka;
     cesta(b.body, true);
     g.stroke();
     g.fill();
   }
   for (const c_ of d.cesty ?? []) {
-    g.lineWidth = ((c_.sirka ?? 6) + 9) * mierka;
+    g.lineWidth = ((c_.sirka ?? 6) + 7) * mierka;
     cesta(c_.body, false);
     g.stroke();
+    maska(c_.body, false, true, g.lineWidth);
   }
   // historické jadro (Staré Mesto v hradbách a okolie): pešia zóna je z veľkých svetlých dosiek
   // (porovnanie so skutočnosťou, docs/porovnanie/opravy.md), drobné kocky len v obslužných uličkách
@@ -250,6 +265,10 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.beginPath();
   g.ellipse(sx(JADRO.x), sz(JADRO.z), JADRO.rx * mierka, JADRO.rz * mierka, JADRO.uhol, 0, Math.PI * 2);
   g.fill();
+  gm.fillStyle = '#000';
+  gm.beginPath();
+  gm.ellipse(sx(JADRO.x), sz(JADRO.z), JADRO.rx * mierka, JADRO.rz * mierka, JADRO.uhol, 0, Math.PI * 2);
+  gm.fill();
   for (const p of d.pokryvka ?? []) {
     let v = TRIEDA_POKRYVKY[p.k] ?? 0;
     // námestia mimo historického jadra sú z betónových dlaždíc, nie z kamenných dosiek
@@ -257,6 +276,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fillStyle = seda(v);
     cesta(p.body, true);
     g.fill();
+    maska(p.body, true, false);
   }
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
   // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
@@ -291,6 +311,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.globalCompositeOperation = v === 128 ? 'lighten' : 'source-over';
     cesta(ch.body, false);
     g.stroke();
+    if (v !== 128) maska(ch.body, false, false, g.lineWidth);
   }
   g.globalCompositeOperation = 'source-over';
   // obslužné uličky v jadre (bez asfaltového pásu) – drobné kocky
@@ -299,6 +320,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.lineWidth = Math.max(1, (c_.sirka ?? 4) * mierka);
     cesta(c_.body, false);
     g.stroke();
+    maska(c_.body, false, false, g.lineWidth);
   }
   // kanál G: zatienenie zeme pri budovách (mäkký tieň pri päte domov – ulice nepôsobia „vznášajúco“)
   const obr = g.getImageData(0, 0, px, px);
@@ -313,7 +335,8 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g2.closePath(); g2.fill();
   }
   const ao = g2.getImageData(0, 0, px, px).data;
-  for (let i = 0; i < obr.data.length; i += 4) obr.data[i + 1] = ao[i];
+  const as = gm.getImageData(0, 0, px, px).data;
+  for (let i = 0; i < obr.data.length; i += 4) { obr.data[i + 1] = ao[i]; obr.data[i + 2] = as[i]; }
   g.putImageData(obr, 0, 0);
   const t = new THREE.CanvasTexture(c);
   t.flipY = false;

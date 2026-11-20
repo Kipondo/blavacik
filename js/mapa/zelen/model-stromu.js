@@ -13,10 +13,10 @@ export const VYSKA_MODELU = 10;   // m
  * karty = počet kariet s listami, velkost = veľkosť karty (m), previs = koľko listov visí dolu (breza).
  */
 export const DRUHY = {
-  lipa: { semienko: 11, korunaOd: 0.3, polomer: 3.4, zvlnenie: 0.14, hlavne: 6, vedlajsie: 4, uhol: [0.45, 0.95], karty: 165, velkost: [1.5, 2.3], kora: 'bezna', farbaKory: '#8c8073', hrubka: 0.24, tonListov: [1.0, 1.0, 0.92] },
-  javor: { semienko: 23, korunaOd: 0.27, polomer: 3.9, zvlnenie: 0.2, hlavne: 5, vedlajsie: 4, uhol: [0.6, 1.1], karty: 170, velkost: [1.6, 2.5], kora: 'bezna', farbaKory: '#7a7066', hrubka: 0.26, tonListov: [1.04, 1.02, 0.85] },
-  platan: { semienko: 37, korunaOd: 0.26, polomer: 4.3, zvlnenie: 0.22, hlavne: 5, vedlajsie: 5, uhol: [0.55, 1.15], karty: 185, velkost: [1.7, 2.6], kora: 'platan', farbaKory: '#ffffff', hrubka: 0.3, tonListov: [0.95, 1.02, 0.86] },
-  breza: { semienko: 41, korunaOd: 0.22, polomer: 2.5, zvlnenie: 0.16, hlavne: 5, vedlajsie: 3, uhol: [0.3, 0.7], karty: 150, velkost: [1.0, 1.5], previs: 0.6, kora: 'breza', farbaKory: '#ffffff', hrubka: 0.15, tonListov: [1.12, 1.12, 0.8] },
+  lipa: { semienko: 11, korunaOd: 0.3, polomer: 3.4, zvlnenie: 0.14, hlavne: 6, vedlajsie: 4, uhol: [0.45, 0.95], karty: 215, velkost: [1.3, 2.0], kora: 'bezna', farbaKory: '#8c8073', hrubka: 0.24, tonListov: [1.0, 1.0, 0.92] },
+  javor: { semienko: 23, korunaOd: 0.27, polomer: 3.9, zvlnenie: 0.2, hlavne: 5, vedlajsie: 4, uhol: [0.6, 1.1], karty: 220, velkost: [1.4, 2.1], kora: 'bezna', farbaKory: '#7a7066', hrubka: 0.26, tonListov: [1.04, 1.02, 0.85] },
+  platan: { semienko: 37, korunaOd: 0.26, polomer: 4.3, zvlnenie: 0.22, hlavne: 5, vedlajsie: 5, uhol: [0.55, 1.15], karty: 235, velkost: [1.5, 2.2], kora: 'platan', farbaKory: '#ffffff', hrubka: 0.3, tonListov: [0.95, 1.02, 0.86] },
+  breza: { semienko: 41, korunaOd: 0.22, polomer: 2.5, zvlnenie: 0.16, hlavne: 5, vedlajsie: 3, uhol: [0.3, 0.7], karty: 190, velkost: [0.9, 1.35], previs: 0.6, kora: 'breza', farbaKory: '#ffffff', hrubka: 0.15, tonListov: [1.12, 1.12, 0.8] },
   topol: { semienko: 53, korunaOd: 0.1, polomer: 1.7, zvlnenie: 0.12, hlavne: 9, vedlajsie: 2, uhol: [0.12, 0.32], karty: 150, velkost: [1.2, 1.8], kora: 'bezna', farbaKory: '#857a6e', hrubka: 0.22, tonListov: [0.98, 1.02, 0.92] },
   smrek: { semienko: 67, ihlicnan: true, korunaOd: 0.08, polomer: 2.4, poschodia: 19, kora: 'bezna', farbaKory: '#7d5f4b', hrubka: 0.2 },
 };

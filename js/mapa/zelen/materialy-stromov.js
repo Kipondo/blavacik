@@ -53,7 +53,7 @@ void RE_Direct_Listy( const in IncidentLight directLight, const in vec3 geometry
   // obalené difúzne svetlo + presvitanie listov proti slnku (tieň už je v directLight.color)
   float obal = saturate( ( dot( geometryNormal, directLight.direction ) + 0.5 ) / 1.5 );
   float proti = pow( saturate( dot( geometryViewDir, -directLight.direction ) ), 3.0 );
-  reflectedLight.directDiffuse += directLight.color * BRDF_Lambert( material.diffuseColor ) * ( obal + proti * ${presvit} * 1.6 );
+  reflectedLight.directDiffuse += directLight.color * BRDF_Lambert( material.diffuseColor ) * ( obal + proti * ${presvit} * 0.85 );
   reflectedLight.directSpecular += directLight.color * saturate( dot( geometryNormal, directLight.direction ) ) * 0.015;
 }
 #undef RE_Direct

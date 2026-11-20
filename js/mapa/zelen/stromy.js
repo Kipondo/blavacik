@@ -72,7 +72,8 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       const mBlizko = new THREE.Matrix4().compose(poz.set(x, y - 0.05, z), q, mier.set(r / d.polomer * pomer, h / VYSKA_MODELU, r / d.polomer * pomer));
       // farebná pestrosť stromov: jas a odtieň (niektoré žltkastejšie, iné sýtejšie)
       const jas = 0.82 + hash(x, z, 3) * 0.3, ton = hash(x, z, 4);
-      const f = new THREE.Color(jas * (0.94 + ton * 0.14), jas, jas * (1.05 - ton * 0.22));
+      // (celkovo trochu do modrozelena – pri teplom slnku by listy inak boli žltkasté)
+      const f = new THREE.Color(jas * (0.8 + ton * 0.12), jas, jas * (1.12 - ton * 0.2));
       stromyCh.push({ x, z, druh, j, m: mBlizko, farba: f, ihl: druh === 'smrek', skryty: false });
       kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt((r / 2.6) * (h / 7.4))), { typ: 'strom' });
       minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); sx += x; sz += z;
@@ -182,7 +183,7 @@ let cacheGeo = null;
 /** Geometrie vzdialenej úrovne: listnatá koruna (zhluk nepravidelných gúľ), ihličnan (dva kužele), kmeň. */
 function geometrieDaleko() {
   if (cacheGeo) return cacheGeo;
-  const kmenGeo = new THREE.CylinderGeometry(0.16, 0.28, 3.2, 6);
+  const kmenGeo = new THREE.CylinderGeometry(0.1, 0.17, 3.2, 6);
   kmenGeo.translate(0, 1.6, 0);
   const casti = [];
   [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5], [-0.3, 3.7, 1.2, 1.3]].forEach(([x, y, z, r], k) => {

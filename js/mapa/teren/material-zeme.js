@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { texturaDetailu } from './textura-zeme.js';
+import { SUM_GLSL } from '../../grafika/sum-glsl.js';
 
 let detail = null;
 let dlazby = null;
@@ -25,6 +26,7 @@ function texturyDlazby() {
     doskyF: t('assets/textury/dosky/farba.jpg', true), doskyN: t('assets/textury/dosky/normal.jpg', false),
     betonF: t('assets/textury/beton/farba.jpg', true), betonN: t('assets/textury/beton/normal.jpg', false),
     travaF: t('assets/textury/trava/farba.jpg', true), travaN: t('assets/textury/trava/normal.jpg', false),
+    asfaltF: t('assets/textury/asfalt/farba.jpg', true), asfaltN: t('assets/textury/asfalt/normal.jpg', false),
   };
   return dlazby;
 }
@@ -62,13 +64,16 @@ function materialZemeDlazba(mapa, triedy) {
       detailMapa: { value: detail }, triedy: { value: triedy },
       kockyF: { value: t.kockyF }, kockyN: { value: t.kockyN }, chodF: { value: t.chodF }, chodN: { value: t.chodN },
       travaF: { value: t.travaF }, travaN: { value: t.travaN }, doskyF: { value: t.doskyF }, doskyN: { value: t.doskyN },
-      betonF: { value: t.betonF }, betonN: { value: t.betonN },
+      betonF: { value: t.betonF }, betonN: { value: t.betonN }, asfaltF: { value: t.asfaltF }, asfaltN: { value: t.asfaltN },
     });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec2 vSvet;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xz;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN;\nvarying vec2 vSvet;')
+      .replace('#include <common>', `#include <common>
+uniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN, asfaltF, asfaltN;
+varying vec2 vSvet;
+${SUM_GLSL}`)
       .replace('#include <map_fragment>', `#include <map_fragment>
         if (sampledDiffuseColor.a < 0.5) discard;
         diffuseColor.a = 1.0;
@@ -76,7 +81,7 @@ function materialZemeDlazba(mapa, triedy) {
         vec2 vDetailUv = vSvet * 0.35;
         diffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.45 + trava * 0.4)
                           * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);
-        vec2 tr2 = texture2D(triedy, vMapUv).rg;
+        vec3 tr2 = texture2D(triedy, vMapUv).rgb;
         float trieda = tr2.r;
         // triedy: 64 tráva, 128 chodník, 160 betónové dlaždice, 192 kamenné dosky, 255 kocky (textura-zeme.js)
         float wK = smoothstep(0.86, 0.95, trieda);
@@ -87,29 +92,43 @@ function materialZemeDlazba(mapa, triedy) {
         // jemná nerovnomernosť (špina, opotrebenie) z veľkého detailu
         float spina = texture2D(detailMapa, vSvet * 0.04).r * 2.0;
         vec3 kocky = texture2D(kockyF, vSvet / 2.4).rgb * mix(1.05, 1.35, spina * 0.5);
-        vec3 chodnik = texture2D(chodF, vSvet / 2.2).rgb * mix(0.88, 1.08, spina * 0.5);
+        // špina a nerovnomernosť dlažby vo veľkej mierke (fľaky, vyšliapané miesta) – nič sa neopakuje
+        float fl = fbm2(vSvet * 0.06) * 0.6 + fbm2(vSvet * 0.45) * 0.4;
+        float spinaD = 0.8 + 0.32 * fl;
+        // chodník pri domoch: sivá zámková dlažba (tmavšia ako pôvodná textúra)
+        vec3 chodnik = texture2D(chodF, vSvet / 2.2).rgb * mix(0.88, 1.08, spina * 0.5) * vec3(0.74, 0.75, 0.78) * spinaD;
+        // chodník popri ceste mimo jadra: asfalt (svetlejší a hrubší ako vozovka), záplaty a praskliny
+        float wA = wC * smoothstep(0.3, 0.7, tr2.b);
+        vec3 asfaltCh = texture2D(asfaltF, vSvet / 3.3).rgb * 1.75 * (0.82 + 0.3 * fbm2(vSvet * 0.04));
+        asfaltCh *= mix(1.0, 0.78, step(0.62, fbm2(vSvet * 0.09 + 7.0)));
+        asfaltCh *= mix(1.0, 0.6, (1.0 - smoothstep(0.0, 0.015, abs(fbm2(vSvet * 0.25 + 3.0) - 0.5))) * step(0.5, sum2(vSvet * 0.05)));
         diffuseColor.rgb = mix(diffuseColor.rgb, kocky, wK);
-        diffuseColor.rgb = mix(diffuseColor.rgb, chodnik, wC);
+        diffuseColor.rgb = mix(diffuseColor.rgb, mix(chodnik, asfaltCh, wA / max(wC, 1e-3)), wC);
         // veľké svetlé kamenné dosky v radoch (námestia, pešia zóna): textúra = 4 × 4 m (tools/textury/dosky.py)
-        vec3 dosky = texture2D(doskyF, vSvet / 4.0).rgb * mix(0.9, 1.04, spina * 0.5);
+        vec3 dosky = texture2D(doskyF, vSvet / 4.0).rgb * mix(0.9, 1.04, spina * 0.5) * 0.9 * spinaD;
         diffuseColor.rgb = mix(diffuseColor.rgb, dosky, wD);
         // veľké svetlosivé betónové dlaždice 50 × 50 cm (moderné námestia): textúra = 3 × 3 m (tools/textury/beton.py)
-        vec3 beton = texture2D(betonF, vSvet / 3.0).rgb * mix(0.88, 1.05, spina * 0.5);
+        vec3 beton = texture2D(betonF, vSvet / 3.0).rgb * mix(0.88, 1.05, spina * 0.5) * 0.8 * spinaD;
         diffuseColor.rgb = mix(diffuseColor.rgb, beton, wB);
         // tráva: CC0 textúra v dvoch mierkach (bez opakovania) a farba z mapy pokrývky (park vs. lúka)
         vec3 travnik = texture2D(travaF, vSvet / 3.1).rgb * 0.6 + texture2D(travaF, vSvet / 11.3).rgb * 0.4;
-        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.1, wT);
+        // pestrosť trávnika: sýtejšie zelené a suchšie miesta, zošliapané okraje; celkovo menej do žlta
+        float sviez = fbm2(vSvet * 0.035 + 2.0);
+        travnik *= mix(vec3(1.06, 0.98, 0.72), vec3(0.8, 1.04, 0.95), smoothstep(0.3, 0.7, sviez));
+        travnik *= 0.86 + 0.28 * fbm2(vSvet * 0.22);
+        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.05, wT);
         // mäkké zatienenie pri päte budov (kanál G mapy tried)
         diffuseColor.rgb *= 1.0 - 0.38 * tr2.g;`)
       .replace('#include <normal_fragment_maps>', `
         vec3 mapN = vec3(0.0, 0.0, 1.0);
         mapN.xy += (texture2D(kockyN, vSvet / 2.4).xy * 2.0 - 1.0) * wK * 1.2;
-        mapN.xy += (texture2D(chodN, vSvet / 2.2).xy * 2.0 - 1.0) * wC;
+        mapN.xy += (texture2D(chodN, vSvet / 2.2).xy * 2.0 - 1.0) * (wC - wA);
+        mapN.xy += (texture2D(asfaltN, vSvet / 3.3).xy * 2.0 - 1.0) * wA * 0.9;
         mapN.xy += (texture2D(doskyN, vSvet / 4.0).xy * 2.0 - 1.0) * wD;
         mapN.xy += (texture2D(betonN, vSvet / 3.0).xy * 2.0 - 1.0) * wB;
         mapN.xy += (texture2D(travaN, vSvet / 3.1).xy * 2.0 - 1.0) * wT * 0.8;
         normal = normalize( tbn * mapN );`);
   };
-  mat.customProgramCacheKey = () => 'zem-dlazba-2';
+  mat.customProgramCacheKey = () => 'zem-dlazba-3';
   return mat;
 }

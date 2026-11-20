@@ -10,7 +10,7 @@ export const NALADA = {
   // obloha: zenit, obzor a žiara okolo slnka
   obloha: { vrch: '#5579b0', horizont: '#efc6a2', ziara: '#ffc58f' },
   // svetlo z oblohy do tieňov: tiene sú chladnejšie (modrasté) ako teplé slnko – to robí zlatú hodinku
-  hemi: { nebo: '#c9d0e0', zem: '#55473a', sila: 0.5 },
+  hemi: { nebo: '#d6d5dc', zem: '#55473a', sila: 0.44 },
   odrazy: { sila: 0.42, zem: '#4f4237' },
   hmla: { farba: '#e6cbb2', od: 0.4 },
   tonovanie: { typ: 'AgX', expozicia: 1.2 },

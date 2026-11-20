@@ -46,15 +46,15 @@ export function vytvorSvet(scena, KONFIG) {
         // slnko a žiara okolo neho; pri nízkom slnku je teplý aj obzor na jeho strane
         float s = max(dot(d, slnko), 0.0);
         float pas = 1.0 - smoothstep(0.0, 0.45, h);
-        farba = mix(farba, ziara, pow(s, 3.0) * pas * 0.55);
+        farba = mix(farba, ziara, pow(s, 3.0) * pas * 0.35);
         farba += ziara * (pow(s, 900.0) * 6.0 + pow(s, 12.0) * 0.22);
         // oblaky – premietnuté na „strop“ nad nami; strana k slnku teplá, tienistá sivomodrá
         if (h > 0.02) {
           vec2 uv = d.xz / (h + 0.12) * 1.4 + vec2(cas * 0.004, cas * 0.002);
           float o = smoothstep(0.52, 0.78, fbm(uv));
           float svetlo = smoothstep(0.55, 0.9, fbm(uv + 0.3));
-          vec3 tien = mix(vrch, horizont, 0.55) * 0.92;
-          vec3 jas = mix(vec3(1.0), ziara, 0.35 + 0.4 * pow(s, 2.0));
+          vec3 tien = mix(vrch, horizont, 0.45) * 0.95;
+          vec3 jas = mix(vec3(1.0), ziara, 0.18 + 0.45 * pow(s, 2.0));
           vec3 oblak = mix(tien, jas, svetlo);
           farba = mix(farba, oblak, o * smoothstep(0.02, 0.2, h) * 0.85);
         }

@@ -40,10 +40,10 @@ export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   geo.computeVertexNormals();
   pridajSukne(geo, v);
   // dlažba, chodníky a tráva z CC0 materiálov podľa mapy tried povrchu; v laserovom výreze ostrejšia textúra
-  // a jemnejšia mapa tried (1024 px = 0,5 m), inde 512 px (1 m) – kvôli pamäti
+  // a mapa tried 1024 px (0,5 m – ostré okraje chodníkov a trávnikov), farba pokrývky inde 512 px – kvôli pamäti
   const mat = d._detailTerenu
     ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024, vyskopis))
-    : materialZeme(vytvorTexturuDlazdice(d, rieky, rect), vytvorTriedyDlazdice(d, rect, 512, vyskopis));
+    : materialZeme(vytvorTexturuDlazdice(d, rieky, rect), vytvorTriedyDlazdice(d, rect, 1024, vyskopis));
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = 'zem';
