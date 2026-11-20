@@ -216,8 +216,23 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
     if (uzavriet) g.closePath();
   };
   const seda = (v) => `rgb(${v},${v},${v})`;
-  g.fillStyle = seda(TRIEDA_POKRYVKY.zaklad);
+  // nezaradená plocha je chodník len v zástavbe (okolo budov a ciest), inde (svahy, okraje parkov) ostáva prírodná
+  g.fillStyle = seda(0);
   g.fillRect(0, 0, px, px);
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  g.strokeStyle = g.fillStyle = seda(TRIEDA_POKRYVKY.zaklad);
+  for (const b of d.budovy ?? []) {
+    g.lineWidth = 14 * mierka;
+    cesta(b.body, true);
+    g.stroke();
+    g.fill();
+  }
+  for (const c_ of d.cesty ?? []) {
+    g.lineWidth = ((c_.sirka ?? 6) + 9) * mierka;
+    cesta(c_.body, false);
+    g.stroke();
+  }
   // historické jadro (Staré Mesto v hradbách a okolie): ulice a dvory sú vydláždené kockami
   g.fillStyle = seda(255);
   g.beginPath();

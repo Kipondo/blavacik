@@ -289,7 +289,7 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
         // riadok atlasu: 0 podlažie, 1 výklad, 2 dvere (prízemie: každá ~4. os má dvere)
         // podlažia: variant podľa budovy; historické budovy majú na 1. poschodí (piano nobile) bohatšie okná
         float riadok = mod(seed, 2.0) > 0.5 ? 3.0 : 0.0;
-        if (styl < 0.5 && podI > 0.5 && podI < 1.5) riadok = mod(seed, 2.0) > 0.5 ? 0.0 : 3.0;
+        if (styl < 0.5 && podI > 0.5 && podI < 1.5 && mod(seed, 3.0) > 0.5) riadok = 3.0;
         if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < 0.28 ? 2.0 : 1.0;
         vec2 bunka = vec2(styl, ${RIADKY - 1}.0 - riadok);
         vec2 auv = (bunka + clamp(lok, 0.002, 0.998)) / vec2(${STLPCE}.0, ${RIADKY}.0);
