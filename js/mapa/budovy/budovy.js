@@ -19,13 +19,14 @@ import { bodVPolygone, stredBodov } from '../geometria.js';
 import { materialFasad, STYLY, PARAMETRE } from './fasady.js';
 import { texturaSkla } from '../pamiatky/textury.js';
 import { typizujBudovy } from './typ-budovy.js';
+import { pridajStrukturuStriech } from './struktura-striech.js';
 
 let materialy = null;
 function ziskajMaterialy() {
   if (materialy) return materialy;
   const steny = materialFasad();
   const sklo = new THREE.MeshStandardMaterial({ map: texturaSkla(), vertexColors: true, roughness: 0.12, metalness: 0.65, envMapIntensity: 1.3 });
-  const strechy = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 });
+  const strechy = pridajStrukturuStriech(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }));
   materialy = [steny, sklo, strechy];
   return materialy;
 }
