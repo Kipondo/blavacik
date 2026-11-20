@@ -43,6 +43,12 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
   (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
   Na mobile sa automaticky vypnú tiene a drahšie materiály.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
+- **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
+  z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
+  šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
+  účesy a brady, vlastné animácie (stoj, chôdza, beh, skok, opitá chôdza, sedenie, nastup/vystup z auta, mávanie).
+  **Editor postavy:** `editor-postavy.html` (uloží vzhľad, hra ho použije). Generátor: `tools/postava/` (Blender bpy).
+  Licencie: MakeHuman/MPFB2 dáta CC0, animácie a textúry vlastné (procedurálne), písmo nápisu DejaVu (len zapečené v textúre).
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
@@ -50,6 +56,8 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
+- Postava: NPC profily z toho istého generátora + LOD pre davy, animácia nastupovania napojená na auto,
+  odkaz na editor postavy z menu, rýchlosť chôdze v `config.js` je arkádová (4,2 m/s) – pre realistický model by sedelo ~1,6 m/s.
 - NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).

@@ -58,6 +58,7 @@ if (anim) {
   postava.userData.animuj(0.016, 0, false);
 }
 r.render(scena, kam);
+window.VIDITELNE = postava.userData.instancia?.siete.filter((s) => s.visible).map((s) => s.userData.objekt + ':' + s.material.name);
 document.title = 'HOTOVO';
 window.HOTOVO = true;
 </script>

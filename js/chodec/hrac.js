@@ -2,7 +2,8 @@
 
 import * as THREE from 'three';
 import { KONFIG } from '../config.js';
-import { vytvorModelPostavy } from './model-postavy.js';
+import { vytvorRealistickuPostavu } from './postava/realisticka-postava.js';
+import { nacitajUlozenyVzhlad } from './postava/ulozenie.js';
 
 const K = KONFIG.HRAC;
 
@@ -13,7 +14,8 @@ class Hrac {
     this.vy = 0;
     this.naZemi = true;
     this.rychlost = 0;
-    this.mesh = vytvorModelPostavy();
+    // realistický Ďoďo z assets/postavy/dodo.glb (vzhľad a oblečenie z editora postavy)
+    this.mesh = vytvorRealistickuPostavu(nacitajUlozenyVzhlad());
   }
 }
 
@@ -143,6 +145,7 @@ export default {
 
     h.mesh.position.copy(h.pozicia);
     h.mesh.rotation.y = h.uhol;
+    h.mesh.userData.opity = !!hra.stav.opity;
     h.mesh.userData.animuj(dt, Math.abs(h.rychlost), !h.naZemi);
   },
 };

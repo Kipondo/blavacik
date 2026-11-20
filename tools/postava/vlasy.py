@@ -113,7 +113,7 @@ def mat_ostni(meno):
     return BU.material(meno, farba_rgb=(0.32, 0.22, 0.16), drsnost_hodnota=0.55)
 
 
-def textura_pramenov(S=256):
+def textura_pramenov(meno, S=256):
     """Textúra pre pásiky vlasov: jednotlivé vlásky (alfa), špička sa stráca. Materiál končí na _pramene."""
     u = np.linspace(0, 1, S)[None, :].repeat(S * 2, 0)
     v = np.linspace(1, 0, S * 2)[:, None].repeat(S, 1)
@@ -129,8 +129,8 @@ def textura_pramenov(S=256):
     a *= np.clip(np.minimum(u, 1 - u) / 0.12, 0, 1)
     farba = np.stack([a * 0 + 0.75, a * 0 + 0.62, a * 0 + 0.52], -1) * (0.75 + 0.25 * v)[..., None]
     rgba = np.concatenate([farba, a[..., None]], -1).astype(np.float32)
-    img = BU.obrazok('vlasy_pramene_farba', rgba)
-    mat = BU.material('vlasy_pramene', img, drsnost_hodnota=0.5, alfa=True)
+    img = BU.obrazok(meno + '_farba', rgba)
+    mat = BU.material(meno, img, drsnost_hodnota=0.5, alfa=True)
     mat.use_backface_culling = False
     return mat
 
@@ -205,7 +205,7 @@ def vsetky(ctx):
         # pramene idú hore a mierne dopredu (rozstrapatené), vzadu dozadu
         dopredu = np.where((Q[:, 1] - ctx.hlava[1]) < 0.02, 1.0, -0.6)[:, None]
         return Nn * 0.55 + up * 0.35 + vpred * 0.45 * dopredu
-    mat_p = textura_pramenov()
+    mat_p = textura_pramenov('vlasy_strapate_pramene')
     V1, F1, UV1 = pramene(ctx, P[vyber], Nc[vyber], 1100, dlzka, smer)
     V2, F2, UV2 = ostne(ctx, P[ciara(P) > 0.05], Nc[ciara(P) > 0.05], lambda Q: 0.004 + 0.004 * vrch(Q),
                         lambda Q, Nn: Nn + up * 0.3, hustota=40000)
@@ -220,7 +220,7 @@ def vsetky(ctx):
     vyber = ciara(P) > 0.2
     V, F, UV = pramene(ctx, P[vyber], Nc[vyber], 1300, lambda Q: 0.035 + 0.03 * vrch(Q),
                        lambda Q, Nn: Nn * 0.15 - vpred * 1.0 + up * 0.15, sirka=0.014, ohyb=0.3)
-    zlep(ctx, 'vlasy_dozadu', P, faces, cap_alfa(-0.004), [(V, F, UV, mat_p)])
+    zlep(ctx, 'vlasy_dozadu', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_dozadu_pramene'))])
 
     # --- brada: hustota ako hladká funkcia polohy → mäkké okraje ---
     ust, oko = ctx.usta, ctx.oko

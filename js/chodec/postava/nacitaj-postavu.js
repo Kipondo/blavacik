@@ -44,10 +44,10 @@ export async function vytvorInstanciu(url) {
       o.castShadow = true;
       o.receiveShadow = true;
       o.frustumCulled = false; // animované kosti menia obrys, orezávanie by postavu občas skrylo
-      // objekt z Blendera: pri viacerých materiáloch je sieť dieťaťom skupiny, ktorá nesie meno objektu
-      const p = o.parent;
-      const skupina = p && !p.isBone && p.children.length > 0 && p.children.every((c) => c.isMesh);
-      o.userData.objekt = skupina ? p.name : o.name;
+      // objekt z Blendera podľa mena materiálu (mená uzlov sa pri kompresii môžu stratiť):
+      // koza_* = telo, <objekt>_ostne / <objekt>_pramene = časť vlasov, inak meno materiálu = meno objektu
+      const mm = o.material.name || o.name;
+      o.userData.objekt = mm.startsWith('koza_') ? 'telo' : mm.replace(/_(ostne|pramene)$/, '');
       siete.push(o);
     }
   });

@@ -14,8 +14,8 @@ C = math.cos
 def base_poza():
     """Uvoľnený postoj: ruky dole popri tele (z A-pózy), mierne pokrčené lakte a prsty."""
     p = {
-        'upperarm_l': (6, 34, 4), 'upperarm_r': (6, -34, -4),
-        'lowerarm_l': (30, 0, 14), 'lowerarm_r': (30, 0, -14),
+        'upperarm_l': (6, 30, 4), 'upperarm_r': (6, -30, -4),
+        'lowerarm_l': (30, 0, 20), 'lowerarm_r': (30, 0, -20),
         'hand_l': (0, 8, -6), 'hand_r': (0, -8, 6),
         'clavicle_l': (0, 4, 0), 'clavicle_r': (0, -4, 0),
     }
