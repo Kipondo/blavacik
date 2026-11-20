@@ -47,8 +47,17 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
   účesy a brady, vlastné animácie (stoj, chôdza, beh, skok, opitá chôdza, sedenie, nastup/vystup z auta, mávanie).
-  **Editor postavy:** `editor-postavy.html` (uloží vzhľad, hra ho použije). Generátor: `tools/postava/` (Blender bpy).
+  **Editor postavy:** `editor-postavy.html`, odkaz je aj v menu hry (uloží vzhľad, hra ho použije). Generátor: `tools/postava/` (Blender bpy).
+  **Nastupovanie do auta s animáciou** (`js/chodec/nastupovanie.js`): Ďoďo po E dôjde k dverám vodiča (aj okolo auta),
+  sadne si dnu; pri vystupovaní auto najprv zabrzdí. Ďalšie E počas cesty k autu to zruší. Keď pri dverách nie je miesto, nastúpi/vystúpi hneď.
   Licencie: MakeHuman/MPFB2 dáta CC0, animácie a textúry vlastné (procedurálne), písmo nápisu DejaVu (len zapečené v textúre).
+- **NPC postavy a davy** (`data/postavy/npc.json`, `assets/postavy/npc/*.glb`, kód `js/chodec/npc/`): z rovnakého generátora
+  ako Ďoďo – 4 telá (muž, žena, dôchodca, dôchodkyňa) a 8 profilov (študent, korporátnik z Twin City, turista na rozlúčke so slobodou,
+  kuriér, študentka, manažérka z Eurovey, dôchodca, babka s fialovým melírom). Z profilu sa náhodne poskladá chodec
+  (variant oblečenia a účesu, farby z paliet, tvar tela, výška, rýchlosť; turista býva opitý). Animácie sa berú z Ďoďa.
+  **LOD pre davy** (`js/chodec/npc/dav.js`): plný model do 14 m (max. 8), zlúčená sieť 3 500 trojuholníkov do 45 m (max. 40),
+  hrubá sieť 700 trojuholníkov do 140 m, ďalej a mimo pohľadu nič. 150 chodcov = ~250 volaní kreslenia.
+  Skúška a snímky: `tools/postava/dav.html` (návod v `tools/postava/README.md`). Do hry ich zatiaľ nikto nevypúšťa – to je ďalší krok.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
@@ -56,9 +65,9 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
-- Postava: NPC profily z toho istého generátora + LOD pre davy, animácia nastupovania napojená na auto,
-  odkaz na editor postavy z menu, rýchlosť chôdze v `config.js` je arkádová (4,2 m/s) – pre realistický model by sedelo ~1,6 m/s.
-- NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
+- Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
+- Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
+- NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
 

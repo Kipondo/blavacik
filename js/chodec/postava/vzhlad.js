@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 
 // predvolená farba pleti v textúre – farba v editore sa prepočíta ako násobok voči nej
-const ZAKLAD_PLETE = new THREE.Color('#e8b493');
+export const ZAKLAD_PLETE = new THREE.Color('#e8b493');
 
 export const PREDVOLENY_VZHLAD = {
   tvar: {},            // { chudy: 0..1, pupkac: 0..1, nos_velky: 0..1, … }
