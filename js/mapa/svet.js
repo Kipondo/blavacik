@@ -1,16 +1,18 @@
 // Obloha, slnko, svetlá a hmla.
 
 import * as THREE from 'three';
+import { NALADA } from '../grafika/nalada.js';
 
 export function vytvorSvet(scena, KONFIG) {
-  const HORIZONT = new THREE.Color('#cfe0ea');
-  const VRCH = new THREE.Color('#5b8fc7');
+  // farby a smer slnka podľa nálady (js/grafika/nalada.js, predvolená zlatá hodinka)
+  const HORIZONT = new THREE.Color(NALADA.obloha.horizont);
+  const VRCH = new THREE.Color(NALADA.obloha.vrch);
 
   scena.background = HORIZONT.clone();
-  scena.fog = new THREE.Fog(HORIZONT, KONFIG.DOHLAD * 0.35, KONFIG.DOHLAD);
+  scena.fog = new THREE.Fog(NALADA.hmla.farba, KONFIG.DOHLAD * NALADA.hmla.od, KONFIG.DOHLAD);
 
   // obloha – guľa s farebným prechodom, slnkom a oblakmi (shader)
-  const smerSlnka = new THREE.Vector3(-0.5, 0.62, 0.35).normalize();
+  const smerSlnka = new THREE.Vector3(...NALADA.slnko.smer).normalize();
   const oblohaGeo = new THREE.SphereGeometry(4000, 32, 16);
   const oblohaMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
@@ -19,6 +21,7 @@ export function vytvorSvet(scena, KONFIG) {
     uniforms: {
       vrch: { value: VRCH }, horizont: { value: HORIZONT },
       slnko: { value: smerSlnka }, cas: { value: 0 },
+      ziara: { value: new THREE.Color(NALADA.obloha.ziara) },
     },
     vertexShader: `
       varying vec3 vSmer;
@@ -27,7 +30,7 @@ export function vytvorSvet(scena, KONFIG) {
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: `
-      uniform vec3 vrch; uniform vec3 horizont; uniform vec3 slnko; uniform float cas;
+      uniform vec3 vrch; uniform vec3 horizont; uniform vec3 slnko; uniform vec3 ziara; uniform float cas;
       varying vec3 vSmer;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float sum(vec2 p) {
@@ -40,14 +43,19 @@ export function vytvorSvet(scena, KONFIG) {
         vec3 d = normalize(vSmer);
         float h = d.y;
         vec3 farba = mix(horizont, vrch, smoothstep(0.0, 0.5, h));
-        // slnko a žiara okolo neho
+        // slnko a žiara okolo neho; pri nízkom slnku je teplý aj obzor na jeho strane
         float s = max(dot(d, slnko), 0.0);
-        farba += vec3(1.0, 0.92, 0.75) * (pow(s, 900.0) * 6.0 + pow(s, 12.0) * 0.18);
-        // oblaky – premietnuté na „strop“ nad nami
+        float pas = 1.0 - smoothstep(0.0, 0.45, h);
+        farba = mix(farba, ziara, pow(s, 3.0) * pas * 0.55);
+        farba += ziara * (pow(s, 900.0) * 6.0 + pow(s, 12.0) * 0.22);
+        // oblaky – premietnuté na „strop“ nad nami; strana k slnku teplá, tienistá sivomodrá
         if (h > 0.02) {
           vec2 uv = d.xz / (h + 0.12) * 1.4 + vec2(cas * 0.004, cas * 0.002);
           float o = smoothstep(0.52, 0.78, fbm(uv));
-          vec3 oblak = mix(vec3(0.82, 0.85, 0.9), vec3(1.0), smoothstep(0.55, 0.9, fbm(uv + 0.3)));
+          float svetlo = smoothstep(0.55, 0.9, fbm(uv + 0.3));
+          vec3 tien = mix(vrch, horizont, 0.55) * 0.92;
+          vec3 jas = mix(vec3(1.0), ziara, 0.35 + 0.4 * pow(s, 2.0));
+          vec3 oblak = mix(tien, jas, svetlo);
           farba = mix(farba, oblak, o * smoothstep(0.02, 0.2, h) * 0.85);
         }
         gl_FragColor = vec4(farba, 1.0);
@@ -61,10 +69,10 @@ export function vytvorSvet(scena, KONFIG) {
   obloha.name = 'obloha';
   scena.add(obloha);
 
-  const hemi = new THREE.HemisphereLight('#dfefff', '#6b6150', 0.7);
+  const hemi = new THREE.HemisphereLight(NALADA.hemi.nebo, NALADA.hemi.zem, NALADA.hemi.sila);
   scena.add(hemi);
 
-  const slnko = new THREE.DirectionalLight('#fff1d6', 2.6);
+  const slnko = new THREE.DirectionalLight(NALADA.slnko.farba, NALADA.slnko.sila);
   slnko.position.copy(smerSlnka).multiplyScalar(200);
   if (KONFIG.TIENE) {
     slnko.castShadow = true;

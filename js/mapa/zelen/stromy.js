@@ -1,228 +1,231 @@
-// Stromy ako InstancedMesh, rozdelené do štvorcov (chunkov), aby sa vzdialené
-// a neviditeľné skupiny stromov vôbec nevykresľovali.
+// Stromy ako InstancedMesh, rozdelené do štvorcov (chunkov), aby sa vzdialené skupiny vôbec nevykresľovali.
 // Formát v dátach: "stromy": [[x, z, mierka], ...] alebo z laserového skenovania
 // [[x, z, mierka, výška, polomer koruny], ...] – strom má potom skutočnú výšku a šírku koruny.
+//
+// Úrovne detailu po stromoch (nie po celých chunkoch):
+//   – do BLIZKO metrov od kamery podrobný model druhu (kmeň, konáre, karty s listami – model-stromu.js),
+//   – ďalej jednoduchá koruna (zhluk gúľ / kužele pri ihličnanoch) s „listnatým“ šumom.
+// Ktoré stromy sú blízko, sa prepočíta, keď sa kamera posunie o POSUN metrov (pri kreslení chunku).
 
 import * as THREE from 'three';
+import { DRUHY, VYSKA_MODELU, modelStromu } from './model-stromu.js';
+import { materialKory, materialListov, materialKmenaDaleko, materialKorunyDaleko } from './materialy-stromov.js';
 
-const CHUNK = 250;
-const DOHLAD = 650; // ďalej ako toto sa stromy skryjú (aj tak sú v hmle)
-const CHUNK_BOHATE = 100;   // stromy z lasera: menšie skupiny kvôli LOD
-const LOD_BLIZKO = 170;     // m – bližšie členitá koruna, ďalej jednoduchá
+const CHUNK = 125;
+const DOHLAD = 650;     // ďalej ako toto sa stromy skryjú (aj tak sú v opare)
+const BLIZKO = 125;     // m – bližšie podrobný model
+const POSUN = 6;        // m – po takom posune kamery sa prepočíta, ktoré stromy sú blízko
+
+// priemerná farba listov a ihlíc z textúr (lineárne) – vzdialená koruna má rovnaký tón ako blízka
+const LISTY_PRIEMER = [0.109, 0.19, 0.037];
+const IHLICE_PRIEMER = [0.024, 0.07, 0.019];
+
+/** Pseudonáhoda podľa polohy (rovnaký strom vyzerá vždy rovnako). */
+const hash = (x, z, k = 0) => { const s = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return s - Math.floor(s); };
+
+/** Druh stromu: z tvaru koruny (laser) a pseudonáhodne podľa polohy; v uliciach a parkoch Bratislavy prevládajú lipy, javory a platany. */
+function vyberDruh(x, z, h, r, ihlicnan) {
+  if (ihlicnan) return 'smrek';
+  if (h / (2 * r) > 2.6) return h > 15 ? 'topol' : 'smrek';
+  const n = hash(x, z, 7);
+  if (r > 5.5 && n < 0.5) return 'platan';
+  if (n < 0.36) return 'lipa';
+  if (n < 0.62) return 'javor';
+  if (n < 0.78) return 'platan';
+  if (n < 0.9) return 'breza';
+  return 'lipa';
+}
 
 export function vytvorStromy(stromy, vyskopis, kolizie) {
   const skupina = new THREE.Group();
   skupina.name = 'stromy';
   if (!stromy?.length) return skupina;
 
-  // stromy z lasera (výrez s detailom) dostanú členitejšiu korunu, ostatné jednoduchšiu (lesy majú tisíce stromov)
-  const bohate = stromy[0]?.length >= 5;
-  const { listnaty, ihlicnaty, kmenGeo } = geometrieStromov(bohate);
-  const jednoduche = bohate ? geometrieStromov(false) : null;
-  const matKmen = new THREE.MeshStandardMaterial({ color: '#5b4632', roughness: 1 });
-  const matKoruna = materialKoruny(bohate);
-  const matKorunaDaleko = bohate ? materialKoruny(false) : null;
-  const velkostChunku = bohate ? CHUNK_BOHATE : CHUNK;
-
+  const { blob, kuzele, kmenGeo } = geometrieDaleko();
   const chunky = new Map();
   stromy.forEach((s, i) => {
-    const k = `${Math.floor(s[0] / velkostChunku)},${Math.floor(s[1] / velkostChunku)}`;
+    const k = `${Math.floor(s[0] / CHUNK)},${Math.floor(s[1] / CHUNK)}`;
     if (!chunky.has(k)) chunky.set(k, []);
     chunky.get(k).push([s, i]);
   });
 
-  const m = new THREE.Matrix4();
-  const q = new THREE.Quaternion();
-  const os = new THREE.Vector3(0, 1, 0);
-  const farba = new THREE.Color();
+  const q = new THREE.Quaternion(), os = new THREE.Vector3(0, 1, 0), poz = new THREE.Vector3(), mier = new THREE.Vector3();
+  const m = new THREE.Matrix4(), farba = new THREE.Color();
   for (const zoznam of chunky.values()) {
-    // ihličnany: z lasera podľa tvaru (úzka vysoká koruna), inak ~1/12 stromov (v meste prevládajú listnaté)
-    const druhy = zoznam.map(([s, i]) => (s.length >= 5 ? (s[3] / (2 * s[4]) > 2.6 ? 1 : 0) : (i * 7919) % 12 === 0 ? 1 : 0));
-    const pocetIhl = druhy.filter((d) => d).length;
-    const kmene = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
-    const koruny = new THREE.InstancedMesh(listnaty, matKoruna, zoznam.length - pocetIhl);
-    const ihlice = new THREE.InstancedMesh(ihlicnaty, matKoruna, Math.max(1, pocetIhl));
-    ihlice.count = pocetIhl;
-    // vzdialená úroveň (len pri stromoch z lasera): rovnaké stromy, jednoduchšia koruna
-    const korunyD = jednoduche ? new THREE.InstancedMesh(jednoduche.listnaty, matKorunaDaleko, Math.max(1, zoznam.length - pocetIhl)) : null;
-    // blízka úroveň: karty s listami okolo jadra koruny
-    const listy = jednoduche ? new THREE.InstancedMesh(geometrieStromov(true).karty, materialListov(), Math.max(1, zoznam.length - pocetIhl)) : null;
-    let sx = 0, sz = 0, kl = 0, ki = 0;
-    zoznam.forEach(([[x, z, s = 1, h, r], i], j) => {
+    const n = zoznam.length;
+    const kmene = new THREE.InstancedMesh(kmenGeo, materialKmenaDaleko(), n);
+    const stromyCh = [];
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity, sx = 0, sz = 0;
+    zoznam.forEach(([[x, z, s = 1, hl, rl], i], j) => {
+      // laser: skutočná výška a polomer koruny, inak odhad z mierky (bežný mestský strom ~7,4 m, koruna 2,6 m)
+      const h = hl ?? 7.4 * s * (0.9 + (i % 5) * 0.06), r = rl ?? 2.6 * s;
+      const ihl = hl ? false : (i * 7919) % 12 === 0;
+      const druh = vyberDruh(x, z, h, r, ihl);
       const y = vyskopis.vyskaTerenu(x, z);
-      q.setFromAxisAngle(os, (i * 2.399) % (Math.PI * 2));
-      // laser: skutočná výška a polomer koruny (základný model: výška 7,4 m, polomer koruny 2,6 m)
-      const mv = h ? h / 7.4 : s * (0.9 + (i % 5) * 0.06), mh = r ? r / 2.6 : s;
-      m.compose(new THREE.Vector3(x, y, z), q, new THREE.Vector3(mh, mv, mh));
+      q.setFromAxisAngle(os, hash(x, z, 1) * Math.PI * 2);
+      // vzdialená úroveň: základný model výšky 7,4 m a koruny 2,6 m
+      m.compose(poz.set(x, y, z), q, mier.set(r / 2.6, h / 7.4, r / 2.6));
       kmene.setMatrixAt(j, m);
-      if (druhy[j]) {
-        farba.setHSL(0.33 + (i % 5) * 0.01, 0.35, 0.2 + (i % 4) * 0.02);
-        ihlice.setMatrixAt(ki, m); ihlice.setColorAt(ki++, farba);
-      } else {
-        farba.setHSL(0.2 + (i % 7) * 0.015, 0.36 + (i % 3) * 0.07, 0.22 + (i % 5) * 0.025);
-        if (korunyD) { korunyD.setMatrixAt(kl, m); korunyD.setColorAt(kl, farba); listy.setMatrixAt(kl, m); listy.setColorAt(kl, farba.clone().multiplyScalar(1.45)); }
-        koruny.setMatrixAt(kl, m); koruny.setColorAt(kl++, farba);
-      }
-      kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt(mh * mv)), { typ: 'strom' });
-      sx += x; sz += z;
+      // blízka úroveň: model druhu (výška VYSKA_MODELU, polomer koruny podľa druhu)
+      const d = DRUHY[druh];
+      const pomer = 0.92 + hash(x, z, 2) * 0.16;
+      const mBlizko = new THREE.Matrix4().compose(poz.set(x, y - 0.05, z), q, mier.set(r / d.polomer * pomer, h / VYSKA_MODELU, r / d.polomer * pomer));
+      // farebná pestrosť stromov: jas a odtieň (niektoré žltkastejšie, iné sýtejšie)
+      const jas = 0.82 + hash(x, z, 3) * 0.3, ton = hash(x, z, 4);
+      const f = new THREE.Color(jas * (0.94 + ton * 0.14), jas, jas * (1.05 - ton * 0.22));
+      stromyCh.push({ x, z, druh, j, m: mBlizko, farba: f, ihl: druh === 'smrek', skryty: false });
+      kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt((r / 2.6) * (h / 7.4))), { typ: 'strom' });
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); sx += x; sz += z;
     });
-    const pripravit = (im) => { im.castShadow = true; im.receiveShadow = im !== kmene; im.computeBoundingSphere(); return im; };
-    let chunk;
-    if (korunyD) {
-      // THREE.LOD prepína úrovne podľa vzdialenosti kamery od stredu skupiny
-      korunyD.count = kl; listy.count = kl;
-      const cx = sx / zoznam.length, cz = sz / zoznam.length;
-      chunk = new THREE.LOD();
-      chunk.position.set(cx, 0, cz);
-      const blizko = new THREE.Group(), daleko = new THREE.Group();
-      blizko.position.set(-cx, 0, -cz); daleko.position.set(-cx, 0, -cz);
-      for (const im of [kmene, koruny, ihlice, listy]) if (pripravit(im).count) blizko.add(im);
-      const kmeneD = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
-      kmeneD.instanceMatrix.copy(kmene.instanceMatrix);
-      for (const im of [kmeneD, korunyD, ihlice.clone()]) if (pripravit(im).count) daleko.add(im);
-      chunk.addLevel(blizko, 0);
-      chunk.addLevel(daleko, LOD_BLIZKO);
-    } else {
-      chunk = new THREE.Group();
-      for (const im of [kmene, koruny, ihlice]) if (pripravit(im).count) chunk.add(im);
+
+    // vzdialené koruny (listnaté a ihličnaté zvlášť)
+    const pocetIhl = stromyCh.filter((t) => t.ihl).length;
+    const koruny = new THREE.InstancedMesh(blob, materialKorunyDaleko(), Math.max(1, n - pocetIhl));
+    const ihlice = new THREE.InstancedMesh(kuzele, materialKorunyDaleko(), Math.max(1, pocetIhl));
+    let kl = 0, ki = 0;
+    for (const t of stromyCh) {
+      kmene.getMatrixAt(t.j, m);
+      const tl = DRUHY[t.druh].tonListov ?? [1, 1, 1];
+      if (t.ihl) {
+        farba.setRGB(IHLICE_PRIEMER[0] * 1.2 * t.farba.r, IHLICE_PRIEMER[1] * 1.2 * t.farba.g, IHLICE_PRIEMER[2] * 1.2 * t.farba.b);
+        ihlice.setMatrixAt(ki, m); ihlice.setColorAt(ki, farba); t.k = ki++;
+      } else {
+        const ao = 0.85;
+        farba.setRGB(LISTY_PRIEMER[0] * ao * tl[0] * t.farba.r, LISTY_PRIEMER[1] * ao * tl[1] * t.farba.g, LISTY_PRIEMER[2] * ao * tl[2] * t.farba.b);
+        koruny.setMatrixAt(kl, m); koruny.setColorAt(kl, farba); t.k = kl++;
+      }
     }
-    chunk.userData.dohlad = { x: sx / zoznam.length, z: sz / zoznam.length, max: DOHLAD };
+    koruny.count = kl; ihlice.count = ki;
+
+    // blízke modely: pre každý druh v chunku kôra + listy, naplnia sa podľa polohy kamery
+    const blizke = new Map();
+    for (const t of stromyCh) {
+      if (!blizke.has(t.druh)) blizke.set(t.druh, { kapacita: 0, n: 0 });
+      blizke.get(t.druh).kapacita++;
+    }
+    const chunk = new THREE.Group();
+    for (const [meno, b] of blizke) {
+      const geo = modelStromu(meno);
+      b.kora = new THREE.InstancedMesh(geo.kora, materialKory(DRUHY[meno]), b.kapacita);
+      b.listy = new THREE.InstancedMesh(geo.listy, materialListov(DRUHY[meno].ihlicnan ? 'ihlice' : 'listy'), b.kapacita);
+      b.listy.setColorAt(0, farba.setRGB(1, 1, 1));
+      for (const im of [b.kora, b.listy]) {
+        im.count = 0; im.visible = false; im.frustumCulled = false;
+        im.castShadow = true; im.receiveShadow = true;
+        im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        chunk.add(im);
+      }
+    }
+    for (const im of [kmene, koruny, ihlice]) {
+      im.castShadow = true; im.receiveShadow = im !== kmene;
+      im.computeBoundingSphere();
+      if (im.count) chunk.add(im);
+    }
+    const stav = {
+      stromy: stromyCh, blizke, kmene, koruny, ihlice, aktivne: false, px: 0, pz: 0,
+      minX, maxX, minZ, maxZ,
+      povodneKmene: kmene.instanceMatrix.array.slice(), povodneKoruny: koruny.instanceMatrix.array.slice(), povodneIhlice: ihlice.instanceMatrix.array.slice(),
+    };
+    // pri kreslení chunku sa prepočíta, ktoré stromy sú blízko (kmene sa kreslia vždy, aby sa to volalo)
+    kmene.frustumCulled = false;
+    kmene.onBeforeRender = (renderer, scena, kamera) => { if (kamera.isPerspectiveCamera) aktualizujDetail(stav, kamera.position); };
+    chunk.userData.dohlad = { x: sx / n, z: sz / n, max: DOHLAD };
     skupina.add(chunk);
   }
   return skupina;
 }
 
-const cacheGeo = {};
-/** Geometrie stromov: listnatý (zhluk nepravidelných gúľ) a ihličnatý (dva kužele). */
-function geometrieStromov(bohate) {
-  if (cacheGeo[bohate]) return cacheGeo[bohate];
-  const kmenGeo = new THREE.CylinderGeometry(0.18, 0.3, 3.2, 7);
-  kmenGeo.translate(0, 1.6, 0);
+/** Skryje / vráti vzdialenú verziu stromu (nulová matica = neviditeľná inštancia). */
+function nastavDaleko(st, t, skryt) {
+  const k = st.kmene.instanceMatrix.array, j = t.j * 16;
+  const im = t.ihl ? st.ihlice : st.koruny, povodne = t.ihl ? st.povodneIhlice : st.povodneKoruny, c = im.instanceMatrix.array, i = t.k * 16;
+  if (skryt) { k.fill(0, j, j + 16); c.fill(0, i, i + 16); }
+  else { k.set(st.povodneKmene.subarray(j, j + 16), j); c.set(povodne.subarray(i, i + 16), i); }
+}
 
+/** Prepočíta blízke stromy chunku podľa polohy kamery. */
+function aktualizujDetail(st, kam) {
+  const dx = Math.max(st.minX - kam.x, 0, kam.x - st.maxX), dz = Math.max(st.minZ - kam.z, 0, kam.z - st.maxZ);
+  if (dx * dx + dz * dz > BLIZKO * BLIZKO) {
+    if (st.aktivne) {
+      // celý chunk je ďaleko – len vzdialené koruny
+      for (const t of st.stromy) if (t.skryty) { t.skryty = false; nastavDaleko(st, t, false); }
+      for (const b of st.blizke.values()) { b.kora.count = b.listy.count = 0; b.kora.visible = b.listy.visible = false; }
+      for (const im of [st.kmene, st.koruny, st.ihlice]) im.instanceMatrix.needsUpdate = true;
+      st.aktivne = false;
+    }
+    return;
+  }
+  if (st.aktivne && (kam.x - st.px) ** 2 + (kam.z - st.pz) ** 2 < POSUN * POSUN) return;
+  st.aktivne = true; st.px = kam.x; st.pz = kam.z;
+  for (const b of st.blizke.values()) b.n = 0;
+  let zmena = false;
+  const b2 = BLIZKO * BLIZKO;
+  for (const t of st.stromy) {
+    const blizko = (t.x - kam.x) ** 2 + (t.z - kam.z) ** 2 < b2;
+    if (blizko) {
+      const b = st.blizke.get(t.druh);
+      b.kora.setMatrixAt(b.n, t.m); b.listy.setMatrixAt(b.n, t.m); b.listy.setColorAt(b.n, t.farba);
+      b.n++;
+    }
+    if (blizko !== t.skryty) { t.skryty = blizko; nastavDaleko(st, t, blizko); zmena = true; }
+  }
+  for (const b of st.blizke.values()) {
+    b.kora.count = b.listy.count = b.n;
+    b.kora.visible = b.listy.visible = b.n > 0;
+    if (b.n) { b.kora.instanceMatrix.needsUpdate = true; b.listy.instanceMatrix.needsUpdate = true; b.listy.instanceColor.needsUpdate = true; }
+  }
+  if (zmena) for (const im of [st.kmene, st.koruny, st.ihlice]) im.instanceMatrix.needsUpdate = true;
+}
+
+let cacheGeo = null;
+/** Geometrie vzdialenej úrovne: listnatá koruna (zhluk nepravidelných gúľ), ihličnan (dva kužele), kmeň. */
+function geometrieDaleko() {
+  if (cacheGeo) return cacheGeo;
+  const kmenGeo = new THREE.CylinderGeometry(0.16, 0.28, 3.2, 6);
+  kmenGeo.translate(0, 1.6, 0);
   const casti = [];
-  // koruna zo zhlukov listov: väčšie jadro a menšie chumáče po obvode (členitejší obrys)
-  const gule = bohate
-    ? [[0, 5.0, 0, 1.8], [1.3, 4.5, 0.5, 1.15], [-1.2, 4.6, -0.6, 1.2], [0.3, 6.2, -0.3, 1.1], [-0.5, 4.3, 1.3, 1.05],
-      [0.7, 4.4, -1.3, 1.0], [1.5, 5.6, -0.4, 0.9], [-1.4, 5.7, 0.6, 0.9], [-0.2, 3.8, -0.2, 1.25], [0.9, 6.5, 0.8, 0.75]]
-    : [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5]];
-  gule.forEach(([x, y, z, r], k) => {
-    const g = new THREE.IcosahedronGeometry(r, bohate ? 1 : 0);
+  [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5], [-0.3, 3.7, 1.2, 1.3]].forEach(([x, y, z, r], k) => {
+    const g = new THREE.IcosahedronGeometry(r, 1);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
-      // nepravidelnosť – aby to nebola dokonalá guľa
       const n = Math.sin(p.getX(i) * 3.1 + k) * Math.cos(p.getZ(i) * 2.7 - k) * 0.22 * r;
       p.setXYZ(i, p.getX(i) * (1 + n / r) + x, p.getY(i) * 0.9 + y, p.getZ(i) * (1 + n / r) + z);
     }
     casti.push(g);
   });
-  const listnaty = spojGeometrie(casti, 3.2, 7.4);
-  // stromy z lasera: okolo jadra karty s listami (CC0 listy, assets/textury/listy) – rozstrapkaný obrys koruny
-  const karty = bohate ? kartyListov() : null;
-
-  const k1 = new THREE.ConeGeometry(2.3, 4.2, 8).toNonIndexed(); k1.translate(0, 4.2, 0);
-  const k2 = new THREE.ConeGeometry(1.6, 3.4, 8).toNonIndexed(); k2.translate(0, 6.4, 0);
-  const ihlicnaty = spojGeometrie([k1, k2], 2.4, 8);
-
-  for (const g of [listnaty, ihlicnaty, kmenGeo, karty]) if (g) g.userData.zdielane = true;
-  cacheGeo[bohate] = { listnaty, ihlicnaty, kmenGeo, karty };
-  return cacheGeo[bohate];
+  const blob = spojGeometrie(casti, 2.6, 7.4);
+  const k1 = new THREE.ConeGeometry(2.3, 4.6, 9).toNonIndexed(); k1.translate(0, 3.6, 0);
+  const k2 = new THREE.ConeGeometry(1.6, 3.6, 9).toNonIndexed(); k2.translate(0, 6.0, 0);
+  const kuzele = spojGeometrie([k1, k2], 1.2, 8);
+  for (const g of [blob, kuzele, kmenGeo]) g.userData.zdielane = true;
+  cacheGeo = { blob, kuzele, kmenGeo };
+  return cacheGeo;
 }
 
-/** Karty s listami rozmiestnené po povrchu koruny (elipsoid okolo jadra), normály smerom od stredu koruny. */
-function kartyListov() {
-  const poz = [], nor = [], uv = [], farby = [];
-  let a = 12345;
-  const rnd = () => ((a = (a * 16807) % 2147483647) / 2147483647);
-  const stred = new THREE.Vector3(0, 5.0, 0);
-  const N = 30, VEL = 2.1;
-  const q = new THREE.Quaternion(), e = new THREE.Euler();
-  for (let k = 0; k < N; k++) {
-    // bod na povrchu elipsoidu (rovnomerne podľa zlatého uhla), trochu dnu/von
-    const y = 1 - (k + 0.5) / N * 1.7, r = Math.sqrt(Math.max(0, 1 - y * y)), u = k * 2.39996;
-    const c = new THREE.Vector3(Math.cos(u) * r * 2.35, y * 1.85, Math.sin(u) * r * 2.35).multiplyScalar(0.8 + rnd() * 0.3).add(stred);
-    e.set((rnd() - 0.5) * 1.6, rnd() * Math.PI * 2, (rnd() - 0.5) * 1.6); q.setFromEuler(e);
-    const v = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([dx, dy]) => new THREE.Vector3(dx * VEL / 2, dy * VEL / 2, 0).applyQuaternion(q).add(c));
-    for (const i of [0, 1, 2, 0, 2, 3]) {
-      poz.push(v[i].x, v[i].y, v[i].z);
-      const n = v[i].clone().sub(stred).normalize();
-      nor.push(n.x, n.y, n.z);
-      uv.push(i === 0 || i === 3 ? 0 : 1, i < 2 ? 0 : 1);
-      const t = Math.min(1, Math.max(0, (v[i].y - 3.2) / 4.2));
-      const jas = 0.62 + t * 0.5;
-      farby.push(jas, jas, jas * 0.95);
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
-  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
-  return g;
-}
-
-let matListy = null;
-function materialListov() {
-  if (matListy) return matListy;
-  const t = new THREE.TextureLoader().load('assets/textury/listy/karta.png');
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-  matListy = new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.45, side: THREE.DoubleSide, vertexColors: true, roughness: 0.8 });
-  // obe strany karty majú normálu „von z koruny“ (inak by zadné strany kariet boli čierne)
-  matListy.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>',
-      THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''));
-  };
-  matListy.customProgramCacheKey = () => 'listy-karty';
-  return matListy;
-}
-
-/** Spojí geometrie a pridá farbu vrcholov: dole tmavšie (tieň v korune), hore svetlejšie. */
+/** Spojí geometrie (normály podľa stredu koruny – mäkké tieňovanie) a pridá farbu vrcholov: dole tmavšie. */
 function spojGeometrie(geos, yMin, yMax) {
   const poz = [];
-  for (const g of geos) poz.push(...g.attributes.position.array);
+  for (const g of geos) poz.push(...(g.index ? g.toNonIndexed() : g).attributes.position.array);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
-  const farby = [];
-  for (let i = 1; i < poz.length; i += 3) {
-    const t = Math.min(1, Math.max(0, (poz[i] - yMin) / (yMax - yMin)));
+  const farby = [], nor = [];
+  const sy = (yMin + yMax) / 2;
+  for (let i = 0; i < poz.length; i += 3) {
+    const t = Math.min(1, Math.max(0, (poz[i + 1] - yMin) / (yMax - yMin)));
     const v = 0.55 + t * 0.55;
     farby.push(v, v, v * 0.95);
+    const n = new THREE.Vector3(poz[i], (poz[i + 1] - sy) * 0.8, poz[i + 2]).normalize();
+    nor.push(n.x, n.y, n.z);
   }
   geo.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
-  geo.computeVertexNormals();
-  return geo;
-}
-
-const materialy = {};
-/** Materiál koruny: pri stromoch z lasera „listnatý“ šum (zhluky listov) vo farbe aj v normále. */
-function materialKoruny(bohate) {
-  if (materialy[bohate]) return materialy[bohate];
-  const mat = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.85, flatShading: !bohate });
-  if (bohate) {
-    mat.onBeforeCompile = (sh) => {
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vSvetK;')
-        .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSvetK = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', `#include <common>
-varying vec3 vSvetK;
-float hash3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
-float sum3(vec3 x) {
-  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(mix(hash3(i), hash3(i + vec3(1,0,0)), f.x), mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), f.x), f.y),
-             mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), f.x), mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), f.x), f.y), f.z);
-}`)
-        .replace('#include <color_fragment>', `#include <color_fragment>
-        float listy = sum3(vSvetK * 2.2) * 0.6 + sum3(vSvetK * 5.3) * 0.4;
-        diffuseColor.rgb *= 0.62 + 0.62 * listy;`)
-        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-        vec3 e = vec3(0.12, 0.0, 0.0);
-        vec3 grad = vec3(sum3((vSvetK + e.xyy) * 3.1) - sum3((vSvetK - e.xyy) * 3.1),
-                         sum3((vSvetK + e.yxy) * 3.1) - sum3((vSvetK - e.yxy) * 3.1),
-                         sum3((vSvetK + e.yyx) * 3.1) - sum3((vSvetK - e.yyx) * 3.1));
-        normal = normalize(normal - (viewMatrix * vec4(grad, 0.0)).xyz * 1.6);`);
-    };
-    mat.customProgramCacheKey = () => 'koruna-listy';
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  // spriemerovať s normálami plôch, aby zhluky boli trochu vidieť
+  const plochy = geo.clone(); plochy.computeVertexNormals();
+  const a = geo.attributes.normal.array, b = plochy.attributes.normal.array;
+  for (let i = 0; i < a.length; i += 3) {
+    const n = new THREE.Vector3(a[i] * 0.6 + b[i] * 0.4, a[i + 1] * 0.6 + b[i + 1] * 0.4, a[i + 2] * 0.6 + b[i + 2] * 0.4).normalize();
+    a[i] = n.x; a[i + 1] = n.y; a[i + 2] = n.z;
   }
-  materialy[bohate] = mat;
-  return mat;
+  return geo;
 }

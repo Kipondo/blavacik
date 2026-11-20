@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import '../tiene.js';
 import { Vykreslovac } from './vykreslovac.js';
+import { NALADA } from '../nalada.js';
 import { nacitajKvalitu, vlozKvalituDoMenu } from '../../ui/nastavenia-grafiky.js';
 
 const KVALITA = {
@@ -35,6 +36,7 @@ export default {
     hra.scena.traverse((o) => { if (!this.slnko && o.isDirectionalLight && o.castShadow) this.slnko = o; });
     this.vykreslovac = new Vykreslovac(hra.renderer, hra.scena, hra.kamera);
     this._smer = new THREE.Vector3();
+    this.nastavNaladu(hra, NALADA);
 
     this.kvalita = nacitajKvalitu(predvolenaKvalita(hra.renderer));
     vlozKvalituDoMenu(this.kvalita, (k) => this.nastavKvalitu(k));
@@ -44,6 +46,16 @@ export default {
       if (this.nastavenie.efekty) this.vykreslovac.render();
       else { hra.renderer.setRenderTarget(null); hra.renderer.render(hra.scena, hra.kamera); }
     };
+  },
+
+  /** Tone mapping, opar a farebné ladenie podľa nálady (js/grafika/nalada.js). */
+  nastavNaladu(hra, n) {
+    hra.renderer.toneMapping = n.tonovanie.typ === 'AgX' ? THREE.AgXToneMapping : THREE.ACESFilmicToneMapping;
+    hra.renderer.toneMappingExposure = n.tonovanie.expozicia;
+    const u = this.vykreslovac.matVysledok.uniforms, e = n.efekty;
+    u.farbaOparu.value.set(e.opar);
+    u.hustotaOparu.value = e.hustotaOparu; u.maxOpar.value = e.maxOpar;
+    u.saturacia.value = e.saturacia; u.kontrast.value = e.kontrast; u.vineta.value = e.vineta; u.silaAo.value = e.silaAo;
   },
 
   nastavKvalitu(kvalita) {
