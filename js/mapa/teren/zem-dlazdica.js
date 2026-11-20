@@ -47,6 +47,7 @@ export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = 'zem';
+  mesh.userData.rect = rect;   // pre trávu zblízka (js/mapa/zelen/trava-modul.js číta mapu tried a pokrývky)
   return mesh;
 }
 

@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { texturaDetailu } from './textura-zeme.js';
 import { SUM_GLSL } from '../../grafika/sum-glsl.js';
+import { KAMEN_GLSL } from '../../grafika/kamen-glsl.js';
 
 let detail = null;
 let dlazby = null;
@@ -67,13 +68,15 @@ function materialZemeDlazba(mapa, triedy) {
       betonF: { value: t.betonF }, betonN: { value: t.betonN },
     });
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec2 vSvet;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xz;');
+      .replace('#include <common>', '#include <common>\nvarying vec2 vSvet;\nvarying float vSvetY;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xz;\nvSvetY = (modelMatrix * vec4(position, 1.0)).y;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
 uniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN;
 varying vec2 vSvet;
-${SUM_GLSL}`)
+varying float vSvetY;
+${SUM_GLSL}
+${KAMEN_GLSL}`)
       .replace('#include <map_fragment>', `#include <map_fragment>
         if (sampledDiffuseColor.a < 0.5) discard;
         diffuseColor.a = 1.0;
@@ -123,6 +126,26 @@ ${SUM_GLSL}`)
         float wP = trava * (1.0 - smoothstep(0.05, 0.12, trieda));
         vec3 farbaPokr = diffuseColor.rgb;
         diffuseColor.rgb = mix(diffuseColor.rgb, travnik * clamp(farbaPokr / vec3(0.15, 0.27, 0.07), 0.5, 1.3) * vec3(0.92, 1.1, 1.1), wP * 0.85);
+        // strmé plochy terénu (normála skoro vodorovná): kamenný múr namiesto natiahnutej textúry zhora
+        // (normála plochy z derivácií – vyhladená normála vrcholov by strmý zrez na mriežke 2 m „zmäkčila“)
+        vec3 nSvet = inverseTransformDirection(normalize(cross(dFdx(vViewPosition), dFdy(vViewPosition))), viewMatrix);
+        float wS = 1.0 - smoothstep(0.45, 0.72, abs(nSvet.y));
+        if (wS > 0.0) {
+          // v meste (Staré Mesto, Hradný kopec) sú strmé zrezy oporné múry z lomového kameňa,
+          // inde (Devínska Kobyla, Kamzík, zárezy ciest v lese) holá skala
+          vec3 pS = vec3(vSvet.x, vSvetY, vSvet.y);
+          vec2 dJ = (vSvet - vec2(-60.0, 40.0)) / vec2(380.0, 330.0), dH = (vSvet - vec2(-540.0, 150.0)) / vec2(280.0, 220.0);
+          float murovany = max(1.0 - smoothstep(0.85, 1.0, dot(dJ, dJ)), 1.0 - smoothstep(0.85, 1.0, dot(dH, dH)));
+          murovany = max(murovany, step(0.4, trieda));
+          vec2 km = murovany > 0.01 ? kamenTriplanar(pS, nSvet, 0.4, 0.65, 0.0) : vec2(0.0);
+          vec2 ks = murovany < 0.99 ? kamenTriplanar(pS, nSvet, 0.4, 0.65, 1.0) : vec2(0.0);
+          vec3 mur = mix(vec3(0.19, 0.17, 0.135), vec3(0.33, 0.3, 0.24), km.x);
+          mur = mix(mur, mur * 0.45, km.y);
+          vec3 skala = mix(vec3(0.13, 0.128, 0.12), vec3(0.32, 0.31, 0.29), ks.x);
+          skala = mix(skala, skala * 0.4, ks.y);
+          vec3 kamen = mix(skala, mur, murovany) * kamenSkvrny(pS);
+          diffuseColor.rgb = mix(diffuseColor.rgb, kamen, wS);
+        }
         // mäkké zatienenie pri päte budov (kanál G mapy tried)
         diffuseColor.rgb *= 1.0 - 0.38 * tr2.g;`)
       .replace('#include <normal_fragment_maps>', `
@@ -133,8 +156,10 @@ ${SUM_GLSL}`)
         mapN.xy += (texture2D(doskyN, vSvet / 4.0).xy * 2.0 - 1.0) * wD;
         mapN.xy += (texture2D(betonN, vSvet / 3.0).xy * 2.0 - 1.0) * wB;
         mapN.xy += (texture2D(travaN, vSvet / 3.1).xy * 2.0 - 1.0) * wT * 0.8;
+        // na strmých plochách (múr) sa mapy dlažby nepoužijú – UV zhora sú tam natiahnuté
+        mapN.xy *= 1.0 - wS;
         normal = normalize( tbn * mapN );`);
   };
-  mat.customProgramCacheKey = () => 'zem-dlazba-4';
+  mat.customProgramCacheKey = () => 'zem-dlazba-5';
   return mat;
 }

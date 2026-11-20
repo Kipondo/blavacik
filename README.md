@@ -107,6 +107,14 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     zadná hrana), pri domoch sivá zámková dlažba 20 × 10 cm (vlastná textúra `tools/textury/zamkova.py`),
     na námestiach tmavšie betónové dlaždice, všade špina a nerovnomernosť vo veľkej mierke; mapa povrchu má 0,5 m.
   - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
+  - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
+    a na zatrávnených svahoch (podľa mapy tried a pokrývky dlaždice), zblízka husto, ďalej redšie a menšie;
+    stredná kvalita do 18 m, vysoká do 30 m, nízka bez nej. Na strmých zrezoch tráva nerastie.
+  - **Vietor:** koruny stromov sa kolíšu (viac hore, kmeň stojí), listy sa trasú, trávou prechádzajú vlny;
+    nárazy vetra sa striedajú s bezvetrím (spoločný čas `vietor` v `js/mapa/zelen/materialy-stromov.js`).
+  - **Strmé zrezy terénu** (oporné múry Hradného kopca, svahy z lasera): namiesto natiahnutej textúry zhora
+    procedurálny kameň (`js/grafika/kamen-glsl.js`) – v Starom Meste a na Hradnom kopci múr z lomového kameňa,
+    inde holá skala s puklinami.
   Snímky pred/po: `docs/snimky/realisticky-vzhlad/`.
 - **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
   20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné
