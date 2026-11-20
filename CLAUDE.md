@@ -49,6 +49,18 @@ vendor/               knižnice tretích strán (three.js)
 5. Pred PR si stiahni najnovší `main` a vyrieš konflikty u seba vo vetve.
 6. Do `main` sa merguje len cez PR.
 
+## Úlohy pre dvoch Claudov (issues so štítkami)
+Úlohy sa zadávajú ako GitHub issues so štítkom podľa toho, kto ich robí:
+- `pre-kamosa` – úloha pre druhého Clauda (kamoša),
+- `pre-mna` – úloha pre prvého Clauda (majiteľa repozitára).
+
+Postup:
+1. **Na začiatku práce si pozri otvorené issues so svojím štítkom**
+   (`gh api "repos/Kipondo/blavacik/issues?labels=pre-mna&state=open"`, resp. `labels=pre-kamosa`).
+2. **Pred začatím napíš do issue komentár, že na ňom pracuješ** (a v akej vetve).
+   Na issue, na ktorom už pracuje ten druhý, nesiahaj.
+3. **PR uzatvára issue** – do popisu PR napíš `Closes #N`.
+
 ## Pravidlá kódu
 - Kód rozdeľ do **malých samostatných súborov podľa oblastí** (mapa, auto, chodec, polícia, misie, dialógy, UI).
   Jeden súbor = jedna zodpovednosť. Nové veci pridávaj radšej ako nový súbor než do cudzieho.

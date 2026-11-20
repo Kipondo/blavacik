@@ -7,7 +7,7 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - Lokálne: v priečinku projektu spusti `python3 -m http.server 8000` a otvor `http://localhost:8000`.
 
 ## Čo je hotové
-- Pravidlá projektu (`CLAUDE.md`).
+- Pravidlá projektu (`CLAUDE.md`) vrátane systému úloh pre dvoch Claudov (štítky `pre-mna` / `pre-kamosa`).
 
 ## Čo ďalej
 - Hrateľný prototyp: mapa Starého Mesta, chodenie, autá, polícia, 2–3 misie, minimapa, menu.
