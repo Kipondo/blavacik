@@ -1,12 +1,14 @@
 // Bratislavský hrad – štvorkrídlový palác okolo nádvoria, biela fasáda,
 // červené strechy a štyri rohové veže (juhozápadná Korunná veža je najvyššia).
+// Porovnanie so skutočnosťou (etapa 4): čisto biela fasáda s pravidelnými oknami so svetlými rámami
+// (bez výkladov a ríms), na strechách krídel dlhé rady vikierov.
 // Rozmery podľa OSM: ~92 × 78 m, krídla 22 m, veže 31 m.
 
 import * as THREE from 'three';
-import { fasada, kvader, ihlan, valbovaStrecha, rimsa, naMiesto } from './pomocne.js';
+import { fasada, kvader, ihlan, valbovaStrecha, rimsa, naMiesto, vikier } from './pomocne.js';
 
 const BIELA = '#f3efe6';
-const STRECHA = '#b24a30';
+const STRECHA = '#a5472f';
 const KAMEN = '#cbc3b1';
 
 export default function postav(p, { vyskopis, kolizie }) {
@@ -26,10 +28,24 @@ export default function postav(p, { vyskopis, kolizie }) {
     [(SIRKA - KRIDLO) / 2, 0, KRIDLO, HLBKA - 2 * KRIDLO],
   ];
   for (const [x, z, w, d] of kridla) {
-    const k = fasada(w, VYSKA, d, BIELA, { okno: [3.4, 5.4] });
+    const k = fasada(w, VYSKA, d, BIELA, { druh: 'okna', okno: [3.4, 6.6] });
     k.position.set(x, y0 + VYSKA / 2, z);
     g.add(k);
-    const r = rimsa(w, d, y0 + VYSKA - 0.3, '#ffffff', 0.4);
+    // rady vikierov na oboch dlhých stranách krídla (von aj do nádvoria)
+    const pozdlzX = w >= d, dlzka = pozdlzX ? w : d, kratka = pozdlzX ? d : w;
+    const sklon = 9 / ((kratka + 1.2) / 2);
+    const pocet = Math.floor((dlzka - 2 * KRIDLO) / 6.8);
+    for (let i = 0; i < pocet; i++) {
+      const t = (i - (pocet - 1) / 2) * 6.8;
+      for (const s_ of [-1, 1]) {
+        const v = vikier({ stena: BIELA, strecha: STRECHA, sirka: 1.8, vyska: 1.9 });
+        const odSteny = kratka / 2 - 0.7;
+        v.position.set(x + (pozdlzX ? t : s_ * odSteny), y0 + VYSKA + sklon * 1.3 - 0.2, z + (pozdlzX ? s_ * odSteny : t));
+        v.rotation.y = pozdlzX ? (s_ > 0 ? 0 : Math.PI) : (s_ > 0 ? Math.PI / 2 : -Math.PI / 2);
+        g.add(v);
+      }
+    }
+    const r = rimsa(w, d, y0 + VYSKA - 0.3, '#ffffff', 0.25, 0.35);
     r.position.x = x; r.position.z = z;
     g.add(r);
     const s = valbovaStrecha(w + 1.2, 9, d + 1.2, STRECHA);

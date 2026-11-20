@@ -40,6 +40,43 @@ function normaloveVlny() {
   return t;
 }
 
+function plochaPolygonu(body) {
+  let a = 0;
+  for (let i = 0, j = body.length - 1; i < body.length; j = i++) a += (body[j][0] + body[i][0]) * (body[j][1] - body[i][1]);
+  return Math.abs(a / 2);
+}
+
+let matOkraj = null;
+/** Nízky kamenný okraj okolo malej vodnej plochy (múrik s vrchnou doskou). */
+function kamennyOkraj(body, zem) {
+  matOkraj ??= new THREE.MeshStandardMaterial({ color: '#cfc8b8', roughness: 0.85 });
+  const V = 0.45, S = 0.35;
+  const P = [];
+  // smer obiehania – aby bol okraj vždy zvonka
+  let a = 0;
+  for (let i = 0, j = body.length - 1; i < body.length; j = i++) a += (body[j][0] - body[i][0]) * (body[j][1] + body[i][1]);
+  const von = a > 0 ? 1 : -1;
+  for (let i = 0; i < body.length; i++) {
+    const [ax, az] = body[i], [bx, bz] = body[(i + 1) % body.length];
+    const d = Math.hypot(bx - ax, bz - az);
+    if (d < 0.05) continue;
+    const nx = ((bz - az) / d) * von, nz = (-(bx - ax) / d) * von;
+    const a0 = [ax, zem - 0.2, az], b0 = [bx, zem - 0.2, bz], a1 = [ax, zem + V, az], b1 = [bx, zem + V, bz];
+    const a2 = [ax + nx * S, zem + V, az + nz * S], b2 = [bx + nx * S, zem + V, bz + nz * S];
+    const a3 = [ax + nx * S, zem - 0.2, az + nz * S], b3 = [bx + nx * S, zem - 0.2, bz + nz * S];
+    // vnútorná stena, vrchná doska, vonkajšia stena (obe strany – poradie bodov nehrá rolu)
+    for (const [p, q, r, t] of [[a0, b0, b1, a1], [a1, b1, b2, a2], [a2, b2, b3, a3]]) {
+      P.push(...p, ...q, ...r, ...p, ...r, ...t, ...p, ...r, ...q, ...p, ...t, ...r);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, matOkraj);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+
 export function vytvorVodu(voda, KONFIG, vyskopis) {
   const skupina = new THREE.Group();
   skupina.name = 'voda';
@@ -61,8 +98,12 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
     const reka = v.reka !== false;
     const mesh = new THREE.Mesh(geo, reka ? matReka : matFontana);
     if (!reka) {
-      const [cx, cz] = v.body[0];
-      mesh.position.y = vyskopis.vyskaTerenu(cx, cz) + 0.25;
+      // fontány a vodné plochy v meste: hladina v kamennom okraji (porovnanie so skutočnosťou, etapa 3 –
+      // jazierko na promenáde Hviezdoslavovho námestia má nízky kamenný okraj, nie trávnaté brehy)
+      let zem = Infinity;
+      for (const [x, z] of v.body) zem = Math.min(zem, vyskopis.vyskaTerenu(x, z));
+      mesh.position.y = zem + 0.32;
+      if (plochaPolygonu(v.body) < 6000) skupina.add(kamennyOkraj(v.body, zem));
     } else if (vyskopis.hladina) {
       // hladina sa mení pozdĺž toku (celé mesto) – výška pre každý vrchol
       for (let i = 0; i < poz.count; i++) poz.setY(i, vyskopis.hladina(poz.getX(i), poz.getZ(i)));

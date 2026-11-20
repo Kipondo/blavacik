@@ -63,7 +63,9 @@ async function start() {
   // prvý snímok vykreslíme hneď (za menu je vidieť mesto)
   hra.moduly.find((m) => m.nazov === 'kamera')?.updateVzdy?.(0.016, hra);
   svet.update(hra.stav.pozicia, hra.kamera);
-  renderer.render(hra.scena, hra.kamera);
+  // snímok kreslí modul efektov (js/grafika/efekty/), bez neho priamo renderer
+  const vykresli = () => (hra.vykresli ? hra.vykresli() : renderer.render(hra.scena, hra.kamera));
+  vykresli();
 
   menu.pripravene(() => {
     hra.pauza(false);
@@ -85,7 +87,7 @@ async function start() {
     aktualizujStav();
     hra.mapa.update(hra.stav.cas);
     svet.update(hra.stav.pozicia, hra.kamera);
-    renderer.render(hra.scena, hra.kamera);
+    vykresli();
     hra.vstup.koniecSnimku();
   });
 }

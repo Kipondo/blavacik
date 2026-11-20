@@ -212,6 +212,8 @@ export function klasifikuj(geo, moznosti) {
       b.strecha = /^#[0-9a-f]{6}$/.test(rc) ? rc : MENA_FARIEB[rc] ?? (st === 'stare' || st === 'vily' ? STRECHY.stare : STRECHY.ostatne)[i % 4];
     }
     if (t.name) b.nazov = t.name;
+    // OSM typ budovy pre js/mapa/budovy/typ-budovy.js (building=yes nič nehovorí, neukladáme)
+    if (t.building && t.building !== 'yes') b.typOsm = t.building;
     const styl = stylPodlaMena.get(t.name);
     if (styl) {
       if (styl.farba) b.farba = styl.farba;

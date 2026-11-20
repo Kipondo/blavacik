@@ -24,6 +24,18 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Typy budov v celom meste** (`js/mapa/budovy/typ-budovy.js`): každá budova dostane typ – panelák, rodinný dom,
+  meštiansky dom, bytovka, hala, garáž/kôlňa, obchod, kancelárie, historická – podľa OSM typu (prezradeného odhadnutou
+  výškou, neskôr `typOsm`), tvaru pôdorysu (plocha, šírka, doska/bod), strechy a štvrte. Podľa typu sa vyberie fasáda,
+  počet podlaží (z OSM `building:levels`), opraví sa vymyslená výška (~46 000 kôlní a domov už nie je 12 m vysokých)
+  a farba z palety typu; rodinné domy majú väčšinou šikmú strechu.
+  - Nové fasády: **panelák** (škáry panelov, plastové okná, lodžie v zvislých pásoch, vchody so strieškou),
+    **rodinný dom** (okná s roletovým boxom alebo okenicami, drevené dvere, sokel), **hala** (trapézový plech,
+    pásové okná, sekcionálne brány); garáže a kôlne sú bez okien.
+  - Rozdelenie: ~44 % rodinné domy, ~31 % garáže a kôlne, ~10 % bytovky, ~6 % meštianske domy, ~5 % paneláky, ~3 % haly
+    (`node tools/mesto/typy-budov.mjs [minX,minZ,maxX,maxZ]`).
+  - **Náhľad fasád bez hry:** `http://localhost:8000/tools/budovy/nahlad.html?x=250&z=1750` (Petržalka),
+    `&typ=1` zafarbí budovy podľa typu. Snímky: `docs/snimky/typy-budov/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
@@ -37,6 +49,14 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - lavičky z OSM natočené k chodníku, v historickom jadre lucerny (na stĺpe alebo na konzole na stene),
   - asfalt ciest a dlažba chodníkov s CC0 štruktúrou, mäkké zatienenie zeme pri päte budov.
   - Postup a zdroje: [data/lidar/README.md](data/lidar/README.md), snímky pred/po: `docs/snimky/etapa-a2/`.
+- **Opravy podľa porovnania so skutočnosťou** ([docs/porovnanie/opravy.md](docs/porovnanie/opravy.md), etapy 1–5, druhý Claude
+  porovnáva hru so Street View len okom): námestia a pešia zóna z veľkých svetlých kamenných dosiek, vikiere na
+  historických strechách (`js/mapa/budovy/vikiere.js`), výklady len v budovách s obchodom z OSM (`tools/mesto/osm-doplnky.mjs`),
+  okenice len kde naozaj sú, vyššie 1. poschodie historických budov, ručné opravy budov
+  ([data/mapa/opravy-budov.json](data/mapa/opravy-budov.json) – farba, okenice, vikiere podľa bodu a mena),
+  nová Stará radnica, Rolandova fontána, portikus Primaciálneho paláca, priečelie SND, Ganymedova fontána, vikiere hradu,
+  kamenný okraj fontán, zatrávnené svahy, hustý Sad Janka Kráľa ([data/mapa/husta-zelen.json](data/mapa/husta-zelen.json)),
+  odkvapy a záhrady z lasera, bez škár medzi dlaždicami terénu. Snímky PRED/PO: `docs/snimky/porovnanie/opravy-*.jpg`.
 - **Celá Bratislava (etapa a z issue #8):** 367 km², ~117 000 budov, ~23 000 úsekov ciest, 72 000 chodníkov,
   ~200 000 stromov, parky, lesy, voda – rozdelené do 1 791 dlaždíc 500 × 500 m. Okolo hráča sa do 900 m
   stavajú podrobné dlaždice (fasády, cesty, značky, kolízie), do 3,2 km jednoduché bloky budov,
@@ -61,10 +81,27 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
   ~780 pouličných lámp. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
 - **Grafika:** obloha so slnkom a pohyblivými oblakmi, odrazy okolia (sklo, autá, voda), Dunaj s vlnkami,
-  4 typy fasád (staromestské okná s okenicami, obytné s balkónmi, kancelárie, jednoduché) a sklenené fasády,
+  7 typov fasád (staromestské okná s okenicami, obytné s balkónmi, kancelárie, jednoduché, panelák, rodinný dom, hala) a sklenené fasády,
   tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
   (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
   Na mobile sa automaticky vypnú tiene a drahšie materiály.
+- **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
+  kúty, dvory a ulice pri pohľade zhora), vzdušná perspektíva (vzdialené mestá a kopce blednú do farby oblohy),
+  farebné ladenie, vyhladzovanie hrán (MSAA), jemná vineta; tiene slnka sú ostrejšie, stred tieňov je kúsok pred
+  hráčom v smere pohľadu a je zarovnaný na texely (okraje neblikajú), na okraji tieňovej mapy sa tiene plynulo stratia.
+  Strechy bez laserového modelu majú škridlu / štrk s normálovou mapou a drsnosťou (CC0, mapované zo svetových súradníc).
+  V menu sa dá zvoliť **Grafika: nízka / stredná / vysoká** (nízka = bez efektov, ako predtým; integrovaná grafika
+  začne na strednej). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
+  hra drží 60 FPS. Snímky pred/po: `docs/snimky/grafika/`. Ladenie AO v konzole:
+  `hra.moduly.find(m => m.nazov === 'efekty').vykreslovac.matVysledok.uniforms.ladenie.value = 1`.
+- **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
+  20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné
+  parapety, nadokenné rímsy a trojuholníkové frontóny, podlažné rímsy a dvojstupňová hlavná rímsa pod strechou;
+  paláce majú v 1. poschodí striedavo trojuholníkové a oblúkové frontóny, budovy s `balkony` / `stity`
+  v `data/mapa/opravy-budov.json` balkóny s kovaným zábradlím a zvlnený štít. Zatienenie ostení a spodkov ríms je
+  zapečené vo farbe vrcholov. Len obvodové steny (nie spoločné so susedom); diely 64 × 64 m stavia modul
+  `fasady3d` podľa vzdialenosti od kamery (do ~250 m, najviac 3 ms za snímok), ďalej stačia okná z atlasu.
+  Na RTX 2060 v Michalskej ~650 000 vrcholov plášťov navyše bez merateľného spomalenia. Snímky: `docs/snimky/fasady-3d/`.
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
@@ -106,6 +143,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
+  má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
@@ -153,6 +192,8 @@ Nový súbor `js/mapa/pamiatky/<nazov>.js` + záznam v `data/mapa/pamiatky.json`
 Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pamiatky.js), príklad je `hrad.js`.
 
 ## Mapa
+- **Porovnanie so skutočnosťou:** [docs/porovnanie/opravy.md](docs/porovnanie/opravy.md) – zoznam chýb po etapách
+  (Hlavné námestie, Michalská, Ventúrska, Primaciálne, Hviezdoslavovo námestie…) s prioritami a odkazmi na pozretie v Street View.
 - **Prehľad mapy (2D, na kontrolu):** `nastroje/prehlad/` – otvor `http://localhost:8000/nastroje/prehlad/`.
   Vrstvy budov, ciest, zelene a vody celého mesta, klik na budovu ukáže výšku a farbu, pripomienky sa dajú skopírovať do issue.
 - **Celé mesto:** `cd tools/mesto && npm install && npm run vsetko` (stiahne OSM a výškový model,
@@ -163,6 +204,7 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
   Návod (aj ručný export cez overpass-turbo) je v [data/osm/README.md](data/osm/README.md).
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
+- **Údaje o obchodoch a type budov z OSM** do hotových dlaždíc: `cd tools/mesto && node --max-old-space-size=8000 osm-doplnky.mjs`.
 - **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
   (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
 - **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).
