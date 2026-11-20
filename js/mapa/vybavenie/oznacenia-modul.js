@@ -6,9 +6,12 @@
 //     druhý riadok je názov miesta,
 //   – názov sa ukáže pri príchode (hra.stav.miestaSluzieb číta js/ui/lokality.js),
 //   – blízke miesta (do 160 m) dostanú značku na minimape (udalosť 'znacka-mapy').
-// Tabule sa stavajú v štvorcoch 300 m do 450 m od hráča.
+// Tabule sa stavajú v štvorcoch 300 m do 450 m od hráča. Ak je služba v OSM len bod vnútri budovy, tabuľa
+// pôjde na fasádu tej budovy (budovy a cesty z načítaných dlaždíc – udalosť 'dlazdica-nacitana'), na stenu
+// najbližšie k ulici.
 
 import * as THREE from 'three';
+import { bodVPolygone, vzdialenostOdOkraja, najblizsiNaUsecke } from '../geometria.js';
 
 const STVOREC = 300;
 const DOHLAD = 450;
@@ -110,7 +113,15 @@ export default {
     hra.scena.add(this.skupina);
     this.cas = 0;
     this.znacky = new Set();
+    this.dlazdice = new Map();
     hra.stav.miestaSluzieb = [];
+    const pridajDlazdicu = (kluc, data) => {
+      if (data) this.dlazdice.set(kluc, { budovy: data.budovy ?? [], cesty: [...(data.cesty ?? []), ...(data.chodniky ?? [])] });
+    };
+    hra.na('dlazdica-nacitana', ({ kluc, data }) => pridajDlazdicu(kluc, data));
+    // dlaždice načítané ešte pred štartom modulu
+    for (const [kluc, a] of hra.mapa.dlazdice?.aktivne ?? []) pridajDlazdicu(kluc, a.data);
+    hra.na('dlazdica-uvolnena', ({ kluc }) => this.dlazdice.delete(kluc));
     let data;
     try { data = await fetch('data/mapa/sluzby.json').then((r) => r.json()); } catch { return; }
     this.sluzby = (data.sluzby ?? []).filter((s) => DRUHY[s.typ]);
@@ -126,15 +137,73 @@ export default {
     console.info(`Označenia: ${this.sluzby.length} služieb (OSM)`);
   },
 
-  /** Tabuľa na fasáde: najdlhšia stena obrysu, 3,6 m nad terénom, lícom von. */
-  tabulaNaFasade(s, g) {
-    let b = s.budova;
+  /** Budova z načítaných dlaždíc, v ktorej leží bod (služba je v OSM len bod), inak najbližšia do 12 m (vchod). */
+  budovaPreBod(x, z) {
+    let naj = null, dmin = 12;
+    for (const d of this.dlazdice.values()) {
+      for (const b of d.budovy) {
+        if (!(b.body?.length > 2) || Math.abs(b.body[0][0] - x) > 300 || Math.abs(b.body[0][1] - z) > 300) continue;
+        if (bodVPolygone(x, z, b.body)) return b.body;
+        const v = vzdialenostOdOkraja(x, z, b.body);
+        if (v < dmin) { dmin = v; naj = b.body; }
+      }
+    }
+    return naj;
+  },
+
+  /** Leží bod vnútri inej budovy (stena susedí so susedným domom)? */
+  vInejBudove(x, z, obrys) {
+    for (const d of this.dlazdice.values()) {
+      for (const b of d.budovy) {
+        if (b.body === obrys || !(b.body?.length > 2) || Math.abs(b.body[0][0] - x) > 300 || Math.abs(b.body[0][1] - z) > 300) continue;
+        if (bodVPolygone(x, z, b.body)) return true;
+      }
+    }
+    return false;
+  },
+
+  /** Cesty z načítaných dlaždíc blízko bodu (úsečky). */
+  usekyCiest(x, z, r = 60) {
+    const out = [];
+    for (const d of this.dlazdice.values()) {
+      for (const c of d.cesty) {
+        for (let i = 0; i < c.body.length - 1; i++) {
+          const [ax, az] = c.body[i], [bx, bz] = c.body[i + 1];
+          if (Math.min(Math.hypot(ax - x, az - z), Math.hypot(bx - x, bz - z)) < r + Math.hypot(bx - ax, bz - az)) out.push([ax, az, bx, bz]);
+        }
+      }
+    }
+    return out;
+  },
+
+  /** Tabuľa na fasáde: stena najbližšie k ulici (inak najdlhšia), 3,4 m nad terénom, lícom von. */
+  tabulaNaFasade(s, g, obrys = s.budova) {
+    let b = obrys;
     if (plocha(b) < 0) b = [...b].reverse();
-    let best = -1, i0 = 0;
+    const cx = b.reduce((a, p) => a + p[0], 0) / b.length, cz = b.reduce((a, p) => a + p[1], 0) / b.length;
+    const useky = this.usekyCiest(cx, cz);
+    const odCesty = (x, z) => {
+      let m = Infinity;
+      for (const [ax, az, bx, bz] of useky) {
+        const dx = bx - ax, dz = bz - az, l = dx * dx + dz * dz || 1;
+        const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l));
+        m = Math.min(m, Math.hypot(ax + dx * t - x, az + dz * t - z));
+      }
+      return m;
+    };
+    let best = -1, i0 = 0, skore = Infinity;
     for (let i = 0; i < b.length; i++) {
       const q = b[(i + 1) % b.length], L = Math.hypot(q[0] - b[i][0], q[1] - b[i][1]);
-      if (L > best) { best = L; i0 = i; }
+      if (L < 3) continue;
+      // stena pri susednom dome (radová zástavba) – tam tabuľa nepatrí
+      const vx = (q[1] - b[i][1]) / L, vz = -(q[0] - b[i][0]) / L;
+      if (this.vInejBudove((b[i][0] + q[0]) / 2 + vx * 1.5, (b[i][1] + q[1]) / 2 + vz * 1.5, obrys)) continue;
+      // blízko ulice / chodníka, nie príliš krátka stena, a čo najbližšie k bodu služby (vchod)
+      const kBodu = Math.sqrt(najblizsiNaUsecke(s.x, s.z, b[i][0], b[i][1], q[0], q[1]).d2) * 0.3;
+      const v = useky.length ? odCesty((b[i][0] + q[0]) / 2, (b[i][1] + q[1]) / 2) - Math.min(L, 20) * 0.15 + kBodu : kBodu - L;
+      if (v < skore) { skore = v; best = L; i0 = i; }
     }
+    if (best < 0) return this.stojan(s, g);
     const a = b[i0], q = b[(i0 + 1) % b.length];
     const ux = (q[0] - a[0]) / best, uz = (q[1] - a[1]) / best;
     // obrys je v rovine x, z (z na juh) – pri kladnej ploche je von normála (uz, −ux)
@@ -142,7 +211,8 @@ export default {
     const sir = Math.min(6.0, Math.max(2.2, best * 0.5)), vys = sir / 4;
     const mx = (a[0] + q[0]) / 2 + nx * 0.14, mz = (a[1] + q[1]) / 2 + nz * 0.14;
     const y = this.hra.mapa.vyska(mx, mz) + 3.4;
-    const doska = new THREE.Mesh(new THREE.PlaneGeometry(sir, vys), new THREE.MeshStandardMaterial({ map: texturaTabule(s), roughness: 0.45, metalness: 0.1, emissive: '#ffffff', emissiveIntensity: 0.0 }));
+    const t = texturaTabule(s);
+    const doska = new THREE.Mesh(new THREE.PlaneGeometry(sir, vys), new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: '#ffffff', emissiveIntensity: 0.22, roughness: 0.45, metalness: 0.1 }));
     doska.position.set(mx, y + vys / 2, mz);
     doska.rotation.y = Math.atan2(nx, nz);
     const ram = new THREE.Mesh(new THREE.BoxGeometry(sir + 0.12, vys + 0.12, 0.08), this.matStojan);
@@ -170,7 +240,8 @@ export default {
     const telo = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.6, 0.2), this.matStojan);
     telo.position.set(x, y + 1.3, z);
     g.add(telo);
-    const mat = new THREE.MeshStandardMaterial({ map: texturaTabule(s), roughness: 0.45, metalness: 0.1, side: THREE.DoubleSide });
+    const t = texturaTabule(s);
+    const mat = new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: '#ffffff', emissiveIntensity: 0.22, roughness: 0.45, metalness: 0.1, side: THREE.DoubleSide });
     const doska = new THREE.Mesh(new THREE.PlaneGeometry(sir, vys), mat);
     doska.position.set(x, y + 2.5, z);
     doska.rotation.y = (s.id * 2.399) % Math.PI;
@@ -180,10 +251,19 @@ export default {
     this.hra.mapa.kolizie?.pridajKruh?.(x, z, 0.25, { typ: 'stojan' });
   },
 
+  /** Je načítaná podrobná dlaždica s bodom (x, z)? */
+  budovaDlazdice(x, z) {
+    for (const d of this.dlazdice.values()) {
+      if (d.budovy.some((b) => b.body?.length && Math.abs(b.body[0][0] - x) < 260 && Math.abs(b.body[0][1] - z) < 260)) return true;
+    }
+    return false;
+  },
+
   postavStvorec(st) {
     st.skupina = new THREE.Group();
     for (const s of st.sluzby) {
-      if (s.budova && s.budova.length > 2) this.tabulaNaFasade(s, st.skupina);
+      const budova = s.budova?.length > 2 ? s.budova : !s.areal ? this.budovaPreBod(s.x, s.z) : null;
+      if (budova) this.tabulaNaFasade(s, st.skupina, budova);
       else this.stojan(s, st.skupina);
     }
     for (const o of st.skupina.children) { o.castShadow = true; o.receiveShadow = true; }
@@ -199,8 +279,10 @@ export default {
     for (const st of this.stvorce.values()) {
       const d = Math.hypot(st.cx - x, st.cz - z);
       if (d < DOHLAD + STVOREC * 0.7) {
-        if (!st.skupina) this.postavStvorec(st);
-        st.skupina.visible = true;
+        st.cakanie = (st.cakanie ?? 0) + 1;
+        // počkaj na budovy z dlaždice (bod služby sa umiestni na fasádu), najviac 6 s
+        if (!st.skupina && (this.budovaDlazdice(st.cx, st.cz) || st.cakanie > 6)) this.postavStvorec(st);
+        if (st.skupina) st.skupina.visible = true;
       } else if (st.skupina) st.skupina.visible = false;
     }
     // značky na minimape pre blízke služby
