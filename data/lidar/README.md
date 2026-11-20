@@ -47,7 +47,9 @@ v `tools/mesto/laser/spolocne.py`), na ktorom sa postup ladí. `--vsetko` spracu
 - `data/mapa/mesto/teren.bin` + `teren.json` – terén celého mesta (Int16, decimetre nad 139 m n. m., 20 m).
 - `data/mapa/mesto/t/<i>_<j>.bin` – detailný terén dlaždice (2 m, 251 × 251 uzlov, uint16 (výška − 100 m)·100,
   po riadkoch rozdiely susedov, gzip; ~50 kB na dlaždicu).
-- `data/mapa/mesto/strechy/<i>_<j>.json` – strechy z rovín (šikmé so škridlou, ploché so štrkom, štíty), komíny.
+- `data/mapa/mesto/strechy/<i>_<j>.bin` – strechy z rovín (šikmé so škridlou, ploché so štrkom, štíty), komíny;
+  binárne (indexované trojuholníky, poloha na 2 cm, gzip), ~250–500 kB na dlaždicu Starého Mesta. Formát je popísaný
+  vo funkcii `zapis_strechy` v `tools/mesto/laser/budovy.py`, číta ho `js/mapa/dlazdice/doplnky.js`.
 - v `data/mapa/mesto/d/<i>_<j>.json` pri budovách: `vyska` (po odkvap), `vyskaLaser` (medián DMP − DMR
   vnútri pôdorysu), `hreben`, `tvarStrechy`, `zdrojVysky` (`lidar` / `osm` / `odhad`), `diery` (dvory),
   `lod2`; stromy `[x, z, mierka, výška, polomer koruny]`.

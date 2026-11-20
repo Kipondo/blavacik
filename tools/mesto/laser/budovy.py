@@ -52,6 +52,9 @@ def lin(hexa):
 PRIEMER_SKRIDLA = np.array([0.182, 0.061, 0.028])
 PRIEMER_STRK = np.array([0.226, 0.213, 0.173])
 SKRIDLA = ['#9c4a35', '#a5553c', '#8e4431', '#b0603f', '#7d4a3a']
+# veľkosť textúry v metroch (musí sedieť s js/mapa/budovy/strechy-lod2.js) – UV sa posúva o jej násobky
+PERIODA = {'sikme': 2.2, 'ploche': 1.6, 'steny': 3.0}
+KODY = {'sikme': 0, 'ploche': 1, 'steny': 2}
 
 
 def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
@@ -372,6 +375,8 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
         otoc = (n[:, 1] < 0) if von is None else (n[:, 0] * von[:, 0] + n[:, 2] * von[:, 1] < 0)
         tri[otoc] = tri[otoc][:, [0, 2, 1]]; uvs[otoc] = uvs[otoc][:, [0, 2, 1]]
+        perioda = PERIODA[druh] * 10
+        uvs = uvs - np.floor(uvs.reshape(-1, 2).min(0) / perioda) * perioda
         vystup[kl][druh].append((tri, uvs, np.repeat(farba[None], len(tri), 0)))
     zlyhalo = 0
     for s, ch in kruhy.items():
@@ -449,18 +454,54 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     # --- zápis ---
     os.makedirs(os.path.join(VYSTUP, 'strechy'), exist_ok=True)
     for kl, casti in vystup.items():
-        out = {}
-        for druh, zoznam in casti.items():
-            if not zoznam: continue
-            T = np.concatenate([z_[0] for z_ in zoznam]); U = np.concatenate([z_[1] for z_ in zoznam]); C = np.concatenate([z_[2] for z_ in zoznam])
-            out[druh] = {'p': np.round(T, 2).ravel().tolist(), 'uv': np.round(U, 2).ravel().tolist(), 'c': np.round(np.repeat(C, 3, 0), 3).ravel().tolist()}
-        if kominy.get(kl): out['kominy'] = kominy[kl]
-        uloz_json(os.path.join(VYSTUP, 'strechy', f'{kl}.json'), out)
+        i_, j_ = map(int, kl.split('_'))
+        cesta = os.path.join(VYSTUP, 'strechy', f'{kl}.bin')
+        zapis_strechy(cesta, i_ * DLAZDICA, j_ * DLAZDICA, casti, kominy.get(kl, []))
+        stary = os.path.join(VYSTUP, 'strechy', f'{kl}.json')
+        if os.path.exists(stary): os.remove(stary)
         for b in data[kl]['budovy']:
             b.pop('_k', None)
         uloz_json(os.path.join(VYSTUP, 'd', f'{kl}.json'), data[kl])
-        print(f'  {kl}: {os.path.getsize(os.path.join(VYSTUP, "strechy", f"{kl}.json")) / 1e6:.2f} MB', flush=True)
+        print(f'  {kl}: {os.path.getsize(cesta) / 1e3:.0f} kB', flush=True)
     return list(vystup)
+
+
+def zarovnaj(kusy):
+    dlzka = sum(len(k) for k in kusy)
+    if dlzka % 4: kusy.append(b'\0' * (4 - dlzka % 4))
+
+
+def zapis_strechy(cesta, x0, z0, casti, kominy):
+    """Binárny formát striech (gzip, little-endian):
+    'STR2', x0, z0 (float32), počet skupín (uint32); pre každú skupinu: kód (uint8: 0 šikmé, 1 ploché, 2 steny),
+    3 B výplň, nV, nI (uint32), poloha uint16×3·nV (x, z: (súr. − začiatok dlaždice + 20 m)·50, y: (y + 60 m)·50),
+    uv int16×2·nV (cm), farba uint8×3·nV (sRGB), výplň na 4 B, indexy uint16/uint32 (uint32, ak nV > 65535), výplň na 4 B;
+    nakoniec počet komínov (uint32) a float32×7 na komín."""
+    import struct
+    kusy = [b'STR2', struct.pack('<ffI', x0, z0, sum(1 for z in casti.values() if z))]
+    for druh, zoznam in casti.items():
+        if not zoznam: continue
+        T = np.concatenate([z_[0] for z_ in zoznam]).reshape(-1, 3)
+        U = np.concatenate([z_[1] for z_ in zoznam]).reshape(-1, 2)
+        C = np.repeat(np.concatenate([z_[2] for z_ in zoznam]), 3, 0)
+        q = np.stack([(T[:, 0] - x0 + 20) * 50, (T[:, 1] + 60) * 50, (T[:, 2] - z0 + 20) * 50], 1)
+        q = np.clip(np.round(q), 0, 65535).astype(np.uint16)
+        u = np.clip(np.round(U * 100), -32768, 32767).astype(np.int16)
+        srgb = np.where(C <= 0.0031308, C * 12.92, 1.055 * np.power(np.clip(C, 0, None), 1 / 2.4) - 0.055)
+        c = np.clip(np.round(srgb * 255), 0, 255).astype(np.uint8)
+        riadky = np.concatenate([q.view(np.uint8).reshape(-1, 6), u.view(np.uint8).reshape(-1, 4), c], 1)
+        uniq, inv = np.unique(riadky, axis=0, return_inverse=True)
+        nV = len(uniq); idx = inv.ravel().astype(np.uint32 if nV > 65535 else np.uint16)
+        kusy.append(struct.pack('<B3xII', KODY[druh], nV, len(idx)))
+        kusy += [np.ascontiguousarray(uniq[:, 0:6]).tobytes(), np.ascontiguousarray(uniq[:, 6:10]).tobytes(),
+                 np.ascontiguousarray(uniq[:, 10:13]).tobytes()]
+        zarovnaj(kusy)                      # zarovnanie na 4 B od začiatku súboru (typové polia v JS)
+        kusy.append(idx.tobytes())
+        zarovnaj(kusy)
+    kusy.append(struct.pack('<I', len(kominy)))
+    kusy.append(np.array(kominy, np.float32).tobytes())
+    with gzip.open(cesta, 'wb', compresslevel=9) as f:
+        f.write(b''.join(kusy))
 
 
 def dp(pts, tol):

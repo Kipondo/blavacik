@@ -1,7 +1,7 @@
 // Strechy budov z laserového skenovania (LOD2): roviny striech, ploché časti a štíty.
-// Dáta: data/mapa/mesto/strechy/<i>_<j>.json (vyrába tools/mesto/laser/budovy.py)
-//   { sikme: {p, uv, c}, ploche: {p, uv, c}, steny: {p, uv, c} } – trojuholníky bez indexov,
-//   uv v metroch, c = lineárny odtieň (násobí textúru).
+// Dáta: data/mapa/mesto/strechy/<i>_<j>.bin (vyrába tools/mesto/laser/budovy.py, číta js/mapa/dlazdice/doplnky.js)
+//   { sikme: {p, uv, c, i}, ploche: {…}, steny: {…}, kominy } – p v súradniciach hry, uv v metroch,
+//   c = lineárny odtieň (násobí textúru), i = indexy trojuholníkov (vrcholy sa medzi plochami nezdieľajú).
 // Materiály sú CC0 textúry z ambientCG (assets/textury/LICENSE.md).
 
 import * as THREE from 'three';
@@ -86,6 +86,7 @@ export function vytvorStrechyLod2(data) {
     g.setAttribute('position', new THREE.Float32BufferAttribute(d.p, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(d.uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(d.c, 3));
+    if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
     g.computeVertexNormals();
     g.computeBoundingSphere();
     const m = new THREE.Mesh(g, mat[druh]);
