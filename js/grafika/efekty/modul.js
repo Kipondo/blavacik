@@ -15,6 +15,17 @@ const KVALITA = {
   vysoka: { efekty: true, msaa: 4, vzorkyAo: 12, ao: true, tiene: 4096, dosahTienov: 120 },
 };
 
+/** Integrovaná grafika (notebooky, kancelárske PC) začne na strednej kvalite, samostatná karta na vysokej. */
+function predvolenaKvalita(renderer) {
+  try {
+    const gl = renderer.getContext();
+    const info = gl.getExtension('WEBGL_debug_renderer_info');
+    const nazov = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+    if (/intel|iris|uhd|radeon\(tm\) graphics|vega|mali|adreno|swiftshader|llvmpipe/i.test(nazov)) return 'stredna';
+  } catch { /* nevadí */ }
+  return 'vysoka';
+}
+
 export default {
   nazov: 'efekty',
   poradie: 2,
@@ -25,7 +36,7 @@ export default {
     this.vykreslovac = new Vykreslovac(hra.renderer, hra.scena, hra.kamera);
     this._smer = new THREE.Vector3();
 
-    this.kvalita = nacitajKvalitu();
+    this.kvalita = nacitajKvalitu(predvolenaKvalita(hra.renderer));
     vlozKvalituDoMenu(this.kvalita, (k) => this.nastavKvalitu(k));
     this.nastavKvalitu(this.kvalita);
 
