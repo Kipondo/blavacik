@@ -1,6 +1,7 @@
 // Stromy ako InstancedMesh, rozdelené do štvorcov (chunkov), aby sa vzdialené
 // a neviditeľné skupiny stromov vôbec nevykresľovali.
-// Formát v dátach: "stromy": [[x, z, mierka], ...]
+// Formát v dátach: "stromy": [[x, z, mierka], ...] alebo z laserového skenovania
+// [[x, z, mierka, výška, polomer koruny], ...] – strom má potom skutočnú výšku a šírku koruny.
 
 import * as THREE from 'three';
 
@@ -12,7 +13,9 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   skupina.name = 'stromy';
   if (!stromy?.length) return skupina;
 
-  const { listnaty, ihlicnaty, kmenGeo } = geometrieStromov();
+  // stromy z lasera (výrez s detailom) dostanú členitejšiu korunu, ostatné jednoduchšiu (lesy majú tisíce stromov)
+  const bohate = stromy[0]?.length >= 5;
+  const { listnaty, ihlicnaty, kmenGeo } = geometrieStromov(bohate);
   const matKmen = new THREE.MeshStandardMaterial({ color: '#5b4632', roughness: 1 });
   const matKoruna = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.85, flatShading: true });
 
@@ -28,27 +31,29 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   const os = new THREE.Vector3(0, 1, 0);
   const farba = new THREE.Color();
   for (const zoznam of chunky.values()) {
-    // ~1/6 stromov sú ihličnany
-    const druhy = zoznam.map(([, i]) => ((i * 7919) % 6 === 0 ? 1 : 0));
+    // ihličnany: z lasera podľa tvaru (úzka vysoká koruna), inak ~1/6 stromov
+    const druhy = zoznam.map(([s, i]) => (s.length >= 5 ? (s[3] / (2 * s[4]) > 1.9 ? 1 : 0) : (i * 7919) % 6 === 0 ? 1 : 0));
     const pocetIhl = druhy.filter((d) => d).length;
     const kmene = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
     const koruny = new THREE.InstancedMesh(listnaty, matKoruna, zoznam.length - pocetIhl);
     const ihlice = new THREE.InstancedMesh(ihlicnaty, matKoruna, Math.max(1, pocetIhl));
     ihlice.count = pocetIhl;
     let sx = 0, sz = 0, kl = 0, ki = 0;
-    zoznam.forEach(([[x, z, s = 1], i], j) => {
+    zoznam.forEach(([[x, z, s = 1, h, r], i], j) => {
       const y = vyskopis.vyskaTerenu(x, z);
       q.setFromAxisAngle(os, (i * 2.399) % (Math.PI * 2));
-      m.compose(new THREE.Vector3(x, y, z), q, new THREE.Vector3(s, s * (0.9 + (i % 5) * 0.06), s));
+      // laser: skutočná výška a polomer koruny (základný model: výška 7,4 m, polomer koruny 2,6 m)
+      const mv = h ? h / 7.4 : s * (0.9 + (i % 5) * 0.06), mh = r ? r / 2.6 : s;
+      m.compose(new THREE.Vector3(x, y, z), q, new THREE.Vector3(mh, mv, mh));
       kmene.setMatrixAt(j, m);
       if (druhy[j]) {
         farba.setHSL(0.33 + (i % 5) * 0.01, 0.35, 0.2 + (i % 4) * 0.02);
         ihlice.setMatrixAt(ki, m); ihlice.setColorAt(ki++, farba);
       } else {
-        farba.setHSL(0.22 + (i % 7) * 0.014, 0.45 + (i % 3) * 0.07, 0.3 + (i % 5) * 0.03);
+        farba.setHSL(0.2 + (i % 7) * 0.015, 0.36 + (i % 3) * 0.07, 0.22 + (i % 5) * 0.025);
         koruny.setMatrixAt(kl, m); koruny.setColorAt(kl++, farba);
       }
-      kolizie?.pridajKruh(x, z, 0.45 * s, { typ: 'strom' });
+      kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt(mh * mv)), { typ: 'strom' });
       sx += x; sz += z;
     });
     const chunk = new THREE.Group();
@@ -64,17 +69,21 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   return skupina;
 }
 
-let cacheGeo = null;
-/** Geometrie stromov: listnatý (zhluk 4 nepravidelných gúľ) a ihličnatý (dva kužele). */
-function geometrieStromov() {
-  if (cacheGeo) return cacheGeo;
+const cacheGeo = {};
+/** Geometrie stromov: listnatý (zhluk nepravidelných gúľ) a ihličnatý (dva kužele). */
+function geometrieStromov(bohate) {
+  if (cacheGeo[bohate]) return cacheGeo[bohate];
   const kmenGeo = new THREE.CylinderGeometry(0.18, 0.3, 3.2, 7);
   kmenGeo.translate(0, 1.6, 0);
 
   const casti = [];
-  const gule = [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5]];
+  // koruna zo zhlukov listov: väčšie jadro a menšie chumáče po obvode (členitejší obrys)
+  const gule = bohate
+    ? [[0, 5.0, 0, 2.0], [1.4, 4.4, 0.5, 1.3], [-1.3, 4.5, -0.6, 1.35], [0.3, 6.3, -0.3, 1.25], [-0.5, 4.2, 1.4, 1.2],
+      [0.7, 4.3, -1.4, 1.15], [1.6, 5.6, -0.4, 1.0], [-1.5, 5.7, 0.6, 1.0], [-0.2, 3.6, -0.2, 1.4], [0.9, 6.6, 0.8, 0.85]]
+    : [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5]];
   gule.forEach(([x, y, z, r], k) => {
-    const g = new THREE.IcosahedronGeometry(r, 0);
+    const g = new THREE.IcosahedronGeometry(r, bohate ? 1 : 0);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
       // nepravidelnosť – aby to nebola dokonalá guľa
@@ -90,8 +99,8 @@ function geometrieStromov() {
   const ihlicnaty = spojGeometrie([k1, k2], 2.4, 8);
 
   for (const g of [listnaty, ihlicnaty, kmenGeo]) g.userData.zdielane = true;
-  cacheGeo = { listnaty, ihlicnaty, kmenGeo };
-  return cacheGeo;
+  cacheGeo[bohate] = { listnaty, ihlicnaty, kmenGeo };
+  return cacheGeo[bohate];
 }
 
 /** Spojí geometrie a pridá farbu vrcholov: dole tmavšie (tieň v korune), hore svetlejšie. */

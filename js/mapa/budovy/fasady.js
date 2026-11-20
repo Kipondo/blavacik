@@ -289,6 +289,8 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
           vec3 zaclona = mix(vec3(0.78, 0.74, 0.66), vec3(0.62, 0.64, 0.66), h2);
           float horna = smoothstep(0.35, 0.5, fract(vv) + (h2 - 0.5) * 0.3);
           fa.rgb = mix(fa.rgb * mix(0.8, 1.6, hs), zaclona * 0.55, hs < 0.45 ? horna * 0.85 : 0.0);
+          // výklady na prízemí: osvetlený interiér obchodu
+          if (riadok > 0.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
           drsnF = hs < 0.45 ? mix(0.14, 0.3, horna) : 0.12;
         }
         diffuseColor.rgb = mix(farbaBudovy, fa.rgb, maska) * tienF;

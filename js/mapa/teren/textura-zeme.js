@@ -193,6 +193,8 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
 // Trieda povrchu pre materiál zeme (kanál R): 0 = prírodný povrch (farba z textúry pokrývky),
 // 0,5 = chodník z kamenných dlaždíc, 1 = mačacie hlavy / žulová dlažba (pešie zóny, námestia).
 const TRIEDA_POKRYVKY = { dlazba: 255, zaklad: 128 };
+// približný obrys historického jadra (Michalská brána – Hlavné nám. – Dóm – Hviezdoslavovo nám.)
+const JADRO = { x: -60, z: 40, rx: 330, rz: 280, uhol: 0.35 };
 const TRIEDA_CHODNIKOV = { pedestrian: 255, footway: 128, steps: 128, corridor: 128, platform: 128, cycleway: 128 };
 
 /** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
@@ -210,6 +212,11 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
   const seda = (v) => `rgb(${v},${v},${v})`;
   g.fillStyle = seda(TRIEDA_POKRYVKY.zaklad);
   g.fillRect(0, 0, px, px);
+  // historické jadro (Staré Mesto v hradbách a okolie): ulice a dvory sú vydláždené kockami
+  g.fillStyle = seda(255);
+  g.beginPath();
+  g.ellipse(sx(JADRO.x), sz(JADRO.z), JADRO.rx * mierka, JADRO.rz * mierka, JADRO.uhol, 0, Math.PI * 2);
+  g.fill();
   for (const p of d.pokryvka ?? []) {
     g.fillStyle = seda(TRIEDA_POKRYVKY[p.k] ?? 0);
     cesta(p.body, true);

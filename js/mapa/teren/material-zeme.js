@@ -75,7 +75,7 @@ function materialZemeDlazba(mapa, triedy) {
         float wC = smoothstep(0.3, 0.42, trieda) * (1.0 - wK);
         // jemná nerovnomernosť (špina, opotrebenie) z veľkého detailu
         float spina = texture2D(detailMapa, vSvet * 0.04).r * 2.0;
-        vec3 kocky = texture2D(kockyF, vSvet / 2.4).rgb * mix(0.85, 1.12, spina * 0.5);
+        vec3 kocky = texture2D(kockyF, vSvet / 2.4).rgb * mix(1.05, 1.35, spina * 0.5);
         vec3 chodnik = texture2D(chodF, vSvet / 2.2).rgb * mix(0.88, 1.08, spina * 0.5);
         diffuseColor.rgb = mix(diffuseColor.rgb, kocky, wK);
         diffuseColor.rgb = mix(diffuseColor.rgb, chodnik, wC);`)

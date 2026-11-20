@@ -6,7 +6,8 @@
 #  - vnútorné dvory podľa lasera (diery v pôdoryse), ak ich OSM nemá,
 #  - strecha ako mnohouholníky rovín → data/mapa/mesto/strechy/<i>_<j>.json:
 #      { "sikme": {p, uv, c}, "ploche": {p, uv, c}, "steny": {p, uv, c} }  (trojuholníky bez indexov,
-#      p = x,y,z v súradniciach hry, uv v metroch, c = lineárna farba RGB 0–1 na vrchol).
+#      p = x,y,z v súradniciach hry, uv v metroch, c = lineárna farba RGB 0–1 na vrchol;
+#      "kominy": [[x, z, spodok, vrch, šírka, hĺbka, uhol], ...] – komíny nájdené ako malé výstupky nad strechou).
 # Postup strechy: povrch strechy sa rozloží na rovinné plochy (sklon a smer + spájanie podobných rovín),
 # hranice plôch sa prevedú na lomené čiary a zjednodušia (spoločné hranice raz → bez škár), body na
 # hrebeňoch a úžľabiach sa posunú na priesečník rovín (rovné ostré hrany), plochy sa strianguľujú (earcut)
@@ -257,6 +258,31 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         vrch_steny[k] = hmax + b['vyska']; lod2[k] = True; stat['lidar'] += 1
     print(f'budovy: s laserom {stat["lidar"]}, bez {stat["bez"]}', flush=True)
 
+    # --- komíny: malé výstupky nad rovinou strechy (0,5–6 m², 0,7–4 m nad strechou) ---
+    nad = np.where(strecha & (seg > 0), dsm - vys, 0)
+    lab_k, nk = ndimage.label(nad > 0.7)
+    kominy = {kl: [] for kl in data}
+    if nk:
+        objekty = ndimage.find_objects(lab_k)
+        vel = np.bincount(lab_k.ravel(), minlength=nk + 1)
+        for l, sl in enumerate(objekty, 1):
+            if not (2 <= vel[l] <= 24): continue
+            m = lab_k[sl] == l
+            hy, hx = sl[0].start, sl[1].start
+            vy, vx = np.nonzero(m)
+            k = int(np.bincount(bid[sl][m]).argmax())
+            if k == 0 or not lod2[k]: continue
+            vrch = float(dsm[sl][m].max()); spod = float(vys[sl][m].min())
+            if not (0.7 <= vrch - spod <= 4.0): continue
+            # natočenie podľa najdlhšej steny budovy
+            body = budovy[k - 1]['body']
+            dl = [(math.hypot(q[0] - p_[0], q[1] - p_[1]), math.atan2(q[1] - p_[1], q[0] - p_[0])) for p_, q in zip(body, body[1:] + body[:1])]
+            uhol = max(dl)[1]
+            strana = min(1.6, max(0.5, math.sqrt(vel[l]) * K))
+            x = X0 + (hx + vx.mean() + 0.5) * K; z = Z0 + (hy + vy.mean() + 0.5) * K
+            kominy[dlazdica_budovy[k - 1]].append([round(x, 2), round(z, 2), round(spod - NULA - 0.3, 2), round(vrch - NULA, 2), round(strana, 2), round(strana * 0.8, 2), round(uhol, 3)])
+    print(f'komíny: {sum(len(v) for v in kominy.values())}', flush=True)
+
     # --- 2) hranice plôch → reťazce ---
     L = np.where(lod2[bid] | (seg == 0), seg, 0)
     L[~lod2[bid]] = 0
@@ -428,6 +454,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
             if not zoznam: continue
             T = np.concatenate([z_[0] for z_ in zoznam]); U = np.concatenate([z_[1] for z_ in zoznam]); C = np.concatenate([z_[2] for z_ in zoznam])
             out[druh] = {'p': np.round(T, 2).ravel().tolist(), 'uv': np.round(U, 2).ravel().tolist(), 'c': np.round(np.repeat(C, 3, 0), 3).ravel().tolist()}
+        if kominy.get(kl): out['kominy'] = kominy[kl]
         uloz_json(os.path.join(VYSTUP, 'strechy', f'{kl}.json'), out)
         for b in data[kl]['budovy']:
             b.pop('_k', None)

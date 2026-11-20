@@ -44,7 +44,8 @@ const MENA_FARIEB = {
   ochre: '#d3a85a', tan: '#d2b48c', ivory: '#f6f1df', maroon: '#7a3a30', silver: '#c0c4c8', gold: '#d9b04a',
 };
 const PALETY = {
-  stare: ['#ecd9a3', '#f1e3c6', '#e8c4a0', '#f3d1c4', '#d9e4c8', '#f4efe4', '#e6cf8f', '#d8c3a5', '#e9d4bd', '#f6e7b8'],
+  // Staré Mesto: pastelové omietky (okrová, lososová, pistáciová, sivomodrá, krémová, biela)
+  stare: ['#ecd28f', '#f1e3c6', '#e9b98f', '#f0c4b4', '#cfdcae', '#f4efe4', '#e6c46f', '#d8c3a5', '#f2d6b0', '#f6e7a8', '#c9d6dc', '#e8a98c', '#f5f0e0', '#dcc89a'],
   mesto: ['#d6d0c2', '#c9c6bd', '#e0dbd0', '#c2b59b', '#d8cbb4', '#bfc4c0', '#e4ddcf'],
   moderne: ['#8fa7b8', '#a3b9c7', '#c8d3da', '#9ea7ad', '#d5d8d6', '#b6c2c8'],
   panelaky: ['#f2f0ea', '#e9e5da', '#f6d28b', '#a8d0e6', '#f4a6a6', '#b8e0b0', '#d9c2f0', '#ffd8a8', '#fff2a8'],

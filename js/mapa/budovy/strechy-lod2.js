@@ -40,6 +40,39 @@ function ziskajMaterialy() {
   return materialy;
 }
 
+let kominGeo = null, kominMat = null;
+const FARBY_KOMINOV = ['#b07a62', '#9c6b56', '#c9bfb2', '#a39a8e', '#8d5a47'].map((c) => new THREE.Color(c));
+
+/** Komíny (nájdené laserom ako malé výstupky nad strechou) – jedna inštancovaná sieť na dlaždicu. */
+function vytvorKominy(kominy) {
+  if (!kominGeo) {
+    // telo komína + mierne širšia hlava
+    const telo = new THREE.BoxGeometry(1, 1, 1); telo.translate(0, 0.5, 0);
+    const hlava = new THREE.BoxGeometry(1.18, 0.12, 1.18); hlava.translate(0, 0.96, 0);
+    const spoj = (a, b) => {
+      const g = new THREE.BufferGeometry();
+      for (const k of ['position', 'normal', 'uv']) {
+        g.setAttribute(k, new THREE.Float32BufferAttribute([...a.toNonIndexed().attributes[k].array, ...b.toNonIndexed().attributes[k].array], a.attributes[k].itemSize));
+      }
+      return g;
+    };
+    kominGeo = spoj(telo, hlava);
+    kominGeo.userData.zdielane = true;
+    kominMat = new THREE.MeshStandardMaterial({ roughness: 0.9 });
+  }
+  const m = new THREE.InstancedMesh(kominGeo, kominMat, kominy.length);
+  const mat = new THREE.Matrix4(), q = new THREE.Quaternion(), os = new THREE.Vector3(0, 1, 0);
+  kominy.forEach(([x, z, y0, y1, w, d, uhol], i) => {
+    q.setFromAxisAngle(os, -uhol);
+    mat.compose(new THREE.Vector3(x, y0, z), q, new THREE.Vector3(w, Math.max(0.5, y1 - y0), d));
+    m.setMatrixAt(i, mat);
+    m.setColorAt(i, FARBY_KOMINOV[(Math.abs(Math.round(x * 3 + z * 7))) % FARBY_KOMINOV.length]);
+  });
+  m.castShadow = true; m.receiveShadow = true;
+  m.name = 'kominy';
+  return m;
+}
+
 /** Sieť striech jednej dlaždice (skupina troch sietí podľa materiálu). */
 export function vytvorStrechyLod2(data) {
   const skupina = new THREE.Group();
@@ -61,5 +94,6 @@ export function vytvorStrechyLod2(data) {
     m.name = `strechy-${druh}`;
     skupina.add(m);
   }
+  if (data.kominy?.length) skupina.add(vytvorKominy(data.kominy));
   return skupina;
 }
