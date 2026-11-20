@@ -22,7 +22,9 @@ VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sk
           'sky_park_offices', 'tower_115', 'nbs',
           # z 3D tagov OSM (vyskove/z_osm.py)
           'cbc_1', 'vub', 'gloria', 'millennium_tower', 'aupark_tower', 'technopol', 'incheba', 'matadorka',
-          'central', 'lakeside_park', 'manderla']
+          'central', 'lakeside_park', 'manderla',
+          # tretia dávka: prerobené staré modely a ďalšie významné budovy
+          'kamzik', 'rozhlas', 'nr_sr', 'nove_snd', 'nivy', 'sng', 'stadion_tehelne_pole', 'zimny_stadion', 'istropolis']
 
 
 def main():
