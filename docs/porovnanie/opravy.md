@@ -268,3 +268,37 @@ https://earth.google.com/web/@48.14160,17.10050,170a,600d,35y,300h,65t,0r
 
 ## Pokračovanie
 Ďalšia etapa: 5 – Most SNP, Starý most, Apollo a najbližšia Petržalka (Aupark, Sad Janka Kráľa).
+
+---
+
+# Etapa 5: Mosty a Sad Janka Kráľa
+
+Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. Snímky z hry: `docs/snimky/porovnanie/e5-hra-mozaika.jpg`
+(vľavo hore Most SNP, vpravo hore Starý most, vľavo dole Most Apollo s Eurovea Tower, vpravo dole Sad Janka Kráľa).
+Pozor: tri pohľady na mosty sú z hladiny Dunaja (bod vybraný automaticky mimo budov), preto nie sú vhodné na posúdenie vody.
+
+## Mosty
+- [ ] [2] **Most SNP, Starý most, Most Apollo** – tvar sedí (pylón s UFO a lanami, priehradové oblúky, oceľový oblúk).
+  Over na leteckom pohľade farbu oblúka Apolla a počet polí Starého mosta:
+  https://earth.google.com/web/@48.13780,17.11500,150a,2500d,35y,90h,65t,0r
+- [ ] [2] **Hladina Dunaja pri pohľade z nízka** – pri kamere tesne nad vodou je celá hladina jednoliato biela/svetlosivá bez vlniek
+  a farby. Over z nábrežia (kamera na chodníku), či ide len o odraz oblohy pri ostrom uhle, alebo chybu materiálu vody
+  (Fresnel, chýbajúca normálová mapa). Dunaj je v skutočnosti hnedozelenkastý a aj z nízka je na ňom vidieť vlny.
+- [ ] [3] **Kamera v strome** – pri Moste SNP stojí strom priamo na nábreží v ceste pohľadu. Over polohu stromov z lasera pri vode.
+
+## Sad Janka Kráľa
+Odkaz (pohľad do parku):
+https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.13450,17.10950&heading=45&pitch=5&fov=80
+
+- [ ] [1] **Hustota a veľkosť stromov** – v hre veľký otvorený trávnik s riedkymi malými low-poly stromami → v skutočnosti
+  najstarší verejný park v strednej Európe: **husto vysadené mohutné staré stromy** (hrubé kmene, koruny 20–30 m),
+  ktoré tvoria súvislú klenbu tieňa nad celým parkom. Pod nimi tráva a asfaltové chodníky.
+  Ak laser stromy v parku nenašiel (mimo výrezu), použi pre `leisure=park` s historickým charakterom hustú výsadbu veľkých listnatých stromov.
+- [ ] [2] **Ihličnany** – v hre sú medzi stromami kužeľovité ihličnany, v parku prevládajú listnaté stromy (platany, duby, gaštany).
+- [ ] [2] **Gotická vežička** (presunutá veža Františkánskeho kostola) a **socha Janka Kráľa** – v hre chýbajú.
+
+## Neoverené
+- Aupark a sídliská pri Dunaji, Eurovea promenáda – porovnať v etape 6 (Nivy, Mlynské nivy, Eurovea).
+
+## Pokračovanie
+Ďalšia etapa: 6 – Nivy, Mlynské nivy, Eurovea.
