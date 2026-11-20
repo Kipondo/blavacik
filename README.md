@@ -94,6 +94,20 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   začne na strednej). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
   hra drží 60 FPS. Snímky pred/po: `docs/snimky/grafika/`. Ladenie AO v konzole:
   `hra.moduly.find(m => m.nazov === 'efekty').vykreslovac.matVysledok.uniforms.ladenie.value = 1`.
+- **Realistickejší vzhľad – zlatá hodinka** (`js/grafika/nalada.js`): nízke teplé slnko (~12° nad obzorom), dlhé tiene,
+  chladnejšie modrasté tiene, teplá žiara okolo slnka a nasvietené oblaky, teplý opar do diaľky; všetky farby
+  osvetlenia sú na jednom mieste (neskôr sa podľa herného času dá prepínať deň/noc).
+  - **Stromy po druhoch** (`js/mapa/zelen/model-stromu.js`): lipa, javor, platan, breza, topoľ a smrek – kmeň a konáre
+    s kôrou (vlastné procedurálne textúry kôry: brázdy, škvrnitý platan, biela breza), koruna z kariet so zhlukmi listov
+    (CC0) alebo vetvičkami smreka. Do 125 m od kamery podrobný model (vyberá sa po stromoch), ďalej jednoduchá koruna
+    v rovnakom tóne. Listy majú obalené svetlo a proti slnku presvitajú.
+  - **Cesty s opotrebením** (`js/mapa/cesty/opotrebenie.js`): pestrý asfalt, záplaty, zaliate praskliny, tmavšie stopy
+    kolies v pruhoch, špina v žľabe pri obrubníku, ošúchané značenie; záplaty a stopy sa trochu lesknú.
+  - **Chodníky:** popri cestách mimo jadra asfaltové (svetlejšie ako vozovka) s obrubníkom (stena, vrch obrubníka aj
+    zadná hrana), pri domoch sivá zámková dlažba 20 × 10 cm (vlastná textúra `tools/textury/zamkova.py`),
+    na námestiach tmavšie betónové dlaždice, všade špina a nerovnomernosť vo veľkej mierke; mapa povrchu má 0,5 m.
+  - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
+  Snímky pred/po: `docs/snimky/realisticky-vzhlad/`.
 - **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
   20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné
   parapety, nadokenné rímsy a trojuholníkové frontóny, podlažné rímsy a dvojstupňová hlavná rímsa pod strechou;
@@ -163,7 +177,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
-- Deň a noc (svietiace lampy a okná).
+- Deň a noc (svietiace lampy a okná) – nálada v `js/grafika/nalada.js` podľa herného času; vietor v korunách stromov.
 - Engine misií a dialógov, polícia, minimapa.
 
 ## Ako pridať misiu
