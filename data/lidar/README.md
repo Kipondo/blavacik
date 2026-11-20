@@ -38,7 +38,7 @@ python3 tools/mesto/laser/budovy.py             # výšky, dvory, strechy z rov�
 python3 tools/mesto/laser/stromy.py             # stromy (poloha, výška, šírka koruny) pre výrez
 ```
 
-Bez prepínača sa detail robí len pre **výrez 1 × 1 km Starého Mesta** (dlaždice −1…0 × −1…0, `VYREZ`
+Bez prepínača sa detail robí len pre **výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km, dlaždice −2…0 × −1…0, `VYREZ`
 v `tools/mesto/laser/spolocne.py`), na ktorom sa postup ladí. `--vsetko` spracuje celé mesto.
 `teren.py` je potrebné spustiť po každom `npm run dlazdice` (prepíše index.json) – stačí `--len-detail`.
 

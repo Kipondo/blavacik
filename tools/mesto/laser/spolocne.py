@@ -15,8 +15,8 @@ KZ = 111132
 NULA = 139.0          # výška 0 v hre (m n. m.)
 DLAZDICA = 500
 
-# výrez, na ktorom ladíme (1 × 1 km Starého Mesta); --vsetko spracuje celé mesto
-VYREZ = [(-1, -1), (0, -1), (-1, 0), (0, 0)]
+# výrez, na ktorom ladíme (Staré Mesto 1 × 1 km + Hradný kopec = 1,5 × 1 km); --vsetko spracuje celé mesto
+VYREZ = [(-2, -1), (-1, -1), (0, -1), (-2, 0), (-1, 0), (0, 0)]
 
 SUBORY = {
     'dmr': ('LOT08_DMR6_sjtsk03_bpv.zip', 'sjtsk03_bpv/dmr6_08_23_s.tif', 'sjtsk03_bpv/dmr6_08_23_s.tfw'),
