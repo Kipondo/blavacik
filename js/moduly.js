@@ -16,6 +16,7 @@ import dlazdice from './mapa/dlazdice/modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
+import hodiny from './cas/modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -27,6 +28,7 @@ import semafory from './doprava/semafory.js';
 // import minimapa from './ui/minimapa.js';
 
 export default [
+  hodiny,
   prostredie,
   hrac,
   riadenieHracom,
