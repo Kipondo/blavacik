@@ -36,6 +36,27 @@ export async function nacitajDataMapy(KONFIG, priebeh = () => {}) {
   data.pamiatky = pamiatky?.pamiatky ?? [];
   data.miesta = (await nacitajJson('data/mapa/miesta.json', false)) ?? {};
 
+  // Celá Bratislava po dlaždiciach (tools/mesto/) – má prednosť pred ostatnými zdrojmi
+  priebeh('Hľadám mapu celej Bratislavy…');
+  const index = await nacitajJson('data/mapa/mesto/index.json', false);
+  if (index?.dlazdice?.length) {
+    const meta = await nacitajJson('data/mapa/mesto/teren.json');
+    priebeh('Načítavam výškový model…');
+    const r = await fetch('data/mapa/mesto/teren.bin');
+    const vysky = new Int16Array(await r.arrayBuffer());
+    KONFIG.HRANICE = index.hranice; // hracia plocha = celé mesto
+    return {
+      ...data,
+      zdroj: 'mesto',
+      mestoIndex: index,
+      teren: { meta, vysky },
+      voda: index.voda,
+      mosty: index.mosty,
+      budovy: [], cesty: [], stromy: [], plochy: [], zony: [], kopce: [], svahy: [],
+      licencia: index.licencia,
+    };
+  }
+
   // OSM – ak súbor existuje (vyrába ho tools/osm/prevod.mjs), nahradí ručné budovy, cesty a vodu
   priebeh('Načítavam mapu z OpenStreetMap…');
   const osm = await nacitajJson(KONFIG.OSM_SUBOR, false);

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blava City – prehľad mapy</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #e9e6df; color: #222; }
+  #platno { position: fixed; inset: 0; width: 100%; height: 100%; cursor: grab; }
+  #platno.tahanie { cursor: grabbing; }
+  #platno.pin { cursor: crosshair; }
+  .panel { position: fixed; background: rgba(255,255,255,.95); border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.18); padding: 12px 14px; }
+  #vrstvy { top: 12px; left: 12px; width: 250px; max-height: calc(100% - 24px); overflow: auto; }
+  #vrstvy h1 { font-size: 17px; margin: 0 0 2px; }
+  #vrstvy .pod { color: #666; font-size: 12px; margin-bottom: 10px; }
+  #vrstvy label { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
+  #vrstvy .pocet { margin-left: auto; color: #888; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .vzorka { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #555; margin: 14px 0 6px; }
+  select, button { font: inherit; }
+  select { width: 100%; padding: 4px; }
+  .skoky { display: flex; flex-wrap: wrap; gap: 4px; }
+  .skoky button, .tl { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+  .skoky button:hover, .tl:hover { background: #f3f0e8; }
+  .tl.aktivne { background: #c8102e; color: #fff; border-color: #c8102e; }
+  #legenda { font-size: 12px; color: #444; }
+  #legenda div { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+  #info { right: 12px; top: 12px; width: 290px; display: none; }
+  #info h3 { margin: 0 0 6px; font-size: 15px; }
+  #info table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  #info td { padding: 2px 0; vertical-align: top; }
+  #info td:first-child { color: #666; width: 42%; }
+  #dole { left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+  #dole a { color: #1d4e9e; }
+  #chyby { right: 12px; bottom: 12px; width: 290px; display: none; max-height: 45%; overflow: auto; }
+  #chyby ol { padding-left: 20px; margin: 6px 0; font-size: 13px; }
+  #chyby textarea { width: 100%; font: inherit; }
+  #nacitavanie { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #555; }
+  .licencia { font-size: 11px; color: #777; margin-top: 10px; }
+</style>
+</head>
+<body>
+<canvas id="platno"></canvas>
+<div id="nacitavanie">Načítavam mapu Bratislavy…</div>
+
+<div id="vrstvy" class="panel">
+  <h1>Blava City – prehľad mapy</h1>
+  <div class="pod">Čo je v hre teraz. Kontroluj vrstvu po vrstve.</div>
+  <h2>Vrstvy</h2>
+  <div id="zoznamVrstiev"></div>
+  <h2>Farba budov</h2>
+  <select id="rezimBudov">
+    <option value="vyska">podľa výšky</option>
+    <option value="farba">farba fasády (ako v hre)</option>
+    <option value="typ">typ (strecha / sklo)</option>
+  </select>
+  <div id="legenda"></div>
+  <h2>Choď na</h2>
+  <div class="skoky" id="skoky"></div>
+  <h2>Pripomienky</h2>
+  <button class="tl" id="tlPin">📍 Označiť chybu na mape</button>
+  <div class="licencia">Mapové dáta © prispievatelia OpenStreetMap (ODbL). Terén: Copernicus DEM.</div>
+</div>
+
+<div id="info" class="panel"></div>
+
+<div id="chyby" class="panel">
+  <h3 style="margin:0 0 4px;font-size:15px">Pripomienky</h3>
+  <ol id="zoznamChyb"></ol>
+  <button class="tl" id="tlKopiruj">Kopírovať zoznam</button>
+  <span id="skopirovane" style="font-size:12px;color:#2e8b57"></span>
+</div>
+
+<div id="dole" class="panel">
+  <span id="suradnice">–</span>
+  <a id="odkazGoogle" href="#" target="_blank" rel="noopener">Google Maps tu ↗</a>
+  <a id="odkazOsm" href="#" target="_blank" rel="noopener">OpenStreetMap tu ↗</a>
+</div>
+
+<script>
+'use strict';
+const platno = document.getElementById('platno');
+const g = platno.getContext('2d');
+let W = 0, Hh = 0, dpr = 1;
+
+// --- stav pohľadu: svetové metre (x = východ, z = juh) → obrazovka ---
+const pohlad = { x: 0, z: 0, mierka: 0.05 }; // px na meter
+let meta, B, C, CH, Z, S;          // dáta vrstiev
+const vrstvy = [
+  { id: 'zelen', nazov: 'Zeleň a plochy', farba: '#8fbf6a', zap: true },
+  { id: 'voda', nazov: 'Voda', farba: '#6fa8c7', zap: true },
+  { id: 'chodniky', nazov: 'Chodníky a cyklotrasy', farba: '#b9ad92', zap: false },
+  { id: 'cesty', nazov: 'Cesty', farba: '#555', zap: true },
+  { id: 'mosty', nazov: 'Mosty (s nájazdom)', farba: '#c8102e', zap: true },
+  { id: 'budovy', nazov: 'Budovy', farba: '#c9a77c', zap: true },
+  { id: 'stromy', nazov: 'Stromy', farba: '#3f7d2c', zap: false },
+  { id: 'hranica', nazov: 'Hranica mesta', farba: '#7a3b8f', zap: true },
+];
+const zap = (id) => vrstvy.find((v) => v.id === id).zap;
+
+const FARBY_POKRYVKY = { trava: '#a9cf86', les: '#6f9f55', cintorin: '#9fbf8a', ihrisko: '#c7d98f', parkovisko: '#c9c6bd', dlazba: '#e3d8c2', piesok: '#ead9a6', zeleznica: '#c7bfb3', stavenisko: '#d9c9a9' };
+const FARBY_CIEST = { motorway: '#d2584a', trunk: '#e07b4f', primary: '#f0a35a', secondary: '#f3c86b', tertiary: '#f6e3a0' };
+const TRIEDY_VYSKY = [[6, '#e9dcc6'], [12, '#e3c79a'], [20, '#d9a46b'], [35, '#c97a4a'], [60, '#a8503a'], [100, '#7b2d3b'], [999, '#4a1a4f']];
+
+// --- načítanie a dekódovanie ---
+async function nacitaj(meno) {
+  const { base64 } = await (await fetch('data/' + meno.replace('.bin', '.json'))).json();
+  const s = atob(base64), b = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+  return new DataView(b.buffer);
+}
+
+function dekoduj(dv, hlavicka) {
+  // vráti { hl: [..hlavičky], off: Uint32Array, xy: Float32Array, ohr }
+  const zaznamy = [];
+  let p = 0, spoluBodov = 0;
+  while (p < dv.byteLength) {
+    const hl = [];
+    for (const t of hlavicka) { if (t === 1) { hl.push(dv.getUint8(p)); p += 1; } else { hl.push(dv.getUint16(p, true)); p += 2; } }
+    const n = dv.getUint16(p, true); p += 2;
+    zaznamy.push({ hl, n, p });
+    p += n * 4;
+    spoluBodov += n;
+  }
+  const xy = new Float32Array(spoluBodov * 2), off = new Uint32Array(zaznamy.length + 1);
+  const ohr = new Float32Array(zaznamy.length * 4);
+  let k = 0;
+  zaznamy.forEach((zz, i) => {
+    off[i] = k;
+    let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+    for (let j = 0; j < zz.n; j++) {
+      const x = dv.getUint16(zz.p + j * 4, true) / 2 + meta.hranice.minX, z = dv.getUint16(zz.p + j * 4 + 2, true) / 2 + meta.hranice.minZ;
+      xy[k * 2] = x; xy[k * 2 + 1] = z; k++;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (z < z0) z0 = z; if (z > z1) z1 = z;
+    }
+    ohr.set([x0, z0, x1, z1], i * 4);
+  });
+  off[zaznamy.length] = k;
+  return { hl: zaznamy.map((z) => z.hl), off, xy, ohr, n: zaznamy.length, mriezka: mriezka(ohr, zaznamy.length) };
+}
+
+// priestorová mriežka 500 m (rýchly výber toho, čo je na obrazovke)
+function mriezka(ohr, n) {
+  const m = new Map();
+  for (let i = 0; i < n; i++) {
+    const cx = Math.floor((ohr[i * 4] + ohr[i * 4 + 2]) / 2 / 500), cz = Math.floor((ohr[i * 4 + 1] + ohr[i * 4 + 3]) / 2 / 500);
+    const k = cx * 100000 + cz;
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(i);
+  }
+  return m;
+}
+function viditelne(vrstva, rozsah, okraj = 400) {
+  const out = [];
+  for (let cx = Math.floor((rozsah.x0 - okraj) / 500); cx <= Math.floor((rozsah.x1 + okraj) / 500); cx++) {
+    for (let cz = Math.floor((rozsah.z0 - okraj) / 500); cz <= Math.floor((rozsah.z1 + okraj) / 500); cz++) {
+      const z = vrstva.mriezka.get(cx * 100000 + cz);
+      if (z) for (const i of z) out.push(i);
+    }
+  }
+  return out;
+}
+
+async function start() {
+  meta = await (await fetch('data/meta.json')).json();
+  [B, C, CH, Z] = await Promise.all([
+    nacitaj('budovy.bin').then((d) => dekoduj(d, [1, 1, 1, 1, 1])),
+    nacitaj('cesty.bin').then((d) => dekoduj(d, [1, 1, 1])),
+    nacitaj('chodniky.bin').then((d) => dekoduj(d, [1])),
+    nacitaj('zelen.bin').then((d) => dekoduj(d, [1])),
+  ]);
+  const sd = await nacitaj('stromy.bin');
+  S = new Float32Array(sd.byteLength / 2);
+  for (let i = 0; i < S.length; i += 2) { S[i] = sd.getUint16(i * 2, true) / 2 + meta.hranice.minX; S[i + 1] = sd.getUint16(i * 2 + 2, true) / 2 + meta.hranice.minZ; }
+  meta.menaMap = new Map(meta.mena);
+  document.getElementById('nacitavanie').remove();
+  postavPanel();
+  zmenVelkost();
+  chodNa(300, 200, 0.12);
+}
+
+// --- súradnice ---
+const KX = 111320 * Math.cos((48.1435 * Math.PI) / 180), KZ = 111132;
+const naStupne = (x, z) => [meta.stred.lat - z / KZ, meta.stred.lon + x / KX];
+const naObr = (x, z) => [(x - pohlad.x) * pohlad.mierka + W / 2, (z - pohlad.z) * pohlad.mierka + Hh / 2];
+const naSvet = (sx, sy) => [(sx - W / 2) / pohlad.mierka + pohlad.x, (sy - Hh / 2) / pohlad.mierka + pohlad.z];
+
+// --- kreslenie ---
+let naplanovane = false;
+function prekresli() { if (!naplanovane) { naplanovane = true; requestAnimationFrame(kresli); } }
+
+function cestaPolygonu(path, v, i, uzavriet) {
+  const a = v.off[i], b = v.off[i + 1];
+  for (let k = a; k < b; k++) {
+    const sx = (v.xy[k * 2] - pohlad.x) * pohlad.mierka + W / 2, sy = (v.xy[k * 2 + 1] - pohlad.z) * pohlad.mierka + Hh / 2;
+    if (k === a) path.moveTo(sx, sy); else path.lineTo(sx, sy);
+  }
+  if (uzavriet) path.closePath();
+}
+
+function farbaBudovy(i) {
+  const [r, gg, b, v, typ] = B.hl[i];
+  const rezim = document.getElementById('rezimBudov').value;
+  if (rezim === 'vyska') return TRIEDY_VYSKY.find(([h]) => v <= h)[1];
+  if (rezim === 'typ') return typ === 1 ? '#5f8fb3' : typ === 2 ? '#b4442d' : '#b9b2a4';
+  // zaokrúhlenie farby (menej skupín = rýchlejšie kreslenie)
+  const q = (c) => Math.round(c / 16) * 16;
+  return `rgb(${q(r)},${q(gg)},${q(b)})`;
+}
+
+function kresli() {
+  naplanovane = false;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = '#ece8df';
+  g.fillRect(0, 0, W, Hh);
+  const [x0, z0] = naSvet(0, 0), [x1, z1] = naSvet(W, Hh);
+  const rozsah = { x0, z0, x1, z1 };
+  const s = pohlad.mierka;
+  const malo = (v, i, px) => (v.ohr[i * 4 + 2] - v.ohr[i * 4]) * s < px && (v.ohr[i * 4 + 3] - v.ohr[i * 4 + 1]) * s < px;
+
+  if (zap('zelen')) {
+    const skupiny = new Map();
+    for (const i of viditelne(Z, rozsah, 1500)) {
+      if (malo(Z, i, 0.8)) continue;
+      const k = meta.pokryvka[Z.hl[i][0]];
+      if (!skupiny.has(k)) skupiny.set(k, new Path2D());
+      cestaPolygonu(skupiny.get(k), Z, i, true);
+    }
+    for (const [k, p] of skupiny) { g.fillStyle = FARBY_POKRYVKY[k] ?? '#ccc'; g.fill(p); }
+  }
+  if (zap('voda')) {
+    const p = new Path2D();
+    for (const v of meta.voda) {
+      v.body.forEach(([x, z], k) => { const [a, b] = naObr(x, z); k ? p.lineTo(a, b) : p.moveTo(a, b); });
+      p.closePath();
+    }
+    g.fillStyle = '#9cc6dc'; g.fill(p);
+  }
+  if (zap('chodniky') && s > 0.25) {
+    const p = new Path2D();
+    for (const i of viditelne(CH, rozsah)) cestaPolygonu(p, CH, i, false);
+    g.strokeStyle = '#c4b596'; g.lineWidth = Math.max(0.7, 2.5 * s); g.lineCap = 'round'; g.stroke(p);
+  }
+  if (zap('cesty')) {
+    const skupiny = new Map();
+    for (const i of viditelne(C, rozsah)) {
+      const typ = meta.typyCiest[C.hl[i][0]].replace('_link', '');
+      if (s < 0.05 && !FARBY_CIEST[typ]) continue;
+      const k = typ + '|' + Math.round(C.hl[i][1] / 4);
+      if (!skupiny.has(k)) skupiny.set(k, { typ, sirka: C.hl[i][1] / 4, p: new Path2D() });
+      cestaPolygonu(skupiny.get(k).p, C, i, false);
+    }
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    const zoradene = [...skupiny.values()].sort((a, b) => a.sirka - b.sirka);
+    for (const sk of zoradene) {
+      g.strokeStyle = s > 0.3 ? '#7d7a74' : '#9a958c'; g.lineWidth = Math.max(1, sk.sirka * s + 1.5); g.stroke(sk.p);
+    }
+    for (const sk of zoradene) {
+      g.strokeStyle = FARBY_CIEST[sk.typ] ?? '#ffffff'; g.lineWidth = Math.max(0.6, sk.sirka * s); g.stroke(sk.p);
+    }
+  }
+  if (zap('mosty')) {
+    g.strokeStyle = 'rgba(200,16,46,.85)'; g.lineCap = 'butt';
+    for (const m of meta.mosty) {
+      const [a, b] = naObr(...m.od), [c, d] = naObr(...m.do);
+      g.lineWidth = Math.max(2, m.sirka * s * 0.6);
+      g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke();
+    }
+  }
+  if (zap('budovy')) {
+    const skupiny = new Map();
+    for (const i of viditelne(B, rozsah)) {
+      if (malo(B, i, 0.6)) continue;
+      const f = farbaBudovy(i);
+      if (!skupiny.has(f)) skupiny.set(f, new Path2D());
+      cestaPolygonu(skupiny.get(f), B, i, true);
+    }
+    for (const [f, p] of skupiny) { g.fillStyle = f; g.fill(p); }
+    if (s > 0.6) {
+      g.strokeStyle = 'rgba(60,40,30,.45)'; g.lineWidth = 0.6;
+      for (const p of skupiny.values()) g.stroke(p);
+    }
+  }
+  if (zap('stromy') && s > 0.12) {
+    g.fillStyle = 'rgba(46,110,40,.75)';
+    const r = Math.max(0.8, 2.5 * s);
+    for (let i = 0; i < S.length; i += 2) {
+      const x = S[i], z = S[i + 1];
+      if (x < x0 - 10 || x > x1 + 10 || z < z0 - 10 || z > z1 + 10) continue;
+      const [a, b] = naObr(x, z);
+      g.fillRect(a - r / 2, b - r / 2, r, r);
+    }
+  }
+  if (zap('hranica')) {
+    const p = new Path2D();
+    meta.hranica.forEach(([x, z], k) => { const [a, b] = naObr(x, z); k ? p.lineTo(a, b) : p.moveTo(a, b); });
+    p.closePath();
+    g.setLineDash([8, 6]); g.strokeStyle = '#7a3b8f'; g.lineWidth = 2; g.stroke(p); g.setLineDash([]);
+  }
+  // zvýraznená budova
+  if (vybrana !== null) {
+    const p = new Path2D(); cestaPolygonu(p, B, vybrana, true);
+    g.strokeStyle = '#1d4e9e'; g.lineWidth = 3; g.stroke(p);
+  }
+  // pripomienky
+  pripomienky.forEach((q, i) => {
+    const [a, b] = naObr(q.x, q.z);
+    g.fillStyle = '#c8102e'; g.beginPath(); g.arc(a, b - 10, 9, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.moveTo(a - 6, b - 6); g.lineTo(a + 6, b - 6); g.lineTo(a, b + 2); g.fill();
+    g.fillStyle = '#fff'; g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillText(i + 1, a, b - 6);
+  });
+  // mierka
+  const metre = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000].find((m) => m * s > 80) ?? 5000;
+  g.fillStyle = '#333'; g.fillRect(W - 30 - metre * s, Hh - 70, metre * s, 3);
+  g.font = '12px system-ui'; g.textAlign = 'right'; g.fillText(metre >= 1000 ? metre / 1000 + ' km' : metre + ' m', W - 30, Hh - 76);
+  aktualizujOdkazy();
+}
+
+// --- panel ---
+function postavPanel() {
+  const el = document.getElementById('zoznamVrstiev');
+  const pocty = { budovy: meta.pocet.budovy, cesty: meta.pocet.cesty, chodniky: meta.pocet.chodniky, zelen: meta.pocet.zelen, stromy: meta.pocet.stromy, mosty: meta.mosty.length, voda: meta.voda.length };
+  for (const v of vrstvy) {
+    const l = document.createElement('label');
+    l.innerHTML = `<input type="checkbox" ${v.zap ? 'checked' : ''}><span class="vzorka" style="background:${v.farba}"></span>${v.nazov}<span class="pocet">${(pocty[v.id] ?? '').toLocaleString('sk')}</span>`;
+    l.querySelector('input').onchange = (e) => { v.zap = e.target.checked; prekresli(); };
+    el.appendChild(l);
+  }
+  const rezim = document.getElementById('rezimBudov');
+  rezim.onchange = () => { legenda(); prekresli(); };
+  legenda();
+  const SKOKY = [['Staré Mesto', 50, 0, 0.5], ['Hrad', -563, 134, 0.8], ['Petržalka', 600, 2200, 0.12], ['Ružinov', 3600, -600, 0.12],
+    ['Nivy', 1500, -200, 0.3], ['Dúbravka', -6000, -4200, 0.12], ['Karlova Ves', -3800, -800, 0.12], ['Rača', 4200, -7600, 0.12],
+    ['Vrakuňa', 7000, 400, 0.15], ['Devín', -9600, 2400, 0.12], ['Mlynská dolina', -2800, -500, 0.25], ['Hlavná stanica', -150, -1650, 0.4],
+    ['Čunovo', 6500, 13500, 0.1], ['Celé mesto', 500, 800, 0.025]];
+  const sk = document.getElementById('skoky');
+  for (const [n, x, z, m] of SKOKY) {
+    const b = document.createElement('button');
+    b.textContent = n; b.onclick = () => chodNa(x, z, m);
+    sk.appendChild(b);
+  }
+}
+function legenda() {
+  const el = document.getElementById('legenda');
+  const rezim = document.getElementById('rezimBudov').value;
+  let polozky = [];
+  if (rezim === 'vyska') { let pred = 0; polozky = TRIEDY_VYSKY.map(([h, f]) => { const t = h === 999 ? `nad ${pred} m` : `${pred}–${h} m`; pred = h; return [f, t]; }); }
+  else if (rezim === 'typ') polozky = [['#b4442d', 'šikmá strecha (staršie domy)'], ['#5f8fb3', 'sklenená fasáda'], ['#b9b2a4', 'plochá strecha']];
+  else polozky = [['linear-gradient(90deg,#efd98f,#f0c4bb,#a8d0e6)', 'farba z OSM alebo typická pre štvrť']];
+  el.innerHTML = polozky.map(([f, t]) => `<div><span class="vzorka" style="background:${f}"></span>${t}</div>`).join('');
+}
+function aktualizujOdkazy() {
+  const [lat, lon] = naStupne(pohlad.x, pohlad.z);
+  const zoom = Math.max(12, Math.min(20, Math.round(Math.log2(pohlad.mierka * 156543 * Math.cos(lat * Math.PI / 180)))));
+  document.getElementById('odkazGoogle').href = `https://www.google.com/maps/@${lat.toFixed(5)},${lon.toFixed(5)},${zoom}z/data=!3m1!1e3`;
+  document.getElementById('odkazOsm').href = `https://www.openstreetmap.org/#map=${zoom}/${lat.toFixed(5)}/${lon.toFixed(5)}`;
+}
+
+// --- ovládanie ---
+function chodNa(x, z, mierka) { pohlad.x = x; pohlad.z = z; if (mierka) pohlad.mierka = mierka; prekresli(); }
+function zmenVelkost() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; Hh = window.innerHeight;
+  platno.width = W * dpr; platno.height = Hh * dpr;
+  prekresli();
+}
+window.addEventListener('resize', zmenVelkost);
+
+let tah = null, pohyb = 0;
+platno.addEventListener('pointerdown', (e) => { tah = { x: e.clientX, y: e.clientY }; pohyb = 0; platno.setPointerCapture(e.pointerId); platno.classList.add('tahanie'); });
+platno.addEventListener('pointermove', (e) => {
+  const [x, z] = naSvet(e.clientX, e.clientY);
+  const [lat, lon] = naStupne(x, z);
+  document.getElementById('suradnice').textContent = `x ${Math.round(x)}, z ${Math.round(z)} m · ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  if (!tah) return;
+  const dx = e.clientX - tah.x, dy = e.clientY - tah.y;
+  pohyb += Math.abs(dx) + Math.abs(dy);
+  pohlad.x -= dx / pohlad.mierka; pohlad.z -= dy / pohlad.mierka;
+  tah = { x: e.clientX, y: e.clientY };
+  prekresli();
+});
+platno.addEventListener('pointerup', (e) => {
+  platno.classList.remove('tahanie');
+  const klik = pohyb < 5;
+  tah = null;
+  if (klik) kliknutie(e.clientX, e.clientY);
+});
+platno.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const [x, z] = naSvet(e.clientX, e.clientY);
+  const f = Math.exp(-e.deltaY * 0.0015);
+  pohlad.mierka = Math.max(0.01, Math.min(8, pohlad.mierka * f));
+  const [x2, z2] = naSvet(e.clientX, e.clientY);
+  pohlad.x += x - x2; pohlad.z += z - z2;
+  prekresli();
+}, { passive: false });
+
+// --- výber budovy a pripomienky ---
+let vybrana = null, rezimPin = false;
+const pripomienky = [];
+document.getElementById('tlPin').onclick = (e) => {
+  rezimPin = !rezimPin;
+  e.target.classList.toggle('aktivne', rezimPin);
+  e.target.textContent = rezimPin ? '📍 Klikni na miesto chyby…' : '📍 Označiť chybu na mape';
+  platno.classList.toggle('pin', rezimPin);
+};
+
+function bodVPolygone(x, z, v, i) {
+  let vnutri = false;
+  const a = v.off[i], b = v.off[i + 1];
+  for (let k = a, j = b - 1; k < b; j = k++) {
+    const xi = v.xy[k * 2], zi = v.xy[k * 2 + 1], xj = v.xy[j * 2], zj = v.xy[j * 2 + 1];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) vnutri = !vnutri;
+  }
+  return vnutri;
+}
+
+function kliknutie(sx, sy) {
+  const [x, z] = naSvet(sx, sy);
+  if (rezimPin) {
+    pripomienky.push({ x, z, text: '', budova: najdiBudovu(x, z) });
+    zobrazPripomienky();
+    prekresli();
+    return;
+  }
+  vybrana = najdiBudovu(x, z);
+  zobrazInfo(x, z);
+  prekresli();
+}
+
+function najdiBudovu(x, z) {
+  for (const i of viditelne(B, { x0: x, x1: x, z0: z, z1: z }, 500)) {
+    if (x < B.ohr[i * 4] || x > B.ohr[i * 4 + 2] || z < B.ohr[i * 4 + 1] || z > B.ohr[i * 4 + 3]) continue;
+    if (bodVPolygone(x, z, B, i)) return i;
+  }
+  return null;
+}
+
+function zobrazInfo(x, z) {
+  const el = document.getElementById('info');
+  const [lat, lon] = naStupne(x, z);
+  const odkazy = `<a href="https://www.google.com/maps/@${lat.toFixed(6)},${lon.toFixed(6)},19z/data=!3m1!1e3" target="_blank" rel="noopener">Google Maps ↗</a> · <a href="https://www.openstreetmap.org/#map=19/${lat.toFixed(6)}/${lon.toFixed(6)}" target="_blank" rel="noopener">OSM ↗</a>`;
+  if (vybrana === null) {
+    el.innerHTML = `<h3>Tu nie je budova</h3><table><tr><td>Súradnice v hre</td><td>x ${Math.round(x)}, z ${Math.round(z)}</td></tr></table><p>${odkazy}</p>`;
+  } else {
+    const [r, gg, b, v, typ] = B.hl[vybrana];
+    const plocha = (() => { let s = 0; const a = B.off[vybrana], e = B.off[vybrana + 1]; for (let k = a, j = e - 1; k < e; j = k++) s += B.xy[j * 2] * B.xy[k * 2 + 1] - B.xy[k * 2] * B.xy[j * 2 + 1]; return Math.abs(s / 2); })();
+    const nazov = meta.menaMap.get(vybrana);
+    el.innerHTML = `<h3>${nazov ?? 'Budova'}</h3><table>
+      <tr><td>Výška v hre</td><td>${v} m (~${Math.max(1, Math.round((v - 1) / 3.2))} podlaží)</td></tr>
+      <tr><td>Strecha / fasáda</td><td>${['plochá strecha', 'sklenená fasáda', 'šikmá strecha'][typ]}</td></tr>
+      <tr><td>Farba fasády</td><td><span class="vzorka" style="display:inline-block;vertical-align:middle;background:rgb(${r},${gg},${b})"></span> rgb(${r},${gg},${b})</td></tr>
+      <tr><td>Pôdorys</td><td>${Math.round(plocha)} m²</td></tr>
+      <tr><td>Súradnice v hre</td><td>x ${Math.round(x)}, z ${Math.round(z)}</td></tr>
+    </table><p>${odkazy}</p>`;
+  }
+  el.style.display = 'block';
+}
+
+function zobrazPripomienky() {
+  const box = document.getElementById('chyby');
+  box.style.display = pripomienky.length ? 'block' : 'none';
+  const ol = document.getElementById('zoznamChyb');
+  ol.innerHTML = '';
+  pripomienky.forEach((q, i) => {
+    const li = document.createElement('li');
+    const [lat, lon] = naStupne(q.x, q.z);
+    li.innerHTML = `<div style="font-size:12px;color:#666">x ${Math.round(q.x)}, z ${Math.round(q.z)} · ${lat.toFixed(5)}, ${lon.toFixed(5)} <a href="#" data-i="${i}" class="zmaz">zmazať</a></div>`;
+    const t = document.createElement('textarea');
+    t.rows = 2; t.placeholder = 'Čo je tu zle? (napr. chýba budova, zlá výška, cesta ide inak…)';
+    t.value = q.text;
+    t.oninput = () => { q.text = t.value; };
+    li.appendChild(t);
+    li.querySelector('.zmaz').onclick = (e) => { e.preventDefault(); pripomienky.splice(i, 1); zobrazPripomienky(); prekresli(); };
+    ol.appendChild(li);
+    if (i === pripomienky.length - 1) setTimeout(() => t.focus(), 0);
+  });
+}
+document.getElementById('tlKopiruj').onclick = async () => {
+  const riadky = pripomienky.map((q, i) => {
+    const [lat, lon] = naStupne(q.x, q.z);
+    return `${i + 1}. ${q.text || '(bez popisu)'} — x ${Math.round(q.x)}, z ${Math.round(q.z)} (${lat.toFixed(5)}, ${lon.toFixed(5)})${q.budova !== null ? `, budova výška ${B.hl[q.budova][3]} m` : ''}`;
+  });
+  try {
+    await navigator.clipboard.writeText('Pripomienky k mape:\n' + riadky.join('\n'));
+    document.getElementById('skopirovane').textContent = ' skopírované – vlož do issue na GitHube';
+  } catch {
+    document.getElementById('skopirovane').textContent = ' nepodarilo sa – označ text ručne';
+  }
+};
+
+start().catch((e) => { document.getElementById('nacitavanie').textContent = 'Chyba: ' + e.message; });
+</script>
+</body>
+</html>

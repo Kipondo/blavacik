@@ -63,6 +63,10 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
     if (!reka) {
       const [cx, cz] = v.body[0];
       mesh.position.y = vyskopis.vyskaTerenu(cx, cz) + 0.25;
+    } else if (vyskopis.hladina) {
+      // hladina sa mení pozdĺž toku (celé mesto) – výška pre každý vrchol
+      for (let i = 0; i < poz.count; i++) poz.setY(i, vyskopis.hladina(poz.getX(i), poz.getZ(i)));
+      geo.computeVertexNormals();
     } else {
       mesh.position.y = KONFIG.HLADINA;
     }

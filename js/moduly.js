@@ -12,6 +12,7 @@ import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
 import dohlad from './kamera/dohlad.js';
+import dlazdice from './mapa/dlazdice/modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
@@ -32,6 +33,7 @@ export default [
   auta,
   kamera,
   dohlad,
+  dlazdice,
   hud,
   lokality,
   poloha,

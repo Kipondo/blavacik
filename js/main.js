@@ -52,7 +52,7 @@ async function start() {
   // mapa
   const svet = vytvorSvet(hra.scena, KONFIG);
   const data = await nacitajDataMapy(KONFIG, menu.priebeh);
-  hra.mapa = await postavMapu(data, hra.scena, KONFIG, menu.priebeh);
+  hra.mapa = await postavMapu(data, hra.scena, KONFIG, menu.priebeh, (u, d) => hra.posli(u, d));
 
   // moduly
   menu.priebeh('Pripravujem moduly…');
