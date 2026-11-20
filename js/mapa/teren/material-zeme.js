@@ -22,7 +22,8 @@ function texturyDlazby() {
   };
   dlazby = {
     kockyF: t('assets/textury/kocky/farba.jpg', true), kockyN: t('assets/textury/kocky/normal.jpg', false),
-    chodF: t('assets/textury/chodnik/farba.jpg', true), chodN: t('assets/textury/chodnik/normal.jpg', false),
+    // chodník pri domoch: sivá zámková dlažba 20 × 10 cm (tools/textury/zamkova.py, textúra = 2 × 2 m)
+    chodF: t('assets/textury/zamkova/farba.jpg', true), chodN: t('assets/textury/zamkova/normal.jpg', false),
     doskyF: t('assets/textury/dosky/farba.jpg', true), doskyN: t('assets/textury/dosky/normal.jpg', false),
     betonF: t('assets/textury/beton/farba.jpg', true), betonN: t('assets/textury/beton/normal.jpg', false),
     travaF: t('assets/textury/trava/farba.jpg', true), travaN: t('assets/textury/trava/normal.jpg', false),
@@ -96,7 +97,7 @@ ${SUM_GLSL}`)
         float fl = fbm2(vSvet * 0.06) * 0.6 + fbm2(vSvet * 0.45) * 0.4;
         float spinaD = 0.8 + 0.32 * fl;
         // chodník pri domoch: sivá zámková dlažba (tmavšia ako pôvodná textúra)
-        vec3 chodnik = texture2D(chodF, vSvet / 2.2).rgb * mix(0.88, 1.08, spina * 0.5) * vec3(0.74, 0.75, 0.78) * spinaD;
+        vec3 chodnik = texture2D(chodF, vSvet / 2.0).rgb * mix(0.88, 1.08, spina * 0.5) * vec3(0.98, 0.98, 1.0) * spinaD;
         // chodník popri ceste mimo jadra: asfalt (svetlejší a hrubší ako vozovka), záplaty a praskliny
         float wA = wC * smoothstep(0.3, 0.7, tr2.b);
         vec3 asfaltCh = texture2D(asfaltF, vSvet / 3.3).rgb * 1.75 * (0.82 + 0.3 * fbm2(vSvet * 0.04));
@@ -114,15 +115,19 @@ ${SUM_GLSL}`)
         vec3 travnik = texture2D(travaF, vSvet / 3.1).rgb * 0.6 + texture2D(travaF, vSvet / 11.3).rgb * 0.4;
         // pestrosť trávnika: sýtejšie zelené a suchšie miesta, zošliapané okraje; celkovo menej do žlta
         float sviez = fbm2(vSvet * 0.035 + 2.0);
-        travnik *= mix(vec3(1.06, 0.98, 0.72), vec3(0.8, 1.04, 0.95), smoothstep(0.3, 0.7, sviez));
+        travnik *= mix(vec3(0.82, 0.96, 0.85), vec3(0.6, 0.98, 1.1), smoothstep(0.3, 0.7, sviez));
         travnik *= 0.86 + 0.28 * fbm2(vSvet * 0.22);
-        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.05, wT);
+        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.12, wT);
+        // trávnaté plochy bez triedy (parky, lúky z mapy pokrývky): tiež štruktúra trávy, odtieň z mapy pokrývky
+        float wP = trava * (1.0 - smoothstep(0.05, 0.12, trieda));
+        vec3 farbaPokr = diffuseColor.rgb;
+        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * clamp(farbaPokr / vec3(0.15, 0.27, 0.07), 0.5, 1.3) * 1.1, wP * 0.85);
         // mäkké zatienenie pri päte budov (kanál G mapy tried)
         diffuseColor.rgb *= 1.0 - 0.38 * tr2.g;`)
       .replace('#include <normal_fragment_maps>', `
         vec3 mapN = vec3(0.0, 0.0, 1.0);
         mapN.xy += (texture2D(kockyN, vSvet / 2.4).xy * 2.0 - 1.0) * wK * 1.2;
-        mapN.xy += (texture2D(chodN, vSvet / 2.2).xy * 2.0 - 1.0) * (wC - wA);
+        mapN.xy += (texture2D(chodN, vSvet / 2.0).xy * 2.0 - 1.0) * (wC - wA);
         mapN.xy += (texture2D(asfaltN, vSvet / 3.3).xy * 2.0 - 1.0) * wA * 0.9;
         mapN.xy += (texture2D(doskyN, vSvet / 4.0).xy * 2.0 - 1.0) * wD;
         mapN.xy += (texture2D(betonN, vSvet / 3.0).xy * 2.0 - 1.0) * wB;

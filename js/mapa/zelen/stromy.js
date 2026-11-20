@@ -71,7 +71,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       const pomer = 0.92 + hash(x, z, 2) * 0.16;
       const mBlizko = new THREE.Matrix4().compose(poz.set(x, y - 0.05, z), q, mier.set(r / d.polomer * pomer, h / VYSKA_MODELU, r / d.polomer * pomer));
       // farebná pestrosť stromov: jas a odtieň (niektoré žltkastejšie, iné sýtejšie)
-      const jas = 0.82 + hash(x, z, 3) * 0.3, ton = hash(x, z, 4);
+      const jas = 0.74 + hash(x, z, 3) * 0.26, ton = hash(x, z, 4);
       // (celkovo trochu do modrozelena – pri teplom slnku by listy inak boli žltkasté)
       const f = new THREE.Color(jas * (0.8 + ton * 0.12), jas, jas * (1.12 - ton * 0.2));
       stromyCh.push({ x, z, druh, j, m: mBlizko, farba: f, ihl: druh === 'smrek', skryty: false });
