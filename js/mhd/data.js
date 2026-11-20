@@ -30,6 +30,23 @@ export class DataMhd {
     return this._trasy.get(linka);
   }
 
+  /**
+   * Trasy aj poriadok linky, ak sú už načítané; inak spustí načítanie a vráti null.
+   * (Synchrónne – pre výpočty v každom snímku.)
+   */
+  nacitane(linka) {
+    if (!this._hotove) this._hotove = new Map();
+    const h = this._hotove.get(linka);
+    if (h) return h;
+    if (!this._hotove.has(linka)) {
+      this._hotove.set(linka, null);
+      Promise.all([this.trasy(linka), this.poriadok(linka)]).then(([trasy, poriadok]) => {
+        if (trasy && poriadok) this._hotove.set(linka, { trasy, poriadok });
+      });
+    }
+    return null;
+  }
+
   /** Cestovný poriadok linky (spoje, jazdné doby, ciele). */
   poriadok(linka) {
     const l = this.linky.get(linka);
