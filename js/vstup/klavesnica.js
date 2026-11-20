@@ -16,6 +16,7 @@ const STLACENE = {
   KeyE: 'akcia', KeyF: 'akcia',
   Escape: 'pauza',
   KeyP: 'poloha',
+  KeyM: 'mapa',
   Space: 'dalej', Enter: 'dalej',
 };
 
