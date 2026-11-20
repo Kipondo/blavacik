@@ -27,7 +27,6 @@ function texturyDlazby() {
     doskyF: t('assets/textury/dosky/farba.jpg', true), doskyN: t('assets/textury/dosky/normal.jpg', false),
     betonF: t('assets/textury/beton/farba.jpg', true), betonN: t('assets/textury/beton/normal.jpg', false),
     travaF: t('assets/textury/trava/farba.jpg', true), travaN: t('assets/textury/trava/normal.jpg', false),
-    asfaltF: t('assets/textury/asfalt/farba.jpg', true), asfaltN: t('assets/textury/asfalt/normal.jpg', false),
   };
   return dlazby;
 }
@@ -65,14 +64,14 @@ function materialZemeDlazba(mapa, triedy) {
       detailMapa: { value: detail }, triedy: { value: triedy },
       kockyF: { value: t.kockyF }, kockyN: { value: t.kockyN }, chodF: { value: t.chodF }, chodN: { value: t.chodN },
       travaF: { value: t.travaF }, travaN: { value: t.travaN }, doskyF: { value: t.doskyF }, doskyN: { value: t.doskyN },
-      betonF: { value: t.betonF }, betonN: { value: t.betonN }, asfaltF: { value: t.asfaltF }, asfaltN: { value: t.asfaltN },
+      betonF: { value: t.betonF }, betonN: { value: t.betonN },
     });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec2 vSvet;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xz;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
-uniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN, asfaltF, asfaltN;
+uniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN;
 varying vec2 vSvet;
 ${SUM_GLSL}`)
       .replace('#include <map_fragment>', `#include <map_fragment>
@@ -100,7 +99,9 @@ ${SUM_GLSL}`)
         vec3 chodnik = texture2D(chodF, vSvet / 2.0).rgb * mix(0.88, 1.08, spina * 0.5) * vec3(0.98, 0.98, 1.0) * spinaD;
         // chodník popri ceste mimo jadra: asfalt (svetlejší a hrubší ako vozovka), záplaty a praskliny
         float wA = wC * smoothstep(0.3, 0.7, tr2.b);
-        vec3 asfaltCh = texture2D(asfaltF, vSvet / 3.3).rgb * 1.75 * (0.82 + 0.3 * fbm2(vSvet * 0.04));
+        // (procedurálne, bez ďalšej textúry – shader zeme už má takmer všetkých 16 textúrových jednotiek)
+        float zrnoA = mix(0.5, sum2(vSvet * 7.0) * 0.6 + sum2(vSvet * 19.0) * 0.4, 1.0 - smoothstep(8.0, 35.0, length(vViewPosition)));
+        vec3 asfaltCh = vec3(0.092, 0.09, 0.087) * (0.82 + 0.3 * fbm2(vSvet * 0.04)) * (0.86 + 0.28 * zrnoA);
         asfaltCh *= mix(1.0, 0.78, step(0.62, fbm2(vSvet * 0.09 + 7.0)));
         asfaltCh *= mix(1.0, 0.6, (1.0 - smoothstep(0.0, 0.015, abs(fbm2(vSvet * 0.25 + 3.0) - 0.5))) * step(0.5, sum2(vSvet * 0.05)));
         diffuseColor.rgb = mix(diffuseColor.rgb, kocky, wK);
@@ -128,12 +129,12 @@ ${SUM_GLSL}`)
         vec3 mapN = vec3(0.0, 0.0, 1.0);
         mapN.xy += (texture2D(kockyN, vSvet / 2.4).xy * 2.0 - 1.0) * wK * 1.2;
         mapN.xy += (texture2D(chodN, vSvet / 2.0).xy * 2.0 - 1.0) * (wC - wA);
-        mapN.xy += (texture2D(asfaltN, vSvet / 3.3).xy * 2.0 - 1.0) * wA * 0.9;
+        mapN.xy += (vec2(sum2(vSvet * 9.0 + 3.0), sum2(vSvet * 9.0 + 8.0)) - 0.5) * wA * 0.35 * (1.0 - smoothstep(6.0, 25.0, length(vViewPosition)));
         mapN.xy += (texture2D(doskyN, vSvet / 4.0).xy * 2.0 - 1.0) * wD;
         mapN.xy += (texture2D(betonN, vSvet / 3.0).xy * 2.0 - 1.0) * wB;
         mapN.xy += (texture2D(travaN, vSvet / 3.1).xy * 2.0 - 1.0) * wT * 0.8;
         normal = normalize( tbn * mapN );`);
   };
-  mat.customProgramCacheKey = () => 'zem-dlazba-3';
+  mat.customProgramCacheKey = () => 'zem-dlazba-4';
   return mat;
 }
