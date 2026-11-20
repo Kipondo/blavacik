@@ -10,9 +10,14 @@ import hrac from './chodec/hrac.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
+import dohlad from './kamera/dohlad.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
+
+// --- doprava ---
+import grafCiest from './doprava/graf.js';
+import semafory from './doprava/semafory.js';
 
 // --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
 // import policia from './policia/policia.js';
@@ -24,9 +29,12 @@ export default [
   riadenieHracom,
   auta,
   kamera,
+  dohlad,
   hud,
   lokality,
   poloha,
+  grafCiest,
+  semafory,
   // policia,
   // misie,
   // minimapa,

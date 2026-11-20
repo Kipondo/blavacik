@@ -89,10 +89,24 @@ function vyskaBudovy(t) {
 }
 
 /** Zjednoduší lomenú čiaru (Douglas–Peucker). */
-export function zjednodus(body, tolerancia) {
+export function zjednodus(body, tolerancia, chranene = null) {
   if (body.length < 3) return body;
   const zachovaj = new Uint8Array(body.length);
   zachovaj[0] = zachovaj[body.length - 1] = 1;
+  // chránené body (napr. križovatky) zostanú vždy – zjednodušujeme len medzi nimi
+  if (chranene) {
+    const idx = [0];
+    for (let i = 1; i < body.length - 1; i++) if (chranene(i)) { zachovaj[i] = 1; idx.push(i); }
+    idx.push(body.length - 1);
+    if (idx.length > 2) {
+      const out = [];
+      for (let k = 0; k < idx.length - 1; k++) {
+        const cast = zjednodus(body.slice(idx[k], idx[k + 1] + 1), tolerancia);
+        out.push(...(k ? cast.slice(1) : cast));
+      }
+      return out;
+    }
+  }
   const zasobnik = [[0, body.length - 1]];
   while (zasobnik.length) {
     const [a, b] = zasobnik.pop();
@@ -195,6 +209,12 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 
   }
 
   // --- cesty, chodníky, koľaje ---
+  // uzly zdieľané viacerými cestami pre autá (križovatky) – pri zjednodušovaní sa nesmú stratiť
+  const pouzitieUzlov = new Map();
+  for (const c of geo.ciary) {
+    if (!c.t.highway || !CESTY_PRE_AUTA[c.t.highway] || !c.nd) continue;
+    for (const id of new Set(c.nd)) pouzitieUzlov.set(id, (pouzitieUzlov.get(id) ?? 0) + 1);
+  }
   const ciaryPreAuta = [];
   for (const c of geo.ciary) {
     const t = c.t;
@@ -216,7 +236,7 @@ export function klasifikuj(geo, { hranice: H, pamiatky = [], styly = [], seed = 
         typ: t.highway,
         sirka: r1(sirka),
         pruhy,
-        body: zjednodus(c.body, 0.3).map(bodR),
+        body: zjednodus(c.body, 0.3, (i) => (pouzitieUzlov.get(c.nd?.[i]) ?? 0) > 1).map(bodR),
       };
       if (jednosmerka) cesta.jednosmerka = true;
       if (t.maxspeed) cesta.max = parseInt(t.maxspeed) || undefined;
