@@ -1,0 +1,11 @@
+{
+  "_popis": "Ručné opravy budov podľa porovnania so skutočnosťou (docs/porovnanie/opravy.md). Porovnávalo sa len okom, OSM sa neupravuje. bod = [lat, lon] vnútri alebo pri pôdoryse, nazov = meno budovy v OSM (nepovinné). farbaOkenic: 0 tmavozelená, 1 hnedá, 2 sivomodrá, 3 bordová.",
+  "budovy": [
+    { "miesto": "Hlavné nám. – dom vedľa radnice (etapa 1, č. 1)", "bod": [48.14332, 17.10881], "farba": "#b5bda6", "okenice": true, "farbaOkenic": 0, "vikiere": true },
+    { "miesto": "Hlavné nám. – Palác Uhorskej eskontnej a zmenárenskej banky (č. 2)", "bod": [48.14301, 17.10796], "nazov": "Palác Uhorskej eskontnej a zmenárenskej banky", "farba": "#efe7d2", "stity": true, "balkony": true },
+    { "miesto": "Hlavné nám. – Palugyaiho palác (č. 3)", "bod": [48.14315, 17.10777], "nazov": "Palugyaiho palác", "farba": "#e6e4de", "balkony": true, "vikiere": true },
+    { "miesto": "Hlavné nám. – Kutscherfeldov palác (č. 4)", "bod": [48.14375, 17.10761], "nazov": "Kutscherfeldov palác", "farba": "#eedb9f", "vikiere": true },
+    { "miesto": "Hlavné nám. – priečelie pokračujúce za Kutscherfeldovým palácom (č. 5)", "bod": [48.14375, 17.10783], "nazov": "Miestodržiteľský palác", "farba": "#eedb9f", "vikiere": true },
+    { "miesto": "Hlavné nám. – dom vľavo od Kutscherfeldovho paláca (č. 6)", "bod": [48.14371, 17.10745], "farba": "#f3f0e8", "vikiere": true }
+  ]
+}

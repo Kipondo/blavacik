@@ -362,12 +362,12 @@ export function materialFasad() {
     sh.uniforms.omietkaFarba = { value: o.farba };
     sh.uniforms.omietkaNormal = { value: o.normal };
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aTyp;\nattribute vec2 aMetre;\nvarying float vTyp;\nvarying vec2 vMetre;')
-      .replace('#include <uv_vertex>', '#include <uv_vertex>\nvTyp = aTyp; vMetre = aMetre;');
+      .replace('#include <common>', '#include <common>\nattribute float aTyp;\nattribute vec2 aMetre;\nattribute float aZnaky;\nvarying float vTyp;\nvarying vec2 vMetre;\nvarying float vZnaky;')
+      .replace('#include <uv_vertex>', '#include <uv_vertex>\nvTyp = aTyp; vMetre = aMetre; vZnaky = aZnaky;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
 uniform sampler2D omietkaFarba; uniform sampler2D omietkaNormal;
-varying float vTyp; varying vec2 vMetre;
+varying float vTyp; varying vec2 vMetre; varying float vZnaky;
 float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 // farby štítov obchodov, okeníc a dverí (v atlase sú „značkovacie“ farby, tu sa nahradia podľa budovy a osi)
 const vec3 STITY[6] = vec3[6](vec3(0.0284, 0.0423, 0.0331), vec3(0.1022, 0.0137, 0.0137), vec3(0.0137, 0.0232, 0.0578), vec3(0.0160, 0.0160, 0.0160), vec3(0.1470, 0.0782, 0.0123), vec3(0.0437, 0.0232, 0.0685));
@@ -376,6 +376,11 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
       .replace('#include <map_fragment>', `
         // náhoda budovy zaokrúhlená – interpolácia atribútu dá drobné odchýlky, hash by z nich spravil šum
         float styl = floor(vTyp + 0.001), seed = floor(fract(vTyp + 0.0005) * 97.0 + 0.5);
+        // znaky budovy (budovy.js): 1 = okenice, 2 = obchod (výklady), 4·(1 + farba okeníc)
+        float znaky = floor(vZnaky + 0.5);
+        bool okenice = mod(znaky, 2.0) > 0.5;
+        bool obchod = mod(floor(znaky / 2.0), 2.0) > 0.5;
+        float farbaOkenic = floor(znaky / 4.0) - 1.0;
         vec2 uvc = vMapUv;
         bool atika = uvc.y > 99.5;
         float vv = atika ? uvc.y - 100.0 : uvc.y;
@@ -391,7 +396,10 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         if (styl > 3.5 && styl < 4.5) riadok = mod(osI + seed, 3.0 + mod(seed, 2.0)) < 0.5 ? 3.0 : 0.0;
         // podiel osí s dverami na prízemí: panelák a dom menej (vchod), hala bránu častejšie
         float podielDveri = styl > 5.5 ? 0.22 : styl > 4.5 ? 0.12 : styl > 3.5 ? 0.1 : 0.28;
-        if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < podielDveri ? 2.0 : 1.0;
+        // mestské štýly: výklady len v budovách s obchodom (OSM shop/amenity), inak obyčajné okná a menej dverí
+        bool mestsky = styl < 3.5;
+        if (mestsky && !obchod) podielDveri = 0.14;
+        if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < podielDveri ? 2.0 : (mestsky && !obchod ? 0.0 : 1.0);
         vec2 bunka = vec2(styl, ${RIADKY - 1}.0 - riadok);
         vec2 auv = (bunka + clamp(lok, 0.002, 0.998)) / vec2(${STLPCE}.0, ${RIADKY}.0);
         vec2 dx = dFdx(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0), dy = dFdy(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0);
@@ -406,7 +414,11 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         if (maska > 0.5) {
           vec3 l = fa.rgb;
           if (distance(l, STITY[0]) < 0.012) fa.rgb = STITY[int(hashF(vec2(osI + 0.5, seed)) * 6.0) % 6];
-          else if (distance(l, OKENICE[0]) < 0.02) fa.rgb = OKENICE[int(mod(seed * 7.0, 4.0))];
+          else if (distance(l, OKENICE[0]) < 0.02) {
+            // okenice len tam, kde naozaj sú (opravy-budov.json); rodinné domy si ich nechávajú podľa náhody
+            if (okenice || styl > 4.5) fa.rgb = OKENICE[farbaOkenic >= 0.0 ? int(farbaOkenic) : int(mod(seed * 7.0, 4.0))];
+            else { maska = 0.0; fn = vec3(0.5, 0.5, 1.0); }
+          }
           else if (distance(l, DVERE[0]) < 0.012) fa.rgb = DVERE[int(hashF(vec2(seed, osI + 3.0)) * 5.0) % 5];
         }
         float tienF = fp.r, drsnF = fp.g;
@@ -425,7 +437,7 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
           float horna = smoothstep(0.35, 0.5, fract(vv) + (h2 - 0.5) * 0.3);
           fa.rgb = mix(fa.rgb * mix(0.8, 1.6, hs), zaclona * 0.55, hs < 0.45 ? horna * 0.85 : 0.0);
           // výklady na prízemí: osvetlený interiér obchodu
-          if (riadok > 0.5 && riadok < 2.5 && styl < 3.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
+          if (riadok > 0.5 && riadok < 1.5 && styl < 3.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
           drsnF = hs < 0.45 ? mix(0.14, 0.3, horna) : 0.12;
         }
         diffuseColor.rgb = mix(farbaBudovy, fa.rgb, maska) * tienF;
@@ -442,6 +454,6 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         normal = normalize( tbn * mapN );
       `);
   };
-  mat.customProgramCacheKey = () => 'fasady-v2';
+  mat.customProgramCacheKey = () => 'fasady-v3';
   return mat;
 }

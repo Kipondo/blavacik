@@ -105,7 +105,12 @@ function podlaziaZOsm(b) {
 /** Určí typ budovy (bez zmeny dát). */
 export function urciTyp(b) {
   if (b.sklo) return 'sklo';
-  if (b.typOsm && PODLA_OSM[b.typOsm]) return PODLA_OSM[b.typOsm];
+  if (b.typOsm && PODLA_OSM[b.typOsm]) {
+    const t = PODLA_OSM[b.typOsm];
+    // v historickom jadre sú byty aj úrady v starých meštianskych domoch
+    if ((t === 'bytovka' || t === 'kancelarie') && vJadre(...stredBodov(b.body))) return 'historicka';
+    return t;
+  }
 
   const odhad = (b.zdrojOsm ?? b.zdrojVysky) === 'odhad' ? Math.round(b.vyskaOsm ?? b.vyska) : null;
   const [cx, cz] = stredBodov(b.body);

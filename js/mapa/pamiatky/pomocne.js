@@ -227,3 +227,24 @@ export function tramy(useky, hrubka, farba, moznosti = {}) {
   im.computeBoundingSphere();
   return im;
 }
+
+/**
+ * Vikier (strešné okno so štítovou strieškou). Lokálne: čelo na z = 0 pozerá na +z, spodok čela na y = 0,
+ * telo vikiera ide dozadu do strechy (−z).
+ */
+export function vikier({ stena = '#f3f0e7', strecha = '#8e3b29', sirka = 1.6, vyska = 1.7 } = {}) {
+  const g = new THREE.Group();
+  const telo = kvader(sirka, vyska, 2.6, stena);
+  telo.position.set(0, vyska / 2, -1.3);
+  g.add(telo);
+  const ram = kvader(sirka * 0.62, vyska * 0.66, 0.05, '#f7f4ec');
+  ram.position.set(0, vyska * 0.52, 0.02);
+  g.add(ram);
+  const okno = kvader(sirka * 0.5, vyska * 0.56, 0.05, '#2c3a45', { lesk: 0.8 });
+  okno.position.set(0, vyska * 0.52, 0.04);
+  g.add(okno);
+  const st = valbovaStrecha(sirka + 0.3, 0.7, 3.0, strecha);
+  st.position.set(0, vyska, -1.2);
+  g.add(st);
+  return g;
+}

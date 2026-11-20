@@ -15,6 +15,7 @@ import { vytvorKolajnice } from '../cesty/kolajnice.js';
 import { vytvorBudovy } from '../budovy/budovy.js';
 import { vytvorBudovyLod } from '../budovy/lod.js';
 import { vytvorStrechyLod2 } from '../budovy/strechy-lod2.js';
+import { vytvorVikiere } from '../budovy/vikiere.js';
 import { vytvorStromy } from '../zelen/stromy.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
@@ -51,6 +52,8 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   for (const b of d.budovy ?? []) k.pridajPolygon(b.body, { typ: 'budova' });
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
+  const vikiere = vytvorVikiere(d.budovy, d._strechy, vyskopis);
+  if (vikiere) g.add(vikiere);
   yield;
   g.add(vytvorStromy(d.stromy, vyskopis, k));
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
