@@ -1,0 +1,58 @@
+{
+  "_popis": "Ovládacie prvky editora postavy. morph = meno morph targetu v dodo.glb (0..1). Skupiny sa zobrazia ako sekcie.",
+  "skupiny": [
+    {
+      "nazov": "Postava",
+      "posuvniky": [
+        { "morph": "chudy", "nazov": "Chudý" },
+        { "morph": "pupkac", "nazov": "Pupkáč" },
+        { "morph": "brucho", "nazov": "Bruško od rezňov" },
+        { "morph": "svalnaty", "nazov": "Svalnatý (posilňovňa)" }
+      ]
+    },
+    {
+      "nazov": "Tvár",
+      "posuvniky": [
+        { "morph": "tvar_uzka", "nazov": "Užšia tvár" },
+        { "morph": "tvar_hranata", "nazov": "Hranatá tvár" },
+        { "morph": "lica_bucate", "nazov": "Bucľaté líca" },
+        { "morph": "brada_vyrazna", "nazov": "Výrazná brada" },
+        { "morph": "oci_velke", "nazov": "Väčšie oči" },
+        { "morph": "pery_plne", "nazov": "Plnšie pery" },
+        { "morph": "usi_odstate", "nazov": "Odstávajúce uši" }
+      ]
+    },
+    {
+      "nazov": "Nos",
+      "posuvniky": [
+        { "morph": "nos_velky", "nazov": "Veľký nos" },
+        { "morph": "nos_maly", "nazov": "Malý nos" },
+        { "morph": "nos_orli", "nazov": "Orlí nos" }
+      ]
+    }
+  ],
+  "ucesy": [
+    { "id": "strapate", "nazov": "Strapaté" },
+    { "id": "jezko", "nazov": "Na ježka" },
+    { "id": "nakratko", "nazov": "Nakrátko (strojček)" },
+    { "id": "dozadu", "nazov": "Uhladené dozadu" },
+    { "id": "ziadny", "nazov": "Plešina" }
+  ],
+  "brady": [
+    { "id": "strnisko", "nazov": "Strnisko" },
+    { "id": "plnobrada", "nazov": "Plnobrada" },
+    { "id": "fuzy", "nazov": "Fúzy" },
+    { "id": "ziadna", "nazov": "Hladko oholený" }
+  ],
+  "plet": ["#f3cdb3", "#e8b493", "#d29a74", "#b67a52", "#8d5a3b", "#5e3a24"],
+  "vlasy": ["#1c1410", "#3b2a1e", "#6e4c34", "#9a7048", "#c9a26b", "#8c3b1f", "#9a9a98"],
+  "animacie": [
+    { "id": "stoj", "nazov": "Stoj" },
+    { "id": "chodza", "nazov": "Chôdza" },
+    { "id": "beh", "nazov": "Beh" },
+    { "id": "opita_chodza", "nazov": "Po dvoch pivách" },
+    { "id": "mavanie", "nazov": "Mávanie" },
+    { "id": "sedenie", "nazov": "Sedenie" },
+    { "id": "skok", "nazov": "Skok" }
+  ]
+}

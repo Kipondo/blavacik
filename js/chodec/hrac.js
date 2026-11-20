@@ -2,7 +2,9 @@
 
 import * as THREE from 'three';
 import { KONFIG } from '../config.js';
-import { vytvorModelPostavy } from './model-postavy.js';
+import { vytvorRealistickuPostavu } from './postava/realisticka-postava.js';
+import { nacitajUlozenyVzhlad } from './postava/ulozenie.js';
+import { zacniNastup, zacniVystup, aktualizujAkciu, zrusAkciu } from './nastupovanie.js';
 
 const K = KONFIG.HRAC;
 
@@ -13,7 +15,8 @@ class Hrac {
     this.vy = 0;
     this.naZemi = true;
     this.rychlost = 0;
-    this.mesh = vytvorModelPostavy();
+    // realistický Ďoďo z assets/postavy/dodo.glb (vzhľad a oblečenie z editora postavy)
+    this.mesh = vytvorRealistickuPostavu(nacitajUlozenyVzhlad());
   }
 }
 
@@ -29,6 +32,7 @@ function najblizsieAuto(hra) {
 }
 
 function nastup(hra, auto) {
+  zrusAkciu(hra);
   auto.vodic = 'hrac';
   hra.stav.auto = auto;
   hra.stav.rezim = 'auto';
@@ -37,8 +41,10 @@ function nastup(hra, auto) {
 }
 
 function vystup(hra) {
-  const auto = hra.stav.auto;
+  const auto = hra.stav.auto ?? hra.hrac.akcia?.auto;
   if (!auto) return;
+  const sedel = hra.stav.auto === auto; // pri animovanom vystupovaní už 'vystupil' odišlo
+  zrusAkciu(hra);
   // vystúpime vľavo od auta; ak tam niečo je, skúsime vpravo, vpredu, vzadu
   const s = auto.smer;
   const kandidati = [[s.z, -s.x], [-s.z, s.x], [s.x, s.z], [-s.x, -s.z]].map(([dx, dz]) => [
@@ -54,7 +60,7 @@ function vystup(hra) {
   auto.vodic = null;
   hra.stav.auto = null;
   hra.stav.rezim = 'pesi';
-  hra.posli('vystupil', auto);
+  if (sedel) hra.posli('vystupil', auto);
 }
 
 export default {
@@ -75,15 +81,19 @@ export default {
   update(dt, hra) {
     const h = hra.hrac;
 
-    // E – nastúpiť / vystúpiť
+    // prebieha nastupovanie / vystupovanie s animáciou (nastupovanie.js)
+    if (h.akcia) { aktualizujAkciu(dt, hra); return; }
+
+    // E – nastúpiť / vystúpiť (s animáciou, ak sa dá; inak hneď)
     if (hra.vstup.stlacil('akcia')) {
       if (hra.stav.auto) {
-        if (hra.stav.auto.rychlostKmh < 25) vystup(hra);
-        else hra.ui.sprava('Najprv spomaľ!', 1.5);
+        if (hra.stav.auto.rychlostKmh >= 25) hra.ui.sprava('Najprv spomaľ!', 1.5);
+        else if (!zacniVystup(hra)) vystup(hra);
       } else {
         const auto = najblizsieAuto(hra);
-        if (auto) nastup(hra, auto);
+        if (auto && !zacniNastup(hra, auto)) nastup(hra, auto);
       }
+      if (h.akcia) { aktualizujAkciu(dt, hra); return; }
     }
 
     if (hra.stav.auto) {
@@ -143,6 +153,7 @@ export default {
 
     h.mesh.position.copy(h.pozicia);
     h.mesh.rotation.y = h.uhol;
+    h.mesh.userData.opity = !!hra.stav.opity;
     h.mesh.userData.animuj(dt, Math.abs(h.rychlost), !h.naZemi);
   },
 };

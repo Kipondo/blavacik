@@ -9,6 +9,7 @@ export function vytvorMenu(koren, { dotyk }) {
       <p class="menu-podtitul">Bratislava. Bez zákazu vjazdu.</p>
       <p class="menu-stav">Načítavam…</p>
       <button class="menu-hrat" disabled>Hrať</button>
+      <p class="menu-editor"><a href="editor-postavy.html">Upraviť Ďoďa – editor postavy</a></p>
       <div class="menu-ovladanie">
         ${dotyk ? `
           <p><b>Joystick</b> – chôdza / jazda</p>
