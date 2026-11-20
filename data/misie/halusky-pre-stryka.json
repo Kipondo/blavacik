@@ -1,0 +1,20 @@
+{
+  "id": "halusky-pre-stryka",
+  "nazov": "Halušky pre strýka",
+  "popis": "Strýko Jožo potrebuje doniesť bryndzové halušky na Eurovea, kým vychladnú.",
+  "start": { "miesto": "hlavne-namestie", "polomer": 4 },
+  "zadavatel": { "meno": "Strýko Jožo", "farba": "#f2c14e" },
+  "odmena": 500,
+  "vzdy_dostupna": true,
+  "kroky": [
+    { "typ": "dialog", "dialog": "strycek-jozo-halusky" },
+    { "typ": "nastup_do_auta", "text": "Nájdi si nejaké auto. Halušky čakajú." },
+    { "typ": "dojdi", "ciel": "eurovea", "polomer": 25, "v_aute": true, "limit": 120, "text": "Odvez halušky na Eurovea, kým vychladnú!" },
+    { "typ": "sprava", "text": "Halušky doručené. Ešte teplé!", "trvanie": 3 },
+    { "typ": "nahanacka", "auto": { "start": { "x": 1000, "z": 330, "uhol": -1.5708 }, "farba": "#ffffff" }, "trasa": ["stary-most", "hviezdoslavovo-namestie", "dom"], "rychlost": 20, "vzdialenost": 7, "limit": 150, "text": "Niekto ukradol slaninku! Dobehni biele auto!" },
+    { "typ": "zbav_sa_policie", "hviezdicky": 2, "text": "Mestská polícia nemá pochopenie pre slaninkové naháňačky. Strať ich!" },
+    { "typ": "dojdi", "ciel": "hlavne-namestie", "polomer": 8, "text": "Vráť sa za strýkom na Hlavné námestie." },
+    { "typ": "dialog", "dialog": "strycek-jozo-koniec" }
+  ],
+  "pri_zlyhani": "Halušky vychladli. Strýko Jožo je sklamaný a ide si kúpiť langoš."
+}

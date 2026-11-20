@@ -1,0 +1,12 @@
+{
+  "id": "strycek-jozo-koniec",
+  "postavy": {
+    "jozo": { "meno": "Strýko Jožo", "farba": "#f2c14e" },
+    "hrac": { "meno": "Ty", "farba": "#ffffff" }
+  },
+  "repliky": [
+    { "kto": "jozo", "text": "Tak čo, chutili?" },
+    { "kto": "hrac", "text": "Halušky áno. Policajtom až tak nie." },
+    { "kto": "jozo", "text": "Hlavne, že slaninka je späť. Tu máš päťsto eur a o policajtoch nikomu ani slovo." }
+  ]
+}
