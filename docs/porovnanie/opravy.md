@@ -230,3 +230,41 @@ https://earth.google.com/web/@48.14100,17.11050,150a,350d,35y,30h,55t,0r
 
 ## Pokračovanie
 Ďalšia etapa: 4 – Hrad, Podhradie, Parlament.
+
+---
+
+# Etapa 4: Hrad, Podhradie, Parlament
+
+Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. Snímky z hry: `docs/snimky/porovnanie/e4-hra-mozaika.jpg`
+(vľavo hore nádvorie hradu, vpravo hore Parlament, vpravo dole hrad z diaľky; pohľad vľavo dole je nepoužiteľný – kamera v strome).
+
+## Nádvorie Bratislavského hradu
+Odkaz (pohľad na juhovýchod po nádvorí):
+https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14262,17.09940&heading=130&pitch=8&fov=85
+
+- [ ] [1] **Výklady na hrade** – prízemie krídel hradu má v hre veľké tmavé výklady ako obchody → v skutočnosti obyčajné
+  okná rovnakého tvaru ako na poschodiach a niekoľko dverí. Hrad (a ďalšie pamiatky, kostoly, úrady) nesmie dostať
+  „obchodné“ prízemie. Výklady len pre budovy so `shop`/`amenity` v OSM.
+- [ ] [1] **Vikiere na streche hradu** – v skutočnosti má strecha každého krídla dlhý rad vikierov, v hre žiadne.
+- [ ] [2] **Fasáda hradu** – v skutočnosti čisto biela, 3 podlažia s pravidelnými oknami so svetlými rámami, bez ríms a šambrán,
+  strecha červenohnedá škridla. V hre je fasáda krémová s farebnými pásmi nad oknami. Zjednoduš na bielu, okná v pravidelnom rastri.
+- [ ] [2] **Korunná veža (nárožná)** – v skutočnosti biela, vyššia ako krídla, so strmou červenou strechou. Over pomer výšky veže a krídel.
+- [ ] [2] **Povrch nádvoria** – svetlé kamenné kocky/dlaždice, v hre tmavé kocky v oblúkoch (rovnaká chyba ako v pešej zóne).
+
+## Hradný kopec z diaľky
+Letecký pohľad na porovnanie:
+https://earth.google.com/web/@48.14160,17.10050,170a,600d,35y,300h,65t,0r
+
+- [ ] [1] **Holý hnedý svah** – v pohľade z nábrežia je pod hradom veľká béžovohnedá plocha bez zelene → over na leteckom pohľade;
+  svah Hradného kopca je v skutočnosti prevažne zelený (trávniky, stromy, záhrady, hradby a terasy).
+  Ak ide o chýbajúci `landuse`/zeleň v OSM, doplň predvolenú trávu/stromy na svahy nad určitý sklon.
+- [ ] [2] **Hradby a bašty** – pod hradom vedú kamenné hradby a terasy (záhrady), v hre ich nevidno. Over a doplň aspoň hlavné múry.
+
+## Parlament (Národná rada SR)
+- [ ] [3] Modernistická budova s pravidelnými oknami celkovo sedí. Over farbu (svetlý kameň) a plochú strechu na leteckom pohľade.
+
+## Neoverené
+- Podhradie (Žižkova ulica) – pohľad sa nepodaril, porovnať v ďalšej etape spolu s nájazdom na Most SNP.
+
+## Pokračovanie
+Ďalšia etapa: 5 – Most SNP, Starý most, Apollo a najbližšia Petržalka (Aupark, Sad Janka Kráľa).
