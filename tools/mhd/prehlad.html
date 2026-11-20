@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<title>Blava City – prehľad siete MHD</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #14171b; color: #ddd; font: 14px Arial, sans-serif; overflow: hidden; }
+  canvas { display: block; }
+  #panel { position: fixed; top: 10px; left: 10px; background: #000b; padding: 10px 12px; border-radius: 8px; max-width: 360px; }
+  #panel label { margin-right: 10px; white-space: nowrap; }
+  #info { margin-top: 6px; color: #aaa; font-size: 12px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="panel">
+  <b>Sieť MHD Bratislava</b> (kontrola dát z <code>data/mhd/</code>)<br>
+  <label><input type="checkbox" data-typ="elektricka" checked> električky</label>
+  <label><input type="checkbox" data-typ="trolejbus" checked> trolejbusy</label>
+  <label><input type="checkbox" data-typ="autobus" checked> autobusy</label>
+  <label><input type="checkbox" data-typ="nocny"> nočné</label><br>
+  <label>linka: <input id="linka" size="5" placeholder="všetky"></label>
+  <div id="info">Koliesko = priblíženie, ťahanie = posun. Spusti cez http server z koreňa projektu
+    a otvor <code>/tools/mhd/prehlad.html</code>.</div>
+</div>
+<script type="module">
+// Prehľadová 2D mapa liniek a zastávok (len nástroj na kontrolu, nie súčasť hry).
+const FARBA = { elektricka: '#e8382c', trolejbus: '#2fb35a', autobus: '#3d7fe0', nocny: '#c9c9c9' };
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const index = await fetch('../../data/mhd/index.json').then((r) => r.json());
+const { zastavky } = await fetch('../../data/mhd/zastavky.json').then((r) => r.json());
+const trasy = await Promise.all(index.linky.map((l) => fetch(`../../data/mhd/trasy/${l.subor}.json`).then((r) => r.json())));
+const pohlad = { x: 0, z: 0, m: 0.08 };
+const params = new URLSearchParams(location.search);
+if (params.has('x')) Object.assign(pohlad, { x: +params.get('x'), z: +params.get('z'), m: +params.get('m') });
+if (params.has('linka')) document.getElementById('linka').value = params.get('linka');
+if (params.has('nocne')) document.querySelector('[data-typ=nocny]').checked = true;
+
+function kresli() {
+  c.width = innerWidth; c.height = innerHeight;
+  ctx.fillStyle = '#14171b'; ctx.fillRect(0, 0, c.width, c.height);
+  const typy = new Set([...document.querySelectorAll('[data-typ]')].filter((e) => e.checked).map((e) => e.dataset.typ));
+  const linka = document.getElementById('linka').value.trim();
+  const P = (x, z) => [(x - pohlad.x) * pohlad.m + c.width / 2, (z - pohlad.z) * pohlad.m + c.height / 2];
+  ctx.lineCap = ctx.lineJoin = 'round';
+  for (const typ of ['nocny', 'autobus', 'trolejbus', 'elektricka']) {
+    if (!typy.has(typ)) continue;
+    for (const t of trasy) {
+      if (t.typ !== typ || (linka && t.linka !== linka)) continue;
+      ctx.strokeStyle = FARBA[typ]; ctx.globalAlpha = 0.75;
+      ctx.lineWidth = Math.max(1.2, Math.min(4, pohlad.m * 8)) * (typ === 'elektricka' ? 1.6 : 1);
+      for (const tr of t.trasy) {
+        ctx.beginPath();
+        tr.body.forEach(([x, z], i) => { const [px, pz] = P(x, z); i ? ctx.lineTo(px, pz) : ctx.moveTo(px, pz); });
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  const r = Math.max(1.5, Math.min(5, pohlad.m * 6));
+  for (const z of zastavky) for (const n of z.nastupistia) {
+    if (!n.typy.some((t) => typy.has(t)) || (linka && !n.linky.includes(linka))) continue;
+    const [px, pz] = P(n.x, n.z);
+    if (px < -10 || pz < -10 || px > c.width + 10 || pz > c.height + 10) continue;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px, pz, r, 0, 7); ctx.fill();
+  }
+  if (pohlad.m > 0.6) {
+    ctx.fillStyle = '#fff'; ctx.font = '12px Arial';
+    for (const z of zastavky) {
+      const n = z.nastupistia[0];
+      if (!n.typy.some((t) => typy.has(t))) continue;
+      const [px, pz] = P(n.x, n.z);
+      ctx.fillText(z.nazov, px + 6, pz - 6);
+    }
+  }
+  ctx.fillStyle = '#888'; ctx.font = '12px Arial';
+  ctx.fillText(`Zdroj: ${index.zdroj}. Licencia: ${index.licencia}`, 10, c.height - 10);
+}
+
+let tahanie = null;
+c.onmousedown = (e) => (tahanie = [e.clientX, e.clientY]);
+onmouseup = () => (tahanie = null);
+onmousemove = (e) => {
+  if (!tahanie) return;
+  pohlad.x -= (e.clientX - tahanie[0]) / pohlad.m; pohlad.z -= (e.clientY - tahanie[1]) / pohlad.m;
+  tahanie = [e.clientX, e.clientY]; kresli();
+};
+c.onwheel = (e) => { pohlad.m *= e.deltaY < 0 ? 1.2 : 1 / 1.2; kresli(); };
+document.querySelectorAll('input').forEach((i) => (i.oninput = kresli));
+onresize = kresli;
+kresli();
+document.body.dataset.hotovo = '1';
+</script>
+</body>
+</html>
