@@ -9,6 +9,7 @@ Pôvodné súbory 1K-JPG sú zmenšené / prekomprimované pre web, inak nezmene
 | `strk/` | ambientCG | [Gravel022](https://ambientcg.com/view?id=Gravel022) | Lennart Demes (ambientCG.com) | CC0 1.0 |
 | `kocky/` | ambientCG | [PavingStones151](https://ambientcg.com/view?id=PavingStones151) | Lennart Demes (ambientCG.com) | CC0 1.0 |
 | `dosky/` | vlastná (procedurálna, `tools/textury/dosky.py`) | veľké svetlé kamenné dosky v radoch (námestia a pešia zóna Starého Mesta) | projekt Blava City | CC0 1.0 |
+| `beton/` | vlastná (procedurálna, `tools/textury/beton.py`) | veľké svetlosivé betónové dlaždice 50 × 50 cm (chodníky a moderné námestia mimo historického jadra) | projekt Blava City | CC0 1.0 |
 | `chodnik/` | ambientCG | [PavingStones128](https://ambientcg.com/view?id=PavingStones128) | Lennart Demes (ambientCG.com) | CC0 1.0 |
 | `trava/` | ambientCG | [Grass004](https://ambientcg.com/view?id=Grass004) | Lennart Demes (ambientCG.com) | CC0 1.0 |
 | `asfalt/` | ambientCG | [Road012A](https://ambientcg.com/view?id=Road012A) | Lennart Demes (ambientCG.com) | CC0 1.0 |

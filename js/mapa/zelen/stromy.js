@@ -36,8 +36,8 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   const os = new THREE.Vector3(0, 1, 0);
   const farba = new THREE.Color();
   for (const zoznam of chunky.values()) {
-    // ihličnany: z lasera podľa tvaru (úzka vysoká koruna), inak ~1/6 stromov
-    const druhy = zoznam.map(([s, i]) => (s.length >= 5 ? (s[3] / (2 * s[4]) > 2.2 ? 1 : 0) : (i * 7919) % 6 === 0 ? 1 : 0));
+    // ihličnany: z lasera podľa tvaru (úzka vysoká koruna), inak ~1/12 stromov (v meste prevládajú listnaté)
+    const druhy = zoznam.map(([s, i]) => (s.length >= 5 ? (s[3] / (2 * s[4]) > 2.6 ? 1 : 0) : (i * 7919) % 12 === 0 ? 1 : 0));
     const pocetIhl = druhy.filter((d) => d).length;
     const kmene = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
     const koruny = new THREE.InstancedMesh(listnaty, matKoruna, zoznam.length - pocetIhl);

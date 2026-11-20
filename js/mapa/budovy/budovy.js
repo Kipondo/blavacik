@@ -124,7 +124,9 @@ export function rozlozenieBudovy(b, vyskopis) {
     if (h < hMin) hMin = h;
     if (h > hMax) hMax = h;
   }
-  const spodok = hMin - 1;
+  // vyvýšená časť budovy (veža nad podnožou, lávka – tools/mesto/casti-budov.mjs): od minVyska nad terénom
+  const nad = (b.minVyska ?? 0) > 0 ? b.minVyska : 0;
+  const spodok = nad ? hMax + nad : hMin - 1;
   const vrch = hMax + (b.vyska ?? 10);
   const [cx, cz] = stredBodov(body);
   const typ = typFasady(b, cx, cz);
@@ -135,7 +137,7 @@ export function rozlozenieBudovy(b, vyskopis) {
   const nahodaFarby = 0.94 + 0.12 * (((Math.abs(Math.round(cx * 13 + cz * 7))) % 11) / 10);
   const farba = new THREE.Color(b.farba ?? '#d8d2c4').multiplyScalar(nahodaFarby);
   const vnutri = (x, z) => bodVPolygone(x, z, body) && !diery.some((d) => bodVPolygone(x, z, d));
-  const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : pasyFasady(spodok, hMax, vrch, par, b.podlazia, typ === STYLY.stare);
+  const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : nad ? pasyVyvysenej(spodok, vrch, par) : pasyFasady(spodok, hMax, vrch, par, b.podlazia, typ === STYLY.stare);
   const slepa = b.typ === 'garaz';                    // garáže a kôlne bez okien
   // znaky pre shader fasád: 1 = okenice (len kde naozaj sú), 2 = obchod (výklady na prízemí), 4·(1 + farba okeníc)
   const znaky = (b.okenice ? 1 : 0) + (b.obchod ? 2 : 0) + (b.farbaOkenic !== undefined ? 4 * (1 + b.farbaOkenic) : 0);
@@ -156,7 +158,15 @@ export function rozlozenieBudovy(b, vyskopis) {
     }
     return { kruh, vonJeVlavo, steny, dvor: iKruhu > 0 };
   });
-  return { body, diery, spodok, hMax, vrch, cx, cz, typ, par, seed, seedInt, farba, pasy, znaky, kruhy };
+  return { body, diery, spodok, hMax, vrch, cx, cz, typ, par, seed, seedInt, farba, pasy, znaky, kruhy, nad };
+}
+
+/** Pásy vyvýšenej časti: len poschodia (bez prízemia a sokla) a atika. */
+function pasyVyvysenej(spodok, vrch, par) {
+  const H = vrch - spodok;
+  const atika = H > 6 ? Math.min(1.1, Math.max(0.5, H * 0.04)) : 0.3;
+  const f = Math.max(1, Math.round((H - atika) / par.podlazie));
+  return [[spodok, vrch - atika, 1, 1 + f], [vrch - atika, vrch, 100, 101]];
 }
 
 function postavGeometriu(budovy, vyskopis) {
@@ -192,6 +202,7 @@ function postavGeometriu(budovy, vyskopis) {
       }
     }
 
+    if (r.nad) podhlad(strechy, body, diery, spodok, c.clone().multiplyScalar(0.5));
     const valbova = b.strecha && !b.lod2 && b.tvarStrechy !== 'plocha' && body.length === 4 && !diery.length;
     if (valbova) valbovaStrecha(strechy, body, vrch, cs, b.hreben);
     else plochaStrecha(strechy, body, diery, vrch, cs);
@@ -235,6 +246,16 @@ function plochaStrecha(ciel, body, diery, y, farba) {
   const vsetky = [...body, ...diery.flat()];
   for (const [i, j, k] of THREE.ShapeUtils.triangulateShape(kontura, otvory)) {
     trojVon(ciel, [vsetky[i][0], y, vsetky[i][1]], [vsetky[j][0], y, vsetky[j][1]], [vsetky[k][0], y, vsetky[k][1]], farba, (n) => n[1] >= 0);
+  }
+}
+
+/** Podhľad vyvýšenej časti budovy (spodná plocha, pozerá nadol). */
+function podhlad(ciel, body, diery, y, farba) {
+  const kontura = body.map(([x, z]) => new THREE.Vector2(x, z));
+  const otvory = diery.map((d) => d.map(([x, z]) => new THREE.Vector2(x, z)));
+  const vsetky = [...body, ...diery.flat()];
+  for (const [i, j, k] of THREE.ShapeUtils.triangulateShape(kontura, otvory)) {
+    trojVon(ciel, [vsetky[i][0], y, vsetky[i][1]], [vsetky[j][0], y, vsetky[j][1]], [vsetky[k][0], y, vsetky[k][1]], farba, (n) => n[1] <= 0);
   }
 }
 

@@ -102,6 +102,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   zapečené vo farbe vrcholov. Len obvodové steny (nie spoločné so susedom); diely 64 × 64 m stavia modul
   `fasady3d` podľa vzdialenosti od kamery (do ~250 m, najviac 3 ms za snímok), ďalej stačia okná z atlasu.
   Na RTX 2060 v Michalskej ~650 000 vrcholov plášťov navyše bez merateľného spomalenia. Snímky: `docs/snimky/fasady-3d/`.
+- **Vyvýšené časti budov** (`tools/mesto/casti-budov.mjs`): veže nad podnožou, horné poschodia nad presklenými
+  prízemiami a lávky medzi budovami (OSM `building:part` s `min_height`) – predtým chýbali, napr. 65 m veža hotela
+  Kyjev. V dátach `minVyska`, hra ich kreslí od tejto výšky s podhľadom a dá sa pod nimi prejsť.
+- **Dlažba v celom meste:** chodníky a námestia mimo historického jadra sú zo svetlých betónových dlaždíc 50 × 50 cm
+  (`assets/textury/beton`, procedurálna CC0), v jadre kamenné dosky a kocky; dlažba a tráva z CC0 materiálov sú vo
+  všetkých podrobných dlaždiciach (mimo laserového výrezu s mapou tried 512 px).
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
@@ -205,6 +211,7 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
 - **Údaje o obchodoch a type budov z OSM** do hotových dlaždíc: `cd tools/mesto && node --max-old-space-size=8000 osm-doplnky.mjs`.
+- **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`.
 - **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
   (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
 - **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).

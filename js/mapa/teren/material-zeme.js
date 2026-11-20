@@ -1,7 +1,8 @@
 // Materiál zeme: textúra pokrývky + jemný opakujúci sa detail zblízka.
 // Kde má textúra alfa 0 (rieka), zem sa nevykreslí – vidno vodu a nábrežné múry.
 // S mapou tried povrchu (detailné dlaždice) sa chodníky a pešie zóny kreslia CC0 dlažbou z ambientCG
-// (assets/textury/kocky – žulové kocky, assets/textury/chodnik – kamenné dlaždice) aj s normálovou mapou.
+// (assets/textury/kocky – žulové kocky, assets/textury/chodnik – kamenné dlaždice) a vlastnými procedurálnymi
+// (assets/textury/dosky – kamenné dosky, assets/textury/beton – betónové dlaždice) aj s normálovou mapou.
 
 import * as THREE from 'three';
 import { texturaDetailu } from './textura-zeme.js';
@@ -22,6 +23,7 @@ function texturyDlazby() {
     kockyF: t('assets/textury/kocky/farba.jpg', true), kockyN: t('assets/textury/kocky/normal.jpg', false),
     chodF: t('assets/textury/chodnik/farba.jpg', true), chodN: t('assets/textury/chodnik/normal.jpg', false),
     doskyF: t('assets/textury/dosky/farba.jpg', true), doskyN: t('assets/textury/dosky/normal.jpg', false),
+    betonF: t('assets/textury/beton/farba.jpg', true), betonN: t('assets/textury/beton/normal.jpg', false),
     travaF: t('assets/textury/trava/farba.jpg', true), travaN: t('assets/textury/trava/normal.jpg', false),
   };
   return dlazby;
@@ -60,12 +62,13 @@ function materialZemeDlazba(mapa, triedy) {
       detailMapa: { value: detail }, triedy: { value: triedy },
       kockyF: { value: t.kockyF }, kockyN: { value: t.kockyN }, chodF: { value: t.chodF }, chodN: { value: t.chodN },
       travaF: { value: t.travaF }, travaN: { value: t.travaN }, doskyF: { value: t.doskyF }, doskyN: { value: t.doskyN },
+      betonF: { value: t.betonF }, betonN: { value: t.betonN },
     });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec2 vSvet;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xz;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN;\nvarying vec2 vSvet;')
+      .replace('#include <common>', '#include <common>\nuniform sampler2D detailMapa, triedy, kockyF, kockyN, chodF, chodN, travaF, travaN, doskyF, doskyN, betonF, betonN;\nvarying vec2 vSvet;')
       .replace('#include <map_fragment>', `#include <map_fragment>
         if (sampledDiffuseColor.a < 0.5) discard;
         diffuseColor.a = 1.0;
@@ -75,9 +78,11 @@ function materialZemeDlazba(mapa, triedy) {
                           * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);
         vec2 tr2 = texture2D(triedy, vMapUv).rg;
         float trieda = tr2.r;
+        // triedy: 64 tráva, 128 chodník, 160 betónové dlaždice, 192 kamenné dosky, 255 kocky (textura-zeme.js)
         float wK = smoothstep(0.86, 0.95, trieda);
-        float wD = smoothstep(0.62, 0.7, trieda) * (1.0 - wK);
-        float wC = smoothstep(0.38, 0.46, trieda) * (1.0 - wK - wD);
+        float wD = smoothstep(0.7, 0.74, trieda) * (1.0 - wK);
+        float wB = smoothstep(0.58, 0.61, trieda) * (1.0 - wK - wD);
+        float wC = smoothstep(0.38, 0.46, trieda) * (1.0 - wK - wD - wB);
         float wT = smoothstep(0.12, 0.2, trieda) * (1.0 - smoothstep(0.3, 0.38, trieda));
         // jemná nerovnomernosť (špina, opotrebenie) z veľkého detailu
         float spina = texture2D(detailMapa, vSvet * 0.04).r * 2.0;
@@ -88,6 +93,9 @@ function materialZemeDlazba(mapa, triedy) {
         // veľké svetlé kamenné dosky v radoch (námestia, pešia zóna): textúra = 4 × 4 m (tools/textury/dosky.py)
         vec3 dosky = texture2D(doskyF, vSvet / 4.0).rgb * mix(0.9, 1.04, spina * 0.5);
         diffuseColor.rgb = mix(diffuseColor.rgb, dosky, wD);
+        // veľké svetlosivé betónové dlaždice 50 × 50 cm (moderné námestia): textúra = 3 × 3 m (tools/textury/beton.py)
+        vec3 beton = texture2D(betonF, vSvet / 3.0).rgb * mix(0.88, 1.05, spina * 0.5);
+        diffuseColor.rgb = mix(diffuseColor.rgb, beton, wB);
         // tráva: CC0 textúra v dvoch mierkach (bez opakovania) a farba z mapy pokrývky (park vs. lúka)
         vec3 travnik = texture2D(travaF, vSvet / 3.1).rgb * 0.6 + texture2D(travaF, vSvet / 11.3).rgb * 0.4;
         diffuseColor.rgb = mix(diffuseColor.rgb, travnik * mix(0.8, 1.15, spina * 0.5) * 1.1, wT);
@@ -98,9 +106,10 @@ function materialZemeDlazba(mapa, triedy) {
         mapN.xy += (texture2D(kockyN, vSvet / 2.4).xy * 2.0 - 1.0) * wK * 1.2;
         mapN.xy += (texture2D(chodN, vSvet / 2.2).xy * 2.0 - 1.0) * wC;
         mapN.xy += (texture2D(doskyN, vSvet / 4.0).xy * 2.0 - 1.0) * wD;
+        mapN.xy += (texture2D(betonN, vSvet / 3.0).xy * 2.0 - 1.0) * wB;
         mapN.xy += (texture2D(travaN, vSvet / 3.1).xy * 2.0 - 1.0) * wT * 0.8;
         normal = normalize( tbn * mapN );`);
   };
-  mat.customProgramCacheKey = () => 'zem-dlazba';
+  mat.customProgramCacheKey = () => 'zem-dlazba-2';
   return mat;
 }

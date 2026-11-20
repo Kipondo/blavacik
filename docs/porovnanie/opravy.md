@@ -314,18 +314,18 @@ Odkazy:
 - na sever (Tesco, trávnik): https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14465,17.11340&heading=10&pitch=8&fov=90
 - letecký pohľad: https://earth.google.com/web/@48.14460,17.11330,150a,450d,35y,330h,60t,0r
 
-- [ ] [1] **Hotel Kyjev (výšková budova)** – v hre z námestia nie je vidieť žiadnu výškovú budovu, v strede stoja 5–6-podlažné farebné domy
+- [x] [1] **Hotel Kyjev (výšková budova)** – v hre z námestia nie je vidieť žiadnu výškovú budovu, v strede stoja 5–6-podlažné farebné domy — *opravené: veža je v OSM `building:part` s `min_height` 12 m a generátor dlaždíc také časti vynechával (ostala 4 m podnož). `tools/mesto/casti-budov.mjs` doplnil 625 vyvýšených častí budov v celom meste (`minVyska` – hra ich kreslí od výšky nad terénom s podhľadom, dá sa pod nimi prejsť). Kyjev má 65 m, hnedú fasádu s balkónmi (`opravy-budov.json`); v OSM stojí pri 48.14609, 17.11497*
   → v skutočnosti dominantná **asi 15-podlažná veža** s hnedou fasádou, zvislými pásmi a balkónmi. Over výšku z lasera
   (Kamenné námestie je mimo výrezu LiDARu, výška je z OSM alebo odhadnutá). Budova pri 48.14453, 17.11238 má v dátach 41,8 m,
   over, či je to Kyjev a či sa vykresľuje v plnej výške.
-- [ ] [1] **Obchodný dom Tesco (bývalý Prior)** – v hre veľký biely kváder → v skutočnosti modernistická budova
+- [ ] [1] **Obchodný dom Tesco (bývalý Prior)** — *čiastočne: horné poschodia (časť od 4 do 16 m) chýbali z rovnakého dôvodu ako Kyjev, teraz sú; tmavočervenohnedá fasáda so zvislými lamelami (štýl „hala“ – zvislé vlny, `opravy-budov.json`)* – v hre veľký biely kváder → v skutočnosti modernistická budova
   s **tmavočervenohnedými zvislými lamelami/pásmi** na hornej fasáde a presklenými vstupmi v prízemí.
 - [ ] [1] **Podchod a schodiská** – v Street View je pri Tescu schodisko/rampa vedúca do nižšej úrovne. Over, či vedie do podchodu
   (OSM `tunnel=yes`/`layer=-1` chodníky, `highway=steps`). Ak áno, modeluj **zahĺbený vstup so schodmi, zábradlím a stropom**,
   podchod pod cestou s osvetlením a vchodmi do obchodov. Rovnako over ďalšie podchody a nadchody v meste (napr. pri Hlavnej stanici,
   Trnavské mýto, Patrónka) – teraz sa `tunnel`/`bridge` pre chodníky v kóde mapy vôbec nerieši.
-- [ ] [2] **Povrch** – v skutočnosti veľké svetlosivé betónové dlaždice, v hre tmavé kocky v oblúkoch so svetlými pásmi.
-- [ ] [2] **Stromy** – v hre zhluk kužeľovitých ihličnanov na západnej strane → v skutočnosti listnaté stromy pri okrajoch,
+- [x] [2] **Povrch** — *opravené: nová trieda povrchu „betónové dlaždice 50 × 50 cm“ (`tools/textury/beton.py`, CC0) pre námestia, pešie zóny a chodníky mimo historického jadra; dlažba z CC0 materiálov je teraz vo všetkých podrobných dlaždiciach mesta, nielen v laserovom výreze* – v skutočnosti veľké svetlosivé betónové dlaždice, v hre tmavé kocky v oblúkoch so svetlými pásmi.
+- [ ] [2] **Stromy** – v hre zhluk kužeľovitých ihličnanov — *čiastočne: ihličnan z lasera až pri korune výšky > 2,6 × šírka, stromy bez lasera ihličnaté len ~1/12* na západnej strane → v skutočnosti listnaté stromy pri okrajoch,
   žiadne ihličnany v strede.
 - [ ] [2] **Okolité budovy na západ** – v skutočnosti sivomodrá kancelárska budova (5–6 podlaží, sklo) a hnedá veža Kyjeva,
   nie rad pestrofarebných historických domov.

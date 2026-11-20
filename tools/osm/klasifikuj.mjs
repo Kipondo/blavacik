@@ -53,6 +53,8 @@ const PALETY = {
 };
 const STRECHY = { stare: ['#9c3d2b', '#8a4b33', '#a5523a', '#7a3b2c', '#6d5547'], ostatne: ['#5a4a42', '#6b6b69', '#7a3b2c', '#4f5a5e'] };
 
+export function farbaBudovy(t) { return farba(t); }
+
 function farba(t) {
   const c = (t['building:colour'] || t.colour || '').toLowerCase().trim();
   if (/^#[0-9a-f]{6}$/.test(c)) return c;

@@ -16,8 +16,9 @@ export function vytvorBudovyLod(budovy, vyskopis) {
     let body = b.body;
     if (body.length < 3 || (b.vyska < 7 && Math.abs(plochaPolygonu(body)) < 150)) continue;
     const [x0, z0] = body[0];
-    const y0 = vyskopis.vyskaTerenu(x0, z0) - 1;
-    const y1 = y0 + 1 + b.vyska;
+    const zem = vyskopis.vyskaTerenu(x0, z0) - 1;
+    const y0 = zem + ((b.minVyska ?? 0) > 0 ? 1 + b.minVyska : 0);   // vyvýšená časť budovy (veža nad podnožou)
+    const y1 = zem + 1 + b.vyska;
     c.set(b.sklo ? '#8ea6b6' : b.farba ?? '#cfc9bd').multiplyScalar(0.92);
     cs.copy(b.strecha ? c.clone().set(b.strecha) : c.clone().multiplyScalar(0.7));
     const [ax, az] = body[0], [bx, bz] = body[1];

@@ -2,7 +2,8 @@
 // OSM sa podľa Google neupravuje – opravy sú len v dátach hry. Budova sa nájde podľa bodu (lat, lon) vnútri pôdorysu.
 //
 // Položka: { "miesto": "…", "bod": [lat, lon], "nazov": "meno budovy v OSM (nepovinné)", "farba": "#…", "okenice": true, "farbaOkenic": 0–3,
-//            "vikiere": true|false, "obchod": true|false, "vyska": m, "strecha": "#…" }
+//            "vikiere": true|false, "obchod": true|false, "vyska": m, "strecha": "#…", "balkony": true, "stity": true,
+//            "fasada": "stare"|"obytne"|"kancelarie"|"jednoduche"|"panelak"|"dom"|"hala" (štýl fasády namiesto odhadu z typu) }
 
 import { bodVPolygone } from '../geometria.js';
 
@@ -23,7 +24,7 @@ export function nacitajOpravyBudov() {
   return opravy;
 }
 
-const POLIA = ['farba', 'okenice', 'farbaOkenic', 'vikiere', 'obchod', 'vyska', 'strecha', 'balkony', 'stity'];
+const POLIA = ['farba', 'okenice', 'farbaOkenic', 'vikiere', 'obchod', 'vyska', 'strecha', 'balkony', 'stity', 'fasada'];
 
 /** Vzdialenosť bodu od obrysu budovy. */
 function odObrysu(x, z, body) {
@@ -37,14 +38,16 @@ function odObrysu(x, z, body) {
   return m;
 }
 
-/** Budova k oprave: podľa mena (v okolí bodu), inak tá, v ktorej bod leží, inak najbližšia do 4 m. */
+/** Budova k oprave: podľa mena (v okolí bodu), inak tá, v ktorej bod leží (najvyššia), inak najbližšia do 4 m. */
 function najdi(budovy, o) {
   const [x, z] = o.xz;
   if (o.nazov) {
     const b = budovy.find((b_) => b_.nazov === o.nazov && odObrysu(x, z, b_.body) < 60);
     if (b) return b;
   }
-  const b = budovy.find((b_) => bodVPolygone(x, z, b_.body));
+  // bod vo viacerých budovách (vyvýšená časť nad podnožou) → tá vyššia, ktorú vidno
+  let b = null;
+  for (const b_ of budovy) if (bodVPolygone(x, z, b_.body) && (!b || (b_.vyska ?? 0) > (b.vyska ?? 0))) b = b_;
   if (b) return b;
   let naj = null, min = 4;
   for (const b_ of budovy) { const d = odObrysu(x, z, b_.body); if (d < min) { min = d; naj = b_; } }

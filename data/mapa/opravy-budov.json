@@ -73,6 +73,34 @@
       "farba": "#f6f3ec",
       "vikiere": false,
       "obchod": false
+    },
+    {
+      "miesto": "Kamenné nám. – Hotel Kyjev, veža nad podnožou (doplnková etapa, č. 1)",
+      "bod": [
+        48.146092,
+        17.11497
+      ],
+      "nazov": "Hotel Kyjev",
+      "farba": "#8c5a45",
+      "fasada": "obytne"
+    },
+    {
+      "miesto": "Kamenné nám. – obchodný dom (bývalý Prior), horné poschodia so zvislými lamelami (č. 2)",
+      "bod": [
+        48.145057,
+        17.114647
+      ],
+      "farba": "#6e3f33",
+      "fasada": "hala"
+    },
+    {
+      "miesto": "Kamenné nám. – obchodný dom (bývalý Prior), vyššia časť (č. 2)",
+      "bod": [
+        48.145138,
+        17.114997
+      ],
+      "farba": "#6e3f33",
+      "fasada": "hala"
     }
   ]
 }

@@ -179,7 +179,7 @@ export function typizujBudovu(b) {
   const [cx, cz] = stredBodov(b.body);
   b._typ = true;
   b.typ = typ;
-  b.styl = stylPreTyp(typ, b, cx, cz);
+  b.styl = b.fasada !== undefined && S[b.fasada] !== undefined ? S[b.fasada] : stylPreTyp(typ, b, cx, cz);
   const pod = podlaziaZOsm(b);
   if (pod) b.podlazia = pod;
 

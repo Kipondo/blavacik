@@ -192,8 +192,9 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
 
 // Trieda povrchu pre materiál zeme (kanál R): 0 = iný povrch (farba z textúry pokrývky), 0,25 = tráva,
 // 0,5 = chodník z kamenných dlaždíc, 0,75 = veľké svetlé kamenné dosky (námestia a pešia zóna),
-// 1 = drobné žulové kocky (uličky a dvory historického jadra).
-const DOSKY = 192, KOCKY = 255;
+// 1 = drobné žulové kocky (uličky a dvory historického jadra); 0,63 = veľké svetlé betónové dlaždice (moderné
+// námestia a pešie zóny mimo historického jadra, napr. Kamenné námestie).
+const BETON = 160, DOSKY = 192, KOCKY = 255;
 const TRIEDA_POKRYVKY = { dlazba: DOSKY, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64 };
 // približný obrys historického jadra (Michalská brána – Hlavné nám. – Dóm – Hviezdoslavovo nám.)
 const JADRO = { x: -60, z: 40, rx: 330, rz: 280, uhol: 0.35 };
@@ -223,7 +224,9 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.fillRect(0, 0, px, px);
   g.lineCap = 'round';
   g.lineJoin = 'round';
-  g.strokeStyle = g.fillStyle = seda(TRIEDA_POKRYVKY.zaklad);
+  // okolie budov a ciest (chodníky): v historickom jadre kamenné dlaždice, inde svetlé betónové dlaždice
+  // (jadro aj tak prekreslí elipsa dosiek nižšie)
+  g.strokeStyle = g.fillStyle = seda(BETON);
   for (const b of d.budovy ?? []) {
     g.lineWidth = 14 * mierka;
     cesta(b.body, true);
@@ -242,7 +245,10 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.ellipse(sx(JADRO.x), sz(JADRO.z), JADRO.rx * mierka, JADRO.rz * mierka, JADRO.uhol, 0, Math.PI * 2);
   g.fill();
   for (const p of d.pokryvka ?? []) {
-    g.fillStyle = seda(TRIEDA_POKRYVKY[p.k] ?? 0);
+    let v = TRIEDA_POKRYVKY[p.k] ?? 0;
+    // námestia mimo historického jadra sú z betónových dlaždíc, nie z kamenných dosiek
+    if (v === DOSKY && !p.body.some(([x, z]) => vJadre(x, z))) v = BETON;
+    g.fillStyle = seda(v);
     cesta(p.body, true);
     g.fill();
   }
@@ -271,11 +277,16 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     if (v === undefined) continue;
     // v historickom jadre nie sú samostatné chodníky – celá ulica je z kamenných dosiek
     if (v === 128 && ch.body.every(([x, z]) => vJadre(x, z))) v = DOSKY;
+    // pešie zóny mimo jadra – betónové dlaždice
+    if (v === DOSKY && ch.typ === 'pedestrian' && !ch.body.some(([x, z]) => vJadre(x, z))) v = BETON;
     g.strokeStyle = seda(v);
     g.lineWidth = Math.max(1, ch.sirka * mierka);
+    // chodník cez námestie nemá prekresliť krajšiu dlažbu (betón, dosky) – „lighten“ nechá vyššiu triedu
+    g.globalCompositeOperation = v === 128 ? 'lighten' : 'source-over';
     cesta(ch.body, false);
     g.stroke();
   }
+  g.globalCompositeOperation = 'source-over';
   // obslužné uličky v jadre (bez asfaltového pásu) – drobné kocky
   for (const c_ of cestyVJadre(d.cesty)) {
     g.strokeStyle = seda(KOCKY);

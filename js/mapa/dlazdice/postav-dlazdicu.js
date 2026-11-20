@@ -50,7 +50,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
   g.add(vytvorKolajnice(d.kolajnice, vyskopis));
   yield;
-  for (const b of d.budovy ?? []) k.pridajPolygon(b.body, { typ: 'budova' });
+  for (const b of d.budovy ?? []) if (!((b.minVyska ?? 0) > 2.5)) k.pridajPolygon(b.body, { typ: 'budova' });
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
   const vikiere = vytvorVikiere(d.budovy, d._strechy, vyskopis);
