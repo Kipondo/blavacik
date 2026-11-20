@@ -15,6 +15,8 @@ import { vytvorKolajnice } from '../cesty/kolajnice.js';
 import { vytvorBudovy } from '../budovy/budovy.js';
 import { vytvorBudovyLod } from '../budovy/lod.js';
 import { vytvorStrechyLod2 } from '../budovy/strechy-lod2.js';
+import { vytvorVikiere } from '../budovy/vikiere.js';
+import { planFasad3d } from '../budovy/fasady-3d.js';
 import { vytvorStromy } from '../zelen/stromy.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
@@ -48,9 +50,20 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
   g.add(vytvorKolajnice(d.kolajnice, vyskopis));
   yield;
-  for (const b of d.budovy ?? []) k.pridajPolygon(b.body, { typ: 'budova' });
+  for (const b of d.budovy ?? []) if (!((b.minVyska ?? 0) > 2.5)) k.pridajPolygon(b.body, { typ: 'budova' });
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
+  const vikiere = vytvorVikiere(d.budovy, d._strechy, vyskopis);
+  if (vikiere) g.add(vikiere);
+  // 3D fasády historických budov (zapustené okná, parapety, rímsy): tu len plán, diely stavia
+  // podľa vzdialenosti od kamery modul js/mapa/budovy/fasady-3d-modul.js
+  const planFasad = planFasad3d(d.budovy ?? [], vyskopis);
+  if (planFasad) {
+    const f3 = new THREE.Group();
+    f3.name = 'fasady3d';
+    f3.userData.plan = planFasad;
+    g.add(f3);
+  }
   yield;
   g.add(vytvorStromy(d.stromy, vyskopis, k));
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
