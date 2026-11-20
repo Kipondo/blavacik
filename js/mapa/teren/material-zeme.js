@@ -121,7 +121,7 @@ ${SUM_GLSL}`)
         // trávnaté plochy bez triedy (parky, lúky z mapy pokrývky): tiež štruktúra trávy, odtieň z mapy pokrývky
         float wP = trava * (1.0 - smoothstep(0.05, 0.12, trieda));
         vec3 farbaPokr = diffuseColor.rgb;
-        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * clamp(farbaPokr / vec3(0.15, 0.27, 0.07), 0.5, 1.3) * 1.1, wP * 0.85);
+        diffuseColor.rgb = mix(diffuseColor.rgb, travnik * clamp(farbaPokr / vec3(0.15, 0.27, 0.07), 0.5, 1.3) * vec3(0.92, 1.1, 1.1), wP * 0.85);
         // mäkké zatienenie pri päte budov (kanál G mapy tried)
         diffuseColor.rgb *= 1.0 - 0.38 * tr2.g;`)
       .replace('#include <normal_fragment_maps>', `

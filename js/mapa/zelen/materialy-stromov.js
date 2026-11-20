@@ -45,8 +45,10 @@ export function materialListov(typ = 'listy') {
   });
   const presvit = typ === 'ihlice' ? '0.35' : '1.0';
   mat.onBeforeCompile = (sh) => {
-    // obe strany karty majú normálu „von z koruny“ (inak by zadné strany kariet boli čierne)
+    // obe strany karty majú normálu „von z koruny“ (inak by zadné strany kariet boli čierne);
+    // listy trochu do modrozelena, aby v teplom svetle nežltli
     sh.fragmentShader = sh.fragmentShader
+      .replace('#include <color_fragment>', '#include <color_fragment>\n      diffuseColor.rgb *= vec3(0.84, 1.0, 1.06);')
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''))
       .replace('#include <lights_physical_pars_fragment>', `#include <lights_physical_pars_fragment>
 void RE_Direct_Listy( const in IncidentLight directLight, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
