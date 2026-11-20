@@ -3,11 +3,13 @@
 
 import * as THREE from 'three';
 import { bodVPolygone, plochaPolygonu } from '../geometria.js';
+import { typizujBudovy } from './typ-budovy.js';
 
 let material = null;
 
 export function vytvorBudovyLod(budovy, vyskopis) {
   material ??= new THREE.MeshLambertMaterial({ vertexColors: true });
+  typizujBudovy(budovy);                    // výška a farba podľa typu – rovnaké ako v podrobnej dlaždici
   const poz = [], farby = [];
   const c = new THREE.Color(), cs = new THREE.Color();
   for (const b of budovy) {

@@ -7,6 +7,7 @@
 
 // --- základ hry ---
 import prostredie from './grafika/prostredie.js';
+import efekty from './grafika/efekty/modul.js';
 import hrac from './chodec/hrac.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
@@ -33,6 +34,7 @@ export default [
   hodiny,
   mys,
   prostredie,
+  efekty,
   hrac,
   riadenieHracom,
   auta,
