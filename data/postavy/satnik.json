@@ -1,0 +1,37 @@
+{
+  "_popis": "Šatník postavy. kusy = jednotlivé veci (objekt = sieť v assets/postavy/dodo.glb, skryva = časti tela pod látkou, farba = násobok farby textúry, efekt = bonusy pre hernú logiku). oblecenia = hotové kombinácie. Časti tela: hlava, hrud, brucho, panva_h, panva, stehno_h, stehno_d, lytko, clenok, chodidlo, rameno_h, rameno_d, predlaktie, dlan.",
+  "predvolenyVzhlad": { "ucet": "strapate", "brada": "strnisko", "plet": "#e8b493", "vlasy": "#6e4c34", "tvar": {} },
+  "kusy": {
+    "tricko":        { "nazov": "Biele tričko", "objekt": "odev_tricko", "typ": "vrch", "skryva": ["hrud", "brucho", "rameno_h", "panva_h"] },
+    "tricko_cierne": { "nazov": "Čierne tričko", "objekt": "odev_tricko", "typ": "vrch", "farba": "#2a2a2c", "skryva": ["hrud", "brucho", "rameno_h", "panva_h"] },
+    "teplaky":       { "nazov": "Tepláky s pruhmi", "objekt": "odev_teplaky", "typ": "spodok", "skryva": ["panva_h", "panva", "stehno_h", "stehno_d", "lytko", "clenok"] },
+    "bunda":         { "nazov": "Tepláková bunda", "objekt": "odev_bunda", "typ": "bunda", "skryva": ["rameno_h", "rameno_d", "predlaktie"] },
+    "tenisky":       { "nazov": "Biele tenisky", "objekt": "odev_tenisky", "typ": "obuv", "skryva": ["chodidlo"] },
+    "retiazka":      { "nazov": "Zlatá retiazka", "objekt": "odev_retiazka", "typ": "doplnok", "efekt": { "atraktivita": 1 } },
+    "igelitka":      { "nazov": "Igelitka s rezňami", "objekt": "odev_igelitka", "typ": "v_ruke" },
+
+    "kosela":        { "nazov": "Biela košeľa", "objekt": "odev_kosela", "typ": "vrch", "skryva": ["hrud", "brucho", "panva_h", "rameno_h", "rameno_d", "predlaktie"] },
+    "sako":          { "nazov": "Sako", "objekt": "odev_sako", "typ": "bunda", "skryva": ["rameno_h", "rameno_d", "predlaktie"] },
+    "kravata":       { "nazov": "Kravata", "objekt": "odev_kravata", "typ": "doplnok" },
+    "nohavice":      { "nazov": "Nohavice k obleku", "objekt": "odev_nohavice", "typ": "spodok", "skryva": ["panva_h", "panva", "stehno_h", "stehno_d", "lytko", "clenok"] },
+    "polobotky":     { "nazov": "Čierne poltopánky", "objekt": "odev_polobotky", "typ": "obuv", "skryva": ["chodidlo"] },
+
+    "vesta":         { "nazov": "Reflexná vesta (kuriér)", "objekt": "odev_vesta", "typ": "vesta" },
+    "party_kosela":  { "nazov": "Párty košeľa", "objekt": "odev_party_kosela", "typ": "vrch", "skryva": ["hrud", "brucho", "rameno_h", "panva_h"] },
+    "rifle":         { "nazov": "Rifle", "objekt": "odev_rifle", "typ": "spodok", "skryva": ["panva_h", "panva", "stehno_h", "stehno_d", "lytko", "clenok"] },
+    "zimna_bunda":   { "nazov": "Zimná páperová bunda", "objekt": "odev_zimna_bunda", "typ": "bunda", "skryva": ["hrud", "brucho", "panva_h", "rameno_h", "rameno_d", "predlaktie"] },
+    "ciapka":        { "nazov": "Pletená čiapka", "objekt": "odev_ciapka", "typ": "pokryvka", "skryvaVlasy": true },
+    "kratasy":       { "nazov": "Kraťasy", "objekt": "odev_kratasy", "typ": "spodok", "skryva": ["panva_h", "panva", "stehno_h"] },
+    "flanelka":      { "nazov": "Flanelka", "objekt": "odev_flanelka", "typ": "vrch", "skryva": ["hrud", "brucho", "panva_h", "rameno_h", "rameno_d", "predlaktie"] }
+  },
+  "oblecenia": {
+    "klasicky":     { "nazov": "Klasický Ďoďo", "kusy": ["tricko", "teplaky", "bunda", "tenisky", "retiazka", "igelitka"] },
+    "klasicky_bez_tasky": { "nazov": "Klasický Ďoďo (bez igelitky)", "kusy": ["tricko", "teplaky", "bunda", "tenisky", "retiazka"] },
+    "oblek":        { "nazov": "Oblek na skúšku", "kusy": ["kosela", "kravata", "sako", "nohavice", "polobotky"], "efekt": { "dojemNaSkuske": 2, "potenie": 1 } },
+    "kurier":       { "nazov": "Pracovné – kuriér", "kusy": ["tricko_cierne", "vesta", "teplaky", "tenisky"], "efekt": { "brigada": "kurier" } },
+    "party":        { "nazov": "Párty", "kusy": ["party_kosela", "rifle", "tenisky", "retiazka"], "efekt": { "atraktivita": 2, "socializacia": 1 } },
+    "zimne":        { "nazov": "Zimné", "kusy": ["tricko", "zimna_bunda", "rifle", "tenisky", "ciapka"] },
+    "letne":        { "nazov": "Letné", "kusy": ["tricko", "kratasy", "tenisky", "retiazka"], "farby": { "tricko": "#e8c547" } },
+    "bratislavsky": { "nazov": "Bratislavský štýl", "kusy": ["flanelka", "rifle", "tenisky"], "efekt": { "bratislavskost": 1 }, "odomkne": { "bratislavskost": 60 } }
+  }
+}

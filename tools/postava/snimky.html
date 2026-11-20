@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Snímky postavy (nástroj)</title>
+  <style>html,body{margin:0;background:#9fb3c8;overflow:hidden}canvas{display:block}</style>
+  <script type="importmap">
+    { "imports": { "three": "../../vendor/three/three.module.min.js", "three/addons/": "../../vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+<!-- Nástroj na snímky postavy do PR: ?uhol=0|90|180|...&anim=chodza&cas=0.3&oblecenie=klasicky&vzdialenost=3 -->
+<script type="module">
+import * as THREE from 'three';
+import { vytvorRealistickuPostavu } from '../../js/chodec/postava/realisticka-postava.js';
+
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 900, H = +q.get('h') || 1200;
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setSize(W, H);
+r.shadowMap.enabled = true;
+r.toneMapping = THREE.ACESFilmicToneMapping;
+r.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(r.domElement);
+const scena = new THREE.Scene();
+scena.background = new THREE.Color('#b7c6d6');
+scena.add(new THREE.HemisphereLight('#dfe9f5', '#6b5f52', 1.1));
+const slnko = new THREE.DirectionalLight('#fff4e6', 2.6);
+slnko.position.set(2.5, 5, 4);
+slnko.castShadow = true;
+slnko.shadow.mapSize.set(2048, 2048);
+Object.assign(slnko.shadow.camera, { left: -2, right: 2, top: 3, bottom: -1 });
+scena.add(slnko);
+const pod = new THREE.Mesh(new THREE.CircleGeometry(3, 48), new THREE.MeshStandardMaterial({ color: '#8a8f94', roughness: 0.9 }));
+pod.rotation.x = -Math.PI / 2;
+pod.receiveShadow = true;
+scena.add(pod);
+
+const kam = new THREE.PerspectiveCamera(+q.get('fov') || 30, W / H, 0.05, 50);
+const postava = vytvorRealistickuPostavu({ url: q.get('model') || '../../assets/postavy/dodo.glb', oblecenie: q.get('oblecenie') || 'klasicky' });
+scena.add(postava);
+
+const uhol = (+q.get('uhol') || 0) * Math.PI / 180;
+const vz = +q.get('vzdialenost') || 4.2, vyska = +q.get('vyska') || 1.0, ciel = +q.get('ciel') || 0.95;
+kam.position.set(Math.sin(uhol) * vz, vyska, Math.cos(uhol) * vz);
+kam.lookAt(0, ciel, 0);
+
+await postava.userData.pripravena;
+if (q.get('vzhlad')) postava.userData.nastavVzhlad(JSON.parse(q.get('vzhlad')));
+if (q.get('iba')) { const iba = q.get('iba').split(','); postava.userData.instancia.siete.forEach((s) => { s.visible = iba.includes(s.userData.objekt); }); }
+if (q.get('ladenie')) postava.traverse((o) => { if (o.isMesh) o.material = q.get('ladenie') === 'farba'
+  ? new THREE.MeshBasicMaterial({ map: o.material.map }) : new THREE.MeshNormalMaterial(); });
+const anim = q.get('anim');
+if (anim) {
+  postava.userData.nastavAnimaciu(anim, 0);
+  postava.userData.mixer?.update(+q.get('cas') || 0);
+} else {
+  postava.userData.animuj(0.016, 0, false);
+}
+r.render(scena, kam);
+document.title = 'HOTOVO';
+window.HOTOVO = true;
+</script>
+</body>
+</html>
