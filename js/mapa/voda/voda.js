@@ -3,6 +3,7 @@
 // Formát: { "nazov": "Dunaj", "reka": true, "body": [[x,z], ...] }
 
 import * as THREE from 'three';
+import { materialReky } from './material-reky.js';
 
 /** Opakovateľná normálová mapa vlniek (súčet sínusov – bez švov). */
 function normaloveVlny() {
@@ -81,12 +82,11 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
   const skupina = new THREE.Group();
   skupina.name = 'voda';
   const vlny = normaloveVlny();
-  const matReka = new THREE.MeshStandardMaterial({
-    color: '#4d7c8a', roughness: 0.06, metalness: 0.3, normalMap: vlny,
+  const matReka = materialReky(vlny);
+  const matFontana = new THREE.MeshStandardMaterial({
+    color: '#4d7f8c', roughness: 0.06, metalness: 0.3, normalMap: vlny,
     normalScale: new THREE.Vector2(0.5, 0.5), envMapIntensity: 2.2,
   });
-  const matFontana = matReka.clone();
-  matFontana.color.set('#4d7f8c');
 
   for (const v of voda ?? []) {
     const tvar = new THREE.Shape(v.body.map(([x, z]) => new THREE.Vector2(x, -z)));
@@ -118,6 +118,7 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
   // vlnky tečú po prúde (Dunaj tečie na východ = +x)
   skupina.userData.update = (cas) => {
     vlny.offset.set(cas * 0.035, Math.sin(cas * 0.1) * 0.02);
+    matReka.userData.cas.value = cas;
   };
   return skupina;
 }

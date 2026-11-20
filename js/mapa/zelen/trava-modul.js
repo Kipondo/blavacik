@@ -93,7 +93,7 @@ export default {
 
   prepocitaj(hra, cx, cz, dosah) {
     const blizko = Math.min(12, dosah * 0.45);
-    const vyska = hra.mapa.vyskaTerenu ?? hra.mapa.vyska;
+    const vyska = hra.mapa.vyskaTerenu ?? hra.mapa.vyska, hladina = hra.mapa.hladina;
     let n = 0;
     // zblízka hustá mriežka, ďalej dvojnásobný krok, väčšie a redšie trsy (zvyšok dokreslí textúra trávnika)
     for (const [krok, od, po, mierka] of [[KROK, 0, blizko, 1], [KROK * 2, blizko, dosah, 1.3]]) {
@@ -109,6 +109,12 @@ export default {
           if (!this.jeTrava(x, z)) continue;
           // nie na strmom zreze ani múre (tam je kameň)
           const y = vyska(x, z);
+          // nie pod hladinou (dno Dunaja a jazier môže mať v mape pokrývky zelenú farbu)
+          // (pri brehu rozhodne obrys vody – sieť zeme medzi vrcholmi môže byť nižšie ako presný terén)
+          if (hladina) {
+            const h = hladina(x, z);
+            if (y < h + 0.15 || (y < h + 1.5 && hra.mapa.jeVoVode?.(x, z))) continue;
+          }
           if (Math.abs(vyska(x + 0.5, z) - y) > 0.45 || Math.abs(vyska(x, z + 0.5) - y) > 0.45) continue;
           const okraj = 1 - Math.max(0, (d - dosah * 0.7) / (dosah * 0.3));
           const s = (0.75 + hash(gx, gz, 4) * 0.55) * (0.25 + 0.75 * okraj) * mierka;

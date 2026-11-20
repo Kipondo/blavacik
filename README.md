@@ -115,6 +115,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - **Strmé zrezy terénu** (oporné múry Hradného kopca, svahy z lasera): namiesto natiahnutej textúry zhora
     procedurálny kameň (`js/grafika/kamen-glsl.js`) – v Starom Meste a na Hradnom kopci múr z lomového kameňa,
     inde holá skala s puklinami.
+  - **Dunaj** (`js/mapa/voda/material-reky.js`): odraz podľa Fresnela (pri pohľade dolu zelenosivá voda, do diaľky
+    obloha), vlny zo šumu v troch mierkach tečúce po prúde (bez opakujúcej sa mriežky), pásy kalnejšej vody,
+    čeriny, drobné vlnky sa do diaľky strácajú.
   Snímky pred/po: `docs/snimky/realisticky-vzhlad/`.
 - **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
   20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné
