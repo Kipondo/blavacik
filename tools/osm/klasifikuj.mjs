@@ -53,6 +53,8 @@ const PALETY = {
 };
 const STRECHY = { stare: ['#9c3d2b', '#8a4b33', '#a5523a', '#7a3b2c', '#6d5547'], ostatne: ['#5a4a42', '#6b6b69', '#7a3b2c', '#4f5a5e'] };
 
+export function farbaBudovy(t) { return farba(t); }
+
 function farba(t) {
   const c = (t['building:colour'] || t.colour || '').toLowerCase().trim();
   if (/^#[0-9a-f]{6}$/.test(c)) return c;
@@ -212,6 +214,8 @@ export function klasifikuj(geo, moznosti) {
       b.strecha = /^#[0-9a-f]{6}$/.test(rc) ? rc : MENA_FARIEB[rc] ?? (st === 'stare' || st === 'vily' ? STRECHY.stare : STRECHY.ostatne)[i % 4];
     }
     if (t.name) b.nazov = t.name;
+    // OSM typ budovy pre js/mapa/budovy/typ-budovy.js (building=yes nič nehovorí, neukladáme)
+    if (t.building && t.building !== 'yes') b.typOsm = t.building;
     const styl = stylPodlaMena.get(t.name);
     if (styl) {
       if (styl.farba) b.farba = styl.farba;

@@ -38,12 +38,53 @@ export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   const farby = new Float32Array(poz.count * 3).fill(1);
   geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
   geo.computeVertexNormals();
-  // detailné dlaždice (laserový terén): ostrejšia textúra a dlažba z CC0 materiálov
+  pridajSukne(geo, v);
+  // dlažba, chodníky a tráva z CC0 materiálov podľa mapy tried povrchu; v laserovom výreze ostrejšia textúra
+  // a jemnejšia mapa tried (1024 px = 0,5 m), inde 512 px (1 m) – kvôli pamäti
   const mat = d._detailTerenu
-    ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024))
-    : materialZeme(vytvorTexturuDlazdice(d, rieky, rect));
+    ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024, vyskopis))
+    : materialZeme(vytvorTexturuDlazdice(d, rieky, rect), vytvorTriedyDlazdice(d, rect, 512, vyskopis));
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = 'zem';
   return mesh;
+}
+
+/**
+ * „Sukňa“ okolo dlaždice: okrajové vrcholy sa zopakujú o 2 m nižšie. Keď susedná dlaždica vznikla
+ * s iným terénom na hrane (napr. ešte bez laserového detailu), medzi dlaždicami nevznikne škára,
+ * cez ktorú by bolo vidieť oblohu (pôsobila ako biela čiara cez námestie).
+ */
+function pridajSukne(geo, v) {
+  const poz = geo.attributes.position, nor = geo.attributes.normal, uv = geo.attributes.uv, col = geo.attributes.color;
+  const n0 = poz.count;
+  const hrany = [
+    Array.from({ length: v }, (_, i) => i),                     // horný okraj
+    Array.from({ length: v }, (_, i) => (v - 1) * v + i),       // dolný okraj
+    Array.from({ length: v }, (_, j) => j * v),                 // ľavý okraj
+    Array.from({ length: v }, (_, j) => j * v + v - 1),         // pravý okraj
+  ];
+  const P = [], N = [], U = [], C = [], I = [];
+  for (let k = 0; k < n0; k++) {
+    P.push(poz.getX(k), poz.getY(k), poz.getZ(k)); N.push(nor.getX(k), nor.getY(k), nor.getZ(k));
+    U.push(uv.getX(k), uv.getY(k)); C.push(col.getX(k), col.getY(k), col.getZ(k));
+  }
+  for (let k = 0; k < geo.index.count; k++) I.push(geo.index.getX(k));
+  let dalsi = n0;
+  for (const hrana of hrany) {
+    const dole = hrana.map((k) => {
+      P.push(poz.getX(k), poz.getY(k) - 2, poz.getZ(k)); N.push(nor.getX(k), nor.getY(k), nor.getZ(k));
+      U.push(uv.getX(k), uv.getY(k)); C.push(col.getX(k), col.getY(k), col.getZ(k));
+      return dalsi++;
+    });
+    for (let i = 0; i < hrana.length - 1; i++) {
+      const a = hrana[i], b = hrana[i + 1], a2 = dole[i], b2 = dole[i + 1];
+      I.push(a, b, b2, a, b2, a2, a, b2, b, a, a2, b2); // obe strany
+    }
+  }
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  geo.setIndex(I);
 }

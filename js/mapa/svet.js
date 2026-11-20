@@ -77,12 +77,31 @@ export function vytvorSvet(scena, KONFIG) {
   }
   scena.add(slnko, slnko.target);
 
-  /** Slnko a obloha idú za kamerou, aby tiene boli vždy okolo hráča. */
+  // os tieňovej kamery (rovnako ako ju nastaví Three.js cez lookAt na slnko) – na zarovnanie na texely
+  const osX = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), smerSlnka).normalize();
+  const osY = new THREE.Vector3().crossVectors(smerSlnka, osX);
+  const pohlad = new THREE.Vector3(), stred = new THREE.Vector3();
+
+  /**
+   * Slnko a obloha idú za kamerou, aby tiene boli vždy okolo hráča. Stred tieňov je kúsok pred hráčom
+   * v smere pohľadu (viac tieňov tam, kam sa pozeráš) a je zarovnaný na texely tieňovej mapy,
+   * takže okraje tieňov pri pohybe neblikajú.
+   */
   function update(ciel, kamera, cas = 0) {
     obloha.position.copy(kamera.position);
     oblohaMat.uniforms.cas.value = cas;
-    slnko.target.position.copy(ciel);
-    slnko.position.copy(ciel).addScaledVector(smerSlnka, 250);
+    const dosah = slnko.shadow.camera.right;
+    kamera.getWorldDirection(pohlad);
+    pohlad.y = 0;
+    if (pohlad.lengthSq() > 1e-4) pohlad.normalize();
+    stred.copy(ciel).addScaledVector(pohlad, dosah * 0.4);
+    const texel = (2 * dosah) / slnko.shadow.mapSize.x;
+    const u = Math.round(stred.dot(osX) / texel) * texel;
+    const v = Math.round(stred.dot(osY) / texel) * texel;
+    const w = stred.dot(smerSlnka);
+    stred.copy(osX).multiplyScalar(u).addScaledVector(osY, v).addScaledVector(smerSlnka, w);
+    slnko.target.position.copy(stred);
+    slnko.position.copy(stred).addScaledVector(smerSlnka, 250);
   }
 
   return { update, slnko, hemi, obloha, smerSlnka };
