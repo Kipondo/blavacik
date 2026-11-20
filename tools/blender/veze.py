@@ -306,7 +306,7 @@ class Geo:
         B = [tuple(b[k] + s * u[k] + t * v[k] for k in range(3)) for s, t in rohy]
         for i in range(4):
             j = (i + 1) % 4
-            self.plocha(mat, [A[j], A[i], B[i], B[j]])
+            self.plocha(mat, [A[i], A[j], B[j], B[i]])
         self.plocha(mat, list(reversed(A)))
         self.plocha(mat, B)
 
