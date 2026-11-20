@@ -275,7 +275,11 @@ export function materialFasad() {
       .replace('#include <common>', `#include <common>
 uniform sampler2D omietkaFarba; uniform sampler2D omietkaNormal;
 varying float vTyp; varying vec2 vMetre;
-float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }`)
+float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+// farby štítov obchodov, okeníc a dverí (v atlase sú „značkovacie“ farby, tu sa nahradia podľa budovy a osi)
+const vec3 STITY[6] = vec3[6](vec3(0.0284, 0.0423, 0.0331), vec3(0.1022, 0.0137, 0.0137), vec3(0.0137, 0.0232, 0.0578), vec3(0.0160, 0.0160, 0.0160), vec3(0.1470, 0.0782, 0.0123), vec3(0.0437, 0.0232, 0.0685));
+const vec3 OKENICE[4] = vec3[4](vec3(0.1144, 0.1470, 0.0844), vec3(0.1470, 0.0685, 0.0319), vec3(0.1022, 0.1329, 0.1620), vec3(0.1946, 0.0437, 0.0252));
+const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232, 0.0130), vec3(0.0284, 0.0423, 0.0331), vec3(0.1022, 0.0137, 0.0137), vec3(0.0137, 0.0232, 0.0578));`)
       .replace('#include <map_fragment>', `
         // náhoda budovy zaokrúhlená – interpolácia atribútu dá drobné odchýlky, hash by z nich spravil šum
         float styl = floor(vTyp + 0.001), seed = floor(fract(vTyp + 0.0005) * 97.0 + 0.5);
@@ -302,6 +306,12 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
         vec3 om = texture2D(omietkaFarba, muv).rgb / 0.82;
         vec3 farbaBudovy = vColor.rgb * mix(vec3(1.0), om, 0.55);
         float maska = fa.a;
+        if (maska > 0.5) {
+          vec3 l = fa.rgb;
+          if (distance(l, STITY[0]) < 0.012) fa.rgb = STITY[int(hashF(vec2(osI + 0.5, seed)) * 6.0) % 6];
+          else if (distance(l, OKENICE[0]) < 0.02) fa.rgb = OKENICE[int(mod(seed * 7.0, 4.0))];
+          else if (distance(l, DVERE[0]) < 0.012) fa.rgb = DVERE[int(hashF(vec2(seed, osI + 3.0)) * 5.0) % 5];
+        }
         float tienF = fp.r, drsnF = fp.g;
         if (vv < 0.0) {                          // sokel (kameň, tmavší)
           maska = 1.0; fa.rgb = mix(vColor.rgb * 0.45, vec3(0.32, 0.30, 0.28), 0.6) * om; drsnF = 0.92; tienF = 1.0; fn = vec3(0.5, 0.5, 1.0);
