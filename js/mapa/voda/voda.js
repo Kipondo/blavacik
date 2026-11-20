@@ -3,7 +3,7 @@
 
 import * as THREE from 'three';
 
-export function vytvorVodu(voda, KONFIG) {
+export function vytvorVodu(voda, KONFIG, vyskopis) {
   const skupina = new THREE.Group();
   skupina.name = 'voda';
   const mat = new THREE.MeshStandardMaterial({
@@ -15,7 +15,13 @@ export function vytvorVodu(voda, KONFIG) {
     const geo = new THREE.ShapeGeometry(tvar);
     geo.rotateX(-Math.PI / 2);
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.y = KONFIG.HLADINA;
+    // rieka je v koryte, fontány a jazierka na úrovni zeme
+    if (v.reka === false) {
+      const [cx, cz] = v.body[0];
+      mesh.position.y = vyskopis.vyskaTerenu(cx, cz) + 0.25;
+    } else {
+      mesh.position.y = KONFIG.HLADINA;
+    }
     mesh.receiveShadow = true;
     skupina.add(mesh);
   }

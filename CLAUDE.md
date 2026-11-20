@@ -6,12 +6,11 @@ Na projekte pracujú dvaja ľudia naraz (z dvoch rôznych Claude účtov) – pr
 
 ## Hra
 - Mapa: Staré Mesto, nábrežie Dunaja, Most SNP (s UFO), Bratislavský hrad, Eurovea.
-- Budovy a cesty z OpenStreetMap (vysunuté pôdorysy s výškou); kým nie sú OSM dáta, používa sa zjednodušená ručná mapa.
+- Budovy a cesty z OpenStreetMap (vysunuté pôdorysy s výškou) – `data/mapa/osm.json`; bez neho sa použije zjednodušená ručná mapa.
+- OSM dáta sú pod licenciou ODbL – v hre (menu) a v README musí ostať uvedené „© prispievatelia OpenStreetMap“.
 - Chodenie pešo, nastupovanie/vystupovanie z áut, jazda s jednoduchou fyzikou a kolíziami.
-- Kamera za postavou/autom, ovládanie klávesnicou a myšou. **Hra je len pre PC** (mobil sa nerieši).
+- Kamera za postavou/autom, ovládanie klávesnicou aj dotykom na mobile.
 - Polícia s hviezdičkami, krátke vtipné misie s bratislavským humorom, minimapa, menu.
-
-**Dizajn hry (príbeh, postava, systémy) je v [napady/dizajn-hry.md](napady/dizajn-hry.md) – pred novou funkciou si ho prečítaj.**
 
 ## Technológie
 - Three.js (súbor priamo v `vendor/`, žiadne CDN ani build proces).
@@ -46,11 +45,10 @@ js/doprava/           NPC doprava, semafory
 js/ui/                HUD, minimapa, menu, názvy miest
 js/zvuk/              syntetizované zvuky (žiadna cudzia hudba)
 data/mapa/            ručná mapa (JSON), pamiatky, pomenované miesta
-data/osm/             export z OpenStreetMap (GeoJSON)
+data/osm/             návod na OSM dáta, prípadný GeoJSON export (spracovaná mapa je data/mapa/osm.json)
 data/misie/           jedna misia = jeden JSON súbor (formát v FORMAT.md)
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
-napady/               dizajn hry, príbeh, nápady (markdown)
-tools/                pomocné skripty (napr. generovanie ručnej mapy)
+tools/                pomocné skripty (generovanie ručnej mapy, tools/osm/ = stiahnutie a prevod OSM)
 vendor/               knižnice tretích strán (three.js)
 ```
 
@@ -64,18 +62,6 @@ vendor/               knižnice tretích strán (three.js)
 5. Pred PR si stiahni najnovší `main` a vyrieš konflikty u seba vo vetve.
 6. Do `main` sa merguje len cez PR.
 
-## Úlohy pre dvoch Claudov (issues so štítkami)
-Úlohy sa zadávajú ako GitHub issues so štítkom podľa toho, kto ich robí:
-- `pre-kamosa` – úloha pre druhého Clauda (kamoša),
-- `pre-mna` – úloha pre prvého Clauda (majiteľa repozitára).
-
-Postup:
-1. **Na začiatku práce si pozri otvorené issues so svojím štítkom**
-   (`gh api "repos/Kipondo/blavacik/issues?labels=pre-mna&state=open"`, resp. `labels=pre-kamosa`).
-2. **Pred začatím napíš do issue komentár, že na ňom pracuješ** (a v akej vetve).
-   Na issue, na ktorom už pracuje ten druhý, nesiahaj.
-3. **PR uzatvára issue** – do popisu PR napíš `Closes #N`.
-
 ## Pravidlá kódu
 - Kód rozdeľ do **malých samostatných súborov podľa oblastí** (mapa, auto, chodec, polícia, misie, dialógy, UI).
   Jeden súbor = jedna zodpovednosť. Nové veci pridávaj radšej ako nový súbor než do cudzieho.
@@ -87,7 +73,7 @@ Postup:
   keď treba nový typ kroku.
 - **Komentáre v kóde a všetky texty v hre sú po slovensky.**
 - Bez build procesu a bez npm závislostí v hre; knižnice idú do `vendor/`.
-- Hra je **len pre PC** (klávesnica + myš); dotykové ovládanie a mobilný výkon sa neriešia.
+- Hra musí fungovať aj na mobile (dotyk) – pri každej novej funkcii mysli aj na ovládanie dotykom.
 - Žiadny obsah z originálnych hier, žiadne značky firiem, žiadne reálne osoby.
 
 ## README.md

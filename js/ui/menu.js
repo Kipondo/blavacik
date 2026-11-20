@@ -19,7 +19,7 @@ export function vytvorMenu(koren, { dotyk }) {
           <p><b>E</b> – nastúpiť / vystúpiť z auta · <b>Esc</b> – pauza</p>
           <p>Ťahaním myšou otáčaš kamerou · <b>P</b> – vypíše polohu</p>`}
       </div>
-      <p class="menu-pata">Hra pre srandu. Všetky postavy a príbehy sú vymyslené.</p>
+      <p class="menu-pata">Hra pre srandu. Všetky postavy a príbehy sú vymyslené.<br>Mapa © prispievatelia OpenStreetMap (ODbL).</p>
     </div>`;
   koren.appendChild(menu);
 
