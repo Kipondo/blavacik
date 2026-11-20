@@ -68,6 +68,9 @@ html, body {
 }
 .menu-hrat:active { transform: translateY(3px); box-shadow: 0 2px 0 #b48a22; }
 .menu-hrat:disabled { opacity: .4; cursor: wait; }
+.menu-editor { margin: -12px 0 16px; }
+.menu-editor a { pointer-events: auto; display: inline-block; padding: 8px 12px; color: #f2c14e; font-weight: 700; font-size: 15px; text-decoration: none; }
+.menu-editor a:hover, .menu-editor a:focus-visible { text-decoration: underline; }
 .menu-ovladanie { font-size: 14px; opacity: .85; line-height: 1.5; }
 .menu-ovladanie p { margin: 4px 0; }
 .menu-pata { margin-top: 22px; font-size: 12px; opacity: .5; }
