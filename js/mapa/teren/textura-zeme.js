@@ -206,10 +206,10 @@ export function vJadre(x, z) {
 const TRIEDA_CHODNIKOV = { pedestrian: DOSKY, footway: 128, steps: 128, corridor: 128, platform: 128, cycleway: 128 };
 
 /** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
-export function vytvorTriedyDlazdice(d, rect, px = 1024) {
+export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   const c = document.createElement('canvas');
   c.width = c.height = px;
-  const g = c.getContext('2d');
+  const g = c.getContext('2d', { willReadFrequently: true });
   const mierka = px / (rect.maxX - rect.minX);
   const sx = (x) => (x - rect.minX) * mierka, sz = (z) => (z - rect.minZ) * mierka;
   const cesta = (body, uzavriet) => {
@@ -245,6 +245,24 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
     g.fillStyle = seda(TRIEDA_POKRYVKY[p.k] ?? 0);
     cesta(p.body, true);
     g.fill();
+  }
+  // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
+  // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
+  if (vyskopis) {
+    const K = 4, n = Math.round((rect.maxX - rect.minX) / K);
+    const obr = g.getImageData(0, 0, px, px), dt = obr.data;
+    for (let j = 0; j < n; j++) {
+      for (let i = 0; i < n; i++) {
+        const x = rect.minX + (i + 0.5) * K, z = rect.minZ + (j + 0.5) * K;
+        const sx_ = vyskopis.vyskaTerenu(x + 2, z) - vyskopis.vyskaTerenu(x - 2, z);
+        const sz_ = vyskopis.vyskaTerenu(x, z + 2) - vyskopis.vyskaTerenu(x, z - 2);
+        if (Math.hypot(sx_, sz_) / 4 <= 0.28) continue;
+        const x0 = Math.floor(i * K * mierka), x1 = Math.min(px, Math.ceil((i + 1) * K * mierka));
+        const y0 = Math.floor(j * K * mierka), y1 = Math.min(px, Math.ceil((j + 1) * K * mierka));
+        for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) { const o = (yy * px + xx) * 4; if (dt[o] < 8) { dt[o] = dt[o + 1] = dt[o + 2] = TRIEDA_POKRYVKY.trava; } }
+      }
+    }
+    g.putImageData(obr, 0, 0);
   }
   g.lineCap = 'round';
   g.lineJoin = 'round';

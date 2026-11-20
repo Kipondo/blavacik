@@ -7,7 +7,7 @@ sa nesťahuje, neukladá do repa ani nepoužíva ako textúra; OpenStreetMap sa 
 **Pre Clauda, ktorý opravy robí:** ber etapy po poradí, v každej najprv priorita 1. Opravené odškrtni (`- [x]`)
 a pridaj snímku PRED/PO do `docs/snimky/porovnanie/`. Nové etapy dopĺňa druhý Claude na konci tohto súboru.
 
-Snímky z hry použité pri porovnaní sú v `docs/snimky/porovnanie/`.
+Snímky z hry použité pri porovnaní sú v `docs/snimky/porovnanie/`. Snímky PRED/PO opráv: `docs/snimky/porovnanie/opravy-*.jpg`.
 
 ---
 
@@ -62,36 +62,36 @@ Odkazy na strany námestia:
 | 9 | Zelenoizbový dom, 48.14323, 17.10739; Jesenákov palác, 48.14318, 17.10856; Budova Prvej bratislavskej sporiteľne, 48.14317, 17.10902; Apponyiho palác, 48.14341, 17.10919 | rôzne (lososová, okrová, žltá) | zo Street View z námestia nie sú dobre vidieť | **neoverené**, porovnať v etape 2 z Rybárskej brány, Radničnej a Zelenej |
 
 **Spoločné pre všetky historické budovy na námestí:**
-- [ ] [1] **Okenice** – v hre má okenice skoro každý dom (bordové alebo zelené) → v skutočnosti ich má na námestí len dom č. 1.
+- [x] [1] **Okenice** – v hre má okenice skoro každý dom (bordové alebo zelené) → v skutočnosti ich má na námestí len dom č. 1. — *opravené: okenice len pri budovách v `data/mapa/opravy-budov.json` (tu dom č. 1, tmavozelené), ostatné historické budovy ich nemajú*
   Okenice dávaj len tam, kde sú naozaj. Predvolene ich historické budovy nemajú.
-- [ ] [1] **Vikiere** – takmer všetky šikmé škridlové strechy okolo námestia majú rad vikierov, v hre nemá vikiere žiadna.
-- [ ] [2] **Okná** – v skutočnosti sú okná vyššie, hlavne v 1. poschodí (piano nobile), s bielymi šambránami a rímsami nad oknami.
+- [x] [1] **Vikiere** – takmer všetky šikmé škridlové strechy okolo námestia majú rad vikierov, v hre nemá vikiere žiadna. — *opravené: `js/mapa/budovy/vikiere.js` – rad vikierov na šikmých strechách historických budov, len tam, kde strecha z lasera naozaj stúpa (nie na štítoch a spoločných stenách)*
+- [x] [2] **Okná** – v skutočnosti sú okná vyššie, hlavne v 1. poschodí (piano nobile), s bielymi šambránami a rímsami nad oknami. — *opravené: 1. poschodie historických budov je o 20 % vyššie (piano nobile), bohatšie okná s rímsou*
   V hre sú všetky podlažia rovnaké. Navrhni 1. poschodie o ~20 % vyššie s výraznejšou rímsou nad oknom.
 - [ ] [2] **Rámy okien** – v skutočnosti biele alebo svetlé. V hre sú tmavé, a preto fasády pôsobia smutnejšie.
 
 ## Priorita 1 – najviac viditeľné
 
-- [ ] [1] **Povrch Hlavného a Františkánskeho námestia** – v hre tmavé drobné kocky ukladané do oblúkov
+- [x] [1] **Povrch Hlavného a Františkánskeho námestia** – v hre tmavé drobné kocky ukladané do oblúkov — *opravené: nová textúra veľkých svetlých kamenných dosiek v radoch s pásmi tmavšieho kameňa (`tools/textury/dosky.py`) na námestiach a v celej pešej zóne; drobné kocky ostali v obslužných uličkách*
   → v skutočnosti veľké svetlé sivobéžové kamenné dlaždice/kvádre ukladané v radoch (obdĺžnikový vzor),
   s pásmi tmavšieho kameňa a mrežami odvodnenia. Drobné kocky nechaj v uliciach, na námestiach daj veľké svetlé dlaždice.
-- [ ] [1] **Prerušovaná biela čiara cez námestie** – na Hlavnom námestí je v hre vodorovné dopravné značenie
+- [x] [1] **Prerušovaná biela čiara cez námestie** – na Hlavnom námestí je v hre vodorovné dopravné značenie — *opravené: nebolo to dopravné značenie, ale škára medzi dlaždicami terénu (hrana dlaždíc z = 0 prechádza námestím); dlaždice zeme majú teraz „sukňu“, cez ktorú nevidno oblohu*
   (vidieť ho pri fontáne a pred juhovýchodnou stranou) → námestie je pešia zóna, žiadne čiary. Skontroluj, či sa
   značenie nekreslí aj na iných pešich zónach (`highway=pedestrian`, `area:highway`).
-- [ ] [1] **Veža Starej radnice** – v hre biely valec so zelenou kužeľovou strechou
+- [x] [1] **Veža Starej radnice** – v hre biely valec so zelenou kužeľovou strechou — *opravené: štvorhranná okrovožltá veža s hodinami na troch stranách, galériou s balustrádou, medeným cibuľovitým helmom, lucernou a hrotom s krížom*
   → štvorhranná veža po celej výške, okrovožltá omietka, hodiny na stranách, pod strechou vyhliadková galéria
   s balustrádou, navrchu barokový zelený (medený) cibuľovitý helm s lucernou a krížom/hrotom.
-- [ ] [1] **Krídlo Starej radnice napravo od veže** – v hre žltá fasáda s pravidelnými oknami a oranžovou strechou bez detailov
+- [x] [1] **Krídlo Starej radnice napravo od veže** – v hre žltá fasáda s pravidelnými oknami a oranžovou strechou bez detailov — *opravené: biele krídlo, strmá strecha so vzorom farebnej glazovanej škridly, rad vikierov, oblúková brána vo veži, arkier*
   → biela/svetlá fasáda, strmá strecha s vikiermi, v prízemí oblúková brána/podjazd pod vežou, gotický arkier.
   Strecha radnice má farebnú glazovanú škridlu so vzorom – over na leteckom pohľade a aspoň naznač vzorom textúry.
-- [ ] [1] **Maximiliánova (Rolandova) fontána** – v hre hladký obelisk v plochej modrej mise
+- [x] [1] **Maximiliánova (Rolandova) fontána** – v hre hladký obelisk v plochej modrej mise — *opravené: kamenná nádrž s balustrádou, podstavec s mušľou, zdobený stĺp s prstencami a socha rytiera v brnení so štítom a mečom*
   → okrúhla kamenná nádrž so zdobeným kamenným okrajom/zábradlím, v strede podstavec so stĺpom a **socha rytiera
   v brnení navrchu**. Stĺp je zdobený, nie hladký ihlan.
 
 ## Priorita 2
 
-- [ ] [2] **Jezuitský kostol (severovýchodný roh, vľavo od radnice)** – v hre béžová budova so štítom
+- [ ] [2] **Jezuitský kostol (severovýchodný roh, vľavo od radnice)** – v hre béžová budova so štítom — *čiastočne: biela fasáda, bez vikierov a výkladov (opravy-budov.json); vežička a oblúkové okná ešte nie*
   → biela fasáda so štítom, vysoké okná, strmá červená strecha a malá vežička (sanktusník) na hrebeni.
-- [ ] [2] **Strechy domov na severnej a západnej strane námestia** – v hre hladké škridlové plochy
+- [x] [2] **Strechy domov na severnej a západnej strane námestia** – v hre hladké škridlové plochy — *opravené spolu s vikiermi (priorita 1)*
   → takmer každý dom má rad vikierov (malé okná v streche). Pridaj vikiere pre historické budovy so šikmou strechou
   (podľa LiDARu sa dajú nájsť ako výstupky v streche, inak pravidlom pre `historické` budovy).
 - [ ] [2] **Južná strana námestia** – v hre ploché fasády so svetlomodrou/bielou farbou
@@ -134,7 +134,7 @@ OpenStreetMap podľa Google neupravuj. Opravy rob len v dátach a kóde hry.
 Formát: `- [ ] [priorita 1–3] miesto – čo je zle → ako to má byť`
 
 ## Spoločné pre celú pešiu zónu (platí aj pre etapu 1)
-- [ ] [1] **Dlažba** – v Michalskej, Ventúrskej aj na Primaciálnom námestí sú v hre tmavé drobné kocky v oblúkoch
+- [x] [1] **Dlažba** – v Michalskej, Ventúrskej aj na Primaciálnom námestí sú v hre tmavé drobné kocky v oblúkoch — *opravené (rovnaké dosky ako na Hlavnom námestí)*
   → v skutočnosti veľké svetlé sivobéžové žulové dosky ukladané v radoch. Platí pre celú pešiu zónu Starého Mesta.
   Drobné kocky nechaj len tam, kde naozaj sú (napr. Hradný kopec, okolie Dómu – over).
 - [ ] [2] **Prízemia** – v skutočnosti kaviarne a reštaurácie s terasami (stoly, stoličky, slnečníky, kvetináče),
@@ -167,10 +167,10 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14400,17.10668&
 Odkaz (pohľad na Primaciálny palác):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14395,17.10945&heading=110&pitch=8&fov=85
 
-- [ ] [1] **Stĺpy Primaciálneho paláca visia vo vzduchu** – v hre sú biele valce len hore pod strechou a nedosahujú na zem
+- [x] [1] **Stĺpy Primaciálneho paláca visia vo vzduchu** – v hre sú biele valce len hore pod strechou a nedosahujú na zem — *opravené: 4 stĺpy ~1 m hrubé na podstavcoch od dlažby po balkón, balkón s balustrádou*
   → v skutočnosti je pred palácom **portikus**: masívne stĺpy (~1 m hrubé) stoja na zemi na podstavcoch
   a nesú balkón v 1. poschodí. Stĺpy musia ísť od dlažby po balkón, nad nimi balkón so zábradlím.
-- [ ] [2] **Farba Primaciálneho paláca** – v hre ružová/fialkastá a tmavšia → v skutočnosti svetlá krémová omietka
+- [x] [2] **Farba Primaciálneho paláca** – v hre ružová/fialkastá a tmavšia → v skutočnosti svetlá krémová omietka — *opravené: svetlá krémová omietka (klobúk na štíte ostáva)*
   s bielymi pilastrami a šambránami. Na štíte navrchu je známy kardinálsky klobúk – over v hre.
 - [ ] [2] **Okná paláca** – vysoké, so šambránami a rímsami. V 1. poschodí výrazne vyššie ako ostatné.
 
@@ -178,7 +178,7 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14395,17.10945&
 Street View je pri Dóme len z interiéru, preto som porovnával len to, čo bolo vidieť v hre. Over to na leteckom pohľade:
 https://earth.google.com/web/@48.14215,17.10530,150a,250d,35y,220h,55t,0r
 
-- [ ] [1] **Visiaci blok budovy nad ulicou** – na mieste 48.14239, 17.10553 (súradnice hry x ≈ −161, z ≈ 123)
+- [x] [1] **Visiaci blok budovy nad ulicou** – na mieste 48.14239, 17.10553 (súradnice hry x ≈ −161, z ≈ 123) — *opravené: bod je vnútri Prepoštského paláca (laser tam vidí ~17 m vysokú budovu, žiadnu ulicu). Chyba bola v nízkom odkvape (5,6 m od nízkej prístavby) – nad krátkou fasádou visela holá stena strechy. Odkvap sa už neberie od prístavby (13,8 m) a koruny stromov vnútri pôdorysov sa nepovažujú za strechu (`tools/mesto/laser/budovy.py`)*
   visí nad chodníkom veľký žltý kváder bez opory, akoby budova bola zdvihnutá nad zem.
   Over, či je tam naozaj prejazd alebo podchod. Ak nie, ide o chybu v dátach (`min_height`/`building:part`
   alebo dvor z lasera). Ak áno, prejazd musí mať steny, strop a oblúk, nie len visiacu hmotu.
@@ -199,14 +199,14 @@ Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. S
 Odkaz (pohľad na východ k SND):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14225,17.10940&heading=95&pitch=8&fov=85
 
-- [ ] [1] **Vysoká štítová budova uprostred pohľadu** – v hre stojí na mieste 48.14225, 17.10940 → smer východ asi 30–50 m
+- [x] [1] **Vysoká štítová budova uprostred pohľadu** – v hre stojí na mieste 48.14225, 17.10940 → smer východ asi 30–50 m — *opravené: bol to model historickej budovy SND (`snd.js`) s plochým priečelím – priečelie prerobené (lodžia s oblúkmi a stĺpmi, tri oblúkové vchody, atika so sochami, kupola nad hľadiskom, kupolky na nárožných pavilónoch)*
   vysoká krémová budova so štítom (6 podlaží). V skutočnosti je tam otvorený priestor pred divadlom s fontánou
   Ganymedes, kvetinovými záhonmi a lampami. Over, či nejde o zle umiestnenú budovu alebo zdvojený pôdorys
   (OSM budova a zároveň model pamiatky).
-- [ ] [1] **SND (historická budova)** – v hre je vidieť len malú zelenú kupolu v diaľke za stromami → v skutočnosti
+- [x] [1] **SND (historická budova)** – v hre je vidieť len malú zelenú kupolu v diaľke za stromami → v skutočnosti — *opravené spolu s predchádzajúcou položkou; poloha a mierka sedia s pôdorysom z OSM*
   dominantná neorenesančná budova blízko pohľadu: krémovobiela fasáda, stĺpy a lodžia v priečelí, sochy,
   zdobená strecha s kupolou. Over polohu a mierku modelu `snd.js` voči OSM pôdorysu.
-- [ ] [2] **Fontána Ganymedes** pred divadlom – v hre chýba.
+- [x] [2] **Fontána Ganymedes** pred divadlom – v hre chýba. — *opravené: nová pamiatka `fontana-ganymedes.js` na mieste z OSM*
 - [ ] [2] **Kandelábre** – pred SND stoja historické lampy s viacerými svietidlami na jednom stĺpe. V hre sú jednoduché lampy.
 - [ ] [3] **Rad domov vľavo (Hviezdoslavovo nám., severná strana)** – v skutočnosti 5-podlažné historizujúce domy
   s bohatými fasádami, kaviarne s terasami a slnečníkmi v prízemí.
@@ -215,9 +215,9 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14225,17.10940&
 Odkaz (pohľad na východ po promenáde):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14160,17.10760&heading=80&pitch=5&fov=85
 
-- [ ] [1] **Voda na promenáde** – v hre je to kľukatý potôčik s trávnatými brehmi → v skutočnosti pravouhlé **kamenné
+- [x] [1] **Voda na promenáde** – v hre je to kľukatý potôčik s trávnatými brehmi → v skutočnosti pravouhlé **kamenné — *opravené: malé vodné plochy v meste majú nízky kamenný okraj a hladinu v ňom (tvar je z OSM)*
   vodné jazierko/kanál** s nízkym kamenným okrajom a zábradlím, okolo dláždená plocha a lavičky.
-- [ ] [2] **Stromy** – v hre sú medzi listnatými aj ihličnany (kužeľovité). V skutočnosti sú na promenáde len veľké listnaté
+- [ ] [2] **Stromy** – v hre sú medzi listnatými aj ihličnany (kužeľovité). V skutočnosti sú na promenáde len veľké listnaté — *čiastočne: ihličnan z lasera len pri naozaj úzkej korune (výška > 2,2 × šírka)*
   stromy (platany/javory) s hustou súvislou korunou, ktorá vytvára tieň nad celou promenádou.
 - [ ] [2] **Povrch promenády** – v skutočnosti svetlá dlažba/mlat, v hre tmavé kocky a pásy trávy. Trávu nechaj len v záhonoch.
 
@@ -242,11 +242,11 @@ Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. S
 Odkaz (pohľad na juhovýchod po nádvorí):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14262,17.09940&heading=130&pitch=8&fov=85
 
-- [ ] [1] **Výklady na hrade** – prízemie krídel hradu má v hre veľké tmavé výklady ako obchody → v skutočnosti obyčajné
+- [x] [1] **Výklady na hrade** – prízemie krídel hradu má v hre veľké tmavé výklady ako obchody → v skutočnosti obyčajné — *opravené: výklady len v budovách s obchodom / kaviarňou / reštauráciou z OSM (`tools/mesto/osm-doplnky.mjs` → `obchod: 1`), inak obyčajné okná a dvere; hrad má pravidelné okná bez výkladov*
   okná rovnakého tvaru ako na poschodiach a niekoľko dverí. Hrad (a ďalšie pamiatky, kostoly, úrady) nesmie dostať
   „obchodné“ prízemie. Výklady len pre budovy so `shop`/`amenity` v OSM.
-- [ ] [1] **Vikiere na streche hradu** – v skutočnosti má strecha každého krídla dlhý rad vikierov, v hre žiadne.
-- [ ] [2] **Fasáda hradu** – v skutočnosti čisto biela, 3 podlažia s pravidelnými oknami so svetlými rámami, bez ríms a šambrán,
+- [x] [1] **Vikiere na streche hradu** – v skutočnosti má strecha každého krídla dlhý rad vikierov, v hre žiadne. — *opravené: rady vikierov na oboch stranách každého krídla*
+- [ ] [2] **Fasáda hradu** – v skutočnosti čisto biela, 3 podlažia s pravidelnými oknami so svetlými rámami, bez ríms a šambrán, — *čiastočne: biela fasáda s jednoduchými oknami v pravidelnom rastri, užšia rímsa*
   strecha červenohnedá škridla. V hre je fasáda krémová s farebnými pásmi nad oknami. Zjednoduš na bielu, okná v pravidelnom rastri.
 - [ ] [2] **Korunná veža (nárožná)** – v skutočnosti biela, vyššia ako krídla, so strmou červenou strechou. Over pomer výšky veže a krídel.
 - [ ] [2] **Povrch nádvoria** – svetlé kamenné kocky/dlaždice, v hre tmavé kocky v oblúkoch (rovnaká chyba ako v pešej zóne).
@@ -255,7 +255,7 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14262,17.09940&
 Letecký pohľad na porovnanie:
 https://earth.google.com/web/@48.14160,17.10050,170a,600d,35y,300h,65t,0r
 
-- [ ] [1] **Holý hnedý svah** – v pohľade z nábrežia je pod hradom veľká béžovohnedá plocha bez zelene → over na leteckom pohľade;
+- [x] [1] **Holý hnedý svah** – v pohľade z nábrežia je pod hradom veľká béžovohnedá plocha bez zelene → over na leteckom pohľade; — *opravené: strmé svahy bez inej pokrývky sú zatrávnené (trieda povrchu podľa sklonu terénu)*
   svah Hradného kopca je v skutočnosti prevažne zelený (trávniky, stromy, záhrady, hradby a terasy).
   Ak ide o chýbajúci `landuse`/zeleň v OSM, doplň predvolenú trávu/stromy na svahy nad určitý sklon.
 - [ ] [2] **Hradby a bašty** – pod hradom vedú kamenné hradby a terasy (záhrady), v hre ich nevidno. Over a doplň aspoň hlavné múry.
@@ -290,11 +290,11 @@ Pozor: tri pohľady na mosty sú z hladiny Dunaja (bod vybraný automaticky mimo
 Odkaz (pohľad do parku):
 https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.13450,17.10950&heading=45&pitch=5&fov=80
 
-- [ ] [1] **Hustota a veľkosť stromov** – v hre veľký otvorený trávnik s riedkymi malými low-poly stromami → v skutočnosti
+- [x] [1] **Hustota a veľkosť stromov** – v hre veľký otvorený trávnik s riedkymi malými low-poly stromami → v skutočnosti — *opravené: `data/mapa/husta-zelen.json` + `js/mapa/zelen/husta-zelen.js` – hustá výsadba veľkých listnatých stromov (18–28 m, koruny 13–19 m) mimo chodníkov*
   najstarší verejný park v strednej Európe: **husto vysadené mohutné staré stromy** (hrubé kmene, koruny 20–30 m),
   ktoré tvoria súvislú klenbu tieňa nad celým parkom. Pod nimi tráva a asfaltové chodníky.
   Ak laser stromy v parku nenašiel (mimo výrezu), použi pre `leisure=park` s historickým charakterom hustú výsadbu veľkých listnatých stromov.
-- [ ] [2] **Ihličnany** – v hre sú medzi stromami kužeľovité ihličnany, v parku prevládajú listnaté stromy (platany, duby, gaštany).
+- [x] [2] **Ihličnany** – v hre sú medzi stromami kužeľovité ihličnany, v parku prevládajú listnaté stromy (platany, duby, gaštany). — *opravené: v dlaždiciach s hustým parkom sú všetky stromy listnaté*
 - [ ] [2] **Gotická vežička** (presunutá veža Františkánskeho kostola) a **socha Janka Kráľa** – v hre chýbajú.
 
 ## Neoverené

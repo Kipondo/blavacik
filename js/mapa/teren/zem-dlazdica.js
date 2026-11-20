@@ -41,7 +41,7 @@ export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   pridajSukne(geo, v);
   // detailné dlaždice (laserový terén): ostrejšia textúra a dlažba z CC0 materiálov
   const mat = d._detailTerenu
-    ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024))
+    ? materialZeme(vytvorTexturuDlazdice(d, rieky, rect, 1024), vytvorTriedyDlazdice(d, rect, 1024, vyskopis))
     : materialZeme(vytvorTexturuDlazdice(d, rieky, rect));
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
