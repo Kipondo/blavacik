@@ -56,12 +56,17 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Kamera** za postavou/autom, dá sa otáčať, pri rýchlosti sa rozšíri zorné pole.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
+- **MHD – etapa a (`feature/mhd`):** všetky linky DPB podľa oficiálneho cestovného poriadku (GTFS): 90 liniek
+  (4 električkové, 15 trolejbusových, 54 denných autobusových, 17 nočných), 582 zastávok s 1 370 nástupišťami,
+  35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
+  a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
 - NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
+- MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
 
 ## Ako pridať vlastný modul
 1. Vytvor súbor, napr. `js/policia/policia.js`:
@@ -99,5 +104,16 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
 - Mapové dáta © prispievatelia OpenStreetMap, licencia ODbL.
+
+## MHD
+- Dáta: `data/mhd/` (formát v [data/mhd/README.md](data/mhd/README.md)), kód hry: `js/mhd/` (modul `mhd`).
+- Zdroj: *Cestovné poriadky MHD vo formáte GTFS* – Dopravný podnik Bratislava, a. s. / hl. m. SR Bratislava
+  ([data.bratislava.sk](https://data.bratislava.sk/datasets/aba12fd2cbac4843bc7406151bc66106/about)), licencia **CC BY 4.0**.
+  Trasy po cestách a koľajach sú vypočítané z mapy (© prispievatelia OpenStreetMap, ODbL).
+- Obnovenie dát: `node tools/mhd/stiahni.mjs && node --max-old-space-size=4000 tools/mhd/spracuj.mjs` (bez npm balíkov).
+- Prehľad siete (2D, na kontrolu): `http://localhost:8000/tools/mhd/prehlad.html`.
+- Pre ostatné moduly: `hra.mhd.data`, `hra.mhd.teraz()`, `hra.mhd.najblizsiaZastavka(x, z)`, `hra.mhd.odchody(id)`,
+  `hra.mhd.typDna()` (popis v [js/mhd/modul.js](js/mhd/modul.js)). Ak iný modul zapisuje herný čas do
+  `hra.stav.datumCas` (Date), MHD sa riadi ním.
 
 Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md).
