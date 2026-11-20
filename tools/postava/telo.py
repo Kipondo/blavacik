@@ -66,24 +66,39 @@ MIMIKA = [
 ]
 
 
+# Základ postavy – predvolene Ďoďo. NPC generátor (npc.py) ho prepíše cez nastav_zaklad() podľa data/postavy/npc.json.
+ZAKLAD = {'makro': DODO_MAKRO, 'prsia': None, 'detaily': DODO_DETAILY, 'morphy': None}
+
+
+def nastav_zaklad(makro, detaily=(), prsia=None, morphy=None):
+    """makro: gender, age, muscle, weight (0..1); prsia: {cupsize, firmness}; morphy: ktoré morphy z EDITOR/MIMIKA
+    vyrobiť (None = všetky)."""
+    ZAKLAD.update(makro=dict(makro), detaily=[tuple(d) for d in detaily], prsia=prsia, morphy=morphy)
+
+
 def detaily(zoznam):
     return [(m, w) for m, w in zoznam if w != 0]
 
 
 def tvar(makro=None, extra=()):
     V0, *_ = mh.nacitaj_obj()
-    mk = dict(DODO_MAKRO)
+    mk = dict(ZAKLAD['makro'])
     mk.update(makro or {})
-    zoz = mh.makro_targety(**mk) + detaily(DODO_DETAILY) + list(extra)
+    zoz = mh.makro_targety(**mk) + detaily(ZAKLAD['detaily']) + list(extra)
+    if ZAKLAD['prsia']:
+        zoz += mh.prsia_targety(**mk, **ZAKLAD['prsia'])
     return mh.aplikuj(V0, zoz)
 
 
 def vsetky_tvary():
-    """Vráti (dodo, {meno: delta}) v súradniciach MakeHumanu (dm)."""
-    dodo = tvar()
+    """Vráti (zaklad, {meno: delta}) v súradniciach MakeHumanu (dm)."""
+    zaklad = tvar()
+    chcem = ZAKLAD['morphy']
     delty = {}
     for meno, mk, ex in EDITOR:
-        delty[meno] = tvar(mk, ex) - dodo
+        if chcem is None or meno in chcem:
+            delty[meno] = tvar(mk, ex) - zaklad
     for meno, ex in MIMIKA:
-        delty[meno] = mh.aplikuj(dodo, ex) - dodo
-    return dodo, delty
+        if chcem is None or meno in chcem:
+            delty[meno] = mh.aplikuj(zaklad, ex) - zaklad
+    return zaklad, delty

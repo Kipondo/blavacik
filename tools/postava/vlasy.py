@@ -1,4 +1,4 @@
-# Vlasy (ježko, nakrátko, uhladené dozadu), brada a čiapka.
+# Vlasy (ježko, strapaté, nakrátko, dozadu; pre NPC aj mikádo, dlhé, drdol, venček), brada a čiapka.
 import numpy as np
 import bpy
 import blender_util as BU
@@ -7,6 +7,8 @@ import latky as L
 from odev import podmesh, taubin, normaly, napec, kus, napec_alfa
 
 RNG = np.random.default_rng(7)
+# NPC: svetlé neutrálne vlasy – farbu (aj sivú, blond) dá tint z palety. Ďoďo má textúry hnedé.
+NEUTRALNE = False
 
 
 def uhol_hlavy(ctx, P):
@@ -32,6 +34,9 @@ def plochy_vlasov(ctx, zdvih=0.0):
 def textura_vlasov(P, N, ctx):
     """Krátke vlasy: tmavá pokožka prerastená chĺpkami ťahanými smerom od čela dozadu."""
     jemne = T.sum3(P * np.array([3.0, 0.4, 3.0]), 900, 41) * 0.6 + T.sum3(P, 2500, 42) * 0.4
+    if NEUTRALNE:
+        a = T.mix(np.broadcast_to(T.srgb('#c8c8c8'), P.shape), T.srgb('#7a7a7a'), T.smooth(0.35, 0.75, jemne))
+        return a, 0.75, jemne * 3
     a = T.mix(np.broadcast_to(T.srgb('#3a2a20'), P.shape), T.srgb('#120c09'), T.smooth(0.35, 0.75, jemne))
     return np.clip(a * 1.6, 0, 1), 0.75, jemne * 3   # farba sa doladí cez tint (vzhlad.vlasy)
 
@@ -110,7 +115,7 @@ def zlep(ctx, meno, P_cap, faces_cap, mat_cap_fn, casti):
 
 
 def mat_ostni(meno):
-    return BU.material(meno, farba_rgb=(0.32, 0.22, 0.16), drsnost_hodnota=0.55)
+    return BU.material(meno, farba_rgb=(0.62, 0.62, 0.62) if NEUTRALNE else (0.32, 0.22, 0.16), drsnost_hodnota=0.55)
 
 
 def textura_pramenov(meno, S=256):
@@ -127,7 +132,8 @@ def textura_pramenov(meno, S=256):
         hustota = np.exp(-((u - x0 - vlna) / w) ** 2) * (v < dl) * np.clip((dl - v) / 0.25, 0, 1)
         a = np.maximum(a, hustota * rng.uniform(0.7, 1.0))
     a *= np.clip(np.minimum(u, 1 - u) / 0.12, 0, 1)
-    farba = np.stack([a * 0 + 0.75, a * 0 + 0.62, a * 0 + 0.52], -1) * (0.75 + 0.25 * v)[..., None]
+    zaklad = (0.8, 0.8, 0.8) if NEUTRALNE else (0.75, 0.62, 0.52)
+    farba = np.stack([a * 0 + zaklad[0], a * 0 + zaklad[1], a * 0 + zaklad[2]], -1) * (0.75 + 0.25 * v)[..., None]
     rgba = np.concatenate([farba, a[..., None]], -1).astype(np.float32)
     img = BU.obrazok(meno + '_farba', rgba)
     mat = BU.material(meno, img, drsnost_hodnota=0.5, alfa=True)
@@ -167,6 +173,8 @@ def pramene(ctx, P, N, n, dlzka_fn, smer_fn, sirka=0.012, segmenty=4, ohyb=0.22)
 
 
 def vsetky(ctx):
+    global NEUTRALNE
+    NEUTRALNE = getattr(ctx, 'npc', False)
     m = ctx.m
     up = np.array([0, 0, 1.0])
     vpred = np.array([0, -1.0, 0])
@@ -186,17 +194,47 @@ def vsetky(ctx):
         P = taubin(m.P[vs] + m.N[vs] * odsad, faces, 2)
         return P, faces, normaly(P, faces)
 
-    # --- ježko: krátke postavené vlasy ---
-    P, faces, Nc = cap(0, 0.0022)
-    vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.1, Q[:, 2])
     ciara = lambda Q: T.smooth(0.0, 0.025, Q[:, 2] - vlasova_ciara(ctx, uhol_hlavy(ctx, Q)))
-    dlzka = lambda Q: (0.004 + 0.013 * vrch(Q)) * (0.35 + 0.65 * ciara(Q))
-    smer = lambda Q, Nn: Nn + up * 0.7 * vrch(Q)[:, None] + vpred * 0.1
-    vyber = ciara(P) > 0.05
-    V, F, UV = ostne(ctx, P[vyber], Nc[vyber], dlzka, smer, hustota=55000)
-    zlep(ctx, 'vlasy_jezko', P, faces, cap_alfa(0), [(V, F, UV, mat_ostni('vlasy_jezko_ostne'))])
+
+    # --- ježko: krátke postavené vlasy ---
+    if ctx.chce('vlasy_jezko'):
+        P, faces, Nc = cap(0, 0.0022)
+        vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.1, Q[:, 2])
+        dlzka = lambda Q: (0.004 + 0.013 * vrch(Q)) * (0.35 + 0.65 * ciara(Q))
+        smer = lambda Q, Nn: Nn + up * 0.7 * vrch(Q)[:, None] + vpred * 0.1
+        vyber = ciara(P) > 0.05
+        V, F, UV = ostne(ctx, P[vyber], Nc[vyber], dlzka, smer, hustota=55000)
+        zlep(ctx, 'vlasy_jezko', P, faces, cap_alfa(0), [(V, F, UV, mat_ostni('vlasy_jezko_ostne'))])
 
     # --- strapaté: hore dlhšie rozstrapatené pramene, po bokoch nakrátko ---
+    if ctx.chce('vlasy_strapate'):
+        strapate(ctx, cap, cap_alfa, ciara)
+
+    # --- nakrátko (strojček) ---
+    if ctx.chce('vlasy_nakratko'):
+        P, faces, Nc = cap(0, 0.0016)
+        zlep(ctx, 'vlasy_nakratko', P, faces, cap_alfa(0), [])
+
+    # --- uhladené dozadu ---
+    if ctx.chce('vlasy_dozadu'):
+        vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.09, Q[:, 2])
+        P, faces, Nc = cap(-0.004, 0.005)
+        vyber = ciara(P) > 0.2
+        V, F, UV = pramene(ctx, P[vyber], Nc[vyber], 1300, lambda Q: 0.035 + 0.03 * vrch(Q),
+                           lambda Q, Nn: Nn * 0.15 - vpred * 1.0 + up * 0.15, sirka=0.014, ohyb=0.3)
+        zlep(ctx, 'vlasy_dozadu', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_dozadu_pramene'))])
+
+    # --- účesy pre NPC (ženy, dôchodcovia) ---
+    npc_ucesy(ctx, cap, cap_alfa, ciara)
+
+    # --- brada ---
+    if any(ctx.chce(b) for b in ('brada_strnisko', 'brada_plnobrada', 'brada_fuzy')):
+        brady(ctx)
+
+
+def strapate(ctx, cap, cap_alfa, ciara):
+    up = np.array([0, 0, 1.0])
+    vpred = np.array([0, -1.0, 0])
     P, faces, Nc = cap(0, 0.0025)
     vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.09, Q[:, 2])
     vyber = (ciara(P) > 0.3) & (vrch(P) > 0.05)
@@ -211,18 +249,11 @@ def vsetky(ctx):
                         lambda Q, Nn: Nn + up * 0.3, hustota=40000)
     zlep(ctx, 'vlasy_strapate', P, faces, cap_alfa(0), [(V1, F1, UV1, mat_p), (V2, F2, UV2, mat_ostni('vlasy_strapate_ostne'))])
 
-    # --- nakrátko (strojček) ---
-    P, faces, Nc = cap(0, 0.0016)
-    zlep(ctx, 'vlasy_nakratko', P, faces, cap_alfa(0), [])
 
-    # --- uhladené dozadu ---
-    P, faces, Nc = cap(-0.004, 0.005)
-    vyber = ciara(P) > 0.2
-    V, F, UV = pramene(ctx, P[vyber], Nc[vyber], 1300, lambda Q: 0.035 + 0.03 * vrch(Q),
-                       lambda Q, Nn: Nn * 0.15 - vpred * 1.0 + up * 0.15, sirka=0.014, ohyb=0.3)
-    zlep(ctx, 'vlasy_dozadu', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_dozadu_pramene'))])
-
-    # --- brada: hustota ako hladká funkcia polohy → mäkké okraje ---
+def brady(ctx):
+    """Brada: hustota ako hladká funkcia polohy → mäkké okraje."""
+    m = ctx.m
+    up = np.array([0, 0, 1.0])
     ust, oko = ctx.usta, ctx.oko
 
     def hustota_brady(P, typ):
@@ -261,12 +292,15 @@ def vsetky(ctx):
     vs, faces = podmesh(m, fi)
     P = m.P[vs] + m.N[vs] * 0.0009
     Nc = normaly(P, faces)
-    zlep(ctx, 'brada_strnisko', P, faces, brada_tex('plna', 0.72), [])
-    h = hustota_brady(P, 'plna')
-    V, F, UV = ostne(ctx, P[h > 0.6], Nc[h > 0.6], lambda Q: np.full(len(Q), 0.008), lambda Q, Nn: Nn - up * 0.7,
-                     hustota=90000, hrubka=0.001)
-    zlep(ctx, 'brada_plnobrada', P + Nc * 0.0012, faces, brada_tex('plna', 1.2), [(V, F, UV, mat_ostni('brada_plnobrada_ostne'))])
-    zlep(ctx, 'brada_fuzy', P + Nc * 0.0006, faces, brada_tex('fuzy', 1.3), [])
+    if ctx.chce('brada_strnisko'):
+        zlep(ctx, 'brada_strnisko', P, faces, brada_tex('plna', 0.72), [])
+    if ctx.chce('brada_plnobrada'):
+        h = hustota_brady(P, 'plna')
+        V, F, UV = ostne(ctx, P[h > 0.6], Nc[h > 0.6], lambda Q: np.full(len(Q), 0.008), lambda Q, Nn: Nn - up * 0.7,
+                         hustota=90000, hrubka=0.001)
+        zlep(ctx, 'brada_plnobrada', P + Nc * 0.0012, faces, brada_tex('plna', 1.2), [(V, F, UV, mat_ostni('brada_plnobrada_ostne'))])
+    if ctx.chce('brada_fuzy'):
+        zlep(ctx, 'brada_fuzy', P + Nc * 0.0006, faces, brada_tex('fuzy', 1.3), [])
 
 
 def ciapka(ctx):
@@ -287,3 +321,192 @@ def ciapka(ctx):
     Pf, *_ = BU.data_meshu(ob)
     ctx.prenos.aplikuj(ob, ctx.arm, Pf, pevna_kost='head')
     ctx.log('odev_ciapka', len(ob.data.vertices))
+
+
+# ================= účesy pre NPC =================
+def pramene_padajuce(ctx, P, N, n, koniec_z_fn, smer_fn, sirka=0.024, segmenty=7, gravitacia=0.4,
+                     odstup=(0.006, 0.02), min_dlzka=0.03):
+    """Dlhé pásiky vlasov (hair cards): od temena padajú dole, obtekajú hlavu a plecia (odtláčajú sa od tela)
+    a končia zhruba vo výške koniec_z_fn(bod)."""
+    telo_P = ctx.m.P[ctx.prenos.TV]
+    telo_N = ctx.m.N[ctx.prenos.TV]
+    strom = ctx.prenos.strom
+    os_hlavy = ctx.hlava
+    dole = np.array([0, 0, -1.0])
+    idx = RNG.choice(len(P), n)
+    V, F, UV = [], [], []
+    for k in idx:
+        nn = N[k]
+        z_konca = koniec_z_fn(P[k:k + 1])[0] + RNG.normal(0, 0.01)
+        p = P[k] - nn * 0.002
+        L = max(min_dlzka, (p[2] - z_konca) * 1.3)
+        d = smer_fn(P[k:k + 1], N[k:k + 1])[0] + RNG.normal(0, 0.12, 3)
+        d /= np.linalg.norm(d)
+        od = RNG.uniform(*odstup)          # vrstvy vlasov – objem
+        w = sirka * RNG.uniform(0.75, 1.25)
+        body = [p]
+        for _ in range(segmenty):
+            d = d + dole * gravitacia + RNG.normal(0, 0.04, 3)
+            d /= np.linalg.norm(d)
+            q = body[-1] + d * (L / segmenty)
+            for _ in range(2):  # odtlačiť od hlavy, krku a pliec
+                _, i = strom.query(q)
+                h = (q - telo_P[i]) @ telo_N[i]
+                if h < od:
+                    q = q + telo_N[i] * (od - h)
+            d = q - body[-1]
+            d /= max(np.linalg.norm(d), 1e-9)
+            body.append(q)
+            if q[2] <= z_konca:
+                break
+        o = len(V)
+        bok_pred = None
+        for j, q in enumerate(body):
+            t = j / (len(body) - 1)
+            smer = body[min(j + 1, len(body) - 1)] - body[max(j - 1, 0)]
+            von = q - os_hlavy
+            von[2] = 0
+            bok = np.cross(smer, von)
+            if np.linalg.norm(bok) < 1e-6:
+                bok = bok_pred if bok_pred is not None else np.array([1.0, 0, 0])
+            bok /= np.linalg.norm(bok)
+            bok_pred = bok
+            ww = w * (1 - 0.3 * t)
+            V += [q - bok * ww / 2, q + bok * ww / 2]
+            UV += [[0, t], [1, t]]
+        for j in range(len(body) - 1):
+            a0 = o + j * 2
+            F.append([a0, a0 + 1, a0 + 3, a0 + 2])
+    return np.array(V), F, np.array(UV)
+
+
+def gula_mesh(stred, polomery, nu=14, nv=9):
+    """Elipsoid (napr. drdol) – vrcholy a štvoruholníky."""
+    V, F = [], []
+    for j in range(nv + 1):
+        th = np.pi * j / nv
+        for i in range(nu):
+            ph = 2 * np.pi * i / nu
+            V.append(stred + polomery * np.array([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)]))
+    for j in range(nv):
+        for i in range(nu):
+            a, b = j * nu + i, j * nu + (i + 1) % nu
+            F.append([a, b, b + nu, a + nu])
+    return np.array(V), F
+
+
+def koniec_ucesu(ctx, styl):
+    """Výška, kde končia vlasy (podľa uhla okolo hlavy) – spoločné pre vlasy aj ich LOD obrys."""
+    phi_ = lambda Q: np.abs(uhol_hlavy(ctx, Q))
+    if styl == 'mikado':
+        # spredu ofina nad obočím, po bokoch a vzadu po sánku
+        return lambda Q: np.where(phi_(Q) < 0.75, ctx.oko[2] + 0.028, ctx.usta[2] - 0.03 - 0.02 * T.smooth(1.2, 2.8, phi_(Q)))
+    if styl == 'dlhe':
+        return lambda Q: np.where(phi_(Q) < 0.7, ctx.oko[2] + 0.02, ctx.krk_z - 0.06 - 0.06 * T.smooth(1.3, 2.8, phi_(Q)))
+    return lambda Q: np.full(len(Q), ctx.oko[2])
+
+
+def npc_ucesy(ctx, cap, cap_alfa, ciara):
+    if ctx.objekty is None:
+        return  # Ďoďo (všetky jeho siete) – účesy pre NPC sa vyrábajú len na požiadanie z npc.json
+    up = np.array([0, 0, 1.0])
+    vpred = np.array([0, -1.0, 0])
+    vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.09, Q[:, 2])
+
+    def tok(Q, Nn, predok):
+        """Smer pramienka pozdĺž hlavy: von od cestičky a dole; spredu podľa funkcie predok."""
+        von = Q - ctx.hlava
+        von[:, 2] = 0
+        von /= np.maximum(np.linalg.norm(von, axis=1, keepdims=True), 1e-6)
+        d = von * 0.45 - up * 0.9
+        spredu = (np.abs(uhol_hlavy(ctx, Q)) < 0.75)[:, None]
+        d = np.where(spredu, predok(Q), d)
+        d = d - (d * Nn).sum(1, keepdims=True) * Nn      # po povrchu hlavy
+        d /= np.maximum(np.linalg.norm(d, axis=1, keepdims=True), 1e-6)
+        return d + Nn * 0.12
+
+    # --- mikádo: rovné vlasy po sánku s ofinou ---
+    if ctx.chce('vlasy_mikado'):
+        P, faces, Nc = cap(-0.004, 0.004)
+        vyber = ciara(P) > 0.15
+        ofina = lambda Q: vpred * 0.7 - up * 0.7
+        V, F, UV = pramene_padajuce(ctx, P[vyber], Nc[vyber], 1300, koniec_ucesu(ctx, 'mikado'),
+                                    lambda Q, Nn: tok(Q, Nn, ofina), sirka=0.024, segmenty=7,
+                                    gravitacia=0.5, odstup=(0.005, 0.016))
+        zlep(ctx, 'vlasy_mikado', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_mikado_pramene'))])
+
+    # --- dlhé: rovné vlasy pod plecia, s cestičkou, bez ofiny ---
+    if ctx.chce('vlasy_dlhe'):
+        P, faces, Nc = cap(-0.004, 0.004)
+        vyber = ciara(P) > 0.15
+
+        def nabok(Q):
+            # spredu učesané nabok a dozadu (od cestičky v strede)
+            bok = np.zeros_like(Q)
+            bok[:, 0] = np.where(Q[:, 0] >= ctx.hlava[0], 1.0, -1.0)
+            return bok * 0.8 - vpred * 0.5 - up * 0.3
+        V, F, UV = pramene_padajuce(ctx, P[vyber], Nc[vyber], 1100, koniec_ucesu(ctx, 'dlhe'),
+                                    lambda Q, Nn: tok(Q, Nn, nabok), sirka=0.03, segmenty=9,
+                                    gravitacia=0.5, odstup=(0.005, 0.02))
+        zlep(ctx, 'vlasy_dlhe', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_dlhe_pramene'))])
+
+    # --- drdol: uhladené dozadu, vzadu na temene uzol ---
+    if ctx.chce('vlasy_drdol'):
+        P, faces, Nc = cap(-0.004, 0.0045)
+        vyber = ciara(P) > 0.2
+        V, F, UV = pramene(ctx, P[vyber], Nc[vyber], 900, lambda Q: 0.03 + 0.03 * vrch(Q),
+                           lambda Q, Nn: Nn * 0.1 - vpred * 1.0 + up * 0.25, sirka=0.014, ohyb=0.35)
+        stred = stred_drdola(ctx)
+        Vg, Fg = gula_mesh(stred, np.array([0.042, 0.038, 0.034]))
+        UVg = np.stack([np.mod(np.arange(len(Vg)), 14) / 14, np.arange(len(Vg)) // 14 / 9], 1)
+        zlep(ctx, 'vlasy_drdol', P, faces, cap_alfa(-0.004), [(V, F, UV, textura_pramenov('vlasy_drdol_pramene')),
+                                                              (Vg, Fg, UVg, mat_ostni('vlasy_drdol_ostne'))])
+
+    # --- venček: plešina navrchu, nakrátko po bokoch a vzadu ---
+    if ctx.chce('vlasy_venec'):
+        P, faces, Nc = cap(0, 0.0018)
+        stredy = np.array([P[f].mean(0) for f in faces])
+        ok = (stredy[:, 2] < ctx.oko[2] + 0.06) | (np.abs(uhol_hlavy(ctx, stredy)) > 2.55)
+        faces = [f for f, o in zip(faces, ok) if o]
+        pouzite = sorted({v for f in faces for v in f})
+        mp = {v: i for i, v in enumerate(pouzite)}
+        zlep(ctx, 'vlasy_venec', P[pouzite], [[mp[v] for v in f] for f in faces], cap_alfa(0), [])
+
+
+def stred_drdola(ctx):
+    return ctx.hlava + np.array([0, 0.085, 0.125])
+
+
+def obrys_vlasov(ctx, styl):
+    """Zjednodušené vlasy pre LOD: plocha temena (a pri dlhých vlasoch závoj po krk a plecia). Vráti (P, faces)."""
+    m = ctx.m
+    if styl in (None, 'ziadny'):
+        return None
+    hrube = styl in ('mikado', 'dlhe', 'strapate', 'drdol')
+    fi = plochy_vlasov(ctx, -0.012)
+    if styl == 'venec':
+        fi = [i for i in fi if ctx.stredy[i][2] < ctx.oko[2] + 0.06 or abs(uhol_hlavy(ctx, ctx.stredy[i])) > 2.55]
+    odsad = {i: (0.016 if hrube else 0.006) for i in fi}
+    if styl in ('mikado', 'dlhe'):
+        koniec = koniec_ucesu(ctx, styl)
+        for i, (l, c) in enumerate(zip(ctx.casti, ctx.stredy)):
+            if i in odsad or l not in ('hlava', 'hrud') or ctx.dom[i] not in ('head', 'neck_01', 'spine_03', 'clavicle_l', 'clavicle_r'):
+                continue
+            phi = abs(uhol_hlavy(ctx, c))
+            if phi > 1.35 and koniec(c[None])[0] < c[2] < ctx.oko[2] + 0.05:
+                odsad[i] = 0.02 + 0.012 * (phi - 1.35)
+    fi = sorted(odsad)
+    vs, faces = podmesh(m, fi)
+    # odsadenie po vrcholoch = maximum z plôch
+    ov = np.zeros(len(vs))
+    mp = {v: i for i, v in enumerate(vs)}
+    for i in fi:
+        for v in m.F[i]:
+            ov[mp[v]] = max(ov[mp[v]], odsad[i])
+    P = taubin(m.P[vs] + m.N[vs] * ov[:, None], faces, 3)
+    if styl == 'drdol':
+        Vg, Fg = gula_mesh(stred_drdola(ctx), np.array([0.045, 0.041, 0.037]), 8, 5)
+        o = len(P)
+        P = np.concatenate([P, Vg])
+        faces = faces + [[v + o for v in f] for f in Fg]
+    return P, faces

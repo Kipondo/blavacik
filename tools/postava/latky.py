@@ -145,11 +145,11 @@ def tenisky():
     return fn
 
 
-def koza_topanky():
+def koza_topanky(farba='#16110e'):
     def fn(P, N):
         z = P[..., 2]
         h, zz = _pletenina(P, 900, 13)
-        a = np.broadcast_to(T.srgb('#16110e'), P.shape) * (0.9 + 0.2 * zz)[..., None]
+        a = np.broadcast_to(T.srgb(farba), P.shape) * (0.9 + 0.2 * zz)[..., None]
         podrazka = T.smooth(0.018, 0.014, z)
         a = T.mix(a, T.srgb('#2a211b'), podrazka)
         drs = 0.28 + 0.2 * zz + 0.4 * podrazka
@@ -200,14 +200,14 @@ def party():
     return fn
 
 
-def paperova(ctx):
+def paperova(ctx, farba='#34402f'):
     def fn(P, N):
         z = P[..., 2]
         perioda = 0.085
         f = np.mod(z, perioda) / perioda
         prešitie = T.smooth(0.08, 0.0, np.minimum(f, 1 - f))
         vank = np.sin(f * np.pi)
-        a = np.broadcast_to(T.srgb('#34402f'), P.shape) * (0.8 + 0.25 * vank)[..., None]
+        a = np.broadcast_to(T.srgb(farba), P.shape) * (0.8 + 0.25 * vank)[..., None]
         predok = T.smooth(-0.2, -0.6, N[..., 1])
         zips = T.smooth(0.006, 0.003, np.abs(P[..., 0])) * predok
         a = T.mix(a, T.srgb('#1a1a1a'), zips)

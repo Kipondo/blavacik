@@ -89,6 +89,24 @@ def makro_targety(gender=1.0, age=0.5, muscle=0.5, weight=0.5, race=None):
     return out
 
 
+def prsia_targety(gender=1.0, age=0.5, muscle=0.5, weight=0.5, cupsize=0.5, firmness=0.5):
+    """Tvar pŕs podľa MakeHumanu (veľkosť, pevnosť) – kombinované targety v breast/. Priemer = bez zmeny."""
+    z = {k: _zlozky(k, v) for k, v in dict(gender=gender, age=age, muscle=muscle, weight=weight,
+                                            cupsize=cupsize, firmness=firmness).items()}
+    out = []
+    for g, gv in z['gender']:
+        for a, av in z['age']:
+            for m, mv in z['muscle']:
+                for wt, wv in z['weight']:
+                    for c, cv in z['cupsize']:
+                        for f, fv in z['firmness']:
+                            w = gv * av * mv * wv * cv * fv
+                            meno = f'breast/{g}-{a}-{m}-{wt}-{c}-{f}'
+                            if w > 1e-3 and os.path.exists(os.path.join(MH, 'targets', meno + '.target.gz')):
+                                out.append((meno, w))
+    return out
+
+
 def aplikuj(V, zoznam):
     out = V.copy()
     for meno, w in zoznam:

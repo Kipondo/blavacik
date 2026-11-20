@@ -7,14 +7,14 @@ VYSKA = 1.76  # cieľová výška postavy v metroch
 
 
 class Model:
-    def __init__(self):
+    def __init__(self, vyska=VYSKA):
         V0, VT, F, FT, G = mh.nacitaj_obj()
         self.VT, self.F, self.FT, self.G = VT, F, FT, G
         dodo, delty = telo.vsetky_tvary()
         body_v = sorted({i for f, g in zip(F, G) if g == 'body' for i in f})
         b = self._mh2b(dodo)
         vys = b[body_v, 2].max() - b[body_v, 2].min()
-        self.mierka = VYSKA / vys
+        self.mierka = vyska / vys
         self.zem = b[body_v, 2].min() * self.mierka
         self.P = self._b(dodo)                      # všetky vrcholy (aj pomocné) v metroch
         self.D = {k: self._mh2b(v) * self.mierka for k, v in delty.items()}

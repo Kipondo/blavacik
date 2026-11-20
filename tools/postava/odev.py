@@ -155,9 +155,19 @@ def napec(ob, fn, S, meno, normal_S=None, drsnost=True):
 
 
 # ---------------- generátor kusu oblečenia ----------------
+SPODKY = {'odev_teplaky', 'odev_nohavice', 'odev_rifle', 'odev_kratasy'}
+
+
 class Kontext:
-    def __init__(self, m, TELO_V, arm, S, log):
+    def __init__(self, m, TELO_V, arm, S, log, objekty=None, latky=None, npc=False):
         self.m, self.arm, self.S, self.log = m, arm, S, log
+        # npc = postava z npc.json: hladšie oblečenie (bez detailov tela), nohavice v páse pod tričkom,
+        # svetlé neutrálne vlasy na prefarbenie
+        self.npc = npc
+        self.pas = m.pas_z
+        # objekty = ktoré siete vyrobiť (None = všetky, Ďoďo); latky = {objekt: [funkcia z latky.py, *argumenty]}
+        self.objekty = set(objekty) if objekty is not None else None
+        self.latky = latky or {}
         self.casti = m.casti_tela()
         self.prenos = Prenos(m, TELO_V)
         F = m.F
@@ -186,6 +196,28 @@ class Kontext:
         self.koleno_z = k['calf_l']['head'][2]
         self.kost = k
 
+    def chce(self, meno):
+        return self.objekty is None or meno in self.objekty
+
+    def latka(self, meno, predvolena):
+        """Látka podľa NPC profilu (napr. ['bavlna', '#efefef']) namiesto Ďoďovej (potlač, pruhy…)."""
+        spec = self.latky.get(meno)
+        if not spec:
+            return predvolena
+        import inspect
+        fn = getattr(L, spec[0])
+        pred = []  # látky, ktoré potrebujú tvar tela (kontext, osi nôh alebo rúk), ich dostanú automaticky
+        for p in inspect.signature(fn).parameters:
+            if p == 'ctx':
+                pred.append(self)
+            elif p == 'nohy':
+                pred.append([self.noha('l'), self.noha('r')])
+            elif p == 'ruky':
+                pred.append([self.ruka('l'), self.ruka('r')])
+            else:
+                break
+        return fn(*pred, *spec[1:])
+
     def plochy(self, labely, podmienka=None):
         out = []
         for i, (l, c) in enumerate(zip(self.casti, self.stredy)):
@@ -205,6 +237,9 @@ class Kontext:
 def kus(ctx, meno, fi, odsadenie, material_fn, hrubka=0.003, hladenie=8, uprav=None, S=None,
         normal_S=512, odstran=None, pevna_kost=None):
     """Vytvorí kus oblečenia z plôch tela fi: odsadenie po normále, vyhladenie, hrúbka, textúra, váhy, morphy."""
+    if not ctx.chce(meno):
+        return None
+    material_fn = ctx.latka(meno, material_fn)
     m = ctx.m
     if odstran is not None:
         fi = [i for i in fi if not odstran(ctx.stredy[i])]
@@ -212,6 +247,11 @@ def kus(ctx, meno, fi, odsadenie, material_fn, hrubka=0.003, hladenie=8, uprav=N
     P0 = m.P[vs]
     N0 = m.N[vs]
     off = odsadenie(P0, N0) if callable(odsadenie) else np.full(len(P0), odsadenie)
+    if ctx.npc and meno in SPODKY:
+        # pás nohavíc tesne pri tele – tričko/košeľa ide cez neho (u NPC nosia vrch navrchu)
+        off = np.minimum(off, 0.003 + (off - 0.003) * T.smooth(ctx.pas - 0.02, ctx.pas - 0.1, P0[:, 2]))
+    if ctx.npc and hladenie:
+        hladenie += 20   # bez bradaviek a rebier pod látkou
     P = P0 + N0 * off[:, None]
     if uprav:
         P = uprav(P, P0)
@@ -236,8 +276,9 @@ def kus(ctx, meno, fi, odsadenie, material_fn, hrubka=0.003, hladenie=8, uprav=N
 
 
 # ---------------- konkrétne kusy ----------------
-def vytvor_vsetko(m, arm, TELO_V, S, log):
-    ctx = Kontext(m, arm=arm, TELO_V=TELO_V, S=S, log=log)
+def vytvor_vsetko(m, arm, TELO_V, S, log, objekty=None, latky=None, npc=False):
+    """Vyrobí oblečenie, vlasy a doplnky. objekty = zoznam mien sietí (None = všetko pre Ďoďa)."""
+    ctx = Kontext(m, arm=arm, TELO_V=TELO_V, S=S, log=log, objekty=objekty, latky=latky, npc=npc)
     import vlasy, doplnky
     pas = m.pas_z
     nohy = [ctx.noha('l'), ctx.noha('r')]
@@ -333,8 +374,10 @@ def vytvor_vsetko(m, arm, TELO_V, S, log):
     topanka(ctx, 'odev_tenisky', topanky_f, 0.011, 0.024, L.tenisky())
 
     # --- retiazka a igelitka ---
-    doplnky.retiazka(ctx)
-    doplnky.igelitka(ctx)
+    if ctx.chce('odev_retiazka'):
+        doplnky.retiazka(ctx)
+    if ctx.chce('odev_igelitka'):
+        doplnky.igelitka(ctx)
 
     # --- vlasy a brada ---
     vlasy.vsetky(ctx)
@@ -403,11 +446,16 @@ def vytvor_vsetko(m, arm, TELO_V, S, log):
     kus(ctx, 'odev_zimna_bunda', zimna_f, rukav_odsad(0.045, 0.02), L.paperova(ctx), hrubka=0.004, hladenie=10)
 
     # čiapka
-    vlasy.ciapka(ctx)
+    if ctx.chce('odev_ciapka'):
+        vlasy.ciapka(ctx)
+    return ctx
 
 
 def topanka(ctx, meno, fi, odsad, podrazka, material_fn, plocha=False):
     """Topánka = vyhladený konvexný obal chodidla (prsty zmiznú, klenba sa vyplní), plochá podrážka."""
+    if not ctx.chce(meno):
+        return None
+    material_fn = ctx.latka(meno, material_fn)
     from scipy.spatial import ConvexHull
     m = ctx.m
     vs, faces = podmesh(m, fi)

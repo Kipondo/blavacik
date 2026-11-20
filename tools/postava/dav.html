@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>NPC a dav (nástroj)</title>
+  <style>
+    html,body{margin:0;background:#9fb3c8;overflow:hidden;font:13px/1.4 system-ui,sans-serif}
+    canvas{display:block}
+    #info{position:fixed;left:8px;top:8px;background:rgba(15,20,28,.72);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre}
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "../../vendor/three/three.module.min.js", "three/addons/": "../../vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+<div id="info">Načítavam…</div>
+<!--
+  Nástroj na skúšku NPC a LOD pre davy (snímky do PR, výkon):
+    ?rezim=galeria&lod=0|1|2&anim=stoj&cas=0   – všetky profily vedľa seba, pevná úroveň detailu
+    ?rezim=dav&pocet=150&kroky=60               – dav chodcov na námestí, LOD podľa vzdialenosti (Dav)
+  Spoločné: w, h, uhol, vzdialenost, vyska, ciel, fov, semienko, profil (len jeden profil)
+-->
+<script type="module">
+import * as THREE from 'three';
+import { nacitajNpcData, poskladajChodca, nahoda } from '../../js/chodec/npc/profily-npc.js';
+import { vytvorNpc } from '../../js/chodec/npc/model-npc.js';
+import { Dav } from '../../js/chodec/npc/dav.js';
+
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || innerWidth, H = +q.get('h') || innerHeight;
+const rezim = q.get('rezim') || 'dav';
+const info = document.getElementById('info');
+
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setSize(W, H);
+r.shadowMap.enabled = true;
+r.shadowMap.type = THREE.PCFSoftShadowMap;
+r.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(r.domElement);
+const scena = new THREE.Scene();
+scena.background = new THREE.Color('#b7c6d6');
+scena.fog = new THREE.Fog('#b7c6d6', 120, 260);
+scena.add(new THREE.HemisphereLight('#dfe9f5', '#6b5f52', 1.1));
+const slnko = new THREE.DirectionalLight('#fff4e6', 2.6);
+slnko.position.set(30, 50, 40);
+slnko.castShadow = true;
+slnko.shadow.mapSize.set(2048, 2048);
+Object.assign(slnko.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, far: 150 });
+scena.add(slnko, slnko.target);
+const pod = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.MeshStandardMaterial({ color: '#a39b8f', roughness: 0.95 }));
+pod.rotation.x = -Math.PI / 2;
+pod.receiveShadow = true;
+scena.add(pod);
+// dlažba – mriežka pre mierku
+const mriezka = new THREE.GridHelper(600, 300, '#8d867b', '#968f84');
+mriezka.position.y = 0.01;
+scena.add(mriezka);
+
+const kam = new THREE.PerspectiveCamera(+q.get('fov') || 45, W / H, 0.1, 600);
+const data = await nacitajNpcData();
+const profily = q.get('profil') ? [q.get('profil')] : Object.keys(data.npc.profily);
+const semienko = +q.get('semienko') || 7;
+
+const chodci = [];
+const t0 = performance.now();
+if (rezim === 'galeria') {
+  // jeden chodec z každého profilu, vedľa seba
+  const lod = +(q.get('lod') ?? 0);
+  const rozostup = +q.get('rozostup') || 0.85;
+  for (const [i, pid] of profily.entries()) {
+    const npc = await vytvorNpc(poskladajChodca(data, { profil: pid, semienko: semienko + i * 101 }), data);
+    npc.koren.position.x = (i - (profily.length - 1) / 2) * rozostup;
+    npc.nastavLod(lod);
+    scena.add(npc.koren);
+    chodci.push(npc);
+  }
+  const anim = q.get('anim') || 'stoj';
+  for (const c of chodci) {
+    c.rychlost = anim === 'chodza' ? 1.4 : 0;
+    c.animuj(0);
+    c.animuj(+q.get('cas') || 0.01);
+  }
+  const uhol = (+q.get('uhol') || 0) * Math.PI / 180;
+  const vz = +q.get('vzdialenost') || 7.5, vyska = +q.get('vyska') || 1.1;
+  kam.position.set(Math.sin(uhol) * vz, vyska, Math.cos(uhol) * vz);
+  kam.lookAt(0, +q.get('ciel') || 0.9, 0);
+  slnko.position.set(3, 6, 5);
+  Object.assign(slnko.shadow.camera, { left: -5, right: 5, top: 4, bottom: -1, far: 20 });
+  slnko.shadow.camera.updateProjectionMatrix();
+} else {
+  // dav: chodci sa prechádzajú po námestí 200 × 200 m, každý ide rovno a občas zmení smer
+  const pocet = +q.get('pocet') || 150;
+  const rnd = nahoda(semienko);
+  const pripravene = [];
+  for (let i = 0; i < pocet; i++) {
+    const pid = profily.length === 1 ? profily[0] : null;
+    pripravene.push(vytvorNpc(poskladajChodca(data, { profil: pid, semienko: semienko + i * 7919 }), data));
+  }
+  const dav = new Dav(data.npc.lod);
+  for (const npc of await Promise.all(pripravene)) {
+    const d = rnd() < 0.5 ? 4 + rnd() * 30 : 4 + rnd() * 140;   // polovica blízko, polovica ďaleko
+    const a = (rnd() - 0.5) * 1.3;
+    npc.koren.position.set(Math.sin(a) * d, 0, -Math.cos(a) * d);
+    npc.koren.rotation.y = rnd() * Math.PI * 2;
+    npc.rychlost = rnd() < 0.15 ? 0 : npc.spec.rychlost;
+    npc._zmena = rnd() * 6;
+    scena.add(npc.koren);
+    dav.pridaj(npc);
+    chodci.push(npc);
+  }
+  window.dav = dav;
+  kam.position.set(0, +q.get('vyska') || 3.2, 6);
+  kam.lookAt(0, 1.2, -30);
+  const krok = (dt) => {
+    for (const c of chodci) {
+      c._zmena -= dt;
+      if (c._zmena < 0) { c.koren.rotation.y += (rnd() - 0.5) * 2; c._zmena = 3 + rnd() * 6; }
+      c.koren.position.x += Math.sin(c.koren.rotation.y) * c.rychlost * dt;
+      c.koren.position.z += Math.cos(c.koren.rotation.y) * c.rychlost * dt;
+    }
+    dav.update(dt, kam);
+  };
+  window.krok = krok;
+  const kroky = +q.get('kroky') || 30;
+  for (let i = 0; i < kroky; i++) krok(1 / 30);
+}
+
+r.render(scena, kam);
+const ri = r.info.render;
+const st = window.dav?.statistika;
+info.textContent = `${rezim}: ${chodci.length} chodcov · načítanie ${((performance.now() - t0) / 1000).toFixed(1)} s\n` +
+  `kreslení: ${ri.calls} volaní, ${(ri.triangles / 1000).toFixed(0)}k trojuholníkov` +
+  (st ? `\nLOD0 ${st.lod0} · LOD1 ${st.lod1} · LOD2 ${st.lod2} · skrytí ${st.skryte}` : '');
+window.STAT = { volania: ri.calls, trojuholniky: ri.triangles, ...(st || {}) };
+if (q.get('bezinfo')) info.hidden = true;
+window.HOTOVO = true;
+
+if (q.get('slucka')) {
+  // živý režim v prehliadači – dav sa hýbe, myšou sa nič neovláda
+  const hodiny = new THREE.Clock();
+  r.setAnimationLoop(() => {
+    const dt = Math.min(hodiny.getDelta(), 0.05);
+    window.krok?.(dt);
+    r.render(scena, kam);
+    info.textContent = info.textContent.split('\n')[0] + `\nkreslení: ${r.info.render.calls} volaní, ${(r.info.render.triangles / 1000).toFixed(0)}k trojuholníkov` +
+      (window.dav ? `\nLOD0 ${dav.statistika.lod0} · LOD1 ${dav.statistika.lod1} · LOD2 ${dav.statistika.lod2} · skrytí ${dav.statistika.skryte}` : '');
+  });
+}
+</script>
+</body>
+</html>
