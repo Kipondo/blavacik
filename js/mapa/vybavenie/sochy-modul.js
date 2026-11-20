@@ -24,9 +24,11 @@ async function postavaVPoze(druh) {
   const url = new URL(cesta, KOREN).href;
   const gltf = await nacitajGlb(url);
   const scena = klonujSKostrou(gltf.scene);
+  // meno má uzol nad sieťou (glTF: uzol „lod1_…“ → sieť „mesh_N“)
+  const nazvy = (o) => [o.name, o.parent?.name ?? ''];
   let siet = null;
-  scena.traverse((o) => { if (o.isSkinnedMesh && !siet && (meno ? o.name === meno : o.name.startsWith('lod1_'))) siet = o; });
-  if (!siet) scena.traverse((o) => { if (o.isSkinnedMesh && !siet && o.name.startsWith('lod1_')) siet = o; });
+  scena.traverse((o) => { if (o.isSkinnedMesh && !siet && nazvy(o).some((n) => (meno ? n === meno : n.startsWith('lod1_')))) siet = o; });
+  if (!siet) scena.traverse((o) => { if (o.isSkinnedMesh && !siet && nazvy(o).some((n) => n.startsWith('lod1_'))) siet = o; });
   if (!siet) throw new Error('socha: model bez lod1');
   try {
     const klipy = await klipyPreModel(url, gltf);
