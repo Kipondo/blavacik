@@ -302,3 +302,32 @@ https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.13450,17.10950&
 
 ## Pokračovanie
 Ďalšia etapa: 6 – Nivy, Mlynské nivy, Eurovea.
+
+---
+
+# Kamenné námestie (doplnková etapa)
+
+Porovnanie: hra z `main` (20. 11. 2026, 10:51) a Google Street View, len okom. Snímky z hry: `docs/snimky/porovnanie/k-hra-mozaika.jpg`
+(vľavo hore pohľad na západ, vpravo hore na sever, dole letecký pohľad).
+Odkazy:
+- na západ (Kyjev): https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14465,17.11340&heading=280&pitch=8&fov=90
+- na sever (Tesco, trávnik): https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=48.14465,17.11340&heading=10&pitch=8&fov=90
+- letecký pohľad: https://earth.google.com/web/@48.14460,17.11330,150a,450d,35y,330h,60t,0r
+
+- [ ] [1] **Hotel Kyjev (výšková budova)** – v hre z námestia nie je vidieť žiadnu výškovú budovu, v strede stoja 5–6-podlažné farebné domy
+  → v skutočnosti dominantná **asi 15-podlažná veža** s hnedou fasádou, zvislými pásmi a balkónmi. Over výšku z lasera
+  (Kamenné námestie je mimo výrezu LiDARu, výška je z OSM alebo odhadnutá). Budova pri 48.14453, 17.11238 má v dátach 41,8 m,
+  over, či je to Kyjev a či sa vykresľuje v plnej výške.
+- [ ] [1] **Obchodný dom Tesco (bývalý Prior)** – v hre veľký biely kváder → v skutočnosti modernistická budova
+  s **tmavočervenohnedými zvislými lamelami/pásmi** na hornej fasáde a presklenými vstupmi v prízemí.
+- [ ] [1] **Podchod a schodiská** – v Street View je pri Tescu schodisko/rampa vedúca do nižšej úrovne. Over, či vedie do podchodu
+  (OSM `tunnel=yes`/`layer=-1` chodníky, `highway=steps`). Ak áno, modeluj **zahĺbený vstup so schodmi, zábradlím a stropom**,
+  podchod pod cestou s osvetlením a vchodmi do obchodov. Rovnako over ďalšie podchody a nadchody v meste (napr. pri Hlavnej stanici,
+  Trnavské mýto, Patrónka) – teraz sa `tunnel`/`bridge` pre chodníky v kóde mapy vôbec nerieši.
+- [ ] [2] **Povrch** – v skutočnosti veľké svetlosivé betónové dlaždice, v hre tmavé kocky v oblúkoch so svetlými pásmi.
+- [ ] [2] **Stromy** – v hre zhluk kužeľovitých ihličnanov na západnej strane → v skutočnosti listnaté stromy pri okrajoch,
+  žiadne ihličnany v strede.
+- [ ] [2] **Okolité budovy na západ** – v skutočnosti sivomodrá kancelárska budova (5–6 podlaží, sklo) a hnedá veža Kyjeva,
+  nie rad pestrofarebných historických domov.
+- [ ] [3] **Mobiliár** – rad zdieľaných bicyklov, vysoké pouličné lampy, kvetinový záhon na trávniku, zastávky električiek
+  na Špitálskej (prístrešky, nástupištia).
