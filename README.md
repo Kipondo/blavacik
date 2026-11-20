@@ -21,6 +21,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Nastúpiť / vystúpiť | E | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
+| Mapa mesta (veľká) | M, koliesko myši = priblíženie | – |
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
@@ -155,6 +156,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   pešo postava chodí v smere kamery, v aute sa myšou rozhliadneš a kamera sa vráti za auto; pri rýchlosti sa rozšíri zorné pole.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
+- **Minimapa** vľavo dole (`js/ui/minimapa/`): kreslí sa z dát dlaždíc (budovy, cesty, chodníky, námestia, zeleň,
+  Dunaj, koľaje, zastávky MHD), otáča sa podľa kamery, v aute sa podľa rýchlosti oddiali; pod ňou názov ulice.
+  **M** otvorí veľkú mapu so severom hore a názvami miest (koliesko myši = priblíženie).
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1) – príklad misie
   `data/misie/halusky-pre-stryka.json`, dialógy v `data/dialogy/`, pomenované miesta pre misie v `data/mapa/miesta.json`.
 
@@ -179,6 +183,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná) – nálada v `js/grafika/nalada.js` podľa herného času; vietor v korunách stromov.
 - Engine misií a dialógov, polícia, minimapa.
+- Deň a noc (svietiace lampy a okná).
+- Engine misií a dialógov, polícia (značky na minimapu už idú cez udalosť `znacka-mapy`).
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.
@@ -208,6 +214,11 @@ Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSO
 
 Všetko, čo modul môže použiť (`hra.stav`, `hra.mapa`, `hra.ui`, `hra.pridajAuto`, udalosti…),
 je popísané v komentári na začiatku [js/jadro/hra.js](js/jadro/hra.js).
+
+## Minimapa pre ďalšie moduly
+- `hra.posli('znacka-mapy', { id, x, z, farba?, popis? })` – pridá alebo posunie značku (cieľ misie, polícia…);
+  mimo minimapy sa ukáže ako šípka na okraji, na veľkej mape aj s popisom.
+- `hra.posli('znacka-mapy-zrus', { id })` – odstráni značku. Zoznam značiek: `hra.minimapa.znacky`.
 
 ## Doprava pre ďalšie moduly
 - `hra.doprava.graf` – uzly a hrany ciest (pruhy, jednosmerky, max. rýchlosť), `hra.doprava.hranyZUzla(i)`, `hra.doprava.najblizsiUzol(x, z)`
