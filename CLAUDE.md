@@ -14,6 +14,8 @@ Na projekte pracujú dvaja ľudia naraz (z dvoch rôznych Claude účtov) – pr
 - Kamera za postavou/autom, ovládanie klávesnicou aj dotykom na mobile.
 - Polícia s hviezdičkami, krátke vtipné misie s bratislavským humorom, minimapa, menu.
 
+**Dizajn hry (príbeh, postava, systémy) je v [napady/dizajn-hry.md](napady/dizajn-hry.md) – pred novou funkciou si ho prečítaj.**
+
 ## Technológie
 - Three.js (súbor priamo v `vendor/`, žiadne CDN ani build proces).
 - Čisté HTML + JavaScript (ES moduly cez `importmap`), CSS.
@@ -41,7 +43,9 @@ js/mapa/mosty/        všeobecný model mosta
 js/mapa/zelen/        stromy
 js/mapa/pamiatky/     jedna stavba = jeden súbor (<model>.js) + záznam v data/mapa/pamiatky.json
 js/auto/              fyzika auta, model auta, správa áut, riadenie hráčom
-js/chodec/            hráč pešo, NPC chodci
+js/chodec/            hráč pešo, NPC chodci; js/chodec/postava/ = realistický Ďoďo, js/chodec/npc/ = davy
+js/cas/               herný čas (hra.stav.datumCas, zrýchľovanie)
+js/mhd/               MHD: zastávky, odchody, spoje (číta data/mhd/)
 js/policia/           hviezdičky, policajné autá, zatknutie
 js/misie/             engine misií (číta data/misie/*.json)
 js/dialogy/           zobrazovanie dialógov (číta data/dialogy/*.json)
@@ -53,6 +57,11 @@ data/mapa/mesto/      VYGENEROVANÉ: index.json, teren.bin, d/<i>_<j>.json (dla�
 data/osm/             návod na OSM dáta, prípadný GeoJSON export (spracovaná mapa je data/mapa/osm.json)
 data/misie/           jedna misia = jeden JSON súbor (formát v FORMAT.md)
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
+data/mhd/             VYGENEROVANÉ z GTFS: linky, zastávky, poriadky (tools/mhd/)
+data/postavy/         šatník a profily NPC
+data/lidar/           návod k laserovému skenovaniu ÚGKK (tools/mesto/laser/)
+assets/               modely (postavy .glb) a CC0 textúry
+napady/               dizajn hry, príbeh, nápady (markdown)
 tools/                pomocné skripty; tools/mesto/ = celé mesto (OSM + DEM → dlaždice), tools/osm/ = spoločné triedenie OSM
 vendor/               knižnice tretích strán (three.js)
 ```
