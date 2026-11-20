@@ -25,7 +25,9 @@ export function pripojKlavesnicu(vstup, platno) {
     if (SMERY[e.code]) vstup.klavesy[SMERY[e.code]] = true;
     if (DRZANE[e.code]) vstup.drz(DRZANE[e.code], true);
     if (e.code === 'Space') vstup.drz('rucna', true);
-    if (STLACENE[e.code] && !e.repeat) vstup.stlac(STLACENE[e.code]);
+    // Esc, ktorý práve uvoľnil zámok myši (mys.js), už pauzu spustil – neprepínať ju späť
+    const poZamku = e.code === 'Escape' && performance.now() - (vstup.zamokSkoncil ?? -1e9) < 300;
+    if (STLACENE[e.code] && !e.repeat && !poZamku) vstup.stlac(STLACENE[e.code]);
     if (SMERY[e.code] || e.code === 'Space') e.preventDefault();
   });
 
@@ -41,11 +43,11 @@ export function pripojKlavesnicu(vstup, platno) {
     vstup.drzane.clear();
   });
 
-  // otáčanie kamery ťahaním myšou
+  // otáčanie kamery ťahaním myšou – len keď myš nie je zamknutá (zamknutú rieši mys.js)
   let tahame = false;
   platno.addEventListener('mousedown', () => { tahame = true; });
   window.addEventListener('mouseup', () => { tahame = false; });
   window.addEventListener('mousemove', (e) => {
-    if (tahame) vstup.otocKameru(e.movementX, e.movementY);
+    if (tahame && !document.pointerLockElement) vstup.otocKameru(e.movementX, e.movementY);
   });
 }

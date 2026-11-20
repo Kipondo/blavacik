@@ -17,8 +17,8 @@ export function vytvorMenu(koren, { dotyk }) {
           <p>Ťahaním prsta po obrazovke otáčaš kamerou.</p>` : `
           <p><b>W A S D</b> / šípky – chôdza a jazda</p>
           <p><b>Shift</b> – beh · <b>Medzerník</b> – skok / ručná brzda</p>
-          <p><b>E</b> – nastúpiť / vystúpiť z auta · <b>Esc</b> – pauza</p>
-          <p>Ťahaním myšou otáčaš kamerou · <b>P</b> – vypíše polohu</p>`}
+          <p><b>E</b> – nastúpiť / vystúpiť z auta</p>
+          <p><b>Klikni do hry</b> – myš ovláda pohľad, <b>Esc</b> = pauza · <b>P</b> – vypíše polohu</p>`}
       </div>
       <p class="menu-pata">Hra pre srandu. Všetky postavy a príbehy sú vymyslené.<br>Mapa © prispievatelia OpenStreetMap (ODbL).<br>Terén a budovy: laserové skenovanie © ÚGKK SR (CC BY 4.0), Copernicus DEM. Textúry: ambientCG (CC0).</p>
     </div>`;
