@@ -1,7 +1,7 @@
 // Postaví obsah jednej dlaždice mesta. Je to generátor – medzi krokmi vráti riadenie,
 // aby správca dlaždíc mohol stavbu rozložiť do viacerých snímok (bez sekania hry).
 //
-//   uroven 'detail' – zem, cesty, chodníky, zebry, koľaje, budovy (+ strechy z lasera), stromy, značky, lampy, kolízie
+//   uroven 'detail' – zem, cesty, chodníky, zebry, koľaje, budovy (+ strechy z lasera), stromy, značky, lampy, lavičky, kolízie
 //   uroven 'lod'    – len jednoduché bloky budov (zem v diaľke kreslí horizont)
 
 import * as THREE from 'three';
@@ -19,6 +19,7 @@ import { vytvorStromy } from '../zelen/stromy.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
 import { vytvorLampy } from '../vybavenie/lampy.js';
+import { vytvorLavicky } from '../vybavenie/lavicky.js';
 import { vytvorVodu } from '../voda/voda.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
 
@@ -55,6 +56,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k));
+  g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
   g.userData.krizovatky = krizovatky;
   return g;
 }
