@@ -3,16 +3,16 @@ import numpy as np
 import mh
 
 # Predvolený „klasický Ďoďo“: mladý muž, skinny fat (chudé ruky a nohy, bruško), okrúhla tvár.
-DODO_MAKRO = dict(gender=1.0, age=0.43, muscle=0.32, weight=0.56)
+DODO_MAKRO = dict(gender=1.0, age=0.36, muscle=0.32, weight=0.56)  # ~19 rokov, prvák na výške
 
 DODO_DETAILY = [
     ('stomach/stomach-pregnant-incr', 0.42),       # bruško od maminých rezňov
     ('head/head-round', 0.45),                     # okrúhla tvár
     ('head/head-oval', 0.25),                      # ale nie široká „lopata“
-    ('head/head-fat-incr', 0.15),
-    ('chin/chin-width-incr', 0.3),                 # výraznejšia sánka
-    ('chin/chin-prominent-incr', 0.25),
-    ('neck/neck-scale-horiz-incr', 0.35),          # robustnejší krk
+    ('head/head-fat-incr', 0.06),
+    ('chin/chin-width-incr', 0.08),                # mladšia, mäkšia sánka
+    ('chin/chin-prominent-incr', 0.08),
+    ('neck/neck-scale-horiz-incr', 0.12),
     ('eyes/l-eye-height2-incr', 0.2), ('eyes/r-eye-height2-incr', 0.2),
     ('eyebrows/eyebrows-angle-up', 0.35),          # obočie do oblúka – dobrácky výraz
     ('nose/nose-scale-vert-incr', 0.3), ('nose/nose-point-width-decr', 0.3),
