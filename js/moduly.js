@@ -14,6 +14,7 @@ import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
 import dohlad from './kamera/dohlad.js';
 import dlazdice from './mapa/dlazdice/modul.js';
+import fasady3d from './mapa/budovy/fasady-3d-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
@@ -41,6 +42,7 @@ export default [
   kamera,
   dohlad,
   dlazdice,
+  fasady3d,
   hud,
   lokality,
   poloha,

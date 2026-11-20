@@ -22,7 +22,8 @@ import { typizujBudovy } from './typ-budovy.js';
 import { pridajStrukturuStriech } from './struktura-striech.js';
 
 let materialy = null;
-function ziskajMaterialy() {
+/** Materiály budov [steny, sklo, strechy] – zdieľané (3D fasády používajú materiál stien). */
+export function ziskajMaterialy() {
   if (materialy) return materialy;
   const steny = materialFasad();
   const sklo = new THREE.MeshStandardMaterial({ map: texturaSkla(), vertexColors: true, roughness: 0.12, metalness: 0.65, envMapIntensity: 1.3 });
@@ -106,52 +107,72 @@ function pasyFasady(spodok, zaklad, vrch, par, podlazia, nobile = false) {
   return pasy;
 }
 
+/**
+ * Rozloženie budovy pre steny – spoločné pre budovy.js aj 3D fasády (fasady-3d.js), aby okná sedeli presne:
+ * obrys, dvory, výšky, štýl, farba, náhoda budovy, pásy fasády (sokel, prízemie, podlažia, atika) a steny
+ * (p → q, smer von, počet okenných osí).
+ */
+export function rozlozenieBudovy(b, vyskopis) {
+  let body = b.body;
+  if (body.length > 3 && body[0][0] === body[body.length - 1][0] && body[0][1] === body[body.length - 1][1]) {
+    body = body.slice(0, -1);
+  }
+  const diery = (b.diery ?? []).filter((d) => d.length >= 3);
+  let hMin = Infinity, hMax = -Infinity;
+  for (const [x, z] of body) {
+    const h = vyskopis.vyskaTerenu(x, z);
+    if (h < hMin) hMin = h;
+    if (h > hMax) hMax = h;
+  }
+  const spodok = hMin - 1;
+  const vrch = hMax + (b.vyska ?? 10);
+  const [cx, cz] = stredBodov(body);
+  const typ = typFasady(b, cx, cz);
+  const par = PARAMETRE[typ];
+  // náhoda budovy ako celé číslo 0…87 (shader fasád ju číta z aTyp: floor(fract(aTyp) · 97 + 0,5))
+  const seedInt = Math.round(0.9 * (Math.abs(Math.round(cx * 7.13 + cz * 3.71)) % 97));
+  const seed = seedInt / 97;
+  const nahodaFarby = 0.94 + 0.12 * (((Math.abs(Math.round(cx * 13 + cz * 7))) % 11) / 10);
+  const farba = new THREE.Color(b.farba ?? '#d8d2c4').multiplyScalar(nahodaFarby);
+  const vnutri = (x, z) => bodVPolygone(x, z, body) && !diery.some((d) => bodVPolygone(x, z, d));
+  const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : pasyFasady(spodok, hMax, vrch, par, b.podlazia, typ === STYLY.stare);
+  const slepa = b.typ === 'garaz';                    // garáže a kôlne bez okien
+  // znaky pre shader fasád: 1 = okenice (len kde naozaj sú), 2 = obchod (výklady na prízemí), 4·(1 + farba okeníc)
+  const znaky = (b.okenice ? 1 : 0) + (b.obchod ? 2 : 0) + (b.farbaOkenic !== undefined ? 4 * (1 + b.farbaOkenic) : 0);
+
+  const kruhy = [body, ...diery].map((kruh, iKruhu) => {
+    // smer von (od hmoty budovy): otestujeme prvú stenu kruhu
+    const [ax, az] = kruh[0], [bx, bz] = kruh[1];
+    const dlz = Math.hypot(bx - ax, bz - az) || 1;
+    const vonJeVlavo = !vnutri((ax + bx) / 2 + (-(bz - az) / dlz) * 0.05, (az + bz) / 2 + ((bx - ax) / dlz) * 0.05);
+    const steny = [];
+    for (let i = 0; i < kruh.length; i++) {
+      const p = kruh[i], q = kruh[(i + 1) % kruh.length];
+      const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      if (d < 0.05) continue;
+      // okenné osi: celé číslo na stenu (krátke steny bez okien)
+      const osi = slepa || d < par.os * 0.6 ? 0 : Math.max(1, Math.round(d / par.os));
+      steny.push({ p, q, d, osi });
+    }
+    return { kruh, vonJeVlavo, steny, dvor: iKruhu > 0 };
+  });
+  return { body, diery, spodok, hMax, vrch, cx, cz, typ, par, seed, seedInt, farba, pasy, znaky, kruhy };
+}
+
 function postavGeometriu(budovy, vyskopis) {
   const skupiny = [0, 1, 2].map(() => ({ poz: [], uv: [], farba: [], typ: [], metre: [], znaky: [] }));
   const [steny, sklo, strechy] = skupiny;
-  const c = new THREE.Color(), cs = new THREE.Color();
+  const cs = new THREE.Color();
 
   for (const b of budovy) {
-    let body = b.body;
-    if (body.length > 3 && body[0][0] === body[body.length - 1][0] && body[0][1] === body[body.length - 1][1]) {
-      body = body.slice(0, -1);
-    }
-    const diery = (b.diery ?? []).filter((d) => d.length >= 3);
-    let hMin = Infinity, hMax = -Infinity;
-    for (const [x, z] of body) {
-      const h = vyskopis.vyskaTerenu(x, z);
-      if (h < hMin) hMin = h;
-      if (h > hMax) hMax = h;
-    }
-    const spodok = hMin - 1;
-    const vrch = hMax + (b.vyska ?? 10);
-    const [cx, cz] = stredBodov(body);
-    const typ = typFasady(b, cx, cz);
-    const par = PARAMETRE[typ];
-    const seed = ((Math.abs(Math.round(cx * 7.13 + cz * 3.71)) % 97) / 97) * 0.9;
+    const r = rozlozenieBudovy(b, vyskopis);
+    const { body, diery, spodok, vrch, typ, par, seed, pasy, znaky } = r;
+    const c = r.farba;
     const ciel = b.sklo ? sklo : steny;
-    const nahodaFarby = 0.94 + 0.12 * (((Math.abs(Math.round(cx * 13 + cz * 7))) % 11) / 10);
-
-    c.set(b.farba ?? '#d8d2c4').multiplyScalar(nahodaFarby);
     if (b.strecha) cs.set(b.strecha); else cs.copy(c).multiplyScalar(0.55).lerp(new THREE.Color('#77736c'), 0.5);
 
-    const vnutri = (x, z) => bodVPolygone(x, z, body) && !diery.some((d) => bodVPolygone(x, z, d));
-    const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : pasyFasady(spodok, hMax, vrch, par, b.podlazia, typ === STYLY.stare);
-    const slepa = b.typ === 'garaz';                    // garáže a kôlne bez okien
-    // znaky pre shader fasád: 1 = okenice (len kde naozaj sú), 2 = obchod (výklady na prízemí), 4·(1 + farba okeníc)
-    const znaky = (b.okenice ? 1 : 0) + (b.obchod ? 2 : 0) + (b.farbaOkenic !== undefined ? 4 * (1 + b.farbaOkenic) : 0);
-
-    for (const kruh of [body, ...diery]) {
-      // smer von (od hmoty budovy): otestujeme prvú stenu kruhu
-      const [ax, az] = kruh[0], [bx, bz] = kruh[1];
-      const dlz = Math.hypot(bx - ax, bz - az) || 1;
-      const vonJeVlavo = !vnutri((ax + bx) / 2 + (-(bz - az) / dlz) * 0.05, (az + bz) / 2 + ((bx - ax) / dlz) * 0.05);
-      for (let i = 0; i < kruh.length; i++) {
-        const p = kruh[i], q = kruh[(i + 1) % kruh.length];
-        const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
-        if (d < 0.05) continue;
-        // okenné osi: celé číslo na stenu (krátke steny bez okien)
-        const osi = slepa || d < par.os * 0.6 ? 0 : Math.max(1, Math.round(d / par.os));
+    for (const { vonJeVlavo, steny: stenyKruhu } of r.kruhy) {
+      for (const { p, q, d, osi } of stenyKruhu) {
         // slepá stena (bez okien) má u od 200 – spojitá UV kvôli normálovej mape, shader v nej okná nekreslí
         const u0 = osi === 0 && !b.sklo ? 200 : 0, u1 = b.sklo ? d / 3 : osi === 0 ? 200 + d / par.os : osi;
         for (const [y0, y1, v0, v1] of pasy) {
