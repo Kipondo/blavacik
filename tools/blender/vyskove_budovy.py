@@ -19,7 +19,10 @@ import bpy  # noqa: E402  (musí byť pred bmesh v ďalších moduloch)
 from veze import nacitaj_obrysy, uloz  # noqa: E402
 
 VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sky_park_rezidencia',
-          'sky_park_offices', 'tower_115', 'nbs']
+          'sky_park_offices', 'tower_115', 'nbs',
+          # z 3D tagov OSM (vyskove/z_osm.py)
+          'cbc_1', 'vub', 'gloria', 'millennium_tower', 'aupark_tower', 'technopol', 'incheba', 'matadorka',
+          'central', 'lakeside_park', 'manderla']
 
 
 def main():

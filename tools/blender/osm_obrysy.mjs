@@ -14,6 +14,18 @@ const CIELE = {
   'tower-115': { cesta: '671692344' },
   'eurovea-tower': { relacia: '21708459' },
   'kamzik-veza': { cesta: '230944086' },
+  // druhá dávka (zoznam významných budov): všeobecný generátor z tagov OSM (vyskove/z_osm.py)
+  'cbc-1': { cesta: '77937663' },
+  'vub': { relacia: '1270596' },
+  'gloria': { cesta: '61398274' },
+  'millennium-tower': { cesty: ['128405266', '229676250'] },
+  'aupark-tower': { cesta: '53778785' },
+  'technopol': { cesty: ['135885927', '135885929'] },
+  'incheba': { cesta: '1153991739' },
+  'matadorka': { cesta: '884231657' },
+  'central': { cesta: '365111959' },
+  'lakeside-park': { cesta: '553359037' },
+  'manderla': { cesta: '38507136' },
 };
 const db = await nacitajPbf('../../.cache/mesto/bratislavsky.osm.pbf');
 const r1 = (v) => Math.round(v * 100) / 100;
