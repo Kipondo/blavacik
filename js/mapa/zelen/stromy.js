@@ -7,6 +7,8 @@ import * as THREE from 'three';
 
 const CHUNK = 250;
 const DOHLAD = 650; // ďalej ako toto sa stromy skryjú (aj tak sú v hmle)
+const CHUNK_BOHATE = 100;   // stromy z lasera: menšie skupiny kvôli LOD
+const LOD_BLIZKO = 170;     // m – bližšie členitá koruna, ďalej jednoduchá
 
 export function vytvorStromy(stromy, vyskopis, kolizie) {
   const skupina = new THREE.Group();
@@ -16,12 +18,15 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   // stromy z lasera (výrez s detailom) dostanú členitejšiu korunu, ostatné jednoduchšiu (lesy majú tisíce stromov)
   const bohate = stromy[0]?.length >= 5;
   const { listnaty, ihlicnaty, kmenGeo } = geometrieStromov(bohate);
+  const jednoduche = bohate ? geometrieStromov(false) : null;
   const matKmen = new THREE.MeshStandardMaterial({ color: '#5b4632', roughness: 1 });
   const matKoruna = materialKoruny(bohate);
+  const matKorunaDaleko = bohate ? materialKoruny(false) : null;
+  const velkostChunku = bohate ? CHUNK_BOHATE : CHUNK;
 
   const chunky = new Map();
   stromy.forEach((s, i) => {
-    const k = `${Math.floor(s[0] / CHUNK)},${Math.floor(s[1] / CHUNK)}`;
+    const k = `${Math.floor(s[0] / velkostChunku)},${Math.floor(s[1] / velkostChunku)}`;
     if (!chunky.has(k)) chunky.set(k, []);
     chunky.get(k).push([s, i]);
   });
@@ -38,6 +43,8 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
     const koruny = new THREE.InstancedMesh(listnaty, matKoruna, zoznam.length - pocetIhl);
     const ihlice = new THREE.InstancedMesh(ihlicnaty, matKoruna, Math.max(1, pocetIhl));
     ihlice.count = pocetIhl;
+    // vzdialená úroveň (len pri stromoch z lasera): rovnaké stromy, jednoduchšia koruna
+    const korunyD = jednoduche ? new THREE.InstancedMesh(jednoduche.listnaty, matKorunaDaleko, Math.max(1, zoznam.length - pocetIhl)) : null;
     let sx = 0, sz = 0, kl = 0, ki = 0;
     zoznam.forEach(([[x, z, s = 1, h, r], i], j) => {
       const y = vyskopis.vyskaTerenu(x, z);
@@ -51,17 +58,31 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
         ihlice.setMatrixAt(ki, m); ihlice.setColorAt(ki++, farba);
       } else {
         farba.setHSL(0.2 + (i % 7) * 0.015, 0.36 + (i % 3) * 0.07, 0.22 + (i % 5) * 0.025);
+        if (korunyD) { korunyD.setMatrixAt(kl, m); korunyD.setColorAt(kl, farba); }
         koruny.setMatrixAt(kl, m); koruny.setColorAt(kl++, farba);
       }
       kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt(mh * mv)), { typ: 'strom' });
       sx += x; sz += z;
     });
-    const chunk = new THREE.Group();
-    for (const im of [kmene, koruny, ihlice]) {
-      im.castShadow = true;
-      im.receiveShadow = im !== kmene;
-      im.computeBoundingSphere();
-      if (im.count) chunk.add(im);
+    const pripravit = (im) => { im.castShadow = true; im.receiveShadow = im !== kmene; im.computeBoundingSphere(); return im; };
+    let chunk;
+    if (korunyD) {
+      // THREE.LOD prepína úrovne podľa vzdialenosti kamery od stredu skupiny
+      korunyD.count = kl;
+      const cx = sx / zoznam.length, cz = sz / zoznam.length;
+      chunk = new THREE.LOD();
+      chunk.position.set(cx, 0, cz);
+      const blizko = new THREE.Group(), daleko = new THREE.Group();
+      blizko.position.set(-cx, 0, -cz); daleko.position.set(-cx, 0, -cz);
+      for (const im of [kmene, koruny, ihlice]) if (pripravit(im).count) blizko.add(im);
+      const kmeneD = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
+      kmeneD.instanceMatrix.copy(kmene.instanceMatrix);
+      for (const im of [kmeneD, korunyD, ihlice.clone()]) if (pripravit(im).count) daleko.add(im);
+      chunk.addLevel(blizko, 0);
+      chunk.addLevel(daleko, LOD_BLIZKO);
+    } else {
+      chunk = new THREE.Group();
+      for (const im of [kmene, koruny, ihlice]) if (pripravit(im).count) chunk.add(im);
     }
     chunk.userData.dohlad = { x: sx / zoznam.length, z: sz / zoznam.length, max: DOHLAD };
     skupina.add(chunk);
