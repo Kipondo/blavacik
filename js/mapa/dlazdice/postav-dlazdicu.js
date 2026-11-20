@@ -1,7 +1,7 @@
 // Postaví obsah jednej dlaždice mesta. Je to generátor – medzi krokmi vráti riadenie,
 // aby správca dlaždíc mohol stavbu rozložiť do viacerých snímok (bez sekania hry).
 //
-//   uroven 'detail' – zem, cesty, chodníky, zebry, koľaje, budovy, stromy, značky, lampy, kolízie
+//   uroven 'detail' – zem, cesty, chodníky, zebry, koľaje, budovy (+ strechy z lasera), stromy, značky, lampy, kolízie
 //   uroven 'lod'    – len jednoduché bloky budov (zem v diaľke kreslí horizont)
 
 import * as THREE from 'three';
@@ -14,6 +14,7 @@ import { vytvorPrechody } from '../cesty/prechody.js';
 import { vytvorKolajnice } from '../cesty/kolajnice.js';
 import { vytvorBudovy } from '../budovy/budovy.js';
 import { vytvorBudovyLod } from '../budovy/lod.js';
+import { vytvorStrechyLod2 } from '../budovy/strechy-lod2.js';
 import { vytvorStromy } from '../zelen/stromy.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
@@ -26,6 +27,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
 
   if (uroven === 'lod') {
     g.add(vytvorBudovyLod(d.budovy ?? [], vyskopis));
+    if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
     return g;
   }
 
@@ -44,6 +46,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   yield;
   for (const b of d.budovy ?? []) k.pridajPolygon(b.body, { typ: 'budova' });
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
+  if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
   yield;
   g.add(vytvorStromy(d.stromy, vyskopis, k));
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
@@ -60,7 +63,7 @@ export function uvolniObjekt(obj) {
     const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
     for (const m of mats) {
       // zdieľané materiály (budovy, cesty…) nemažeme – len textúry zeme, ktoré patria dlaždici
-      if (o.name === 'zem') { m.map?.dispose(); m.dispose(); }
+      if (o.name === 'zem') { m.map?.dispose(); m.userData.triedy?.dispose(); m.dispose(); }
     }
   });
 }

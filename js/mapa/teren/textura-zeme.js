@@ -189,3 +189,44 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
   t.anisotropy = 8;
   return t;
 }
+
+// Trieda povrchu pre materiál zeme (kanál R): 0 = prírodný povrch (farba z textúry pokrývky),
+// 0,5 = chodník z kamenných dlaždíc, 1 = mačacie hlavy / žulová dlažba (pešie zóny, námestia).
+const TRIEDA_POKRYVKY = { dlazba: 255, zaklad: 128 };
+const TRIEDA_CHODNIKOV = { pedestrian: 255, footway: 128, steps: 128, corridor: 128, platform: 128, cycleway: 128 };
+
+/** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
+export function vytvorTriedyDlazdice(d, rect, px = 1024) {
+  const c = document.createElement('canvas');
+  c.width = c.height = px;
+  const g = c.getContext('2d');
+  const mierka = px / (rect.maxX - rect.minX);
+  const sx = (x) => (x - rect.minX) * mierka, sz = (z) => (z - rect.minZ) * mierka;
+  const cesta = (body, uzavriet) => {
+    g.beginPath();
+    body.forEach(([x, z], i) => (i ? g.lineTo(sx(x), sz(z)) : g.moveTo(sx(x), sz(z))));
+    if (uzavriet) g.closePath();
+  };
+  const seda = (v) => `rgb(${v},${v},${v})`;
+  g.fillStyle = seda(TRIEDA_POKRYVKY.zaklad);
+  g.fillRect(0, 0, px, px);
+  for (const p of d.pokryvka ?? []) {
+    g.fillStyle = seda(TRIEDA_POKRYVKY[p.k] ?? 0);
+    cesta(p.body, true);
+    g.fill();
+  }
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  for (const ch of d.chodniky ?? []) {
+    const v = TRIEDA_CHODNIKOV[ch.typ];
+    if (v === undefined) continue;
+    g.strokeStyle = seda(v);
+    g.lineWidth = Math.max(1, ch.sirka * mierka);
+    cesta(ch.body, false);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.flipY = false;
+  t.colorSpace = THREE.NoColorSpace;
+  return t;
+}

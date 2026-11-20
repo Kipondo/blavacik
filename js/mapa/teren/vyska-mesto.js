@@ -14,7 +14,52 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
   const { meta, vysky } = teren;
   const W = meta.sirka, D = meta.hlbka, K = meta.krok;
 
+  // --- detailný terén vybraných dlaždíc (mriežka 2 m z laserového skenovania) ---
+  // pridajDetail(i, j, mriezka) / odoberDetail(i, j); na hrane k dlaždici bez detailu sa plynulo prejde na hrubú mriežku
+  const DL = data.terenDetail?.velkost ?? 500;
+  const detaily = new Map();   // i * 100000 + j → { v: Float32Array, n, krok, x0, z0, susedia }
+  const klucD = (i, j) => i * 100000 + j;
+  const PRECHOD = 25;          // m
+  function obnovSusedov(i, j) {
+    for (const [a, b] of [[i, j], [i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]]) {
+      const d = detaily.get(klucD(a, b));
+      if (d) d.susedia = [detaily.has(klucD(a - 1, b)), detaily.has(klucD(a + 1, b)), detaily.has(klucD(a, b - 1)), detaily.has(klucD(a, b + 1))];
+    }
+  }
+  function pridajDetail(i, j, v, n, krok) {
+    detaily.set(klucD(i, j), { v, n, krok, x0: i * DL, z0: j * DL, susedia: [false, false, false, false] });
+    obnovSusedov(i, j);
+  }
+  function odoberDetail(i, j) {
+    detaily.delete(klucD(i, j));
+    obnovSusedov(i, j);
+  }
+  function vyskaDetail(d, x, z) {
+    const fx = Math.min(d.n - 1.0001, Math.max(0, (x - d.x0) / d.krok)), fz = Math.min(d.n - 1.0001, Math.max(0, (z - d.z0) / d.krok));
+    const i = Math.floor(fx), j = Math.floor(fz), tx = fx - i, tz = fz - j, n = d.n, v = d.v;
+    return (v[j * n + i] * (1 - tx) + v[j * n + i + 1] * tx) * (1 - tz) + (v[(j + 1) * n + i] * (1 - tx) + v[(j + 1) * n + i + 1] * tx) * tz;
+  }
+
   function vyskaDem(x, z) {
+    if (detaily.size) {
+      const d = detaily.get(klucD(Math.floor(x / DL), Math.floor(z / DL)));
+      if (d) {
+        const hd = vyskaDetail(d, x, z);
+        let w = 1;
+        const s = d.susedia;
+        if (!s[0]) w = Math.min(w, (x - d.x0) / PRECHOD);
+        if (!s[1]) w = Math.min(w, (d.x0 + DL - x) / PRECHOD);
+        if (!s[2]) w = Math.min(w, (z - d.z0) / PRECHOD);
+        if (!s[3]) w = Math.min(w, (d.z0 + DL - z) / PRECHOD);
+        if (w >= 1) return hd;
+        w = plynulo(Math.max(0, w));
+        return vyskaHruba(x, z) * (1 - w) + hd * w;
+      }
+    }
+    return vyskaHruba(x, z);
+  }
+
+  function vyskaHruba(x, z) {
     let fx = (x - meta.minX) / K, fz = (z - meta.minZ) / K;
     fx = Math.max(0, Math.min(W - 1.001, fx));
     fz = Math.max(0, Math.min(D - 1.001, fz));
@@ -144,7 +189,7 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
     return false;
   }
 
-  return { vyska, vyskaTerenu, vyskaMostu, jeVoVode, hladina, mosty, voda: rieky };
+  return { vyska, vyskaTerenu, vyskaMostu, jeVoVode, hladina, mosty, voda: rieky, pridajDetail, odoberDetail, maDetail: (i, j) => detaily.has(klucD(i, j)) };
 }
 
 function vyplnPolygon(maska, w, d, body, x0, z0, krok) {

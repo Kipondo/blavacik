@@ -22,6 +22,15 @@ function jePlocha(t, uzavreta) {
   return PLOCHOVE_ZNACKY.some((k) => t[k] !== undefined);
 }
 
+function vnutriPolygonu(x, z, body) {
+  let dnu = false;
+  for (let i = 0, j = body.length - 1; i < body.length; j = i++) {
+    const [xi, zi] = body[i], [xj, zj] = body[j];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) dnu = !dnu;
+  }
+  return dnu;
+}
+
 /** Pospája cesty (zoznamy bodov) do reťazcov podľa spoločných koncov. */
 export function spojRetazce(useky) {
   const zostava = useky.map((u) => [...u]);
@@ -75,12 +84,22 @@ export function zostavGeometriu(db, stred) {
     if (r.t.type !== 'multipolygon' && r.t.type !== 'building') continue;
     const vonkajsie = r.cleny.filter((c) => c.typ === 'way' && (c.rola === 'outer' || c.rola === '') && bodyCesty.has(c.ref));
     if (!vonkajsie.length) continue;
+    // vnútorné obrysy (dvory budov, ostrovčeky) – priradia sa k vonkajšiemu obrysu, v ktorom ležia
+    const vnutorne = [];
+    for (const ret of spojRetazce(r.cleny.filter((c) => c.typ === 'way' && c.rola === 'inner' && bodyCesty.has(c.ref)).map((c) => bodyCesty.get(c.ref)))) {
+      const a = ret[0], b = ret[ret.length - 1];
+      if (ret.length >= 4 && a[0] === b[0] && a[1] === b[1]) vnutorne.push(ret.slice(0, -1));
+    }
     for (const ret of spojRetazce(vonkajsie.map((c) => bodyCesty.get(c.ref)))) {
       if (ret.length < 4) continue;
       const a = ret[0], b = ret[ret.length - 1];
       const uzavrety = a[0] === b[0] && a[1] === b[1];
       // nedokončené obrysy (časť je mimo stiahnutej oblasti) uzavrieme priamkou
-      polygony.push({ id: `r${id}`, t: r.t, body: uzavrety ? ret.slice(0, -1) : ret, neuplny: !uzavrety });
+      const body = uzavrety ? ret.slice(0, -1) : ret;
+      const p = { id: `r${id}`, t: r.t, body, neuplny: !uzavrety };
+      const diery = vnutorne.filter((v) => vnutriPolygonu(v[0][0], v[0][1], body));
+      if (diery.length) p.diery = diery;
+      polygony.push(p);
     }
   }
 

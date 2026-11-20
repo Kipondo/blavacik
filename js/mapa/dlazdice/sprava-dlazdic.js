@@ -6,6 +6,7 @@
 // Udalosti (hra.posli): 'dlazdica-nacitana' { kluc, uroven, data, objekt }, 'dlazdica-uvolnena' { kluc, uroven }
 
 import { postavDlazdicu, uvolniObjekt } from './postav-dlazdicu.js';
+import { nacitajDoplnky } from './doplnky.js';
 
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
@@ -17,6 +18,7 @@ export class SpravaDlazdic {
     this.velkost = index.dlazdica;
     this.scena = scena;
     this.kontext = { vyskopis, kolizie, rieky: vyskopis.voda, KONFIG };
+    this.vyskopis = vyskopis;
     this.kolizie = kolizie;
     this.posli = posli ?? (() => {});
     this.zoznam = index.dlazdice.map(([i, j, pocet, maxVyska]) => ({ i, j, kluc: `${i}_${j}`, pocet, maxVyska }));
@@ -40,7 +42,14 @@ export class SpravaDlazdic {
 
   nacitajData(kluc) {
     if (!this.data.has(kluc)) {
-      this.data.set(kluc, fetch(`data/mapa/mesto/d/${kluc}.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({})));
+      const [i, j] = kluc.split('_').map(Number);
+      const obsah = fetch(`data/mapa/mesto/d/${kluc}.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+      this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index)]).then(([d, { teren, strechy }]) => {
+        // detailný terén sa zaregistruje skôr, než sa dlaždica začne stavať (budovy, cesty aj zem ho už použijú)
+        if (teren && this.data.has(kluc)) { this.vyskopis.pridajDetail?.(i, j, teren.v, teren.n, teren.krok); d._detailTerenu = true; }
+        if (strechy) d._strechy = strechy;
+        return d;
+      }));
     }
     return this.data.get(kluc);
   }
@@ -137,7 +146,11 @@ export class SpravaDlazdic {
     if (a.uroven === 'detail') this.kolizie.odstranDlazdicu(kluc);
     this.aktivne.delete(kluc);
     this.posli('dlazdica-uvolnena', { kluc, uroven: a.uroven, nahrada });
-    if (!nahrada && a.uroven === 'lod') this.data.delete(kluc);
+    if (!nahrada && a.uroven === 'lod') {
+      this.data.delete(kluc);
+      const [i, j] = kluc.split('_').map(Number);
+      this.vyskopis.odoberDetail?.(i, j);
+    }
   }
 
   /** Cesty zo všetkých podrobne načítaných dlaždíc (napr. na rozmiestnenie áut). */

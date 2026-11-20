@@ -72,6 +72,11 @@ function cislo(v) {
   return parseFloat(String(v).replace(',', '.'));
 }
 
+/** Zdroj výšky budovy: 'osm' (značka height alebo building:levels), inak 'odhad' podľa typu. */
+function zdrojVysky(t) {
+  return cislo(t.height) > 0 || cislo(t['building:levels']) > 0 ? 'osm' : 'odhad';
+}
+
 function vyskaBudovy(t) {
   const h = cislo(t.height);
   if (h > 0) return h;
@@ -191,8 +196,13 @@ export function klasifikuj(geo, moznosti) {
     const b = {
       body: zjednodus(p.body, 0.3).map(bodR),
       vyska: Math.max(3, Math.round(vyskaBudovy(t))),
+      zdrojVysky: zdrojVysky(t),
       farba: farba(t) ?? PALETY[st][i % PALETY[st].length],
     };
+    // vnútorné dvory (vnútorné obrysy multipolygónu)
+    const diery = (p.diery ?? []).filter((d) => d.length >= 3 && Math.abs(plochaPolygonu(d)) >= 15).map((d) => zjednodus(d, 0.3).map(bodR));
+    if (diery.length) b.diery = diery;
+    if (t['roof:shape']) b.tvarOsm = t['roof:shape'];
     const tvar = t['roof:shape'];
     const sikma = ['gabled', 'hipped', 'pyramidal', 'half-hipped', 'mansard', 'gambrel'].includes(tvar)
       || (!tvar && (st === 'stare' || st === 'vily') && b.vyska < 25);

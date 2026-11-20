@@ -1,0 +1,65 @@
+// Strechy budov z laserového skenovania (LOD2): roviny striech, ploché časti a štíty.
+// Dáta: data/mapa/mesto/strechy/<i>_<j>.json (vyrába tools/mesto/laser/budovy.py)
+//   { sikme: {p, uv, c}, ploche: {p, uv, c}, steny: {p, uv, c} } – trojuholníky bez indexov,
+//   uv v metroch, c = lineárny odtieň (násobí textúru).
+// Materiály sú CC0 textúry z ambientCG (assets/textury/LICENSE.md).
+
+import * as THREE from 'three';
+
+const TEXTURY = {
+  sikme: { priecinok: 'skridla', velkost: 2.2, drsnost: 0.85 },
+  ploche: { priecinok: 'strk', velkost: 1.6, drsnost: 0.95 },
+  steny: { priecinok: 'omietka', velkost: 3.0, drsnost: 0.9 },
+};
+
+let materialy = null;
+function ziskajMaterialy() {
+  if (materialy) return materialy;
+  const loader = new THREE.TextureLoader();
+  const nacitaj = (cesta, velkost, srgb) => {
+    const t = loader.load(cesta);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(1 / velkost, 1 / velkost);
+    t.anisotropy = 8;
+    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  };
+  materialy = {};
+  for (const [druh, { priecinok, velkost, drsnost }] of Object.entries(TEXTURY)) {
+    const z = `assets/textury/${priecinok}/`;
+    materialy[druh] = new THREE.MeshStandardMaterial({
+      map: nacitaj(z + 'farba.jpg', velkost, true),
+      normalMap: nacitaj(z + 'normal.jpg', velkost, false),
+      roughnessMap: nacitaj(z + 'drsnost.jpg', velkost, false),
+      roughness: drsnost,
+      vertexColors: true,
+      side: THREE.DoubleSide,   // štíty a hrany striech vidno z oboch strán
+    });
+  }
+  materialy.sikme.normalScale.set(1.2, 1.2);
+  return materialy;
+}
+
+/** Sieť striech jednej dlaždice (skupina troch sietí podľa materiálu). */
+export function vytvorStrechyLod2(data) {
+  const skupina = new THREE.Group();
+  skupina.name = 'strechy-lod2';
+  if (!data) return skupina;
+  const mat = ziskajMaterialy();
+  for (const druh of ['sikme', 'ploche', 'steny']) {
+    const d = data[druh];
+    if (!d?.p?.length) continue;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(d.p, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(d.uv, 2));
+    g.setAttribute('color', new THREE.Float32BufferAttribute(d.c, 3));
+    g.computeVertexNormals();
+    g.computeBoundingSphere();
+    const m = new THREE.Mesh(g, mat[druh]);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    m.name = `strechy-${druh}`;
+    skupina.add(m);
+  }
+  return skupina;
+}
