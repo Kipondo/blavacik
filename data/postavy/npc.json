@@ -1,0 +1,143 @@
+{
+  "_popis": "NPC postavy (chodci, davy). 'modely' = základné telá, ktoré z rovnakého generátora ako Ďoďa vyrobí tools/postava/npc.sh (parametre MakeHumanu 0..1: pohlavie 0 = žena, 1 = muž; vek 0.5 = 25 r., 1 = 90 r.; vyska v m). Model obsahuje všetko oblečenie a účesy, ktoré používajú jeho profily. 'profily' = typy ľudí v meste: hra z nich náhodne poskladá konkrétneho chodca (variant oblečenia a účesu, farby z paliet, tvar tela z rozsahov). Kusy oblečenia sú z data/postavy/satnik.json. 'latky' = neutrálne svetlé látky pre NPC (farbu dá paleta profilu). 'lod' = úrovne detailu pre davy.",
+
+  "lod": {
+    "_popis": "blizko/stredne/daleko = do akej vzdialenosti (m) sa kreslí plný model / zlúčená sieť LOD1 / hrubá sieť LOD2; ďalej sa chodec nekreslí. max* = limity naraz (najbližší vyhrávajú). trojuholniky = cieľ generátora pre LOD1 a LOD2. animaciaDaleko = LOD2 sa animuje každý n-tý snímok.",
+    "blizko": 14,
+    "stredne": 45,
+    "daleko": 140,
+    "maxBlizko": 8,
+    "maxStredne": 40,
+    "trojuholniky": [3500, 700],
+    "animaciaDaleko": 3
+  },
+
+  "latky": {
+    "odev_tricko": ["bavlna", "#ededeb"],
+    "odev_kosela": ["kosela", "#f2f2f0"],
+    "odev_nohavice": ["vlna", "#d6d6d4", true],
+    "odev_sako": ["vlna", "#d2d2d0"],
+    "odev_kratasy": ["bavlna", "#e9e5dc", true],
+    "odev_zimna_bunda": ["paperova", "#dededc"],
+    "odev_polobotky": ["koza_topanky", "#8a7a6c"]
+  },
+
+  "modely": {
+    "muz":        { "subor": "assets/postavy/npc/muz.glb",        "telo": { "pohlavie": 1.0, "vek": 0.5,  "svaly": 0.5,  "vaha": 0.5 },  "vyska": 1.79 },
+    "zena":       { "subor": "assets/postavy/npc/zena.glb",       "telo": { "pohlavie": 0.0, "vek": 0.46, "svaly": 0.45, "vaha": 0.45 }, "prsia": { "velkost": 0.55, "pevnost": 0.5 }, "vyska": 1.67 },
+    "dochodca":   { "subor": "assets/postavy/npc/dochodca.glb",   "telo": { "pohlavie": 1.0, "vek": 0.93, "svaly": 0.3,  "vaha": 0.62 }, "vyska": 1.73,
+                    "detaily": [["stomach/stomach-pregnant-incr", 0.25], ["torso/torso-vshape-decr", 0.3]] },
+    "dochodkyna": { "subor": "assets/postavy/npc/dochodkyna.glb", "telo": { "pohlavie": 0.0, "vek": 0.93, "svaly": 0.3,  "vaha": 0.66 }, "prsia": { "velkost": 0.6, "pevnost": 0.2 }, "vyska": 1.6 }
+  },
+
+  "morphy": ["chudy", "pupkac", "brucho", "svalnaty", "usmev", "zmurk"],
+
+  "palety": {
+    "plet": ["#e8b493", "#f1c6a6", "#dba57f", "#c98d66", "#f3cfb4"],
+    "vlasy": ["#2b1d14", "#4a3222", "#6e4c34", "#9a7350", "#c9a66b", "#1b1714"],
+    "vlasy_sive": ["#b9b9b6", "#d8d8d4", "#9c9c98", "#8a8580", "#c7b9d8"],
+    "pestre": ["#c0392b", "#2e86c1", "#27ae60", "#f1c40f", "#8e44ad", "#e67e22", "#16a085", "#ecf0f1", "#2c3e50", "#d35400"],
+    "tlmene": ["#2c3e50", "#34495e", "#5d6d7e", "#7f8c8d", "#1b2631", "#4a235a", "#6e2c00", "#145a32", "#3b3b3b"],
+    "kancel": ["#2b2f36", "#1c2230", "#3a3f47", "#4b4f56", "#24282e"],
+    "kosele": ["#ffffff", "#dfe9f5", "#f4ecdf", "#e8f0e8", "#f2e1e6"],
+    "nohavice": ["#2b2f36", "#4b4f56", "#6b5b4b", "#2a3a52", "#8a7d6a"],
+    "obuv": ["#ffffff", "#ffffff", "#e6e6e6", "#bdbdbd", "#2a2a2a", "#2a2a2a", "#c0392b", "#2e86c1"],
+    "topanky": ["#222222", "#3a2a20", "#5b4030", "#2b2b30"]
+  },
+
+  "profily": {
+    "student": {
+      "nazov": "Študent z intrákov", "model": "muz", "pocetnost": 3,
+      "varianty": [
+        { "kusy": ["tricko", "rifle", "tenisky"], "ucet": "strapate" },
+        { "kusy": ["flanelka", "rifle", "tenisky"], "ucet": "nakratko" },
+        { "kusy": ["tricko", "kratasy", "tenisky"], "ucet": "jezko" }
+      ],
+      "brady": ["ziadna", "strnisko", "strnisko", "plnobrada"],
+      "farby": { "tricko": "pestre", "tenisky": "obuv" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "chudy": [0, 0.7], "pupkac": [0, 0.2], "svalnaty": [0, 0.3] },
+      "mierka": [0.96, 1.05], "rychlost": [1.3, 1.6]
+    },
+    "korporat": {
+      "nazov": "Korporátnik z Twin City", "model": "muz", "pocetnost": 2,
+      "varianty": [
+        { "kusy": ["kosela", "kravata", "sako", "nohavice", "polobotky"], "ucet": "dozadu" },
+        { "kusy": ["kosela", "nohavice", "polobotky"], "ucet": "nakratko" }
+      ],
+      "brady": ["ziadna", "ziadna", "strnisko"],
+      "farby": { "kosela": "kosele", "sako": "kancel", "nohavice": "kancel", "polobotky": "topanky" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "pupkac": [0, 0.35], "brucho": [0, 0.4] },
+      "mierka": [0.97, 1.05], "rychlost": [1.5, 1.8]
+    },
+    "turista": {
+      "nazov": "Turista na rozlúčke so slobodou", "model": "muz", "pocetnost": 2, "opity": 0.35,
+      "varianty": [
+        { "kusy": ["tricko", "kratasy", "tenisky"], "ucet": "nakratko" },
+        { "kusy": ["tricko", "kratasy", "tenisky", "ciapka"], "ucet": "nakratko" }
+      ],
+      "brady": ["ziadna", "plnobrada", "fuzy", "strnisko"],
+      "farby": { "tricko": "pestre", "kratasy": "nohavice", "tenisky": "obuv", "ciapka": "pestre" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "pupkac": [0.2, 0.9], "brucho": [0, 0.6], "svalnaty": [0, 0.3] },
+      "mierka": [0.98, 1.06], "rychlost": [1.1, 1.4]
+    },
+    "kurier": {
+      "nazov": "Kuriér na brigáde", "model": "muz", "pocetnost": 1,
+      "varianty": [ { "kusy": ["tricko_cierne", "vesta", "rifle", "tenisky"], "ucet": "jezko" } ],
+      "brady": ["ziadna", "strnisko"],
+      "farby": { "tenisky": "obuv" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "chudy": [0, 0.5], "svalnaty": [0, 0.4] },
+      "mierka": [0.97, 1.03], "rychlost": [1.6, 1.9]
+    },
+    "studentka": {
+      "nazov": "Študentka", "model": "zena", "pocetnost": 3,
+      "varianty": [
+        { "kusy": ["tricko", "rifle", "tenisky"], "ucet": "dlhe" },
+        { "kusy": ["kosela", "rifle", "tenisky"], "ucet": "mikado" },
+        { "kusy": ["tricko", "kratasy", "tenisky"], "ucet": "dlhe" }
+      ],
+      "farby": { "tricko": "pestre", "kosela": "kosele", "kratasy": "nohavice", "tenisky": "obuv" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "chudy": [0, 0.6], "brucho": [0, 0.15] },
+      "mierka": [0.95, 1.04], "rychlost": [1.25, 1.5]
+    },
+    "manazerka": {
+      "nazov": "Manažérka z Eurovey", "model": "zena", "pocetnost": 2,
+      "varianty": [
+        { "kusy": ["kosela", "sako", "nohavice", "polobotky"], "ucet": "drdol" },
+        { "kusy": ["kosela", "nohavice", "polobotky"], "ucet": "mikado" }
+      ],
+      "farby": { "kosela": "kosele", "sako": "kancel", "nohavice": "kancel", "polobotky": "topanky" },
+      "plet": "plet", "vlasy": "vlasy",
+      "tvar": { "chudy": [0, 0.5] },
+      "mierka": [0.97, 1.04], "rychlost": [1.4, 1.7]
+    },
+    "dochodca": {
+      "nazov": "Dôchodca na prechádzke", "model": "dochodca", "pocetnost": 2,
+      "varianty": [
+        { "kusy": ["flanelka", "nohavice", "polobotky"], "ucet": "venec" },
+        { "kusy": ["kosela", "sako", "nohavice", "polobotky"], "ucet": "nakratko" },
+        { "kusy": ["kosela", "zimna_bunda", "nohavice", "polobotky", "ciapka"], "ucet": "ziadny" }
+      ],
+      "brady": ["ziadna", "fuzy", "fuzy", "plnobrada"],
+      "farby": { "kosela": "kosele", "sako": "tlmene", "nohavice": "nohavice", "zimna_bunda": "tlmene", "polobotky": "topanky", "ciapka": "tlmene" },
+      "plet": "plet", "vlasy": "vlasy_sive",
+      "tvar": { "pupkac": [0, 0.6], "chudy": [0, 0.4] },
+      "mierka": [0.96, 1.02], "rychlost": [0.9, 1.2]
+    },
+    "dochodkyna": {
+      "nazov": "Babka s fialovým melírom", "model": "dochodkyna", "pocetnost": 2,
+      "varianty": [
+        { "kusy": ["kosela", "zimna_bunda", "nohavice", "polobotky"], "ucet": "drdol" },
+        { "kusy": ["kosela", "sako", "nohavice", "polobotky"], "ucet": "mikado" }
+      ],
+      "farby": { "kosela": "kosele", "zimna_bunda": "tlmene", "sako": "tlmene", "nohavice": "nohavice", "polobotky": "topanky" },
+      "plet": "plet", "vlasy": "vlasy_sive",
+      "tvar": { "pupkac": [0, 0.5], "chudy": [0, 0.3] },
+      "mierka": [0.95, 1.02], "rychlost": [0.8, 1.1]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "blava-city-nastroje-mesto",
+  "private": true,
+  "type": "module",
+  "description": "Nástroje na spracovanie celej Bratislavy (OSM + výškový model) do dlaždíc pre hru.",
+  "scripts": {
+    "stiahni": "node stiahni.mjs",
+    "teren": "node teren.mjs",
+    "dlazdice": "node --max-old-space-size=8000 dlazdice.mjs",
+    "prehlad": "node prehlad.mjs",
+    "vsetko": "npm run stiahni && npm run dlazdice && npm run teren && npm run prehlad"
+  },
+  "dependencies": {
+    "geotiff": "^2.1.3",
+    "osm-pbf-parser": "^2.3.0"
+  }
+}

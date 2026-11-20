@@ -1,0 +1,31 @@
+{
+  "id": "vlak-revizor-listok",
+  "postavy": {
+    "revizor": {
+      "meno": "Revízor",
+      "farba": "#5b6c8f"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "dodo",
+      "text": "Najdzeny! Bul u babky v taške pod koláčmi."
+    },
+    {
+      "kto": "revizor",
+      "text": "Prečo bol tvoj lístok v taške cudzej babky?"
+    },
+    {
+      "kto": "dodo",
+      "text": "To je dluha historia. Je tam aj rezeň."
+    },
+    {
+      "kto": "revizor",
+      "text": "Platí. A ďakujem, rezne nejem. V službe."
+    }
+  ]
+}

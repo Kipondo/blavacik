@@ -1,0 +1,5 @@
+.osm-cache/
+
+node_modules/
+.cache/
+__pycache__/

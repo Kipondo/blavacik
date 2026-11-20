@@ -1,0 +1,31 @@
+{
+  "id": "vlak-hlasenie",
+  "postavy": {
+    "rozhlas": {
+      "meno": "Rozhlas vo vlaku",
+      "farba": "#9aa5b1"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "rozhlas",
+      "text": "Vážení cestujúci, rýchlik z Košíc do Bratislavy mešká približne 120 minút."
+    },
+    {
+      "kto": "rozhlas",
+      "text": "Za meškanie sa vám ospravedlňujeme."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ta jasne. Ľem ja som śe ponahľal na stanicu jak bláznivy."
+    },
+    {
+      "kto": "dodo",
+      "text": "Dve hodziny... Ta to stihnem zjesc šicky rezne aj s chlebom."
+    }
+  ]
+}

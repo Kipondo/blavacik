@@ -1,0 +1,302 @@
+{
+  "popis": "Základ mapy: Dunaj, mosty, kopce, svahy, štart. Ak existuje data/mapa/osm.json (OpenStreetMap), budovy, cesty, voda a mosty sa vezmú odtiaľ; tento súbor je potom zdroj výškopisu a štartu a záloha, keby OSM chýbalo. Súradnice v metroch, x = východ, z = juh, (0,0) = 48.1435 N, 17.1077 E.",
+  "voda": [
+    {
+      "nazov": "Dunaj",
+      "body": [[-1400, 380], [-900, 400], [-600, 420], [-230, 465], [100, 458], [300, 450], [600, 432], [900, 420], [1200, 410], [1500, 418], [1800, 430], [1800, 740], [1500, 722], [1200, 710], [900, 720], [600, 738], [300, 760], [100, 768], [-230, 775], [-600, 730], [-900, 705], [-1400, 690]]
+    }
+  ],
+  "mosty": [
+    {
+      "nazov": "Most SNP",
+      "od": [-230, 425],
+      "do": [-230, 820],
+      "sirka": 22,
+      "vyska": 2.5,
+      "nabeh": 40
+    }
+  ],
+  "kopce": [
+    {
+      "nazov": "Hradný kopec",
+      "x": -560,
+      "z": 140,
+      "polomer": 235,
+      "vyska": 52,
+      "plato": 0.3
+    },
+    {
+      "nazov": "Hradný kopec – sever",
+      "x": -640,
+      "z": -60,
+      "polomer": 260,
+      "vyska": 34,
+      "plato": 0.2
+    },
+    {
+      "nazov": "Palisády",
+      "x": -560,
+      "z": -560,
+      "polomer": 420,
+      "vyska": 42,
+      "plato": 0.15
+    },
+    {
+      "nazov": "Slavín",
+      "x": -690,
+      "z": -1110,
+      "polomer": 380,
+      "vyska": 70,
+      "plato": 0.12
+    }
+  ],
+  "cesty": [
+    {
+      "nazov": "Nábrežie",
+      "sirka": 14,
+      "body": [[-1300, 350], [-900, 368], [-600, 390], [-230, 432], [100, 426], [300, 420], [600, 402], [900, 390], [1200, 382], [1500, 388], [1700, 398]]
+    },
+    {
+      "nazov": "Staromestská",
+      "sirka": 16,
+      "body": [[-230, 432], [-250, 330], [-262, 200], [-258, 60], [-250, -150], [-240, -300], [-232, -550], [-230, -700]]
+    },
+    {
+      "nazov": "Most SNP",
+      "sirka": 16,
+      "body": [[-230, 432], [-230, 820]]
+    },
+    {
+      "nazov": "Panónska",
+      "sirka": 16,
+      "body": [[-230, 820], [-230, 1500]]
+    },
+    {
+      "nazov": "Petržalské nábrežie",
+      "sirka": 11,
+      "body": [[-1300, 735], [-900, 750], [-600, 775], [-230, 808], [100, 800], [600, 778], [1200, 752], [1700, 775]]
+    },
+    {
+      "nazov": "Obchodná",
+      "sirka": 10,
+      "body": [[-240, -300], [350, -300], [700, -300], [1000, -300], [1350, -300], [1600, -300]]
+    },
+    {
+      "nazov": "Michalská",
+      "sirka": 8,
+      "body": [[-250, -150], [350, -150]]
+    },
+    {
+      "nazov": "Rybárska",
+      "sirka": 8,
+      "body": [[-255, -40], [350, -40]]
+    },
+    {
+      "nazov": "Panská",
+      "sirka": 8,
+      "body": [[-258, 60], [350, 60]]
+    },
+    {
+      "nazov": "Laurinská",
+      "sirka": 8,
+      "body": [[-262, 170], [350, 170]]
+    },
+    {
+      "nazov": "Rajská",
+      "sirka": 9,
+      "body": [[-255, 290], [350, 290], [700, 290]]
+    },
+    {
+      "nazov": "Šancová",
+      "sirka": 14,
+      "body": [[-232, -550], [350, -550], [700, -550], [1000, -550], [1600, -550]]
+    },
+    {
+      "nazov": "Kapucínska",
+      "sirka": 8,
+      "body": [[-130, -300], [-130, 423]]
+    },
+    {
+      "nazov": "Ventúrska",
+      "sirka": 8,
+      "body": [[-20, -300], [-20, -40]]
+    },
+    {
+      "nazov": "Sedlárska",
+      "sirka": 8,
+      "body": [[90, -300], [90, 421]]
+    },
+    {
+      "nazov": "Štúrova",
+      "sirka": 10,
+      "body": [[210, -550], [210, -300], [210, 419]]
+    },
+    {
+      "nazov": "Dostojevského",
+      "sirka": 10,
+      "body": [[350, -550], [350, 416]]
+    },
+    {
+      "nazov": "Karadžičova",
+      "sirka": 14,
+      "body": [[700, -700], [700, -550], [700, 397]]
+    },
+    {
+      "nazov": "Pribinova",
+      "sirka": 12,
+      "body": [[1000, -550], [1000, 388]]
+    },
+    {
+      "nazov": "Košická",
+      "sirka": 12,
+      "body": [[1350, -550], [1350, 384]]
+    },
+    {
+      "nazov": "Hradná cesta",
+      "sirka": 8,
+      "body": [[-258, 60], [-345, 55], [-395, 100], [-445, 72], [-495, 118], [-522, 150]]
+    },
+    {
+      "nazov": "Palisády",
+      "sirka": 9,
+      "body": [[-250, -150], [-500, -160], [-800, -150], [-1300, -140]]
+    },
+    {
+      "nazov": "Žižkova",
+      "sirka": 10,
+      "body": [[-600, 390], [-800, 300], [-1300, 280]]
+    },
+    {
+      "nazov": "Rusovská",
+      "sirka": 12,
+      "body": [[-900, 900], [-230, 900], [450, 900], [900, 900]]
+    },
+    {
+      "nazov": "Romanova",
+      "sirka": 12,
+      "body": [[-900, 1100], [-230, 1100], [450, 1100], [900, 1100]]
+    },
+    {
+      "nazov": "Jiráskova",
+      "sirka": 12,
+      "body": [[-900, 1300], [-230, 1300], [450, 1300], [900, 1300]]
+    },
+    {
+      "nazov": "Kopčianska",
+      "sirka": 10,
+      "body": [[-600, 780], [-600, 1500]]
+    },
+    {
+      "nazov": "Einsteinova",
+      "sirka": 14,
+      "body": [[450, 785], [450, 1500]]
+    },
+    {
+      "nazov": "Bosákova",
+      "sirka": 10,
+      "body": [[900, 765], [900, 1500]]
+    }
+  ],
+  "plochy": [
+    {
+      "nazov": "Hlavné námestie",
+      "farba": "#b9ab92",
+      "body": [[-48, -36], [48, -36], [48, 36], [-48, 36]]
+    },
+    {
+      "nazov": "Hviezdoslavovo námestie",
+      "farba": "#b3a68e",
+      "body": [[-125, 330], [205, 330], [205, 380], [-125, 380]]
+    },
+    {
+      "nazov": "Promenáda Eurovea",
+      "farba": "#c4b9a4",
+      "body": [[1010, 392], [1300, 392], [1300, 408], [1010, 410]]
+    }
+  ],
+  "zony": [
+    {
+      "nazov": "Mesto",
+      "farba": "#8f8d86",
+      "body": [[-260, -700], [1700, -700], [1700, 420], [-260, 440]]
+    },
+    {
+      "nazov": "Petržalka",
+      "farba": "#6f8a4f",
+      "body": [[-1300, 780], [1700, 760], [1700, 1500], [-1300, 1500]]
+    }
+  ],
+  "spawn": {
+    "hrac": {
+      "x": 48,
+      "z": 28,
+      "uhol": 3.1416
+    },
+    "auta": [
+      {
+        "x": 22,
+        "z": -40,
+        "uhol": 1.5708,
+        "farba": "#c8102e"
+      },
+      {
+        "x": 130,
+        "z": 60,
+        "uhol": -1.5708,
+        "farba": "#1f5fbf"
+      },
+      {
+        "x": -130,
+        "z": 110,
+        "uhol": 3.1416,
+        "farba": "#f2c14e"
+      },
+      {
+        "x": -242,
+        "z": 360,
+        "uhol": 0,
+        "farba": "#e8e8e8"
+      },
+      {
+        "x": 320,
+        "z": 421,
+        "uhol": 1.5708,
+        "farba": "#2e8b57"
+      },
+      {
+        "x": 980,
+        "z": 386,
+        "uhol": 1.5708,
+        "farba": "#ff7f11"
+      },
+      {
+        "x": -230,
+        "z": 960,
+        "uhol": 0,
+        "farba": "#6a3d9a"
+      },
+      {
+        "x": -512,
+        "z": 140,
+        "uhol": 1.5708,
+        "farba": "#111111"
+      },
+      {
+        "x": 700,
+        "z": -100,
+        "uhol": 3.1416,
+        "farba": "#4dc3ff"
+      }
+    ],
+    "ulice": ["Rázusovo nábrežie", "Vajanského nábrežie", "Štúrova", "Staromestská", "Námestie SNP", "Pribinova", "Panónska cesta", "Jesenského", "Kollárovo námestie", "Mostová", "Karadžičova", "Einsteinova"]
+  },
+  "svahy": [
+    {
+      "nazov": "Stúpanie Starého Mesta na sever",
+      "od": [150, 420],
+      "do": [150, -900],
+      "sirka": 1100,
+      "vyska": 10
+    }
+  ]
+}

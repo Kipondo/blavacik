@@ -1,0 +1,31 @@
+{
+  "id": "vlak-hlasenie-druhe",
+  "postavy": {
+    "rozhlas": {
+      "meno": "Rozhlas vo vlaku",
+      "farba": "#9aa5b1"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "rozhlas",
+      "text": "Vážení cestujúci, rýchlik do Bratislavy mešká približne 150 minút."
+    },
+    {
+      "kto": "dodo",
+      "text": "Co? Pred chvilu bulo sto dvaccec! My idzeme dozadu?"
+    },
+    {
+      "kto": "rozhlas",
+      "text": "Ďakujeme za pochopenie."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ja ňic ňechapem, ale ďakujem tiež."
+    }
+  ]
+}
