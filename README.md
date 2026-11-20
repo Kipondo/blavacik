@@ -81,6 +81,15 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   V hre ich stavia `js/mapa/pamiatky/vyskova-budova.js` (záznam `"model": "vyskova-budova", "subor": …` v `pamiatky.json`):
   kolízie z pôdorysov, z dlaždíc sa vynechajú bežné vysunuté budovy, ktoré model nahrádza
   (`js/mapa/pamiatky/nahradene-budovy.js`), z diaľky (> 260 m) sa nekreslia drobné prvky (menej moaré a trojuholníkov).
+- **Pamiatky Starého Mesta z Blendera** (`python3 tools/blender/historicke_blender.py`, dáta
+  `node tools/blender/osm_pamiatky.mjs`): 35 budov – Dóm sv. Martina (gotická loď s opornými piliermi, veža z OSM
+  so zeleným ihlanom a pozlátenou korunou), Stará radnica (veža s barokovou helmicou), Primaciálny palác (portikus,
+  tympanón, kardinálsky klobúk), Grasalkovičov a Letný arcibiskupský palác, historická budova SND, Reduta, Modrý
+  kostolík, kostoly františkánov, klarisiek, jezuitov, kapucínov, trinitárov, evanjelický, paláce Pálffyho,
+  Mirbachov, Esterházyho, Apponyiho, Kutscherfeldov, Erdődyho, Zichyho, Jesenákov, Keglevičov, Aspremontov,
+  Academia Istropolitana, Dom U dobrého pastiera, Stará tržnica, Carlton, SNM a Slavín. Pôdorys s nádvoriami
+  (relácie OSM sa spájajú z úsekov), podlažia a tvar strechy z OSM, farby a doplnky v `tools/blender/historicke/zoznam.py`.
+  Strechy podľa vzdialenosti od okraja (`historicke/strechy.py`) – valby aj okolo nádvorí, mansardy, ihlany.
 - **Bratislavský hrad z Blendera** (`python3 tools/blender/hrad_blender.py`, dáta `node tools/blender/osm_hrad.mjs`):
   Kráľovský palác podľa častí z OSM – štyri krídla s pravidelnými barokovými oknami (šambrány, parapety,
   kordónové a hlavná rímsa, sokel), strmá strecha s vikiermi a komínmi, rohové veže prečnievajúce nad strechu
@@ -148,8 +157,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
-- Hrad Devín, pamiatky Starého Mesta (Dóm, Stará radnica, Primaciálny palác, kostoly, paláce, brány, fontány, pomníky)
-  – rovnakým postupom ako palác hradu (`tools/blender/hrad/stavebne.py`).
+- Hrad Devín, fontány a pomníky (Rolandova, Ganymedova, Hviezdoslav, Štúr, SNP), ďalšie kostoly a paláce zo zoznamu,
+  veže kostolov bez údajov v OSM (františkáni, klarisky).
 - TV veža Kamzík ostáva zatiaľ pôvodný model z telies (tvar päty veže treba overiť podľa fotografií).
 - Chodníky dolného podlažia Mosta SNP sú zatiaľ len na pohľad (nedá sa po nich chodiť).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
