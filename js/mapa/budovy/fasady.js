@@ -2,7 +2,7 @@
 //
 // Atlas sa kreslí v prehliadači (žiadne cudzie textúry okien): bunka = jedna okenná os × jedno podlažie.
 //   stĺpce = štýl (0 historická, 1 obytná, 2 kancelárie, 3 jednoduchá)
-//   riadky = 0 podlažie, 1 prízemie s výkladom, 2 prízemie s dverami
+//   riadky = 0 podlažie, 1 prízemie s výkladom, 2 prízemie s dverami, 3 podlažie – druhý variant (podľa budovy)
 // Tri textúry: farba + maska omietky (A = 1 → nefarbí sa farbou budovy), normálová mapa, (drsnosť, tieň).
 // Jemná štruktúra omietky je CC0 textúra Plaster001 z ambientCG (assets/textury/omietka).
 //
@@ -23,7 +23,7 @@ export const PARAMETRE = [
 ];
 
 const C = 384;               // pixelov na bunku
-const STLPCE = 4, RIADKY = 3;
+const STLPCE = 4, RIADKY = 4;
 
 // --- kreslenie do štyroch plátien naraz -------------------------------------------------
 function platna() {
@@ -112,6 +112,17 @@ function rimsa(P, ox, oy, y, h, svetla = true) {
 const BUNKY = {
   // 0 historická: vysoké okno so šambránou a nadokennou rímsou
   0: {
+    variant(P, ox, oy) {                // klasicistické: trojuholníková nadokenná rímsa, bez šambrány, okenice
+      rimsa(P, ox, oy, 0.955, 0.03);
+      const X = Math.round(ox + 0.27 * C), Y = Math.round(oy + 0.07 * C), W2 = Math.round(0.46 * C), H2 = Math.round(0.1 * C);
+      P.normal.fillStyle = NORM.hore; P.normal.beginPath(); P.normal.moveTo(X, Y + H2); P.normal.lineTo(X + W2 / 2, Y); P.normal.lineTo(X + W2, Y + H2); P.normal.closePath(); P.normal.fill();
+      prvok(P, ox, oy, { x: 0.27, y: 0.17, w: 0.46, h: 0.03, hlbka: 1, hrana: 4 });
+      tienPod(P, ox, oy, 0.27, 0.2, 0.46, 0.05, 0.55);
+      okno(P, ox, oy, { x: 0.33, y: 0.25, w: 0.34, h: 0.55, priecky: 'kriz', ram: '#efeae0' });
+      prvok(P, ox, oy, { x: 0.22, y: 0.25, w: 0.09, h: 0.55, farba: '#5f6b52', drsnost: 0.6, hlbka: 1, hrana: 3 });   // okenice
+      prvok(P, ox, oy, { x: 0.69, y: 0.25, w: 0.09, h: 0.55, farba: '#5f6b52', drsnost: 0.6, hlbka: 1, hrana: 3 });
+      parapet(P, ox, oy, 0.31, 0.8, 0.38);
+    },
     podlazie(P, ox, oy) {
       rimsa(P, ox, oy, 0.955, 0.03);
       prvok(P, ox, oy, { x: 0.27, y: 0.2, w: 0.46, h: 0.64, hlbka: 1, hrana: 5 });               // šambrána (omietka)
@@ -137,6 +148,12 @@ const BUNKY = {
   },
   // 1 obytná: širšie okno s bielym plastovým rámom, parapet
   1: {
+    variant(P, ox, oy) {                // balkón s plným zábradlím (každá os)
+      okno(P, ox, oy, { x: 0.22, y: 0.2, w: 0.56, h: 0.56, ram: '#f4f4f2', sklo: '#22303a', priecky: 'stlpik', ramHr: 0.02 });
+      prvok(P, ox, oy, { x: 0.08, y: 0.62, w: 0.84, h: 0.34, farba: '#d9d6cf', drsnost: 0.8, hlbka: 1, hrana: 6 });
+      prvok(P, ox, oy, { x: 0.08, y: 0.6, w: 0.84, h: 0.03, farba: '#9a9892', drsnost: 0.6, hlbka: 1, hrana: 2 });
+      tienPod(P, ox, oy, 0.08, 0.96, 0.84, 0.04, 0.5);
+    },
     podlazie(P, ox, oy) {
       okno(P, ox, oy, { x: 0.2, y: 0.28, w: 0.6, h: 0.46, ram: '#f4f4f2', sklo: '#22303a', priecky: 'stlpik', ramHr: 0.02 });
       parapet(P, ox, oy, 0.2, 0.74, 0.6, '#cfcfcf');
@@ -153,6 +170,10 @@ const BUNKY = {
   },
   // 2 kancelárie: pásové okná s hliníkovými stĺpikmi
   2: {
+    variant(P, ox, oy) {                // samostatné štvorcové okná v betónovom ráme
+      okno(P, ox, oy, { x: 0.12, y: 0.18, w: 0.76, h: 0.58, ram: '#4e555a', sklo: '#2b3d4a', priecky: 'stlpik', ramHr: 0.016 });
+      prvok(P, ox, oy, { x: 0.08, y: 0.14, w: 0.84, h: 0.03, hlbka: 1, hrana: 3 });
+    },
     podlazie(P, ox, oy) {
       prvok(P, ox, oy, { x: 0, y: 0.72, w: 1, h: 0.28, farba: '#c9cbcc', drsnost: 0.55, hlbka: 1, hrana: 3 });          // parapetný panel
       okno(P, ox, oy, { x: 0.01, y: 0.06, w: 0.98, h: 0.66, ram: '#7e868c', sklo: '#2b3d4a', priecky: 'stlpik', ramHr: 0.014 });
@@ -168,6 +189,10 @@ const BUNKY = {
   },
   // 3 jednoduchá: okno s rámom a parapetom
   3: {
+    variant(P, ox, oy) {                // dvojkrídlové okno bez priečky, tmavý rám
+      okno(P, ox, oy, { x: 0.27, y: 0.22, w: 0.46, h: 0.56, ram: '#6b5a4a', priecky: 'stlpik' });
+      parapet(P, ox, oy, 0.27, 0.78, 0.46, '#cfc8bb');
+    },
     podlazie(P, ox, oy) {
       okno(P, ox, oy, { x: 0.29, y: 0.24, w: 0.42, h: 0.52, ram: '#ece8df', priecky: 'kriz' });
       parapet(P, ox, oy, 0.29, 0.76, 0.42);
@@ -193,6 +218,7 @@ function vytvorAtlas() {
     b.podlazie(P, s * C, 0);
     b.vyklad(P, s * C, C);
     b.dvere(P, s * C, 2 * C);
+    b.variant(P, s * C, 3 * C);
   }
   const w = C * STLPCE, h = C * RIADKY;
   const citaj = (g) => g.getImageData(0, 0, w, h).data;
@@ -261,9 +287,9 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
         vec2 lok = vec2(slepa ? 0.012 : fract(uvc.x), fract(vv));
         float hs = hashF(vec2(osI, podI) + seed);
         // riadok atlasu: 0 podlažie, 1 výklad, 2 dvere (prízemie: každá ~4. os má dvere)
-        float riadok = 0.0;
+        float riadok = mod(seed, 2.0) > 0.5 ? 3.0 : 0.0;
         if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < 0.28 ? 2.0 : 1.0;
-        vec2 bunka = vec2(styl, 2.0 - riadok);
+        vec2 bunka = vec2(styl, ${RIADKY - 1}.0 - riadok);
         vec2 auv = (bunka + clamp(lok, 0.002, 0.998)) / vec2(${STLPCE}.0, ${RIADKY}.0);
         vec2 dx = dFdx(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0), dy = dFdy(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0);
         vec4 fa = textureGrad(map, auv, dx, dy);
@@ -290,7 +316,7 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
           float horna = smoothstep(0.35, 0.5, fract(vv) + (h2 - 0.5) * 0.3);
           fa.rgb = mix(fa.rgb * mix(0.8, 1.6, hs), zaclona * 0.55, hs < 0.45 ? horna * 0.85 : 0.0);
           // výklady na prízemí: osvetlený interiér obchodu
-          if (riadok > 0.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
+          if (riadok > 0.5 && riadok < 2.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
           drsnF = hs < 0.45 ? mix(0.14, 0.3, horna) : 0.12;
         }
         diffuseColor.rgb = mix(farbaBudovy, fa.rgb, maska) * tienF;
@@ -307,16 +333,6 @@ float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.54
         normal = normalize( tbn * mapN );
       `);
   };
-  // ladenie (dočasné): globalThis.FASADY_LADENIE = 'drsnost' | 'normal' | 'farba'
-  const lad = globalThis.FASADY_LADENIE;
-  if (lad) {
-    const ob = mat.onBeforeCompile;
-    mat.onBeforeCompile = (sh) => {
-      ob(sh);
-      const v = lad === 'drsnost' ? 'vec3(fasDrsnost)' : lad === 'normal' ? 'normal * 0.5 + 0.5' : 'diffuseColor.rgb';
-      sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>\ngl_FragColor = vec4(${v}, 1.0);`);
-    };
-  }
-  mat.customProgramCacheKey = () => 'fasady-v1' + (lad ?? '');
+  mat.customProgramCacheKey = () => 'fasady-v1';
   return mat;
 }

@@ -17,7 +17,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   const bohate = stromy[0]?.length >= 5;
   const { listnaty, ihlicnaty, kmenGeo } = geometrieStromov(bohate);
   const matKmen = new THREE.MeshStandardMaterial({ color: '#5b4632', roughness: 1 });
-  const matKoruna = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.85, flatShading: true });
+  const matKoruna = materialKoruny(bohate);
 
   const chunky = new Map();
   stromy.forEach((s, i) => {
@@ -118,4 +118,39 @@ function spojGeometrie(geos, yMin, yMax) {
   geo.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
   geo.computeVertexNormals();
   return geo;
+}
+
+const materialy = {};
+/** Materiál koruny: pri stromoch z lasera „listnatý“ šum (zhluky listov) vo farbe aj v normále. */
+function materialKoruny(bohate) {
+  if (materialy[bohate]) return materialy[bohate];
+  const mat = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.85, flatShading: !bohate });
+  if (bohate) {
+    mat.onBeforeCompile = (sh) => {
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vSvetK;')
+        .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvSvetK = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+varying vec3 vSvetK;
+float hash3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float sum3(vec3 x) {
+  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash3(i), hash3(i + vec3(1,0,0)), f.x), mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), f.x), mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), f.x), f.y), f.z);
+}`)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+        float listy = sum3(vSvetK * 2.2) * 0.6 + sum3(vSvetK * 5.3) * 0.4;
+        diffuseColor.rgb *= 0.62 + 0.62 * listy;`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+        vec3 e = vec3(0.12, 0.0, 0.0);
+        vec3 grad = vec3(sum3((vSvetK + e.xyy) * 3.1) - sum3((vSvetK - e.xyy) * 3.1),
+                         sum3((vSvetK + e.yxy) * 3.1) - sum3((vSvetK - e.yxy) * 3.1),
+                         sum3((vSvetK + e.yyx) * 3.1) - sum3((vSvetK - e.yyx) * 3.1));
+        normal = normalize(normal - (viewMatrix * vec4(grad, 0.0)).xyz * 1.6);`);
+    };
+    mat.customProgramCacheKey = () => 'koruna-listy';
+  }
+  materialy[bohate] = mat;
+  return mat;
 }

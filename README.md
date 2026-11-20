@@ -23,11 +23,22 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez 1 × 1 km Starého Mesta** (od Michalskej brány
+  po nábrežie, dlaždice −1…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
+  - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
+    vo výreze detailný terén po 2 m,
+  - výšky budov z lasera (`zdrojVysky`: `lidar` / `osm` / `odhad`), strechy rozložené na roviny (LOD2) so škridlou
+    a štrkom, štíty, ~4 300 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+  - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
+    na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
+  - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch,
+  - ~1 500 stromov na skutočných miestach so skutočnou výškou a šírkou koruny (z lasera).
+  - Postup a zdroje: [data/lidar/README.md](data/lidar/README.md), snímky pred/po: `docs/snimky/etapa-a2/`.
 - **Celá Bratislava (etapa a z issue #8):** 367 km², ~117 000 budov, ~23 000 úsekov ciest, 72 000 chodníkov,
   ~200 000 stromov, parky, lesy, voda – rozdelené do 1 791 dlaždíc 500 × 500 m. Okolo hráča sa do 900 m
   stavajú podrobné dlaždice (fasády, cesty, značky, kolízie), do 3,2 km jednoduché bloky budov,
   ďalej vzdialený terén (Malé Karpaty, Kamzík s vežou, Devínska Kobyla). Stavba dlaždíc je rozložená do snímok.
-- **Výškový model** celej Bratislavy (Copernicus DEM, vyčistený od budov), hladina Dunaja podľa toku,
+- **Výškový model** celej Bratislavy (laserové skenovanie ÚGKK DMR 6.0, na okraji Copernicus DEM), hladina Dunaja podľa toku,
   koryto s nábrežnými múrmi v centre a prírodnými brehmi mimo neho, 17 mostov s nájazdmi.
 - **Základ hry:** úvodné menu, pauza, herná slučka, modulárne jadro (`hra.pridajModul`).
 - **Mapa zo skutočnej Bratislavy (OpenStreetMap):** ~5 800 budov s reálnymi pôdorysmi a výškami,
@@ -59,6 +70,8 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
 ## Čo ďalej
+- Laser na celé mesto (`--vsetko`), keď sa výrez odobrí; strechy a terén v binárnom formáte (menšie súbory).
+- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
 - NPC doprava a chodci (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná), NPC autá a chodci.
 - Engine misií a dialógov, polícia, minimapa (kamoš).
@@ -98,6 +111,9 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
   Návod (aj ručný export cez overpass-turbo) je v [data/osm/README.md](data/osm/README.md).
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
+- **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
+  (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
+- **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).
 - Mapové dáta © prispievatelia OpenStreetMap, licencia ODbL.
 
 Pravidlá spolupráce sú v [CLAUDE.md](CLAUDE.md).
