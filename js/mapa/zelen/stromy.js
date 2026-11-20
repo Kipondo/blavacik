@@ -45,6 +45,8 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
     ihlice.count = pocetIhl;
     // vzdialená úroveň (len pri stromoch z lasera): rovnaké stromy, jednoduchšia koruna
     const korunyD = jednoduche ? new THREE.InstancedMesh(jednoduche.listnaty, matKorunaDaleko, Math.max(1, zoznam.length - pocetIhl)) : null;
+    // blízka úroveň: karty s listami okolo jadra koruny
+    const listy = jednoduche ? new THREE.InstancedMesh(geometrieStromov(true).karty, materialListov(), Math.max(1, zoznam.length - pocetIhl)) : null;
     let sx = 0, sz = 0, kl = 0, ki = 0;
     zoznam.forEach(([[x, z, s = 1, h, r], i], j) => {
       const y = vyskopis.vyskaTerenu(x, z);
@@ -58,7 +60,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
         ihlice.setMatrixAt(ki, m); ihlice.setColorAt(ki++, farba);
       } else {
         farba.setHSL(0.2 + (i % 7) * 0.015, 0.36 + (i % 3) * 0.07, 0.22 + (i % 5) * 0.025);
-        if (korunyD) { korunyD.setMatrixAt(kl, m); korunyD.setColorAt(kl, farba); }
+        if (korunyD) { korunyD.setMatrixAt(kl, m); korunyD.setColorAt(kl, farba); listy.setMatrixAt(kl, m); listy.setColorAt(kl, farba.clone().multiplyScalar(1.45)); }
         koruny.setMatrixAt(kl, m); koruny.setColorAt(kl++, farba);
       }
       kolizie?.pridajKruh(x, z, 0.45 * Math.min(1.6, Math.sqrt(mh * mv)), { typ: 'strom' });
@@ -68,13 +70,13 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
     let chunk;
     if (korunyD) {
       // THREE.LOD prepína úrovne podľa vzdialenosti kamery od stredu skupiny
-      korunyD.count = kl;
+      korunyD.count = kl; listy.count = kl;
       const cx = sx / zoznam.length, cz = sz / zoznam.length;
       chunk = new THREE.LOD();
       chunk.position.set(cx, 0, cz);
       const blizko = new THREE.Group(), daleko = new THREE.Group();
       blizko.position.set(-cx, 0, -cz); daleko.position.set(-cx, 0, -cz);
-      for (const im of [kmene, koruny, ihlice]) if (pripravit(im).count) blizko.add(im);
+      for (const im of [kmene, koruny, ihlice, listy]) if (pripravit(im).count) blizko.add(im);
       const kmeneD = new THREE.InstancedMesh(kmenGeo, matKmen, zoznam.length);
       kmeneD.instanceMatrix.copy(kmene.instanceMatrix);
       for (const im of [kmeneD, korunyD, ihlice.clone()]) if (pripravit(im).count) daleko.add(im);
@@ -100,8 +102,8 @@ function geometrieStromov(bohate) {
   const casti = [];
   // koruna zo zhlukov listov: väčšie jadro a menšie chumáče po obvode (členitejší obrys)
   const gule = bohate
-    ? [[0, 5.0, 0, 2.0], [1.4, 4.4, 0.5, 1.3], [-1.3, 4.5, -0.6, 1.35], [0.3, 6.3, -0.3, 1.25], [-0.5, 4.2, 1.4, 1.2],
-      [0.7, 4.3, -1.4, 1.15], [1.6, 5.6, -0.4, 1.0], [-1.5, 5.7, 0.6, 1.0], [-0.2, 3.6, -0.2, 1.4], [0.9, 6.6, 0.8, 0.85]]
+    ? [[0, 5.0, 0, 1.8], [1.3, 4.5, 0.5, 1.15], [-1.2, 4.6, -0.6, 1.2], [0.3, 6.2, -0.3, 1.1], [-0.5, 4.3, 1.3, 1.05],
+      [0.7, 4.4, -1.3, 1.0], [1.5, 5.6, -0.4, 0.9], [-1.4, 5.7, 0.6, 0.9], [-0.2, 3.8, -0.2, 1.25], [0.9, 6.5, 0.8, 0.75]]
     : [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5]];
   gule.forEach(([x, y, z, r], k) => {
     const g = new THREE.IcosahedronGeometry(r, bohate ? 1 : 0);
@@ -114,14 +116,63 @@ function geometrieStromov(bohate) {
     casti.push(g);
   });
   const listnaty = spojGeometrie(casti, 3.2, 7.4);
+  // stromy z lasera: okolo jadra karty s listami (CC0 listy, assets/textury/listy) – rozstrapkaný obrys koruny
+  const karty = bohate ? kartyListov() : null;
 
   const k1 = new THREE.ConeGeometry(2.3, 4.2, 8).toNonIndexed(); k1.translate(0, 4.2, 0);
   const k2 = new THREE.ConeGeometry(1.6, 3.4, 8).toNonIndexed(); k2.translate(0, 6.4, 0);
   const ihlicnaty = spojGeometrie([k1, k2], 2.4, 8);
 
-  for (const g of [listnaty, ihlicnaty, kmenGeo]) g.userData.zdielane = true;
-  cacheGeo[bohate] = { listnaty, ihlicnaty, kmenGeo };
+  for (const g of [listnaty, ihlicnaty, kmenGeo, karty]) if (g) g.userData.zdielane = true;
+  cacheGeo[bohate] = { listnaty, ihlicnaty, kmenGeo, karty };
   return cacheGeo[bohate];
+}
+
+/** Karty s listami rozmiestnené po povrchu koruny (elipsoid okolo jadra), normály smerom od stredu koruny. */
+function kartyListov() {
+  const poz = [], nor = [], uv = [], farby = [];
+  let a = 12345;
+  const rnd = () => ((a = (a * 16807) % 2147483647) / 2147483647);
+  const stred = new THREE.Vector3(0, 5.0, 0);
+  const N = 30, VEL = 2.1;
+  const q = new THREE.Quaternion(), e = new THREE.Euler();
+  for (let k = 0; k < N; k++) {
+    // bod na povrchu elipsoidu (rovnomerne podľa zlatého uhla), trochu dnu/von
+    const y = 1 - (k + 0.5) / N * 1.7, r = Math.sqrt(Math.max(0, 1 - y * y)), u = k * 2.39996;
+    const c = new THREE.Vector3(Math.cos(u) * r * 2.35, y * 1.85, Math.sin(u) * r * 2.35).multiplyScalar(0.8 + rnd() * 0.3).add(stred);
+    e.set((rnd() - 0.5) * 1.6, rnd() * Math.PI * 2, (rnd() - 0.5) * 1.6); q.setFromEuler(e);
+    const v = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([dx, dy]) => new THREE.Vector3(dx * VEL / 2, dy * VEL / 2, 0).applyQuaternion(q).add(c));
+    for (const i of [0, 1, 2, 0, 2, 3]) {
+      poz.push(v[i].x, v[i].y, v[i].z);
+      const n = v[i].clone().sub(stred).normalize();
+      nor.push(n.x, n.y, n.z);
+      uv.push(i === 0 || i === 3 ? 0 : 1, i < 2 ? 0 : 1);
+      const t = Math.min(1, Math.max(0, (v[i].y - 3.2) / 4.2));
+      const jas = 0.62 + t * 0.5;
+      farby.push(jas, jas, jas * 0.95);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
+  return g;
+}
+
+let matListy = null;
+function materialListov() {
+  if (matListy) return matListy;
+  const t = new THREE.TextureLoader().load('assets/textury/listy/karta.png');
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  matListy = new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.45, side: THREE.DoubleSide, vertexColors: true, roughness: 0.8 });
+  // obe strany karty majú normálu „von z koruny“ (inak by zadné strany kariet boli čierne)
+  matListy.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>',
+      THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''));
+  };
+  matListy.customProgramCacheKey = () => 'listy-karty';
+  return matListy;
 }
 
 /** Spojí geometrie a pridá farbu vrcholov: dole tmavšie (tieň v korune), hore svetlejšie. */
