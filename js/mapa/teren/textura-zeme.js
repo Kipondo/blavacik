@@ -231,8 +231,10 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const ch of d.chodniky ?? []) {
-    const v = TRIEDA_CHODNIKOV[ch.typ];
+    let v = TRIEDA_CHODNIKOV[ch.typ];
     if (v === undefined) continue;
+    // v historickom jadre nie sú samostatné chodníky – celá ulica je z kociek
+    if (v === 128 && ch.body.every(([x, z]) => vJadre(x, z))) v = 255;
     g.strokeStyle = seda(v);
     g.lineWidth = Math.max(1, ch.sirka * mierka);
     cesta(ch.body, false);
