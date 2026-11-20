@@ -23,17 +23,29 @@ index.html            vstupná stránka
 css/style.css         vzhľad UI
 js/main.js            štart hry a herná slučka (meň len minimálne)
 js/config.js          spoločné konštanty
-js/mapa/              načítanie mapy, budovy, cesty, Dunaj, mosty, kolízie
-js/auto/              fyzika auta, modely áut, doprava (NPC autá)
+js/moduly.js          zoznam modulov (nový modul = 1 import + 1 položka)
+js/jadro/hra.js       rozhranie hry: stav, moduly, udalosti (popis v komentári)
+js/vstup/             klávesnica, dotyk (joystick), spoločný stav ovládania
+js/kamera/            kamera za postavou/autom
+js/mapa/              načítanie mapy (ručná + OSM), kolízie, geometria, obloha
+js/mapa/teren/        výškopis (kopce, koryto Dunaja, mosty) a model zeme
+js/mapa/budovy/       vysunuté budovy, textúra okien
+js/mapa/cesty/        cesty, námestia
+js/mapa/voda/         Dunaj
+js/mapa/mosty/        všeobecný model mosta
+js/mapa/zelen/        stromy
+js/mapa/pamiatky/     jedna stavba = jeden súbor (<model>.js) + záznam v data/mapa/pamiatky.json
+js/auto/              fyzika auta, model auta, správa áut, riadenie hráčom
 js/chodec/            hráč pešo, NPC chodci
 js/policia/           hviezdičky, policajné autá, zatknutie
 js/misie/             engine misií (číta data/misie/*.json)
 js/dialogy/           zobrazovanie dialógov (číta data/dialogy/*.json)
-js/ui/                HUD, minimapa, menu, dotykové ovládanie
+js/doprava/           NPC doprava, semafory
+js/ui/                HUD, minimapa, menu, názvy miest
 js/zvuk/              syntetizované zvuky (žiadna cudzia hudba)
-data/mapa/            ručná mapa (JSON)
+data/mapa/            ručná mapa (JSON), pamiatky, pomenované miesta
 data/osm/             export z OpenStreetMap (GeoJSON)
-data/misie/           jedna misia = jeden JSON súbor
+data/misie/           jedna misia = jeden JSON súbor (formát v FORMAT.md)
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
 tools/                pomocné skripty (napr. generovanie ručnej mapy)
 vendor/               knižnice tretích strán (three.js)
@@ -64,7 +76,9 @@ Postup:
 ## Pravidlá kódu
 - Kód rozdeľ do **malých samostatných súborov podľa oblastí** (mapa, auto, chodec, polícia, misie, dialógy, UI).
   Jeden súbor = jedna zodpovednosť. Nové veci pridávaj radšej ako nový súbor než do cudzieho.
-- `js/main.js` a `js/config.js` sú spoločné – meň ich čo najmenej a len s jasným dôvodom v PR.
+- Nový modul hry = nový súbor + registrácia v `js/moduly.js` (rozhranie je popísané v `js/jadro/hra.js`).
+  Moduly medzi sebou komunikujú cez `hra.stav` a udalosti `hra.na()` / `hra.posli()`, nie priamym importom.
+- `js/main.js`, `js/config.js` a `js/jadro/hra.js` sú spoločné – meň ich čo najmenej a len s jasným dôvodom v PR.
 - **Misie a dialógy sú dáta (JSON), nie kód.** Nová misia = nový súbor v `data/misie/` + záznam
   v `data/misie/zoznam.json`; nový dialóg = súbor v `data/dialogy/`. Engine misií sa mení len vtedy,
   keď treba nový typ kroku.
