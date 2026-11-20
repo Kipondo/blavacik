@@ -7,6 +7,7 @@ import bpy
 from mathutils import Euler, Matrix, Quaternion, Vector
 
 FPS = 30
+import chuze
 S = math.sin
 C = math.cos
 
@@ -165,10 +166,13 @@ def mavanie(t, T):
 
 ANIMACIE = [
     ('stoj', 4.0, True, stoj),
-    ('chodza', 1.0, True, chodza),
-    ('beh', 0.70, True, beh),
+    ('chodza', 1.05, True, lambda t, T: chuze.chodza(t, T, base=base_poza())),
+    ('klus', 0.76, True, lambda t, T: chuze.beh(t, T, sila=0.7, naklon=6, base=base_poza())),
+    ('beh', 0.68, True, lambda t, T: chuze.beh(t, T, base=base_poza())),
     ('skok', 0.9, False, skok),
-    ('opita_chodza', 1.6, True, lambda t, T: chodza(t, T, 0.8, 1.0)),
+    ('opita_chodza', 1.5, True, lambda t, T: chuze.chodza(t, T, 0.8, 1.0, base=base_poza())),
+    ('plavanie', 1.4, True, lambda t, T: chuze.plavanie(t, T, base=base_poza())),
+    ('plavanie_stoj', 2.0, True, lambda t, T: chuze.plavanie_stoj(t, T, base=base_poza())),
     ('sedenie', 3.0, True, sedenie),
     ('nastup_auto', 1.6, False, nastup_auto),
     ('vystup_auto', 1.6, False, lambda t, T: nastup_auto(t, T, True)),
@@ -196,7 +200,8 @@ def vytvor(arm, m, log):
                 pb.rotation_mode = 'QUATERNION'
                 rot = poza.get(pb.name, (0, 0, 0))
                 R = rest[pb.name]
-                qa = Euler([math.radians(x) for x in rot], 'XYZ').to_quaternion()
+                poradie = rot[3] if len(rot) > 3 else 'XYZ'  # voliteľné poradie osí, napr. 'YXZ'
+                qa = Euler([math.radians(x) for x in rot[:3]], poradie).to_quaternion()
                 ql = (R.inverted() @ qa.to_matrix() @ R).to_quaternion()
                 pb.rotation_quaternion = ql
                 loc = poza.get('@' + pb.name)
