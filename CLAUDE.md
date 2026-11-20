@@ -8,8 +8,10 @@ Na projekte pracujú dvaja ľudia naraz (z dvoch rôznych Claude účtov) – pr
 - Mapa: Staré Mesto, nábrežie Dunaja, Most SNP (s UFO), Bratislavský hrad, Eurovea.
 - Budovy a cesty z OpenStreetMap (vysunuté pôdorysy s výškou); kým nie sú OSM dáta, používa sa zjednodušená ručná mapa.
 - Chodenie pešo, nastupovanie/vystupovanie z áut, jazda s jednoduchou fyzikou a kolíziami.
-- Kamera za postavou/autom, ovládanie klávesnicou aj dotykom na mobile.
+- Kamera za postavou/autom, ovládanie klávesnicou a myšou. **Hra je len pre PC** (mobil sa nerieši).
 - Polícia s hviezdičkami, krátke vtipné misie s bratislavským humorom, minimapa, menu.
+
+**Dizajn hry (príbeh, postava, systémy) je v [napady/dizajn-hry.md](napady/dizajn-hry.md) – pred novou funkciou si ho prečítaj.**
 
 ## Technológie
 - Three.js (súbor priamo v `vendor/`, žiadne CDN ani build proces).
@@ -47,6 +49,7 @@ data/mapa/            ručná mapa (JSON), pamiatky, pomenované miesta
 data/osm/             export z OpenStreetMap (GeoJSON)
 data/misie/           jedna misia = jeden JSON súbor (formát v FORMAT.md)
 data/dialogy/         jeden dialóg / sada dialógov = jeden JSON súbor
+napady/               dizajn hry, príbeh, nápady (markdown)
 tools/                pomocné skripty (napr. generovanie ručnej mapy)
 vendor/               knižnice tretích strán (three.js)
 ```
@@ -84,7 +87,7 @@ Postup:
   keď treba nový typ kroku.
 - **Komentáre v kóde a všetky texty v hre sú po slovensky.**
 - Bez build procesu a bez npm závislostí v hre; knižnice idú do `vendor/`.
-- Hra musí fungovať aj na mobile (dotyk) – pri každej novej funkcii mysli aj na ovládanie dotykom.
+- Hra je **len pre PC** (klávesnica + myš); dotykové ovládanie a mobilný výkon sa neriešia.
 - Žiadny obsah z originálnych hier, žiadne značky firiem, žiadne reálne osoby.
 
 ## README.md
