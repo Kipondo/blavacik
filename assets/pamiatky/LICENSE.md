@@ -1,0 +1,10 @@
+# Modely pamiatok – zdroje a licencie
+
+Modely v tomto priečinku sú vlastné, vygenerované skriptami v `tools/blender/` (Blender cez Python, `pip install bpy`),
+licencia **CC0 1.0**. Tvar podľa verejne známych rozmerov a fotografií (Wikimedia Commons) – len okom, nič z Google
+ani iných modelov sa nepoužilo.
+
+| Súbor | Skript | Obsah |
+|---|---|---|
+| `michalska-brana.glb`, `michalska-brana-ao.jpg` | `tools/blender/michalska_brana.py` | Michalská brána (51 m): gotická kamenná veža s prejazdom, baroková nadstavba s hodinami a ochodzou, medená cibuľa s lucernou, socha archanjela Michala; zapečené zatienenie (AO) |
+| `nivy-tower.glb.gz`, `eurovea-tower.glb.gz`, `twin-city-tower.glb.gz`, `panorama-city.glb.gz`, `sky-park-rezidencia.glb.gz`, `sky-park-offices.glb.gz`, `tower-115.glb.gz`, `nbs.glb.gz` (+ `.json`) | `tools/blender/vyskove_budovy.py` (`tools/blender/vyskove/*.py`) | Výškové budovy: pôdorysy a časti budov z OpenStreetMap (© prispievatelia OpenStreetMap, ODbL), fasády vlastné podľa verejných popisov stavieb; AO zapečené do farieb vrcholov; meshopt + gzip |
