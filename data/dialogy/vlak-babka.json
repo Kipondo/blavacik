@@ -1,0 +1,90 @@
+{
+  "id": "vlak-babka",
+  "postavy": {
+    "babka": {
+      "meno": "Babka v kupé",
+      "farba": "#c98bb9"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "babka",
+      "text": "Synku, nestoj na tej chodbe ako socha. Poď si sadnúť, tu je ešte kúsok miesta."
+    },
+    {
+      "kto": "dodo",
+      "text": "Dzekujem, paňi. Ja mam ľem kufor, tašku a dva igelity od mamy."
+    },
+    {
+      "kto": "babka",
+      "text": "A čo ti mama nabalila?"
+    },
+    {
+      "kto": "dodo",
+      "text": "Rezne. Dakus koláčov. Zaváraninu. A list, že mam volac, kedz prídzem."
+    },
+    {
+      "kto": "babka",
+      "text": "Zlatá žena. Do Bratislavy ideš prvýkrát?"
+    },
+    {
+      "kto": "dodo",
+      "text": "Hej. Idzem na vysoku. Na intrak."
+    },
+    {
+      "kto": "babka",
+      "text": "Joj, intrák... Môj vnuk tam býval. Prvý týždeň jedol len rožky s horčicou."
+    },
+    {
+      "kto": "babka",
+      "text": "Tri rady ti dám, synku. Nepožičiavaj hrnček. Nepožičiavaj peniaze. A nepožičiavaj sa nikomu na sťahovanie."
+    },
+    {
+      "kto": "dodo",
+      "text": "A rezne môžem požičac?"
+    },
+    {
+      "kto": "babka",
+      "text": "Rezne sa nepožičiavajú. Rezne sa delia. A daj aj mne jeden, nech vidím, ako tvoja mama robí."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ta nech śe pači.",
+      "volby": [
+        {
+          "text": "Podať babke rezeň",
+          "efekty": {
+            "socializacia": 3,
+            "inventar": {
+              "rezen": -1
+            }
+          },
+          "skok": "babka-rezen"
+        },
+        {
+          "text": "„Prepačce, to mam rátane na tyždzeň.“",
+          "skok": "babka-bez-rezna"
+        }
+      ]
+    },
+    {
+      "kto": "babka",
+      "text": "Mňam. Tvoja mama vie. Takú nevestu by som chcela pre vnuka.",
+      "znacka": "babka-rezen"
+    },
+    {
+      "kto": "dodo",
+      "text": "Moja mama je už vydata, paňi.",
+      "koniec": true
+    },
+    {
+      "kto": "babka",
+      "text": "Rozumná hlava. Bratislava ťa naučí šetriť skôr, ako si myslíš.",
+      "znacka": "babka-bez-rezna"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "id": "vlak-pekna-baba",
+  "postavy": {
+    "baba": {
+      "meno": "Baba pri okne",
+      "farba": "#6fb7e9"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "dodo",
+      "text": "(Joj. Šumna. Ta co ja teraz povim...)"
+    },
+    {
+      "kto": "baba",
+      "text": "Prepáč, je to miesto voľné? Celý vlak je natrieskaný."
+    },
+    {
+      "kto": "dodo",
+      "text": "Hej, hej! Teda... voľne. Ja tu ľem stojim. Ja tu ňestojim. Ja tu šedzim.",
+      "volby": [
+        {
+          "text": "„Ja som Ďoďo. Teda Jozef. Ale Ďoďo.“",
+          "efekty": {
+            "socializacia": 2,
+            "atraktivita": 2
+          },
+          "skok": "baba-normalne"
+        },
+        {
+          "text": "„Ty tiež do Blavy? Ja tam budzem veľky boss.“",
+          "efekty": {
+            "atraktivita": -2
+          },
+          "skok": "baba-kecy"
+        }
+      ]
+    },
+    {
+      "kto": "baba",
+      "text": "Ďoďo? To je zlaté. Ja idem do druháku, ty si prvák, však?",
+      "znacka": "baba-normalne"
+    },
+    {
+      "kto": "dodo",
+      "text": "Jak si to poznala?"
+    },
+    {
+      "kto": "baba",
+      "text": "Máš na sebe tri bundy, kufor a tašku s rezňami. Prváci sa vždy balia na zimu aj na vojnu."
+    },
+    {
+      "kto": "dodo",
+      "text": "Mama povedala, že v Bratislave je zima. A drahe bundy."
+    },
+    {
+      "kto": "baba",
+      "text": "Má pravdu. Možno sa uvidíme v meste. Ak ma spoznáš bez tých bund.",
+      "koniec": true
+    },
+    {
+      "kto": "baba",
+      "text": "Boss? Fajn. Tak potom mi, boss, podržíš kufor až do Bratislavy.",
+      "znacka": "baba-kecy"
+    },
+    {
+      "kto": "dodo",
+      "text": "...Ta hej. Šak ja som silny."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "vlak-fero",
+  "postavy": {
+    "fero": {
+      "meno": "Fero, čo ide do roboty",
+      "farba": "#d07a52"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "fero",
+      "text": "Prvý raz do Blavy, hej? Vidím to na tebe. Pozeráš z okna, ako keby si išiel do Ameriky."
+    },
+    {
+      "kto": "dodo",
+      "text": "A ty?"
+    },
+    {
+      "kto": "fero",
+      "text": "Ja už dvanásť rokov. V pondelok tam, v piatok domov. Stavby. Bratislava je celá postavená z východniarov."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ta to ňevedzel."
+    },
+    {
+      "kto": "fero",
+      "text": "Tri veci si zapamätaj. Káva za tri eurá je normálna. Pivo za štyri je normálne. A keď ti niekto povie ‚na skok‘, rátaj tri hodiny."
+    },
+    {
+      "kto": "dodo",
+      "text": "A dze je najlepše jedlo?"
+    },
+    {
+      "kto": "fero",
+      "text": "U mamy, chlapče. Všetko ostatné je len záloha."
+    },
+    {
+      "kto": "fero",
+      "text": "A keby si chcel brigádu, ozvi sa. Na stavbe chýbajú ruky, čo vydržia."
+    }
+  ]
+}

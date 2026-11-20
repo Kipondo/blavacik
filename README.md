@@ -35,6 +35,8 @@ Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1).
 
+- Dialógy úvodnej scény vo vlaku (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch.
+
 ## Čo ďalej
 - `feature/pamiatky` – Most SNP s UFO, Dóm, Michalská brána, radnica, SND, Eurovea, Kamzík…
 - `feature/doprava-a-znacky` – jazdné pruhy, obrubníky, prechody, koľaje, semafory, značky, tabule s ulicami, graf ciest.

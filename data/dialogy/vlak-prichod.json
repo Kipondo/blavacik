@@ -1,0 +1,59 @@
+{
+  "id": "vlak-prichod",
+  "postavy": {
+    "rozhlas": {
+      "meno": "Rozhlas na stanici",
+      "farba": "#9aa5b1"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    },
+    "mama": {
+      "meno": "Mama",
+      "farba": "#e05d5d"
+    }
+  },
+  "repliky": [
+    {
+      "kto": "rozhlas",
+      "text": "Vlak z Košíc práve prišiel na tretiu koľaj. S meškaním. Ako vždy."
+    },
+    {
+      "kto": "dodo",
+      "text": "Ta tak. Bratislava. Ja som tu."
+    },
+    {
+      "kto": "dodo",
+      "text": "(zvoní mobil) Mama..."
+    },
+    {
+      "kto": "mama",
+      "text": "Jožko! Si tam? Prečo nevoláš? Ja už tri hodiny sedím pri telefóne!"
+    },
+    {
+      "kto": "dodo",
+      "text": "Mamo, vlak meškal. Šicko je v poriadku."
+    },
+    {
+      "kto": "mama",
+      "text": "A jedol si? A máš bundu? A nikomu si nepožičal peniaze?"
+    },
+    {
+      "kto": "dodo",
+      "text": "Jedol, mam tri bundy a ňe. Idzem na intrak."
+    },
+    {
+      "kto": "mama",
+      "text": "Tak choď, synku. A nezabudni si kúpiť lístok na električku, nech ťa nezavrú!"
+    },
+    {
+      "kto": "dodo",
+      "text": "Dobre, mamo. Ľubim ce. Pa."
+    },
+    {
+      "kto": "dodo",
+      "text": "...Ta dze tu šoferuje ta električka?"
+    }
+  ]
+}
