@@ -20,6 +20,7 @@ import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
 import { vytvorLampy } from '../vybavenie/lampy.js';
 import { vytvorVodu } from '../voda/voda.js';
+import { cestyVJadre } from '../teren/textura-zeme.js';
 
 export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, rieky, KONFIG }) {
   const g = new THREE.Group();
@@ -35,7 +36,9 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorZemDlazdice(d, rect, vyskopis, rieky));
   yield;
   if (d.voda?.length) g.add(vytvorVodu(d.voda.map((v) => ({ ...v, reka: false })), KONFIG, vyskopis));
-  const cesty = d.cesty ?? [];
+  // v detailnom výreze sú obslužné uličky historického jadra vydláždené (kreslí ich zem), nie asfaltové
+  const dlazdene = d._detailTerenu ? new Set(cestyVJadre(d.cesty)) : null;
+  const cesty = dlazdene?.size ? d.cesty.filter((c) => !dlazdene.has(c)) : d.cesty ?? [];
   const { krizovatky } = najdiKrizovatky(cesty);
   g.add(vytvorCesty(cesty, vyskopis));
   g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));

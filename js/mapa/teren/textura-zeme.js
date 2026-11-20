@@ -190,11 +190,17 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
   return t;
 }
 
-// Trieda povrchu pre materiál zeme (kanál R): 0 = prírodný povrch (farba z textúry pokrývky),
-// 0,5 = chodník z kamenných dlaždíc, 1 = mačacie hlavy / žulová dlažba (pešie zóny, námestia).
-const TRIEDA_POKRYVKY = { dlazba: 255, zaklad: 128 };
+// Trieda povrchu pre materiál zeme (kanál R): 0 = iný povrch (farba z textúry pokrývky), 0,25 = tráva,
+// 0,5 = chodník z kamenných dlaždíc, 1 = žulové kocky (pešie zóny, námestia, historické jadro).
+const TRIEDA_POKRYVKY = { dlazba: 255, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64 };
 // približný obrys historického jadra (Michalská brána – Hlavné nám. – Dóm – Hviezdoslavovo nám.)
 const JADRO = { x: -60, z: 40, rx: 330, rz: 280, uhol: 0.35 };
+/** Je bod v historickom jadre? (tam sú aj obslužné uličky vydláždené kockami) */
+export function vJadre(x, z) {
+  const c = Math.cos(JADRO.uhol), s = Math.sin(JADRO.uhol), dx = x - JADRO.x, dz = z - JADRO.z;
+  const a = (dx * c + dz * s) / JADRO.rx, b = (-dx * s + dz * c) / JADRO.rz;
+  return a * a + b * b < 1;
+}
 const TRIEDA_CHODNIKOV = { pedestrian: 255, footway: 128, steps: 128, corridor: 128, platform: 128, cycleway: 128 };
 
 /** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
@@ -232,8 +238,20 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
     cesta(ch.body, false);
     g.stroke();
   }
+  // obslužné uličky v jadre (bez asfaltového pásu) – kocky
+  for (const c_ of cestyVJadre(d.cesty)) {
+    g.strokeStyle = seda(255);
+    g.lineWidth = Math.max(1, (c_.sirka ?? 4) * mierka);
+    cesta(c_.body, false);
+    g.stroke();
+  }
   const t = new THREE.CanvasTexture(c);
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;
   return t;
+}
+
+/** Obslužné cesty v historickom jadre – kreslia sa ako dlažba, nie ako asfalt. */
+export function cestyVJadre(cesty = []) {
+  return cesty.filter((c) => (c.typ === 'service' || c.typ === 'living_street') && c.body.every(([x, z]) => vJadre(x, z)));
 }
