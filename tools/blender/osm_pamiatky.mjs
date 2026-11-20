@@ -43,9 +43,20 @@ const MENA = [
   ['keglevicov-palac', /Keglevič/i],
   ['palugyayov-palac', /Palugyay/i],
   ['michalska-veza', /^Michalská veža/i],
-  ['vodarenske-muzeum', /Vodárenské múzeum|Stará vodáreň/i],
+  ['vodarenske-muzeum', /./, ['69233624']],
+  // 2. dávka (zoznam významných budov): Devín, Rusovce, kostoly, synagóga, galérie, múzeá
+  ['kostol-sv-kriza-devin', /^Kostol sv\. Kríža$/i, ['59424102']],
+  ['kastiel-rusovce', /Rusovský kaštieľ/i],
+  ['mauzoleum-chatama-sofera', /Mauzóleum Chatama Sofera/i],
+  ['ursulinsky-kostol-2', /./, ['444325135']],
+  ['notre-dame', /./, ['56305243']],
+  ['blumental', /./, ['75219636']],
+  ['kostol-sv-rodiny', /^Kostol Svätej rodiny/i],
+  ['synagoga', /^Ortodoxná synagóga/i],
+  ['nedbalka', /^Galéria Nedbalka/i],
+  ['greckokatolicka-katedrala', /Katedrálny chrám povýšenia/i],
 ];
-const OHR = { minX: -1200, maxX: 1500, minZ: -1500, maxZ: 900 };
+const OHR = { minX: -12500, maxX: 13600, minZ: -14000, maxZ: 15700 };
 // časti, ktoré v OSM ležia mimo hlavného obrysu (napr. veža Dómu)
 const EXTRA = { 'dom-sv-martina': ['243293986'] };
 const db = await nacitajPbf('../../.cache/mesto/bratislavsky.osm.pbf');
@@ -59,7 +70,8 @@ const casti = [];
 for (const [id, w] of db.cesty) if (w.t['building:part'] && w.t['building:part'] !== 'no') { const b = body(w); if (b.length > 2 && vnutri(b)) casti.push({ id, t: w.t, body: b, s: stred(b) }); }
 const out = {};
 const obrysy = [];
-for (const [id, w] of db.cesty) if (w.t.building && w.t.name) obrysy.push({ id, t: w.t, b: () => body(w) });
+const IDY = new Set(MENA.flatMap((m) => m[2] ?? []));
+for (const [id, w] of db.cesty) if (w.t.building && (w.t.name || IDY.has(id))) obrysy.push({ id, t: { name: w.t.name ?? w.t.alt_name ?? '', ...w.t }, b: () => body(w) });
 // spojí členy relácie (úseky ciest) do uzavretých kruhov podľa spoločných koncových uzlov
 function kruhy(cleny) {
   const useky = cleny.map((c) => db.cesty.get(c.ref)?.nd.slice()).filter((nd) => nd && nd.length > 1);
@@ -90,8 +102,8 @@ const plocha = (b) => Math.abs(b.reduce((s, p, i) => { const q = b[(i + 1) % b.l
 for (const [id, r] of db.relacie) if (r.t.building && r.t.name) obrysy.push({ id, t: r.t,
   b: () => { const v = kruhy(r.cleny.filter((c) => c.typ === 'way' && c.rola === 'outer')); v.sort((a, b) => plocha(b) - plocha(a)); return v[0] ?? []; },
   diery: () => kruhy(r.cleny.filter((c) => c.typ === 'way' && c.rola === 'inner')) });
-for (const [kluc, re] of MENA) {
-  const najdene = obrysy.filter((o) => re.test(o.t.name));
+for (const [kluc, re, idy] of MENA) {
+  const najdene = obrysy.filter((o) => (idy ? idy.includes(o.id) : re.test(o.t.name)));
   for (const o of najdene) {
     const b = o.b();
     if (b.length < 3 || !vnutri(b)) continue;
