@@ -26,7 +26,7 @@ function pokojKosti(scena) {
  * Animácie Ďoďa prenesené na kostru modelu: rotácia kosti = pokoj modelu × (pokoj Ďoďa⁻¹ × animácia),
  * posun panvy sa zmenší/zväčší podľa výšky panvy.
  */
-function klipyPreModel(url, gltf) {
+export function klipyPreModel(url, gltf) {
   if (!klipy.has(url)) {
     klipy.set(url, nacitajGlb(URL_DODO).then((dodo) => {
       const d = pokojKosti(dodo.scene);
@@ -59,7 +59,7 @@ function klipyPreModel(url, gltf) {
 }
 
 /** Extras uzla LOD (npc_lod, variant, sloty) – môžu byť na sieti alebo na jej rodičovi. */
-function lodUdaje(o) {
+export function lodUdaje(o) {
   for (let x = o; x; x = x.parent) if (x.userData?.npc_lod) return x.userData;
   return null;
 }
@@ -79,7 +79,7 @@ function menoObjektu(o) {
 }
 
 /** Farby slotov LOD siete: priemerná farba kusu × farba chodca (pleť, vlasy, paleta oblečenia). */
-function farbySlotov(sloty, spec, satnik) {
+export function farbySlotov(sloty, spec, satnik) {
   const out = Array.from({ length: MAX_SLOTOV }, () => new THREE.Color(1, 1, 1));
   const plet = new THREE.Color(spec.vzhlad.plet || '#e8b493');
   const tintPleti = new THREE.Color(plet.r / ZAKLAD_PLETE.r, plet.g / ZAKLAD_PLETE.g, plet.b / ZAKLAD_PLETE.b);

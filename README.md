@@ -86,6 +86,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
+- **Chodci** (`js/chodec/chodci/`, modul `chodci`): do 120 m okolo hráča ~1 človek na 5 m chodníka (pešie zóny hustejšie,
+  námestia 1 na 30 m²), ďalej do 230 m štvrtina – v Starom Meste ~600 ľudí do 120 m. Chodia po sieti chodníkov z dlaždíc
+  mesta, držia sa vpravo, obchádzajú sa, občas zastanú, na námestiach sa prechádzajú, uhýbajú hráčovi aj autu.
+  Najbližších 8 = plný model s kostrou a mimikou, ostatní sa kreslia cez InstancedMesh s **animáciou zapečenou
+  do textúry** (VAT: chôdza a státie sa pri načítaní raz prehrajú na zlúčených LOD sieťach NPC, ~2 s) – každý má vlastné
+  oblečenie a pleť (textúra paliet). Stovky ľudí za ~36 volaní kreslenia. Pre ostatné moduly: `hra.chodci.zoznam`.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
 - **Kamera** za postavou/autom: na PC sa pohľad ovláda myšou bez držania tlačidla (Pointer Lock, `js/vstup/mys.js`),
@@ -109,7 +115,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
-- Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
+- Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Deň a noc (svietiace lampy a okná).

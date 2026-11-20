@@ -8,6 +8,7 @@
 // --- základ hry ---
 import prostredie from './grafika/prostredie.js';
 import hrac from './chodec/hrac.js';
+import chodci from './chodec/chodci/modul.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
@@ -34,6 +35,7 @@ export default [
   mys,
   prostredie,
   hrac,
+  chodci,
   riadenieHracom,
   auta,
   kamera,
