@@ -161,15 +161,63 @@ def zapec_ao(ob, cesta, velkost=1024, vzorky=48, vzdialenost=6.0):
             nt.nodes.remove(n)
 
 
-def exportuj(ob, cesta_glb, gltfpack=None):
+def zapec_ao_vrcholy(ob, vzorky=32, vzdialenost=4.0, minimum=0.3, ku_stredu=0.15, posun=0.02):
+    """Zatienenie okolia (AO) do farieb vrcholov (rohov plôch) – bez UV a bez textúry, pre veľké stavby.
+    Lúče sa strieľajú z rohov plôch posunutých kúsok k stredu plochy a nad ňu: roh panelu skla
+    zapustený pod stĺpik by inak vyšiel celý čierny (vrcholové AO má len rohy). Výsledok sa
+    premapuje na minimum..1 (mäkšie AO)."""
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    me = ob.data
+    V = [v.co.copy() for v in me.vertices]
+    bvh = BVHTree.FromPolygons(V, [tuple(p.vertices) for p in me.polygons], all_triangles=False)
+    # kosínusovo vážené smery v pologuli (Fibonacciho špirála) – rovnaké pre všetky plochy (bez šumu)
+    smery = []
+    zlaty = math.pi * (3 - math.sqrt(5))
+    for i in range(vzorky):
+        r = math.sqrt((i + 0.5) / vzorky)
+        a = i * zlaty
+        smery.append((r * math.cos(a), r * math.sin(a), math.sqrt(max(0.0, 1 - r * r))))
+    hodnoty = [1.0] * (len(me.loops) * 4)
+    for p in me.polygons:
+        n = p.normal
+        if n.length < 0.5:
+            continue
+        t = (Vector((0, 0, 1)) if abs(n.z) < 0.9 else Vector((1, 0, 0))).cross(n).normalized()
+        b2 = n.cross(t)
+        svet = [t * d[0] + b2 * d[1] + n * d[2] for d in smery]
+        c = p.center
+        for li, vi in zip(p.loop_indices, p.vertices):
+            v = V[vi]
+            k = c - v
+            l = k.length
+            bod = v + k * (min(ku_stredu * l, 0.6) / l if l > 1e-6 else 0) + n * posun
+            zakryte = 0.0
+            for d in svet:
+                zasah = bvh.ray_cast(bod, d, vzdialenost)
+                if zasah[0] is not None:
+                    zakryte += 1.0 - 0.5 * (zasah[3] / vzdialenost)
+            a = 1.0 - zakryte / vzorky
+            a = minimum + (1 - minimum) * max(0.0, a)
+            hodnoty[li * 4] = hodnoty[li * 4 + 1] = hodnoty[li * 4 + 2] = a
+    ca = me.color_attributes.new('ao', 'FLOAT_COLOR', 'CORNER')
+    me.color_attributes.active_color = ca
+    ca.data.foreach_set('color', hodnoty)
+
+
+def exportuj(ob, cesta_glb, gltfpack=None, farby_vrcholov=False):
     for o in bpy.context.scene.objects:
         o.select_set(o == ob)
     docasne = cesta_glb.replace('.glb', '.surove.glb')
     bpy.ops.export_scene.gltf(filepath=docasne, export_format='GLB', use_selection=True, export_yup=True,
-                              export_texcoords=True, export_normals=True, export_apply=True)
+                              export_texcoords=not farby_vrcholov, export_normals=True, export_apply=True,
+                              export_vertex_color='ACTIVE' if farby_vrcholov else 'MATERIAL')
     if gltfpack and os.path.exists(gltfpack):
         subprocess.run([gltfpack, '-i', docasne, '-o', cesta_glb, '-cc', '-kv', '-km', '-vp', '14', '-vt', '12'], check=True)
-        os.remove(docasne)
+        if os.environ.get('SUROVE_DO'):          # nekomprimovaná kópia na náhľad v Blenderi (nevie meshopt)
+            os.replace(docasne, os.path.join(os.environ['SUROVE_DO'], os.path.basename(cesta_glb)))
+        else:
+            os.remove(docasne)
     else:
         os.replace(docasne, cesta_glb)
     return os.path.getsize(cesta_glb)

@@ -69,6 +69,20 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   (`pip install bpy`, bez okna), zapečené zatienenie (AO) do textúry, export `.glb` a zmenšenie cez gltfpack (meshopt).
   Hra ich načíta cez `js/mapa/pamiatky/model-glb.js` (pri chybe postaví starý model z telies). Zatiaľ Michalská brána
   (87 kB + 316 kB AO): `python3 tools/blender/michalska_brana.py <cesta k gltfpack>` (gltfpack: `npm i gltfpack`).
+- **Výškové budovy z Blendera:** Nivy Tower, Eurovea Tower, Twin City Tower, Panorama City (2 veže), Sky Park
+  (4 rezidencie + kancelárie), Tower 115 a Národná banka Slovenska. Pôdorysy a časti budov z OSM
+  (`node tools/blender/osm_obrysy.mjs` → `tools/blender/data/obrysy.json`), fasády sa skladajú z panelov ako
+  skutočné závesové steny: sklo v dvoch–troch odtieňoch s nepatrne natočenými tabuľami (odraz oblohy sa láme),
+  stĺpiky a priečky, medené lamely (Twin City), biely exoskelet s „tečúcimi“ zvislicami (Sky Park), lodžie a tiara
+  rebier (Eurovea), biela mriežka s balkónmi a pergolou (Panorama), kamenná podnož s pásovými oknami (NBS),
+  technické podlažia za lamelami, antény a výstražné svetlá. Zatienenie (AO) je zapečené do farieb vrcholov,
+  modely sú zbalené meshopt + gzip (`assets/pamiatky/<meno>.glb.gz`, spolu ~1 MB). Generovanie:
+  `python3 tools/blender/vyskove_budovy.py [meno …]` (súbory v `tools/blender/vyskove/`).
+  V hre ich stavia `js/mapa/pamiatky/vyskova-budova.js` (záznam `"model": "vyskova-budova", "subor": …` v `pamiatky.json`):
+  kolízie z pôdorysov, z dlaždíc sa vynechajú bežné vysunuté budovy, ktoré model nahrádza
+  (`js/mapa/pamiatky/nahradene-budovy.js`), z diaľky (> 260 m) sa nekreslia drobné prvky (menej moaré a trojuholníkov).
+- **Odrazy okolia opravené:** mapa okolia (`js/grafika/prostredie.js`) predtým nezachytila oblohu (guľa oblohy bola
+  za `far` kamery) – sklo, autá a voda odrážali len čiernu; teraz odrážajú bledšiu oblohu.
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
@@ -110,6 +124,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Mosty z Blendera (Most SNP s UFO, Starý most, Apollo, Prístavný, Lafranconi) a hrad s okolím, pamiatky Starého Mesta.
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).

@@ -1,6 +1,9 @@
 // Načítanie modelov pamiatok z Blendera (tools/blender/, issue #31 etapa G3): assets/pamiatky/<meno>.glb
 // (geometria zmenšená cez gltfpack – meshopt) + <meno>-ao.jpg (zapečené zatienenie okolia, aoMap).
 // Ak sa model nenačíta, vráti null a pamiatka sa postaví po starom z jednoduchých telies.
+// Veľké stavby (výškové budovy) majú zatienenie zapečené vo farbách vrcholov – vtedy { ao: false },
+// a sú zbalené gzipom (<meno>.glb.gz) – vtedy { gz: true }.
+// Materiály s menom „sklo…“ dostanú silnejší odraz okolia (ako sklenené fasády budov z dlaždíc).
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -9,11 +12,23 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 
-export async function nacitajModelPamiatky(meno) {
+/** .glb zbalený gzipom (veľké modely); GitHub Pages ho niekedy pošle už rozbalený – spoznáme podľa hlavičky. */
+async function nacitajGz(cesta) {
+  const r = await fetch(cesta);
+  if (!r.ok) throw new Error(`${cesta}: ${r.status}`);
+  let buf = await r.arrayBuffer();
+  const b = new Uint8Array(buf, 0, 2);
+  if (b[0] === 0x1f && b[1] === 0x8b) {
+    buf = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  }
+  return loader.parseAsync(buf, 'assets/pamiatky/');
+}
+
+export async function nacitajModelPamiatky(meno, { ao: sAo = true, gz = false } = {}) {
   try {
     const [gltf, ao] = await Promise.all([
-      loader.loadAsync(`assets/pamiatky/${meno}.glb`),
-      new THREE.TextureLoader().loadAsync(`assets/pamiatky/${meno}-ao.jpg`).catch(() => null),
+      gz ? nacitajGz(`assets/pamiatky/${meno}.glb.gz`) : loader.loadAsync(`assets/pamiatky/${meno}.glb`),
+      sAo ? new THREE.TextureLoader().loadAsync(`assets/pamiatky/${meno}-ao.jpg`).catch(() => null) : null,
     ]);
     if (ao) { ao.flipY = false; ao.colorSpace = THREE.NoColorSpace; ao.anisotropy = 4; }
     const g = gltf.scene;
@@ -23,7 +38,7 @@ export async function nacitajModelPamiatky(meno) {
       o.receiveShadow = true;
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
         if (ao) { m.aoMap = ao; m.aoMapIntensity = 1; }
-        m.envMapIntensity = 0.8;
+        m.envMapIntensity = m.name.startsWith('sklo') ? 1.3 : 0.8;
         m.needsUpdate = true;
       }
     });
