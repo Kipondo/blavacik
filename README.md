@@ -24,6 +24,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Označenia verejných služieb z OSM** (`tools/mesto/sluzby.mjs` → `data/mapa/sluzby.json`, modul
+  `js/mapa/vybavenie/oznacenia-modul.js`): 611 miest – polícia, nemocnice a polikliniky, pošty, školy a univerzity,
+  stanice, úrady, knižnice, hasiči, obchodné centrá. Tabuľa s ikonou a názvom visí na fasáde budovy (stena
+  najbližšie k ulici alebo chodníku, nie stena susedného domu); keď je služba v OSM len bod, nájde sa budova, v ktorej
+  leží (alebo do 12 m od vchodu), z načítaných dlaždíc. Veľké areály majú stojan pri okraji. Pri príchode sa ukáže
+  názov miesta, blízke služby sú farebné značky na minimape. Tabule sa stavajú postupne (najviac ~3 ms za snímok),
+  aby hra v centre pri príchode do novej štvrte nesekala. Snímky: `docs/snimky/sluzby/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),

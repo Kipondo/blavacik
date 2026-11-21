@@ -21,7 +21,8 @@ export default {
 
     const { x, z } = hra.stav.pozicia;
     let naj = null, min = Infinity;
-    for (const p of hra.mapa.pamiatky) {
+    // pamiatky a pomenované miesta + verejné služby (stanice, nemocnice, úrady…) z modulu označení
+    for (const p of hra.stav.miestaSluzieb?.length ? [...hra.mapa.pamiatky, ...hra.stav.miestaSluzieb] : hra.mapa.pamiatky) {
       if (!p.nazov || !p.dosah) continue;
       const d = Math.hypot(p.x - x, p.z - z);
       if (d < p.dosah && d / p.dosah < min) { min = d / p.dosah; naj = p; }
