@@ -267,13 +267,11 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
   const t2 = document.createElement('canvas'); t2.width = t2.height = px;
   const g2 = t2.getContext('2d', { willReadFrequently: true });
   g2.fillStyle = '#000'; g2.fillRect(0, 0, px, px);
-  g2.filter = `blur(${Math.max(1, 2.2 * mierka)}px)`;
-  g2.fillStyle = '#fff';
-  for (const b of d.budovy ?? []) {
-    g2.beginPath();
-    b.body.forEach(([x, z], i) => (i ? g2.lineTo(sx(x), sz(z)) : g2.moveTo(sx(x), sz(z))));
-    g2.closePath(); g2.fill();
-  }
+  // domy sa nakreslia do 4× menšieho plátna, to sa raz rozmaže a zväčší (rozmazanie pri každom dome zvlášť
+  // trvalo v hustej zástavbe aj sekundy – hra pri načítaní dlaždice zamrzla)
+  g2.imageSmoothingEnabled = true;
+  g2.imageSmoothingQuality = 'high';
+  g2.drawImage(rozmazaneBudovy(d.budovy, rect, px), 0, 0, px, px);
   const ao = g2.getImageData(0, 0, px, px).data;
   for (let i = 0; i < obr.data.length; i += 4) obr.data[i + 1] = ao[i];
   g.putImageData(obr, 0, 0);
@@ -281,6 +279,26 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024) {
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;
   return t;
+}
+
+/** Pôdorysy budov (biela na čiernom) v plátne px/4 × px/4, rozmazané o 2,2 m – mäkké zatienenie pri päte domov. */
+function rozmazaneBudovy(budovy, rect, px) {
+  const mp = Math.max(64, px >> 2), mm = mp / (rect.maxX - rect.minX);
+  const ostre = document.createElement('canvas'); ostre.width = ostre.height = mp;
+  const go = ostre.getContext('2d');
+  go.fillStyle = '#000'; go.fillRect(0, 0, mp, mp);
+  go.fillStyle = '#fff';
+  for (const b of budovy ?? []) {
+    go.beginPath();
+    b.body.forEach(([x, z], i) => (i ? go.lineTo((x - rect.minX) * mm, (z - rect.minZ) * mm) : go.moveTo((x - rect.minX) * mm, (z - rect.minZ) * mm)));
+    go.closePath(); go.fill();
+  }
+  const rozm = document.createElement('canvas'); rozm.width = rozm.height = mp;
+  const gr = rozm.getContext('2d');
+  gr.fillStyle = '#000'; gr.fillRect(0, 0, mp, mp);
+  gr.filter = `blur(${Math.max(0.5, 2.2 * mm)}px)`;
+  gr.drawImage(ostre, 0, 0);
+  return rozm;
 }
 
 /** Obslužné cesty v historickom jadre – kreslia sa ako dlažba, nie ako asfalt. */
