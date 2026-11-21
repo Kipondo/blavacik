@@ -110,6 +110,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
   skala pod Devínom s puklinami; odtiene kameňov, škáry, stekance a lišajník. Snímky: `docs/snimky/pamiatky-3/kamen-*.jpg`.
+- **Sklenené fasády modelov v noci** (`js/mapa/pamiatky/sklo-noc.js`): materiály „sklo…“ (Nivy Tower, Eurovea…) v noci
+  svietia po kanceláriách (moduly 3 × 3,6 m). Sila noci prichádza zo spoločného `js/grafika/noc.js`, ktorý nastavuje
+  modul deň/noc (PR realistický vzhľad); bez neho modely nesvietia. Snímka: `docs/snimky/pamiatky-3/noc-nivy.jpg`.
 - **Sochy a pamätníky v celom meste** (`js/mapa/vybavenie/sochy-modul.js`, dáta `node tools/mesto/sochy.mjs` →
   `data/mapa/sochy.json`): 853 sôch, búst a skulptúr z OSM (Hviezdoslav, Štúr, Čumil, Schöne Náci, Napoleonský
   vojak, svätci…). Postava je model chodca v pokojnej póze „odliaty“ do bronzu (aj s patinou) alebo vytesaný
