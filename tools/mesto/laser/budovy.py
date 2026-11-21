@@ -92,11 +92,12 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         kl = f'{i}_{j}'
         d = json.load(open(os.path.join(VYSTUP, 'd', f'{kl}.json'))); data[kl] = d
         for b in d['budovy']:
-            # pôvodné údaje z OSM (aby sa skript dal spustiť opakovane)
-            if 'vyskaOsm' in b: b['vyska'] = b['vyskaOsm']; b['zdrojVysky'] = b.get('zdrojOsm', b.get('zdrojVysky', 'odhad'))
-            else: b['vyskaOsm'] = b['vyska']; b['zdrojOsm'] = b.get('zdrojVysky', 'odhad')
-            for k_ in ('tvarStrechy', 'hreben', 'lod2', 'dieryLaser'): b.pop(k_, None)
-            if b.get('dieryLaser') is None and b.get('_dieryZLasera'): b.pop('diery', None)
+            # pôvodné údaje z OSM (aby sa skript dal spustiť opakovane); pri --len-strechy ostávajú výšky z dlaždice
+            if not LEN_STRECHY:
+                if 'vyskaOsm' in b: b['vyska'] = b['vyskaOsm']; b['zdrojVysky'] = b.get('zdrojOsm', b.get('zdrojVysky', 'odhad'))
+                else: b['vyskaOsm'] = b['vyska']; b['zdrojOsm'] = b.get('zdrojVysky', 'odhad')
+                for k_ in ('tvarStrechy', 'hreben', 'lod2', 'dieryLaser'): b.pop(k_, None)
+                if b.get('dieryLaser') is None and b.get('_dieryZLasera'): b.pop('diery', None)
             budovy.append(b); dlazdica_budovy.append(kl)
             dr.polygon([((x - X0) / K, (z - Z0) / K) for x, z in b['body']], fill=len(budovy))
             for d_ in b.get('diery', []):
