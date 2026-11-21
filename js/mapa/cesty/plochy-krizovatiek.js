@@ -2,6 +2,7 @@
 
 import * as THREE from 'three';
 import { pridajStrukturu } from './struktura.js';
+import { pridajOpotrebenie } from './opotrebenie.js';
 import { texturaAsfaltu } from './textura-cesty.js';
 
 const SEGMENTY = 16;
@@ -29,9 +30,9 @@ export function vytvorPlochyKrizovatiek(krizovatky, vyskopis) {
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.setIndex(idx);
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, pridajStrukturu(new THREE.MeshStandardMaterial({
+  const mesh = new THREE.Mesh(geo, pridajOpotrebenie(pridajStrukturu(new THREE.MeshStandardMaterial({
     map: texturaAsfaltu(), roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
-  }), 'asfalt', 3.5, 0.9));
+  }), 'asfalt', 3.5, 0.9), 0));
   mesh.receiveShadow = true;
   mesh.name = 'krizovatky';
   return mesh;

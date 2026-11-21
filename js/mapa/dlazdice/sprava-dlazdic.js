@@ -7,6 +7,8 @@
 
 import { postavDlazdicu, uvolniObjekt } from './postav-dlazdicu.js';
 import { nacitajDoplnky } from './doplnky.js';
+import { nacitajOpravyBudov, aplikujOpravy } from '../budovy/opravy.js';
+import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
@@ -44,7 +46,10 @@ export class SpravaDlazdic {
     if (!this.data.has(kluc)) {
       const [i, j] = kluc.split('_').map(Number);
       const obsah = fetch(`data/mapa/mesto/d/${kluc}.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
-      this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index)]).then(([d, { teren, strechy }]) => {
+      this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index), nacitajOpravyBudov(), nacitajHustuZelen()]).then(([d, { teren, strechy }, opravy, zelen]) => {
+        // ručné opravy podľa porovnania so skutočnosťou (budovy, hustá zeleň v parkoch)
+        aplikujOpravy(d.budovy, opravy);
+        doplnHustuZelen(d, this.rect({ i, j }), zelen);
         // detailný terén sa zaregistruje skôr, než sa dlaždica začne stavať (budovy, cesty aj zem ho už použijú)
         if (teren && this.data.has(kluc)) { this.vyskopis.pridajDetail?.(i, j, teren.v, teren.n, teren.krok); d._detailTerenu = true; }
         if (strechy) d._strechy = strechy;

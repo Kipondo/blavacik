@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Náhľad budov a fasád</title>
+  <!-- stránka beží z koreňa projektu, aby sedeli cesty k textúram (assets/…) aj importmap -->
+  <base href="../../">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #9fc3e0; font: 13px system-ui, sans-serif; }
+    #info { position: absolute; left: 8px; top: 8px; background: rgba(255,255,255,.85); padding: 6px 9px; border-radius: 6px; max-width: 46ch; }
+  </style>
+</head>
+<body>
+<div id="info">Načítavam…</div>
+<script type="module">
+// Náhľad budov okolo bodu mapy – na kontrolu typov budov a fasád bez spúšťania celej hry.
+// Spustenie: python3 -m http.server 8000 → http://localhost:8000/tools/budovy/nahlad.html?x=0&z=0
+// Parametre: x, z (bod v metroch hry), smer (° kam sa kamera pozerá, 0 = sever), vzdialenost (m), vyska (m kamery),
+//            okruh (m, koľko budov postaviť), typ=1 (budovy zafarbené podľa typu namiesto fasád).
+// Terén je rovný (budovy stoja na nule) – ide len o fasády. Myšou: ťahaj = otáčanie, koliesko = priblíženie.
+import * as THREE from 'three';
+import { KONFIG } from './js/config.js';
+import { vytvorBudovy } from './js/mapa/budovy/budovy.js';
+import { typizujBudovy } from './js/mapa/budovy/typ-budovy.js';
+import { stredBodov } from './js/mapa/geometria.js';
+
+const P = new URLSearchParams(location.search);
+const x = +(P.get('x') ?? 0), z = +(P.get('z') ?? 0);
+const smer = (+(P.get('smer') ?? 0) * Math.PI) / 180;
+const vzd = +(P.get('vzdialenost') ?? 120), vys = +(P.get('vyska') ?? 40), okruh = +(P.get('okruh') ?? 350);
+const FARBY_TYPOV = {
+  historicka: '#b5523b', mestska: '#e0a458', bytovka: '#6c9bd2', panelak: '#3f5fa8', 'rodinny-dom': '#7fbf6a',
+  garaz: '#9a9a9a', hala: '#7b5ea7', obchod: '#e07ab0', kancelarie: '#3bb0b5', sklo: '#9fd7ff',
+};
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scena = new THREE.Scene();
+scena.background = new THREE.Color('#a9c9e6');
+scena.fog = new THREE.Fog('#a9c9e6', okruh * 1.2, okruh * 3);
+const kamera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.5, 6000);
+kamera.position.set(x - Math.sin(smer) * vzd, vys, z + Math.cos(smer) * vzd);
+const ciel = new THREE.Vector3(x, Math.min(12, vys * 0.3), z);
+kamera.lookAt(ciel);
+// jednoduché ovládanie myšou: ťahaj = otáčanie okolo bodu, koliesko = priblíženie
+let tah = null;
+addEventListener('pointerdown', (e) => { tah = [e.clientX, e.clientY]; });
+addEventListener('pointerup', () => { tah = null; });
+addEventListener('pointermove', (e) => {
+  if (!tah) return;
+  const o = kamera.position.clone().sub(ciel), s = new THREE.Spherical().setFromVector3(o);
+  s.theta -= (e.clientX - tah[0]) * 0.005; s.phi = Math.min(1.5, Math.max(0.1, s.phi - (e.clientY - tah[1]) * 0.005));
+  kamera.position.copy(ciel).add(new THREE.Vector3().setFromSpherical(s)); kamera.lookAt(ciel); tah = [e.clientX, e.clientY];
+});
+addEventListener('wheel', (e) => { kamera.position.lerp(ciel, e.deltaY < 0 ? 0.1 : -0.1); kamera.lookAt(ciel); });
+
+scena.add(new THREE.HemisphereLight('#dfe9f5', '#7a6f60', 1.4));
+const slnko = new THREE.DirectionalLight('#fff4e0', 2.6);
+slnko.position.set(x + 300, 400, z + 200); slnko.target.position.set(x, 0, z);
+slnko.castShadow = true; slnko.shadow.mapSize.set(4096, 4096);
+Object.assign(slnko.shadow.camera, { left: -okruh, right: okruh, top: okruh, bottom: -okruh, far: 1500 });
+scena.add(slnko, slnko.target);
+const zem = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ color: '#9a9a8c' }));
+zem.position.set(x, -0.02, z); zem.receiveShadow = true; scena.add(zem);
+
+const index = await (await fetch('data/mapa/mesto/index.json')).json();
+const D = index.dlazdica;
+const budovy = [];
+for (let i = Math.floor((x - okruh) / D); i <= Math.floor((x + okruh) / D); i++) {
+  for (let j = Math.floor((z - okruh) / D); j <= Math.floor((z + okruh) / D); j++) {
+    const r = await fetch(`data/mapa/mesto/d/${i}_${j}.json`);
+    if (!r.ok) continue;
+    for (const b of (await r.json()).budovy ?? []) {
+      const [cx, cz] = stredBodov(b.body);
+      if (Math.hypot(cx - x, cz - z) <= okruh) budovy.push(b);
+    }
+  }
+}
+typizujBudovy(budovy);
+const rezimTypov = !!P.get('typ');
+// režim typov: jednofarebné budovy podľa typu (rýchla kontrola triedenia)
+if (rezimTypov) for (const b of budovy) b.farba = FARBY_TYPOV[b.typ] ?? '#ffffff';
+const skupina = vytvorBudovy(budovy, { vyskaTerenu: () => 0, vyska: () => 0 }, KONFIG);
+if (rezimTypov) skupina.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshLambertMaterial({ vertexColors: true }); });
+skupina.traverse((o) => { if (o.isMesh) o.castShadow = o.receiveShadow = true; });
+scena.add(skupina);
+
+const pocty = {};
+for (const b of budovy) pocty[b.typ] = (pocty[b.typ] ?? 0) + 1;
+document.getElementById('info').innerHTML = `<b>${budovy.length} budov</b> okolo [${x}, ${z}]<br>` +
+  Object.entries(pocty).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<span style="color:${FARBY_TYPOV[t]}">■</span> ${t}: ${n}`).join(' · ');
+
+renderer.setAnimationLoop(() => renderer.render(scena, kamera));
+addEventListener('resize', () => { kamera.aspect = innerWidth / innerHeight; kamera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+window.hotovo = true;
+</script>
+</body>
+</html>

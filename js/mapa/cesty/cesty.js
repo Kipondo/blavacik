@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { texturaCesty, DLZKA_V } from './textura-cesty.js';
 import { pridajStrukturu } from './struktura.js';
+import { pridajOpotrebenie } from './opotrebenie.js';
 
 const KROK = 5;           // delenie cesty na úseky (m), aby sedela na teréne
 export const NAD_TERENOM = 0.12;
@@ -35,10 +36,10 @@ export function vytvorCesty(cesty, vyskopis) {
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(s.uv, 2));
     geo.setIndex(s.idx);
     geo.computeVertexNormals();
-    const mat = pridajStrukturu(new THREE.MeshStandardMaterial({
+    const mat = pridajOpotrebenie(pridajStrukturu(new THREE.MeshStandardMaterial({
       map: texturaCesty(s.pruhy, s.jednosmerka, s.okraje), roughness: 0.9,
       polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
-    }), 'asfalt', 3.5, 0.9);
+    }), 'asfalt', 3.5, 0.9), s.pruhy);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
     skupina.add(mesh);
