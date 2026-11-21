@@ -1,12 +1,13 @@
 // Postaví obsah jednej dlaždice mesta. Je to generátor – medzi krokmi vráti riadenie,
 // aby správca dlaždíc mohol stavbu rozložiť do viacerých snímok (bez sekania hry).
+// Každý krok má trvať najviac pár milisekúnd – ťažké časti (zem) sú samy generátory (yield*).
 //
 //   uroven 'detail' – zem, cesty, chodníky, zebry, koľaje, budovy (+ strechy z lasera), stromy, značky, lampy, lavičky, kolízie
 //   uroven 'lod'    – len jednoduché bloky budov (zem v diaľke kreslí horizont)
 
 import * as THREE from 'three';
 import { bodVPolygone } from '../geometria.js';
-import { vytvorZemDlazdice } from '../teren/zem-dlazdica.js';
+import { krokyZemeDlazdice } from '../teren/zem-dlazdica.js';
 import { vytvorCesty } from '../cesty/cesty.js';
 import { najdiKrizovatky } from '../cesty/krizovatky.js';
 import { vytvorPlochyKrizovatiek } from '../cesty/plochy-krizovatiek.js';
@@ -40,7 +41,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   }
 
   const k = kolizie.preDlazdicu(kluc);
-  g.add(vytvorZemDlazdice(d, rect, vyskopis, rieky));
+  g.add(yield* krokyZemeDlazdice(d, rect, vyskopis, rieky));   // po krokoch (textúry, výšky po pásoch)
   yield;
   if (d.voda?.length) g.add(vytvorVodu(d.voda.map((v) => ({ ...v, reka: false })), KONFIG, vyskopis));
   // v detailnom výreze sú obslužné uličky historického jadra vydláždené (kreslí ich zem), nie asfaltové
@@ -74,9 +75,11 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
     k.pridajPolygon(b.body, { typ: 'budova' });
   }
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
+  yield;
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
   const vikiere = vytvorVikiere(d.budovy, d._strechy, vyskopis);
   if (vikiere) g.add(vikiere);
+  yield;
   // 3D fasády historických budov (zapustené okná, parapety, rímsy): tu len plán, diely stavia
   // podľa vzdialenosti od kamery modul js/mapa/budovy/fasady-3d-modul.js
   const planFasad = planFasad3d(d.budovy ?? [], vyskopis);
@@ -88,8 +91,10 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   }
   yield;
   g.add(vytvorStromy(d.stromy, vyskopis, k));
+  yield;
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
+  yield;
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
   g.userData.krizovatky = krizovatky;
