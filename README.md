@@ -24,6 +24,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Terén pod cestami a pri mostoch** (issue #54):
+  - `python3 tools/mesto/laser/cesty_teren.py` zarovná podrobný terén (2 m) pod cestami. Profil po osi cesty
+    je pozdĺžne vyhladený, naprieč je cesta vodorovná a terén sa 3 m za okrajom plynulo zlieva s pôvodným
+    (múry a svahy nad 2,5 m ostávajú). Na Staromestskej klesli skoky z 0,9 m na 0,07 m.
+  - `hra.mapa.vyska(x, z, y)` berie výšku objektu: kto je pod mostovkou, ide po teréne a neskočí na most.
+    Bočný okraj nájazdovej rampy sa plynulo zlieva s terénom.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
