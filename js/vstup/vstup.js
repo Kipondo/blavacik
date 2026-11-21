@@ -3,7 +3,7 @@
 //
 //   hra.vstup.pohyb()          → { x, y }  x: -1 vľavo … 1 vpravo, y: -1 dozadu … 1 dopredu
 //   hra.vstup.drzi('beh')      → true, kým je tlačidlo držané ('beh', 'skok', 'rucna')
-//   hra.vstup.stlacil('akcia') → true raz po stlačení ('akcia', 'pauza', 'poloha', 'dalej')
+//   hra.vstup.stlacil('akcia') → true raz po stlačení ('akcia', 'pauza', 'poloha', 'mapa', 'dalej')
 //   hra.vstup.kameraPosun()    → { dx, dy } o koľko hráč otočil kameru (myš / prst)
 
 export class Vstup {

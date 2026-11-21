@@ -18,16 +18,16 @@ import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
+import minimapa from './ui/minimapa/modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
 import mhd from './mhd/modul.js';
 
-// --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
+// --- doplnkové moduly (polícia, misie, doprava, …) ---
 // import policia from './policia/policia.js';
 // import misie from './misie/misie.js';
-// import minimapa from './ui/minimapa.js';
 
 export default [
   hodiny,
@@ -42,10 +42,10 @@ export default [
   hud,
   lokality,
   poloha,
+  minimapa,
   grafCiest,
   semafory,
   mhd,
   // policia,
   // misie,
-  // minimapa,
 ];
