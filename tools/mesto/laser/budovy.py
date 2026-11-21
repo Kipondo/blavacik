@@ -15,7 +15,9 @@
 # Steny sú dvojaké: „steny“ = štítová stena medzi strechami dvoch rôznych budov (bez okien),
 # „okna“ = ustúpené podlažie / nadstavba tej istej budovy alebo stena na okraji strechy (hra na nej kreslí okná, #64).
 #
-# Spustenie (po teren.py): python3 tools/mesto/laser/budovy.py [--vsetko]
+# Spustenie (po teren.py): python3 tools/mesto/laser/budovy.py [--vsetko] [--len-strechy]
+#   --len-strechy: prepočíta len strechy (strechy/<i>_<j>.bin), dlaždice JSON nemení – LOD2 a výšku stien
+#   berie z dlaždíc (`lod2`, `vyska`). Na dlaždice, ktoré už upravili ďalšie skripty (casti.py, priechody.py…).
 import sys, os, json, math, gzip, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
@@ -31,6 +33,7 @@ TOL = 1.3          # zjednodušenie hraníc plôch strechy (pixely)
 MIN_PLOCHA = 40    # najmenšia plocha strechy (pixely = 10 m²)
 MIN_DVOR = 80      # najmenší dvor (pixely = 20 m²)
 
+LEN_STRECHY = '--len-strechy' in sys.argv
 index = nacitaj_index()
 dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
 detail = index.get('terenDetail', {})
@@ -251,6 +254,11 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if any(h is None for h in hs) or strecha_n[k] < 0.3 * max(1, plocha_b[k]) or strecha_n[k] < 16:
             stat['bez'] += 1; vrch_steny[k] = np.nan; continue
         hmax = max(hs)
+        if LEN_STRECHY:
+            # výšky z dlaždice (už ich mohli upraviť ďalšie skripty) – strecha len pre budovy s LOD2
+            if b.get('lod2'): vrch_steny[k] = hmax + b['vyska']; lod2[k] = True; stat['lidar'] += 1
+            else: vrch_steny[k] = np.nan
+            continue
         v_okraj = okraj_b(k); v_str = strecha_b(k)
         odkvap = np.percentile(v_okraj, 10) - NULA if len(v_okraj) else np.percentile(v_str, 10) - NULA
         vrchol = np.percentile(v_str, 98) - NULA
@@ -465,7 +473,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if os.path.exists(stary): os.remove(stary)
         for b in data[kl]['budovy']:
             b.pop('_k', None)
-        uloz_json(os.path.join(VYSTUP, 'd', f'{kl}.json'), data[kl])
+        if not LEN_STRECHY: uloz_json(os.path.join(VYSTUP, 'd', f'{kl}.json'), data[kl])
         print(f'  {kl}: {os.path.getsize(cesta) / 1e3:.0f} kB', flush=True)
     return list(vystup)
 
