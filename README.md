@@ -288,6 +288,17 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - Nový kľúč `nahradit` v `<subor>.json` modelu: pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc,
     bez kolízie – napríklad pod blokom obchodného domu sa dá prejsť medzi stĺpmi.
   - Snímky: `docs/snimky/kamenne/`.
+- **Átriaky v Mlynskej doline** (issue #72; dáta `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_atriaky.mjs`,
+  laser `python3 tools/blender/laser_atriaky.py`, model `python3 tools/blender/atriaky_blender.py`).
+  - **Domy**: 20 átriových domov AD-A … AD-U podľa pôdorysov z OSM, výšky a terén pod každým domom
+    z laserového skenovania ÚGKK. Areál je na svahu s rozdielom 18 m, každý dom stojí na svojej výške.
+  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, zapustené pásy okien, presklené prízemie
+    na stĺpoch, vyložené horné podlažie a strecha so zábradlím.
+  - **Átriá**: laser ukázal, že sú zastrešené, preto majú domy na streche svetlík. Otvorený dvor
+    s prechodom má len AD-I.
+  - **Vstup** podľa verejnej fotografie: tri celovýškové turnikety (poloha z OSM), sivá vrátnica
+    s červeným pásom, dvojkrídlová brána so značkou zákazu státia, skriňa a betónový múr.
+  - **Ploty a múry** okolo areálu sú z OSM a majú kolízie. Cez turnikety sa dá prejsť.
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
