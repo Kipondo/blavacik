@@ -58,7 +58,7 @@ function zrazkyAut(auta, K, hra) {
           if (rel < 0) {
             a.vx -= rel * nx * 0.8; a.vz -= rel * nz * 0.8;
             b.vx += rel * nx * 0.8; b.vz += rel * nz * 0.8;
-            if (-rel > 4) hra.posli('naraz', { auto: a, ine: b, sila: -rel });
+            if (-rel > 4) hra.posli('naraz', { auto: a, ine: b, sila: -rel, nx, nz });
           }
         }
       }
