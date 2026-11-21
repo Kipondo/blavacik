@@ -118,6 +118,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - **Dunaj** (`js/mapa/voda/material-reky.js`): odraz podľa Fresnela (pri pohľade dolu zelenosivá voda, do diaľky
     obloha), vlny zo šumu v troch mierkach tečúce po prúde (bez opakujúcej sa mriežky), pásy kalnejšej vody,
     čeriny, drobné vlnky sa do diaľky strácajú.
+  - **Zvetrané fasády** (`js/mapa/budovy/fasady.js`): fľaky na omietke, zvislé stekance, šmuhy pod parapetmi,
+    špina pri zemi (odstrek z chodníka) – historické domy viac, paneláky a haly menej; paneláky majú škáry medzi
+    panelmi (3,6 m × podlažie) a jemne iný odtieň každého panelu. Všetko procedurálne vo svetových metroch.
   Snímky pred/po: `docs/snimky/realisticky-vzhlad/`.
 - **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
   20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné

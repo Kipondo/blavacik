@@ -14,6 +14,7 @@
 // aMetre = (metre pozdĺž steny, výška v m) pre omietku; aTyp = štýl + 0,9·náhoda budovy.
 
 import * as THREE from 'three';
+import { SUM_GLSL } from '../../grafika/sum-glsl.js';
 
 export const STYLY = { stare: 0, obytne: 1, kancelarie: 2, jednoduche: 3, panelak: 4, dom: 5, hala: 6 };
 // šírka okennej osi, výška prízemia a podlažia (m) podľa štýlu
@@ -369,6 +370,7 @@ export function materialFasad() {
 uniform sampler2D omietkaFarba; uniform sampler2D omietkaNormal;
 varying float vTyp; varying vec2 vMetre; varying float vZnaky;
 float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+${SUM_GLSL}
 // farby štítov obchodov, okeníc a dverí (v atlase sú „značkovacie“ farby, tu sa nahradia podľa budovy a osi)
 const vec3 STITY[6] = vec3[6](vec3(0.0284, 0.0423, 0.0331), vec3(0.1022, 0.0137, 0.0137), vec3(0.0137, 0.0232, 0.0578), vec3(0.0160, 0.0160, 0.0160), vec3(0.1470, 0.0782, 0.0123), vec3(0.0437, 0.0232, 0.0685));
 const vec3 OKENICE[4] = vec3[4](vec3(0.1144, 0.1470, 0.0844), vec3(0.1470, 0.0685, 0.0319), vec3(0.1022, 0.1329, 0.1620), vec3(0.1946, 0.0437, 0.0252));
@@ -440,7 +442,40 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
           if (riadok > 0.5 && riadok < 1.5 && styl < 3.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
           drsnF = hs < 0.45 ? mix(0.14, 0.3, horna) : 0.12;
         }
+        // panelák: škáry medzi panelmi (každá os = panel 3,6 m, vodorovne na úrovni stropov) a jemne iný odtieň panelov
+        float skaraP = 0.0;
+        if (styl > 3.5 && styl < 4.5 && !atika && vv >= 1.0 && maska < 0.5) {
+          vec2 fw = fwidth(lok) + 1e-4;
+          float sx = 1.0 - smoothstep(0.0, fw.x * 1.5 + 0.004, min(lok.x, 1.0 - lok.x));
+          float sy = 1.0 - smoothstep(0.0, fw.y * 1.5 + 0.006, lok.y);
+          skaraP = max(sx, sy);
+          farbaBudovy *= 0.97 + 0.06 * hashF(vec2(osI * 3.1, podI * 1.7) + seed);
+          if (skaraP > 0.3) fn = sx > sy ? vec3(lok.x < 0.5 ? 0.2 : 0.8, 0.5, 0.9) : vec3(0.5, 0.75, 0.9);
+        }
         diffuseColor.rgb = mix(farbaBudovy, fa.rgb, maska) * tienF;
+        diffuseColor.rgb *= 1.0 - 0.38 * skaraP;
+        // zvetranie (procedurálne, vo svetových metroch – nič sa neopakuje): fľaky na omietke, zvislé stekance,
+        // šmuhy pod parapetmi okien a špina pri zemi (odstrek z chodníka); staršie budovy viac, panelák a hala menej
+        {
+          float omie = 1.0 - maska * 0.7;
+          float vek = styl < 0.5 ? 1.0 : styl < 3.5 ? 0.8 : 0.55;
+          vec2 m = vMetre;
+          float fl = fbm2(m * vec2(0.11, 0.08) + seed * 1.37);
+          diffuseColor.rgb *= mix(1.0, mix(0.86, 1.08, fl), omie);
+          float pruh = sum2(vec2(m.x * 2.3, m.y * 0.05 + seed)) * 0.7 + sum2(vec2(m.x * 5.1, m.y * 0.11)) * 0.3;
+          float stekance = smoothstep(0.6, 0.92, pruh) * smoothstep(0.35, 0.75, fbm2(vec2(m.x * 0.35, m.y * 0.22) + seed));
+          diffuseColor.rgb *= 1.0 - 0.28 * vek * stekance * omie;
+          if (!atika && vv >= 1.0 && !slepa) {
+            float wx = smoothstep(0.24, 0.32, lok.x) * (1.0 - smoothstep(0.68, 0.76, lok.x));
+            float pod = smoothstep(-0.05, 0.27, lok.y) * (1.0 - smoothstep(0.27, 0.31, lok.y));
+            float sila = 0.4 + 0.6 * hashF(vec2(osI, podI * 3.0) + seed * 0.7);
+            diffuseColor.rgb *= 1.0 - 0.32 * vek * wx * pod * sila * (0.6 + 0.4 * sum2(vec2(m.x * 9.0, m.y * 1.5))) * omie;
+          }
+          if (!atika && vv < 0.35) {
+            float zem = 1.0 - smoothstep(-0.2, 0.35, vv);
+            diffuseColor.rgb *= 1.0 - 0.22 * zem * (0.6 + 0.4 * fbm2(m * vec2(1.3, 4.0)));
+          }
+        }
         float fasDrsnost = drsnF;
         vec3 fasNormal = fn;
       `)
@@ -454,6 +489,6 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         normal = normalize( tbn * mapN );
       `);
   };
-  mat.customProgramCacheKey = () => 'fasady-v3';
+  mat.customProgramCacheKey = () => 'fasady-v4';
   return mat;
 }
