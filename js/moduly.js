@@ -20,6 +20,7 @@ import fasady3d from './mapa/budovy/fasady-3d-modul.js';
 import podchody from './mapa/podchody/modul.js';
 import nadjazdy from './mapa/mosty/nadjazdy-modul.js';
 import trava from './mapa/zelen/trava-modul.js';
+import schody from './mapa/cesty/schody-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
@@ -68,6 +69,7 @@ export default [
   nadjazdy,
   trava,
   cyklopruhy,
+  schody,
   hud,
   lokality,
   poloha,

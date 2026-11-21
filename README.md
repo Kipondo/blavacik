@@ -148,7 +148,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
   ~780 pouličných lámp, červené cyklopruhy s bielou čiarou a piktogramom bicykla (316 úsekov, ~61 km z OSM
   `cycleway=lane`). Značka je pred stĺpikom na dvoch objímkach (stĺpik neprechádza symbolom), tabuľa ulice
-  má stĺpik pri kraji, označník MHD je plechová skrinka okolo stĺpa. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
+  má stĺpik pri kraji, označník MHD je plechová skrinka okolo stĺpa. Vonkajšie schody (~3 900 schodísk z OSM
+  `highway=steps`, modul `js/mapa/cesty/schody-modul.js`) sú 3D stupne po teréne (výška schodu 15 cm, na rovine podesta)
+  s kovovým zábradlím pri dlhších schodiskách. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
 - **Grafika:** obloha so slnkom a pohyblivými oblakmi, odrazy okolia (sklo, autá, voda), Dunaj s vlnkami,
   7 typov fasád (staromestské okná s okenicami, obytné s balkónmi, kancelárie, jednoduché, panelák, rodinný dom, hala) a sklenené fasády,
   tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
