@@ -7,6 +7,9 @@
 // Pre ostatné moduly zverejňuje hra.mhd.vozidla:
 //   [{ kluc, linka, typ, ciel, x, z, smerX, smerZ, rychlost (m/s), stoji, dlzka, sirka,
 //      clanky: [{ x, y, z, sx, sz, d, s, vx, vz }] }]   (len vozidlá do VIDITELNOST m)
+//
+// Vozidlo nejde cez autá ani ľudí (prekazky.js): keď mu niečo stojí na trase, spomalí a počká – jeho čas
+// v cestovnom poriadku sa posunie o meškanie (this.meskanie), takže potom pokračuje s meškaním.
 
 import * as THREE from 'three';
 import { aktivneSluzby, naKod } from '../kalendar.js';
@@ -15,6 +18,7 @@ import { stavSpoja, PRED_ODCHODOM } from './jazda.js';
 import { VykreslenieVozidiel } from './vykreslenie.js';
 import { Displeje } from './displeje.js';
 import { riesKolizie } from './kolizie.js';
+import { prekazkaPred } from './prekazky.js';
 
 const OKOLIE_LINIEK = 1600;  // m – linky so zastávkou v tomto okolí sa sledujú
 const VIDITELNOST = 1200;    // m – vozidlá ďalej sa nekreslia
@@ -48,6 +52,7 @@ function bodTrasy(tr, km, out) {
   return out;
 }
 
+const _bodZvuk = {};
 const sekundyDnaPresne = (d) => d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
 
 export default {
@@ -59,6 +64,8 @@ export default {
     this.displeje = new Displeje(this.kresba.skupina);
     this.spoje = [];          // spoje na ceste v okolí (obnova raz za sekundu)
     this.dvere = new Map();   // kľúč spoja → otvorenie dverí 0…1
+    this.meskanie = new Map(); // kľúč spoja → meškanie v s (čakal na autá / ľudí na trati)
+    this.cakanie = new Map();  // kľúč spoja → ako dlho už stojí pred prekážkou (s)
     this.casObnovy = 0;
     this.den = '';
     hra.na('casPreskoceny', () => { this.casObnovy = 0; });
@@ -96,8 +103,9 @@ export default {
         const prof = poriadok.profily[pi];
         const koniec = start + prof[prof.length - 1] + 2;
         let zaciatok = null;
-        if (this.dnes.has(sluzba) && sek >= start - PRED_ODCHODOM && sek <= koniec) zaciatok = start;
-        else if (this.vcera.has(sluzba) && sek + 86400 >= start - PRED_ODCHODOM && sek + 86400 <= koniec) zaciatok = start - 86400;
+        const sm = sek - (this.meskanie.get(`${linka}:${k}`) ?? 0);
+        if (this.dnes.has(sluzba) && sm >= start - PRED_ODCHODOM && sm <= koniec) zaciatok = start;
+        else if (this.vcera.has(sluzba) && sm + 86400 >= start - PRED_ODCHODOM && sm + 86400 <= koniec) zaciatok = start - 86400;
         if (zaciatok === null) return;
         const tr = trasy.trasy[ti];
         if (!tr || tr.km.length < 2) return;
@@ -122,6 +130,34 @@ export default {
     this._vykresli(hra, teraz, dt);
   },
 
+  /** Spomalenie pred prekážkou: čas spoja sa zdrží (meškanie rastie) – pri 4 m stojí, od 26 m ďalej ide plne. */
+  _prekazka(hra, s, st, t, dt) {
+    const pos = t.posunVpravo ?? 0;
+    const bod = (km, out) => {
+      bodTrasy(s.tr, km, out);
+      out.x -= out.dz * pos; out.z += out.dx * pos;
+      return out;
+    };
+    const d = prekazkaPred(hra, bod, st.km + 0.5, t.sirka);
+    let cak = this.cakanie.get(s.kluc) ?? 0;
+    if (d === Infinity || cak > 10) {
+      // voľno, alebo už čakal priveľmi dlho (aby sa nezasekli s autom, ktoré čaká naňho) – chvíľu ide
+      this.cakanie.set(s.kluc, cak > 10 ? (cak > 13 ? 0 : cak + dt) : 0);
+      return;
+    }
+    const f = Math.min(1, Math.max(0, 1 - (d - 4) / 22));
+    this.meskanie.set(s.kluc, (this.meskanie.get(s.kluc) ?? 0) + dt * f);
+    if (f > 0.9) {
+      cak += dt;
+      // zazvoní (električka) alebo zatrúbi – raz za chvíľu
+      if (Math.floor(cak / 4) !== Math.floor((cak - dt) / 4) || cak === dt) {
+        bodTrasy(s.tr, st.km, _bodZvuk);
+        hra.posli('zvuk', { meno: t.typ === 'elektricka' ? 'zvoncek' : 'klaxon-kratky', x: _bodZvuk.x, z: _bodZvuk.z });
+      }
+    }
+    this.cakanie.set(s.kluc, cak);
+  },
+
   _vykresli(hra, teraz, dt) {
     const sek = sekundyDnaPresne(teraz);
     const p = hra.stav.pozicia;
@@ -137,10 +173,13 @@ export default {
 
     for (const s of this.spoje) {
       const t = s.typ;
-      const st = stavSpoja(s.prof, s.km, sek - s.zaciatok, t);
+      const mesk = this.meskanie.get(s.kluc) ?? 0;
+      const st = stavSpoja(s.prof, s.km, sek - s.zaciatok - mesk, t);
       if (!st) continue;
       bodTrasy(s.tr, st.km, bod);
       const vzd = Math.hypot(bod.x - p.x, bod.z - p.z);
+      // prekážka na trase pred čelom (len v okolí hráča – inde nie sú autá ani ľudia) → spomalí, počká
+      if (vzd < 450 && !st.stoji) this._prekazka(hra, s, st, t, dt);
       if (vzd < najblizsie) najblizsie = vzd;
       if (vzd > VIDITELNOST) continue;
       zive.add(s.kluc);
@@ -205,6 +244,7 @@ export default {
     kresba.dokonci();
 
     for (const k of this.dvere.keys()) if (!zive.has(k)) this.dvere.delete(k);
+    for (const k of this.meskanie.keys()) if (!zive.has(k) && !this.spoje.some((s) => s.kluc === k)) { this.meskanie.delete(k); this.cakanie.delete(k); }
     hra.mhd.vozidla = vozidla;
     hra.hodiny?.blizko('mhd', najblizsie);
     riesKolizie(hra, clankyKolizie);
