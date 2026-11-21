@@ -73,4 +73,17 @@ SPEC = {
     'greckokatolicka-katedrala': {'nazov': 'Gréckokatolícka katedrála', 'typ': 'kostol', 'farba': '#efe6d3', 'strecha': '#8c4b32', 'vyska': 12.0},
     'vodarenske-muzeum': {'nazov': 'Vodárenské múzeum', 'typ': 'palac', 'podlazia': 2, 'farba': '#c98f6b', 'detaily': '#e9dcc4',
                           'strecha': '#6f4a3a'},
+    # Špitálska (issue #69) – výšky z laserového skenovania ÚGKK, priečelia do ulice (smer na severovýchod)
+    'kostol-alzbetinok': {'nazov': 'Kostol sv. Alžbety (alžbetínky)', 'typ': 'kostol', 'farba': '#efe2c4', 'detaily': '#faf5ea',
+                          'strecha': '#6e4a3a', 'vyska': 17.0, 'sklon': 1.1, 'strecha_h': 8.5,
+                          'niky': {'bod': (496.5, -338.5), 'pocet': 2},
+                          'veze': [{'x': 493.1, 'z': -341.3, 'sirka': 6.0, 'vyska': 29.5, 'strecha_h': 11.0, 'typ': 'barok',
+                                    'farba_strechy': '#5c8a74', 'hodiny': True}]},
+    'kostol-sv-ladislava': {'nazov': 'Kostol sv. Ladislava', 'typ': 'kostol', 'farba': '#f4f1ea', 'detaily': '#ffffff',
+                            'strecha': '#c0623c', 'vyska': 14.5, 'sklon': 1.0, 'strecha_h': 6.0,
+                            'stit': {'bod': (415.5, -223.0), 'vyska': 4.5},
+                            'pilastre': {'bod': (415.5, -223.0), 'pocet': 4},
+                            # zvonička na streche za štítom (laser: vrch 27,7 m)
+                            'veze': [{'cast': '1318227762', 'od': 17.0, 'vyska': 26.0, 'strecha_h': 5.0, 'typ': 'ihlan',
+                                      'farba_strechy': '#c0623c'}]},
 }

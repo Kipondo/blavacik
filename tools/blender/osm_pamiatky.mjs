@@ -55,6 +55,9 @@ const MENA = [
   ['synagoga', /^Ortodoxná synagóga/i],
   ['nedbalka', /^Galéria Nedbalka/i],
   ['greckokatolicka-katedrala', /Katedrálny chrám povýšenia/i],
+  // Špitálska (issue #69): kostol sv. Alžbety s kláštorom alžbetínok, kostol sv. Ladislava v budove bývalého špitála
+  ['kostol-alzbetinok', /./, ['75070305']],
+  ['kostol-sv-ladislava', /./, ['75070258']],
 ];
 const OHR = { minX: -12500, maxX: 13600, minZ: -14000, maxZ: 15700 };
 // časti, ktoré v OSM ležia mimo hlavného obrysu (napr. veža Dómu)
