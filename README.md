@@ -147,6 +147,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
     a na zatrávnených svahoch (podľa mapy tried a pokrývky dlaždice), zblízka husto, ďalej redšie a menšie;
     stredná kvalita do 18 m, vysoká do 30 m, nízka bez nej. Na strmých zrezoch tráva nerastie.
+  - **Stromy mimo ciest** (`js/mapa/zelen/miesto-stromu.js`): strom nesmie stáť na vozovke, koľajach, obslužnej
+    ceste ani v dome. Stromy z lasera majú polohu podľa stredu koruny – keď koruna presahuje nad cestu, kmeň sa
+    posunie kolmo na okraj (najviac o 4 m), inak sa strom vynechá.
   - **Vietor:** koruny stromov sa kolíšu (viac hore, kmeň stojí), listy sa trasú, trávou prechádzajú vlny;
     nárazy vetra sa striedajú s bezvetrím (spoločný čas `vietor` v `js/mapa/zelen/materialy-stromov.js`).
   - **Strmé zrezy terénu** (oporné múry Hradného kopca, svahy z lasera): namiesto natiahnutej textúry zhora
