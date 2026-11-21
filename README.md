@@ -84,6 +84,16 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   (4 električkové, 15 trolejbusových, 54 denných autobusových, 17 nočných), 582 zastávok s 1 370 nástupišťami,
   35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
+- **MHD – etapa b: vozidlá jazdia podľa poriadku** (`js/mhd/vozidla/`, modul `mhd-vozidla`): každý spoj z poriadku,
+  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (3 články, zberač),
+  trolejbus (kĺbový, tyče) alebo autobus (kĺbový / sólo). Poloha sa počíta priamo z poriadku: vozidlo sa rozbieha
+  a brzdí, na zastávku príde o chvíľu skôr, otvorí dvere a **odíde presne v čase z cestovného poriadku**
+  (aj po preskočení času). Články sa lámu v zákrutách, autobusy idú v pravom pruhu, vpredu, na boku a vzadu
+  je displej s číslom linky a cieľom. Do chodca a áut sa nedá prejsť (odtlačí ich). Všetko je pár volaní
+  kreslenia (InstancedMesh). Pre ostatné moduly: `hra.mhd.vozidla`.
+  Vozidlo nejde cez autá ani ľudí (`prekazky.js`): keď mu na trase do 30 m stojí auto, hráč alebo chodec, spomalí,
+  zastaví, električka zazvoní a počká; potom pokračuje s meškaním (čas spoja sa posunie). Po 10 s čakania sa pohne,
+  aby sa nezasekla s autom, ktoré čaká na ňu.
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
@@ -108,7 +118,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo ďalej
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
-- MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
+- MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
