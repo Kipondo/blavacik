@@ -141,7 +141,7 @@ export default {
     }
 
     // skok a gravitácia
-    const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
+    const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mosty?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
     if (h.naZemi && hra.vstup.drzi('skok')) {
       h.vy = K.SKOK;
       h.naZemi = false;

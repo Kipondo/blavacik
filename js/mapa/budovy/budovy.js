@@ -20,13 +20,37 @@ import { materialFasad, STYLY, PARAMETRE } from './fasady.js';
 import { texturaSkla } from '../pamiatky/textury.js';
 import { typizujBudovy } from './typ-budovy.js';
 import { pridajStrukturuStriech } from './struktura-striech.js';
+import { NOC, OKNA } from '../../grafika/noc.js';
+
+/** Sklenené fasády v noci: kancelárie po moduloch (UV skla = 3 m × 3,4 m) čiastočne svietia. */
+function nocneSklo(mat) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uNoc = NOC;
+    sh.uniforms.uOkna = OKNA;
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float uNoc, uOkna;\nfloat hashS(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }')
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+        if (uNoc > 0.0) {
+          vec2 bunka = floor(vMapUv * vec2(1.0, 1.0));
+          float h = hashS(bunka + floor(vColor.r * 97.0 + vColor.g * 31.0));
+          // kancelárie svietia menej ako byty, chodby a schodiská v pásoch
+          float svieti = step(h, uOkna * 0.45);
+          vec3 ton = mix(vec3(0.85, 0.9, 1.0), vec3(1.0, 0.85, 0.62), hashS(bunka.yx + 3.0));
+          vec2 f = fract(vMapUv);
+          float okraj = smoothstep(0.02, 0.08, f.x) * smoothstep(0.98, 0.92, f.x) * smoothstep(0.05, 0.15, f.y) * smoothstep(0.98, 0.9, f.y);
+          totalEmissiveRadiance += ton * svieti * okraj * uNoc * 0.42;
+        }`);
+  };
+  mat.customProgramCacheKey = () => 'sklo-noc';
+  return mat;
+}
 
 let materialy = null;
 /** Materiály budov [steny, sklo, strechy] – zdieľané (3D fasády používajú materiál stien). */
 export function ziskajMaterialy() {
   if (materialy) return materialy;
   const steny = materialFasad();
-  const sklo = new THREE.MeshStandardMaterial({ map: texturaSkla(), vertexColors: true, roughness: 0.12, metalness: 0.65, envMapIntensity: 1.3 });
+  const sklo = nocneSklo(new THREE.MeshStandardMaterial({ map: texturaSkla(), vertexColors: true, roughness: 0.12, metalness: 0.65, envMapIntensity: 1.3 }));
   const strechy = pridajStrukturuStriech(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }));
   materialy = [steny, sklo, strechy];
   return materialy;

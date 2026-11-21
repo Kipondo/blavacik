@@ -27,6 +27,7 @@ import { vytvorLampy } from '../vybavenie/lampy.js';
 import { vytvorLavicky } from '../vybavenie/lavicky.js';
 import { vytvorVodu } from '../voda/voda.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
+import { vytvorNadjazdy } from '../mosty/nadjazdy.js';
 
 export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, rieky, KONFIG }) {
   const g = new THREE.Group();
@@ -46,12 +47,19 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   const dlazdene = d._detailTerenu ? new Set(cestyVJadre(d.cesty)) : null;
   const cesty = dlazdene?.size ? d.cesty.filter((c) => !dlazdene.has(c)) : d.cesty ?? [];
   const { krizovatky } = najdiKrizovatky(cesty);
-  g.add(vytvorCesty(cesty, vyskopis));
+  // cesty na nadjazdoch sa nekreslia na zem – mostovku stavia js/mapa/mosty/nadjazdy.js
+  g.add(vytvorCesty(cesty.filter((c) => !c.nadjazd), vyskopis));
   g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
   yield;
   g.add(vytvorChodniky(cesty, krizovatky, vyskopis));
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
-  g.add(vytvorKolajnice(d.kolajnice, vyskopis));
+  g.add(vytvorKolajnice((d.kolajnice ?? []).filter((kl) => !kl.nadjazd), vyskopis));
+  // nadjazdy, lávky a nadchody (chôdzu a jazdu po nich rieši modul js/mapa/mosty/nadjazdy-modul.js)
+  if (d.nadjazdy?.length) {
+    const nadj = vytvorNadjazdy(d.nadjazdy, vyskopis, k);
+    g.add(nadj.skupina);
+    g.userData.nadjazdy = nadj.profily;
+  }
   // podchody: chodby pod zemou, schody, zábradlie (chôdzu rieši modul js/mapa/podchody/modul.js)
   if (d.podchody?.length) g.add(vytvorPodchody(pripravTuby(d.podchody, vyskopis.vyskaTerenu), vyskopis.vyskaTerenu, k).skupina);
   yield;
