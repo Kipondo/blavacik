@@ -98,7 +98,7 @@ def strecha_ihlan(G, obrys, z0, vyska, mat, presah=0.4, vrch=None):
 
 
 def barokova_fasada(G, obrys, kz, *, stena, sambrana, sklo_m, rimsa, sokel=None, os_okien=3.6, okno=(1.35, 2.3),
-                    min_dlzka=5.0, prizemie_okno=None, hlavna_rimsa=0.55, seed=1, preskoc=None):
+                    min_dlzka=5.0, prizemie_okno=None, hlavna_rimsa=0.55, seed=1, preskoc=None, stena_preskocenej=True):
     """Omietnutá fasáda s pravidelnými oknami: šambrány (rámy), parapety, nadokenné rímsy,
     kordónové rímsy medzi podlažiami, hlavná rímsa pod strechou, kamenný sokel.
     kz = výšky podlaží [z0, z1, …]; okná len na hranách dlhších ako min_dlzka."""
@@ -114,7 +114,11 @@ def barokova_fasada(G, obrys, kz, *, stena, sambrana, sklo_m, rimsa, sokel=None,
             continue
         ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
         nx, ny = uy, -ux
-        if L < min_dlzka or (preskoc and preskoc(i)):
+        if preskoc and preskoc(i):
+            if stena_preskocenej:           # inak si hranu kreslí volajúci sám (napr. lodžie na čele krídla)
+                G.stena(stena, a, b, z_dole, z_hore)
+            continue
+        if L < min_dlzka:
             G.stena(stena, a, b, z_dole, z_hore)
             continue
         pocet = max(1, round(L / os_okien))

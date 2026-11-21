@@ -106,6 +106,17 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   dráhou), Slovenská národná galéria (Vodné kasárne a premostenie), Národný futbalový štadión (tribúny okolo ihriska
   s čiarami a bránami, biela strecha s osvetlením, fasáda z lamiel), zimný štadión (klenutá strecha) a **stavenisko
   Istropolis** (oplotenie, výkop, rozostavaný skelet, dva vežové žeriavy, bunky).
+- **Mladá garda a okolie (Račianska)** z Blendera (`python3 tools/blender/garda_blender.py internat obchody
+  obytne_veze okolie`, dáta `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_garda.mjs`):
+  internát Mladá garda podľa častí z OSM – šesť krídel so 4 podlažiami, valbové strechy s vetracími vikiermi,
+  rímsy, šambrány, lodžie na čelách krídiel, nárožné budovy, vstupná budova s presklenou fasádou, cimburím
+  a hodinovou vežou (ciferníky, ručičky, kríž), jedáleň, spojovacie chodby, stožiare s vlajkami a socha s živým
+  plotom pred vstupom; antukové tenisové kurty s čiarami, sieťami a oplotením. Oproti cez Račiansku **supermarket**
+  (hala so šikmou strechou z OSM, plechové opláštenie, výklady s plagátmi, podlubie na stĺpoch, zádverie,
+  prístrešok na vozíky, rampa), **bistro** (drevené lamely, presklená jedáleň, terasa so slnečníkmi, stojan)
+  a **obytné veže** za supermarketom (17 a 20 podlaží + nižší blok, fasáda z posunutých rámov okien, zelené strechy).
+  Obchody majú podľa pravidiel projektu **vlastné neutrálne nápisy** („POTRAVINY“, „BISTRO“) – žiadne značky firiem.
+  Nápis je nový model `js/mapa/pamiatky/napis.js` (tabuľa s textom z plátna, záznam `"model": "napis"`).
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
