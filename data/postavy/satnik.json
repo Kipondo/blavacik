@@ -1,6 +1,6 @@
 {
   "_popis": "Šatník postavy. kusy = jednotlivé veci (objekt = sieť v assets/postavy/dodo.glb, skryva = časti tela pod látkou, farba = násobok farby textúry, efekt = bonusy pre hernú logiku). oblecenia = hotové kombinácie. Časti tela: hlava, hrud, brucho, panva_h, panva, stehno_h, stehno_d, lytko, clenok, chodidlo, rameno_h, rameno_d, predlaktie, dlan.",
-  "predvolenyVzhlad": { "ucet": "strapate", "brada": "strnisko", "plet": "#e8b493", "vlasy": "#6e4c34", "tvar": {} },
+  "predvolenyVzhlad": { "ucet": "strapate", "brada": "ziadna", "plet": "#e8b493", "vlasy": "#6e4c34", "tvar": {} },
   "kusy": {
     "tricko":        { "nazov": "Biele tričko", "objekt": "odev_tricko", "typ": "vrch", "skryva": ["hrud", "brucho", "rameno_h", "panva_h"] },
     "tricko_cierne": { "nazov": "Čierne tričko", "objekt": "odev_tricko", "typ": "vrch", "farba": "#2a2a2c", "skryva": ["hrud", "brucho", "rameno_h", "panva_h"] },

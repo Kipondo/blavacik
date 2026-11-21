@@ -1,15 +1,19 @@
 // Strechy budov z laserového skenovania (LOD2): roviny striech, ploché časti a štíty.
 // Dáta: data/mapa/mesto/strechy/<i>_<j>.bin (vyrába tools/mesto/laser/budovy.py, číta js/mapa/dlazdice/doplnky.js)
-//   { sikme: {p, uv, c, i}, ploche: {…}, steny: {…}, kominy } – p v súradniciach hry, uv v metroch,
+//   { sikme: {p, uv, c, i}, ploche: {…}, steny: {…}, okna: {…}, kominy } – p v súradniciach hry, uv v metroch,
+//   steny = štítové steny medzi budovami, okna = ustúpené podlažia a nadstavby (s oknami, okna-ustupenych.js),
 //   c = lineárny odtieň (násobí textúru), i = indexy trojuholníkov (vrcholy sa medzi plochami nezdieľajú).
 // Materiály sú CC0 textúry z ambientCG (assets/textury/LICENSE.md).
 
 import * as THREE from 'three';
+import { vNahradenom } from '../pamiatky/nahradene-budovy.js';
+import { stenySOknami } from './okna-ustupenych.js';
 
 const TEXTURY = {
   sikme: { priecinok: 'skridla', velkost: 2.2, drsnost: 0.85 },
   ploche: { priecinok: 'strk', velkost: 1.6, drsnost: 0.95 },
   steny: { priecinok: 'omietka', velkost: 3.0, drsnost: 0.9 },
+  okna: { priecinok: 'omietka', velkost: 3.0, drsnost: 0.9 },
 };
 
 let materialy = null;
@@ -73,28 +77,52 @@ function vytvorKominy(kominy) {
   return m;
 }
 
+/**
+ * Index trojuholníkov bez tých, ktorých stred leží v pôdoryse modelu pamiatky (Átriaky, Manderlák, obchodný dom…) –
+ * laserová strecha by inak trčala z modelu. Vráti null, keď sa nič nevyhadzuje.
+ */
+function bezNahradenychTrojuholnikov(d) {
+  const p = d.p;
+  const pocet = d.i ? d.i.length / 3 : p.length / 9;
+  const vrchol = (t, k) => (d.i ? d.i[t * 3 + k] : t * 3 + k);
+  const ostava = [];
+  let vyhodene = 0;
+  for (let t = 0; t < pocet; t++) {
+    const a = vrchol(t, 0), b = vrchol(t, 1), c = vrchol(t, 2);
+    const x = (p[a * 3] + p[b * 3] + p[c * 3]) / 3, z = (p[a * 3 + 2] + p[b * 3 + 2] + p[c * 3 + 2]) / 3;
+    if (vNahradenom(x, z)) { vyhodene++; continue; }
+    ostava.push(a, b, c);
+  }
+  if (!vyhodene) return null;
+  return p.length / 3 > 65535 ? new Uint32Array(ostava) : new Uint16Array(ostava);
+}
+
 /** Sieť striech jednej dlaždice (skupina troch sietí podľa materiálu). */
 export function vytvorStrechyLod2(data) {
   const skupina = new THREE.Group();
   skupina.name = 'strechy-lod2';
   if (!data) return skupina;
   const mat = ziskajMaterialy();
-  for (const druh of ['sikme', 'ploche', 'steny']) {
+  for (const druh of ['sikme', 'ploche', 'steny', 'okna']) {
     const d = data[druh];
     if (!d?.p?.length) continue;
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(d.p, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(d.uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(d.c, 3));
-    if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
+    const index = bezNahradenychTrojuholnikov(d);
+    if (index) g.setIndex(new THREE.BufferAttribute(index, 1));
+    else if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
     g.computeVertexNormals();
     g.computeBoundingSphere();
-    const m = new THREE.Mesh(g, mat[druh]);
+    // ustúpené podlažia a nadstavby dostanú okná – js/mapa/budovy/okna-ustupenych.js
+    const m = druh === 'okna' ? stenySOknami(g, mat.okna) : new THREE.Mesh(g, mat[druh]);
     m.castShadow = true;
     m.receiveShadow = true;
     m.name = `strechy-${druh}`;
     skupina.add(m);
   }
-  if (data.kominy?.length) skupina.add(vytvorKominy(data.kominy));
+  const kominy = (data.kominy ?? []).filter(([x, z]) => !vNahradenom(x, z));
+  if (kominy.length) skupina.add(vytvorKominy(kominy));
   return skupina;
 }

@@ -7,7 +7,7 @@ import { texturaCesty, DLZKA_V } from './textura-cesty.js';
 import { pridajStrukturu } from './struktura.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
 
-const KROK = 5;           // delenie cesty na úseky (m), aby sedela na teréne
+const KROK = 2.5;         // delenie cesty na úseky (m), aby sedela na teréne (terén je po 2 m)
 export const NAD_TERENOM = 0.12;
 const S_OKRAJMI = new Set(['motorway', 'trunk', 'primary', 'motorway_link', 'trunk_link']);
 
@@ -47,27 +47,47 @@ export function vytvorCesty(cesty, vyskopis) {
   return skupina;
 }
 
-/** Pridá pás (cestu) do spoločnej geometrie. Normála vždy nahor. */
+/**
+ * Pridá pás (cestu) do spoločnej geometrie. Normála vždy nahor.
+ * V priečnom smere má pás 3 rady vrcholov (okraj – stred – okraj), aby terén v strede širokej cesty
+ * nepresvital cez vozovku. V zákrute sa okraj posunie po osi uhla (pokos) – cesta sa nezúži –
+ * a vnútorný okraj ostrej zákruty sa nevracia späť (pás sa neprekrúti).
+ */
 export function pridajPas(s, body, pol, posun, vyskopis, dlzkaV = DLZKA_V) {
   const zaciatok = s.poz.length / 3;
   let v = 0;
+  let predL = null, predP = null;
   for (let i = 0; i < body.length; i++) {
     const [x, z] = body[i];
     const prev = body[Math.max(0, i - 1)], next = body[Math.min(body.length - 1, i + 1)];
-    let dx = next[0] - prev[0], dz = next[1] - prev[1];
-    const d = Math.hypot(dx, dz) || 1;
-    dx /= d; dz /= d;
-    const nx = -dz, nz = dx;
+    // smery úsekov pred a za bodom
+    let ax = x - prev[0], az = z - prev[1], bx = next[0] - x, bz = next[1] - z;
+    const la = Math.hypot(ax, az), lb = Math.hypot(bx, bz);
+    if (la < 1e-6) { ax = bx; az = bz; } else { ax /= la; az /= la; }
+    if (lb < 1e-6) { bx = ax; bz = az; } else { bx /= lb; bz /= lb; }
+    if (la < 1e-6 && lb < 1e-6) { ax = bx = 1; az = bz = 0; }
+    // normála ako os uhla, dĺžka pokosu najviac 2× šírka
+    let nx = -(az + bz), nz = ax + bx;
+    const ln = Math.hypot(nx, nz) || 1;
+    nx /= ln; nz /= ln;
+    const kos = Math.max(0.5, nx * -az + nz * ax);
+    const o = pol / kos;
+    const dx = ax + bx, dz = az + bz;
     if (i > 0) v += Math.hypot(x - body[i - 1][0], z - body[i - 1][1]) / dlzkaV;
-    const lx = x + nx * pol, lz = z + nz * pol;
-    const px = x - nx * pol, pz = z - nz * pol;
-    s.poz.push(lx, vyskopis.vyska(lx, lz) + posun, lz);
-    s.poz.push(px, vyskopis.vyska(px, pz) + posun, pz);
-    s.uv.push(0, v, 1, v);
+    let L = [x + nx * o, z + nz * o], P = [x - nx * o, z - nz * o];
+    // vnútorný okraj ostrej zákruty: ak by šiel proti smeru cesty, ostane na predošlom bode
+    if (predL && (L[0] - predL[0]) * dx + (L[1] - predL[1]) * dz < 0) L = predL;
+    if (predP && (P[0] - predP[0]) * dx + (P[1] - predP[1]) * dz < 0) P = predP;
+    predL = L; predP = P;
+    s.poz.push(L[0], vyskopis.vyska(L[0], L[1]) + posun, L[1]);
+    s.poz.push(x, vyskopis.vyska(x, z) + posun, z);
+    s.poz.push(P[0], vyskopis.vyska(P[0], P[1]) + posun, P[1]);
+    s.uv.push(0, v, 0.5, v, 1, v);
     if (i > 0) {
-      const a = zaciatok + (i - 1) * 2;
-      // poradie vrcholov tak, aby normála smerovala nahor
-      s.idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+      const a = zaciatok + (i - 1) * 3;
+      // poradie vrcholov tak, aby normála smerovala nahor (okraj L – stred, stred – okraj P)
+      s.idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4);
+      s.idx.push(a + 1, a + 4, a + 2, a + 2, a + 4, a + 5);
     }
   }
 }

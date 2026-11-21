@@ -22,10 +22,12 @@ import { planFasad3d } from '../budovy/fasady-3d.js';
 import { pripravTuby } from '../podchody/tuby.js';
 import { vytvorPodchody } from '../podchody/geometria.js';
 import { vytvorStromy } from '../zelen/stromy.js';
+import { stromyMimoCiest } from '../zelen/miesto-stromu.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
 import { vytvorLampy } from '../vybavenie/lampy.js';
 import { vytvorLavicky } from '../vybavenie/lavicky.js';
+import { vytvorHroby } from '../vybavenie/hroby.js';
 import { vytvorVodu } from '../voda/voda.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
 import { vytvorNadjazdy } from '../mosty/nadjazdy.js';
@@ -76,7 +78,10 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   for (const b of d.budovy ?? []) {
     if ((b.minVyska ?? 0) > 2.5) continue;
     if (vstupy.some(([x, z]) => bodVPolygone(x, z, b.body))) continue;
-    k.pridajPolygon(b.body, { typ: 'budova' });
+    // vrch = výška strechy (kamera nad nízkou budovou sa nemusí približovať) – rovnako ako v budovy.js
+    let hMax = -Infinity;
+    for (const [x, z] of b.body) hMax = Math.max(hMax, vyskopis.vyskaTerenu(x, z));
+    k.pridajPolygon(b.body, { typ: 'budova', vrch: hMax + (b.vyska ?? 10) + 1.5 });
   }
   g.add(yield* krokyBudov(d.budovy ?? [], vyskopis, KONFIG));
   yield;
@@ -95,7 +100,12 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
     g.add(f3);
   }
   yield;
-  g.add(vytvorStromy(d.stromy, vyskopis, k));
+  // stromy nie na vozovke, koľajach ani v domoch (koruny z lasera nad cestou → kmeň na okraj)
+  const stromy = stromyMimoCiest(d.stromy, {
+    cesty: d.cesty, kolajnice: d.kolajnice, budovy: d.budovy,
+    sluzobne: (d.chodniky ?? []).filter((c) => c.typ === 'sluzobna'),
+  });
+  g.add(vytvorStromy(stromy, vyskopis, k));
   yield;
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
   yield;
@@ -104,6 +114,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
   yield;
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
+  g.add(vytvorHroby(d, vyskopis));
   g.userData.krizovatky = krizovatky;
   return g;
 }

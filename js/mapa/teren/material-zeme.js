@@ -46,7 +46,8 @@ export function materialZeme(mapa, triedy = null) {
       .replace('#include <map_fragment>', `#include <map_fragment>
         if (sampledDiffuseColor.a < 0.5) discard;
         diffuseColor.a = 1.0;
-        float trava = smoothstep(0.02, 0.12, diffuseColor.g - diffuseColor.r);
+        // (modrá prevažuje nad zelenou = voda v bazéne, nie tráva – js/mapa/teren/ihriska.js)
+        float trava = smoothstep(0.02, 0.12, diffuseColor.g - diffuseColor.r) * (1.0 - smoothstep(0.0, 0.06, diffuseColor.b - diffuseColor.g));
         diffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.45 + trava * 0.4)
                           * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);`);
   };
@@ -80,7 +81,8 @@ ${KAMEN_GLSL}`)
       .replace('#include <map_fragment>', `#include <map_fragment>
         if (sampledDiffuseColor.a < 0.5) discard;
         diffuseColor.a = 1.0;
-        float trava = smoothstep(0.02, 0.12, diffuseColor.g - diffuseColor.r);
+        // (modrá prevažuje nad zelenou = voda v bazéne, nie tráva – js/mapa/teren/ihriska.js)
+        float trava = smoothstep(0.02, 0.12, diffuseColor.g - diffuseColor.r) * (1.0 - smoothstep(0.0, 0.06, diffuseColor.b - diffuseColor.g));
         vec2 vDetailUv = vSvet * 0.35;
         diffuseColor.rgb *= mix(vec3(1.0), texture2D(detailMapa, vDetailUv).rgb * 2.0, 0.45 + trava * 0.4)
                           * mix(vec3(1.0), texture2D(detailMapa, vDetailUv * 2.7).rgb * 2.0, 0.25 + trava * 0.35);

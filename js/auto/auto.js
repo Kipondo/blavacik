@@ -101,7 +101,7 @@ export class Auto {
     // výška a náklon podľa terénu
     const s = this.smer;
     // na nadjazde výška mostovky (js/mapa/mosty/nadjazdy-modul.js), pod ním terén
-    const vy = (x, z) => hra?.mosty?.vyska(x, z, this.pozicia.y) ?? mapa.vyska(x, z);
+    const vy = (x, z) => hra?.mosty?.vyska(x, z, this.pozicia.y) ?? mapa.vyska(x, z, this.pozicia.y);
     const hP = vy(this.pozicia.x + s.x * 1.4, this.pozicia.z + s.z * 1.4);
     const hZ = vy(this.pozicia.x - s.x * 1.4, this.pozicia.z - s.z * 1.4);
     const hL = vy(this.pozicia.x - s.z * 0.9, this.pozicia.z + s.x * 0.9);
@@ -130,7 +130,7 @@ export class Auto {
         this.vx -= r.nx * vn * 1.3;
         this.vz -= r.nz * vn * 1.3;
         this.vx *= 0.8; this.vz *= 0.8;
-        if (-vn > 4) hra?.posli('naraz', { auto: this, sila: -vn });
+        if (-vn > 4) hra?.posli('naraz', { auto: this, sila: -vn, nx: r.nx, nz: r.nz });
       }
     }
   }

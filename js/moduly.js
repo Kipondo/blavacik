@@ -10,6 +10,7 @@ import prostredie from './grafika/prostredie.js';
 import efekty from './grafika/efekty/modul.js';
 import denNoc from './grafika/den-noc.js';
 import hrac from './chodec/hrac.js';
+import chodci from './chodec/chodci/modul.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
@@ -19,23 +20,37 @@ import fasady3d from './mapa/budovy/fasady-3d-modul.js';
 import podchody from './mapa/podchody/modul.js';
 import nadjazdy from './mapa/mosty/nadjazdy-modul.js';
 import trava from './mapa/zelen/trava-modul.js';
+import schody from './mapa/cesty/schody-modul.js';
+import povrch from './mapa/cesty/povrch-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
+import minimapa from './ui/minimapa/modul.js';
+import sochy from './mapa/vybavenie/sochy-modul.js';
+import oznacenia from './mapa/vybavenie/oznacenia-modul.js';
+import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
+import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
+import premavka from './doprava/premavka/modul.js';
 import mhd from './mhd/modul.js';
+import mhdVozidla from './mhd/vozidla/modul.js';
+
+// --- doplnkové moduly (polícia, misie, doprava, …) ---
+// --- dočasné pomôcky na prezeranie mesta (lietanie 2× Medzerník, presun klikom na veľkú mapu) ---
+import letLadenie from './ladenie/let.js';
+import teleport from './ladenie/teleport.js';
 
 // --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
+import zvuk from './zvuk/modul.js';
 // import policia from './policia/policia.js';
 // import misie from './misie/misie.js';
-// import minimapa from './ui/minimapa.js';
 
 export default [
   hodiny,
@@ -44,6 +59,7 @@ export default [
   efekty,
   denNoc,
   hrac,
+  chodci,
   riadenieHracom,
   auta,
   kamera,
@@ -53,15 +69,26 @@ export default [
   podchody,
   nadjazdy,
   trava,
+  cyklopruhy,
+  schody,
+  povrch,
   hud,
   lokality,
   poloha,
+  minimapa,
+  sochy,
+  oznacenia,
+  poskodenieAut,
   rozlisenie,
   vykon,
   grafCiest,
   semafory,
+  premavka,
   mhd,
+  zvuk,
+  mhdVozidla,
+  letLadenie,
+  teleport,
   // policia,
   // misie,
-  // minimapa,
 ];

@@ -12,7 +12,7 @@ import sys, os, json, gzip, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 from scipy import ndimage
-from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json
+from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json, vyber_dlazdic
 
 KROK_DETAIL = 2
 N_DETAIL = DLAZDICA // KROK_DETAIL + 1
@@ -58,7 +58,7 @@ if not len_detail:
 
 # --- 2) detail 2 m ---
 index = nacitaj_index()
-dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
+dlazdice = vyber_dlazdic(index)   # --vsetko | --dlazdice i_j,… | --mlynska-dolina | výrez Starého Mesta
 os.makedirs(os.path.join(VYSTUP, 't'), exist_ok=True)
 hotove = []
 for (i, j) in dlazdice:

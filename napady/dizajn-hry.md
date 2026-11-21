@@ -1,4 +1,4 @@
-# Blava City – dizajn hry (pracovná verzia)
+# Blavačík – dizajn hry (pracovná verzia)
 
 > Živý dokument. Brainstorm, nie finálne rozhodnutia. Čo je označené **❓**, ešte treba doriešiť.
 > Kód sa riadi `CLAUDE.md`; tento súbor hovorí, **čo** staviame, nie **ako**.

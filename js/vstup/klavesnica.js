@@ -10,12 +10,14 @@ const SMERY = {
 const DRZANE = {
   ShiftLeft: 'beh', ShiftRight: 'beh',
   Space: 'skok',
+  KeyH: 'klaxon',
 };
 
 const STLACENE = {
   KeyE: 'akcia', KeyF: 'akcia',
   Escape: 'pauza',
   KeyP: 'poloha',
+  KeyM: 'mapa',
   Space: 'dalej', Enter: 'dalej',
 };
 

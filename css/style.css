@@ -1,8 +1,22 @@
-/* Blava City – vzhľad UI */
+/* Blavačík – vzhľad UI
+   Farby Bratislavy: červená a biela, doplnkovo zlatá. Znak v assets/ui/logo.svg je vlastná štylizácia
+   (červený štít, biela brána s vežami a UFO z Mosta SNP), nie oficiálny erb mesta. */
+
+:root {
+  --cervena: #c8102e;          /* biela na nej: kontrast 5,7 : 1 (WCAG AA) */
+  --cervena-tmava: #8f0b21;
+  --cervena-svetla: #ff5a6e;   /* červený text na tmavom pozadí (kontrast 5,0 : 1) */
+  --biela: #ffffff;
+  --zlata: #d4a017;            /* na tmavom pozadí kontrast 6,7 : 1 */
+  --zlata-svetla: #f0c64a;
+  --tmava: #1b2430;
+  --tmava-2: #232f3e;
+  --pruhy: repeating-linear-gradient(90deg, var(--cervena) 0 18px, var(--biela) 18px 36px);
+}
 
 * { box-sizing: border-box; }
 html, body {
-  margin: 0; height: 100%; overflow: hidden; background: #1b2430;
+  margin: 0; height: 100%; overflow: hidden; background: var(--tmava);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: #fff; -webkit-user-select: none; user-select: none; touch-action: none;
 }
@@ -13,28 +27,34 @@ html, body {
 .ui-vrstva > * { pointer-events: none; }
 .ui-pokyn {
   position: absolute; top: max(16px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
-  background: rgba(15, 20, 28, 0.72); padding: 10px 18px; border-radius: 10px;
+  background: rgba(15, 20, 28, 0.78); padding: 10px 18px; border-radius: 10px; border-left: 4px solid var(--cervena);
   font-size: 17px; max-width: 90vw; text-align: center; text-shadow: 0 1px 2px #000;
 }
 .ui-sprava {
   position: absolute; top: 28%; left: 50%; transform: translateX(-50%);
   font-size: 26px; font-weight: 800; text-align: center; max-width: 90vw;
-  text-shadow: 0 2px 4px #000, 0 0 12px rgba(0,0,0,.6);
+  text-shadow: 0 3px 0 var(--cervena-tmava), 0 2px 4px #000, 0 0 12px rgba(0,0,0,.6);
 }
 .ui-sprava.animuj { animation: vyskoc .35s ease-out; }
 .ui-napoveda {
   position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
-  background: rgba(15, 20, 28, 0.65); padding: 7px 14px; border-radius: 8px; font-size: 15px;
+  background: rgba(15, 20, 28, 0.72); padding: 7px 14px; border-radius: 8px; font-size: 15px;
+  border-bottom: 2px solid var(--zlata);
 }
 .ui-rychlomer {
   position: absolute; right: 24px; bottom: 22px; text-align: right;
   font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums;
   text-shadow: 0 2px 6px rgba(0,0,0,.7);
 }
-.ui-rychlomer small { font-size: 15px; margin-left: 4px; opacity: .8; }
+.ui-rychlomer small { font-size: 15px; margin-left: 4px; color: var(--zlata-svetla); }
 .ui-lokalita {
   position: absolute; right: 28px; bottom: 90px; font-size: 30px; font-weight: 800;
-  font-style: italic; color: #fff6dc; text-shadow: 0 2px 0 #3b2d12, 0 0 10px rgba(0,0,0,.6);
+  font-style: italic; color: var(--biela); text-shadow: 0 2px 0 var(--cervena-tmava), 0 0 10px rgba(0,0,0,.6);
+}
+/* štítok s bránou pred názvom miesta */
+.ui-lokalita::before {
+  content: ''; display: inline-block; width: .8em; height: .8em; margin-right: .3em; vertical-align: -.05em;
+  background: url(../assets/ui/favicon.svg) center / contain no-repeat;
 }
 .ui-lokalita.animuj { animation: lokalita 3.5s ease-out forwards; }
 
@@ -45,43 +65,80 @@ html, body {
   100% { opacity: 0; }
 }
 
+/* --- Minimapa a veľká mapa (js/ui/minimapa/) --- */
+.ui-minimapa {
+  position: absolute; left: 22px; bottom: 22px; width: 232px;
+}
+#hra .ui-minimapa canvas {
+  position: static; display: block; width: 232px; height: 232px; border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.22); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+.ui-minimapa-ulica {
+  margin-top: 7px; max-width: 232px; font-size: 14px; font-weight: 700; color: #f5f1e6;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.ui-velka-mapa {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(10, 12, 15, 0.45);
+}
+.ui-velka-mapa-okno { width: min(88vw, 150vh); }
+#hra .ui-velka-mapa canvas {
+  position: static; display: block; width: 100%; height: min(82vh, 56vw); border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+.ui-velka-mapa-pata {
+  display: flex; justify-content: space-between; gap: 16px; margin-top: 8px;
+  font-size: 13px; color: #f5f1e6; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.ui-velka-mapa-pata span:last-child { opacity: .7; }
+.ui-minimapa[hidden], .ui-velka-mapa[hidden], .ui-minimapa-ulica[hidden] { display: none; }
+
 /* --- Menu --- */
+/* --- Menu (aj načítavanie a pauza) --- */
 .menu {
   position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at center, rgba(20,28,40,.55), rgba(10,14,20,.88));
-  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(27,36,48,.6), rgba(10,14,20,.9));
+  padding: 16px; overflow-y: auto;
 }
 .menu[hidden] { display: none; }
-.menu-okno { max-width: 520px; width: 100%; text-align: center; }
+.menu-okno { max-width: 540px; width: 100%; text-align: center; }
+.menu-logo { width: clamp(84px, 18vw, 128px); height: auto; display: block; margin: 0 auto 10px; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
+.menu-pruhy { height: 8px; width: 216px; margin: 0 auto 14px; border-radius: 4px; background: var(--pruhy); box-shadow: 0 2px 6px rgba(0,0,0,.4); }
 .menu h1 {
-  margin: 0; font-size: clamp(48px, 11vw, 84px); font-weight: 900; letter-spacing: -2px; line-height: .95;
-  color: #fff; text-shadow: 0 4px 0 #b4442d, 0 8px 18px rgba(0,0,0,.5);
+  margin: 0; font-size: clamp(46px, 10.5vw, 82px); font-weight: 900; letter-spacing: -1.5px; line-height: 1;
+  color: var(--biela); text-shadow: 0 4px 0 var(--cervena), 0 8px 18px rgba(0,0,0,.5);
 }
-.menu h1 span { display: block; color: #f2c14e; font-style: italic; }
-.menu-podtitul { margin: 14px 0 22px; font-size: 18px; opacity: .85; }
-.menu-stav { min-height: 1.3em; opacity: .75; font-size: 14px; }
-.menu-stav.chyba { color: #ff8a80; opacity: 1; }
+.menu h1 span { color: var(--zlata-svetla); font-style: italic; }
+.menu-podtitul { margin: 14px 0 20px; font-size: 18px; opacity: .9; }
+.menu-stav { min-height: 1.3em; opacity: .8; font-size: 14px; }
+.menu-stav.chyba { color: var(--cervena-svetla); opacity: 1; }
 .menu-hrat {
-  pointer-events: auto; margin: 10px 0 22px; padding: 14px 54px; font-size: 22px; font-weight: 800;
-  border: 0; border-radius: 12px; cursor: pointer; color: #1b2430; background: #f2c14e;
-  box-shadow: 0 5px 0 #b48a22; transition: transform .08s;
+  pointer-events: auto; margin: 10px 0 22px; padding: 14px 58px; font-size: 22px; font-weight: 800;
+  border: 2px solid var(--biela); border-radius: 12px; cursor: pointer; color: var(--biela); background: var(--cervena);
+  box-shadow: 0 5px 0 var(--cervena-tmava); transition: transform .08s, background .15s;
 }
-.menu-hrat:active { transform: translateY(3px); box-shadow: 0 2px 0 #b48a22; }
-.menu-hrat:disabled { opacity: .4; cursor: wait; }
+.menu-hrat:hover:not(:disabled) { background: #d91836; }
+.menu-hrat:focus-visible { outline: 3px solid var(--zlata-svetla); outline-offset: 3px; }
+.menu-hrat:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--cervena-tmava); }
+.menu-hrat:disabled { opacity: .45; cursor: wait; }
 .menu-editor { margin: -12px 0 16px; }
-.menu-editor a { pointer-events: auto; display: inline-block; padding: 8px 12px; color: #f2c14e; font-weight: 700; font-size: 15px; text-decoration: none; }
+.menu-editor a { pointer-events: auto; display: inline-block; padding: 8px 12px; color: var(--zlata-svetla); font-weight: 700; font-size: 15px; text-decoration: none; }
 .menu-editor a:hover, .menu-editor a:focus-visible { text-decoration: underline; }
 .menu-mys { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; margin: 0 0 14px; font-size: 14px; }
 .menu-mys-riadok { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
-.menu-mys-citlivost { width: 130px; accent-color: #f2c14e; cursor: pointer; }
+.menu-mys-citlivost { width: 130px; accent-color: var(--cervena); cursor: pointer; }
 .menu-mys-hodnota { min-width: 2.2em; text-align: left; font-variant-numeric: tabular-nums; }
 .menu-mys input[type="checkbox"] { width: 16px; height: 16px; accent-color: #f2c14e; cursor: pointer; }
 .menu-grafika { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px; margin: 0 0 14px; font-size: 14px; }
 .menu-grafika label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; pointer-events: auto; }
 .menu-grafika input { width: 15px; height: 15px; accent-color: #f2c14e; cursor: pointer; margin: 0; }
 .menu-ovladanie { font-size: 14px; opacity: .85; line-height: 1.5; }
+.menu-mys input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--cervena); cursor: pointer; }
+.menu-ovladanie { font-size: 14px; opacity: .9; line-height: 1.5; }
 .menu-ovladanie p { margin: 4px 0; }
-.menu-pata { margin-top: 22px; font-size: 12px; opacity: .5; }
+.menu-ovladanie b { color: var(--zlata-svetla); }
+.menu-pata { margin-top: 22px; font-size: 12px; opacity: .6; }
 
 /* --- Dotykové ovládanie --- */
 .dotyk { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
@@ -103,9 +160,11 @@ html, body {
   background: rgba(20,28,40,.45); color: #fff; font-size: 24px; font-weight: 800;
 }
 .dotyk-tl.maly { width: 46px; height: 46px; font-size: 14px; justify-self: center; align-self: center; }
-.dotyk-tl.aktivne { background: rgba(242,193,78,.7); }
+.dotyk-tl.aktivne { background: rgba(200,16,46,.75); border-color: var(--biela); }
 @media (pointer: coarse) {
   .ui-rychlomer { bottom: auto; top: 18px; right: 18px; font-size: 34px; }
   .ui-lokalita { bottom: auto; top: 70px; right: 18px; font-size: 22px; }
   .ui-napoveda { bottom: 190px; }
+  .ui-minimapa { bottom: auto; top: 14px; left: 14px; width: 150px; }
+  #hra .ui-minimapa canvas { width: 150px; height: 150px; }
 }

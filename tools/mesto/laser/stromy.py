@@ -8,16 +8,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage
-from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json
+from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json, vyber_dlazdic
 
 K = 0.5
 MIN_VYSKA = 3.0       # m nad terénom
 MIN_ROZOSTUP = 3.0    # m medzi vrcholmi korún
+MAX_VYSKA = 30.0      # m – vyššie „stromy“ sú takmer vždy strechy alebo steny výškových budov (issue #71)
 
 index = nacitaj_index()
 from spolocne import KOREN
 PAMIATKY = json.load(open(os.path.join(KOREN, 'data', 'mapa', 'pamiatky.json')))['pamiatky']
-dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
+dlazdice = vyber_dlazdic(index)   # --vsetko | --dlazdice i_j,… | --mlynska-dolina | výrez Starého Mesta
 dmp_r, dmr_r = Raster('dmp'), Raster('dmr')
 OKRAJ = 10
 spolu = 0
@@ -50,6 +51,17 @@ for (i, j) in dlazdice:
             rohy = [(-w / 2, -h_ / 2), (w / 2, -h_ / 2), (w / 2, h_ / 2), (-w / 2, h_ / 2)]
             # rovnaké natočenie ako vPamiatke v tools/osm/klasifikuj.mjs (lokálne → svet)
             dr.polygon([((pm['x'] + a * c + b * s_ - X0) / K, (pm['z'] - a * s_ + b * c - Z0) / K) for a, b in rohy], fill=1)
+    # modely z Blendera (výškové budovy, kostoly…): ich OSM budovy sú z dlaždíc vyradené, preto maska
+    # z pôdorysov v assets/pamiatky/<subor>.json (inak by Manderlák mal v sebe 44 m „stromy“, issue #71)
+    for pm in PAMIATKY:
+        if not pm.get('subor'): continue
+        pi = os.path.join(KOREN, 'assets', 'pamiatky', f"{pm['subor']}.json")
+        if not os.path.exists(pi): continue
+        info = json.load(open(pi))
+        u = pm.get('natocenie', 0); c, s_ = math.cos(u), math.sin(u)
+        for w in info.get('obrysy', []) + info.get('kolizie', []):
+            if len(w) < 3: continue
+            dr.polygon([((pm['x'] + a * c + b * s_ - X0) / K, (pm['z'] - a * s_ + b * c - Z0) / K) for a, b in w], fill=1)
     budova = ndimage.binary_dilation(np.array(img, bool), iterations=2)
     # vegetácia: nad terénom, mimo budov, „drsná“ (koruna nie je rovná ako strecha alebo stena)
     hl = ndimage.gaussian_filter(ndsm, 1.5)
@@ -73,6 +85,7 @@ for (i, j) in dlazdice:
         gx, gz = X0 + (x + 0.5) * K, Z0 + (y + 0.5) * K
         if not (i * DLAZDICA <= gx < (i + 1) * DLAZDICA and j * DLAZDICA <= gz < (j + 1) * DLAZDICA): continue
         if r < 1.2: continue                     # stĺpy, lampy, tenké konštrukcie
+        if h > MAX_VYSKA: continue               # strecha/stena budovy, nie koruna
         stromy.append([round(gx, 1), round(gz, 1), round(min(2.2, max(0.5, h / 9)), 2), round(h, 1), round(min(9, r), 1)])
     d['stromy'] = stromy
     d['stromyZLasera'] = True

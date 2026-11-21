@@ -3,6 +3,8 @@
 // Cesty pre autá sa kreslia zvlášť ako 3D pásy (js/mapa/cesty/).
 
 import * as THREE from 'three';
+import { kresliIhriska, triedyIhrisk } from './ihriska.js';
+import { kresliZahrady, triedyZahrad } from './zahrady.js';
 import { dieryPodchodov } from '../podchody/tuby.js';
 import { dokonci } from '../kroky.js';
 
@@ -150,11 +152,15 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
 
   g.fillStyle = FARBY_POKRYVKY.zaklad;
   g.fillRect(0, 0, px, px);
+  // záhrady a trávniky v obytnej zástavbe (js/mapa/teren/zahrady.js)
+  kresliZahrady(g, d, rect, px, vJadre);
   for (const p of d.pokryvka ?? []) {
     g.fillStyle = FARBY_POKRYVKY[p.k] ?? FARBY_POKRYVKY.zaklad;
     cesta(p.body, true);
     g.fill();
   }
+  // športoviská: povrch a čiary z OSM (js/mapa/teren/ihriska.js)
+  kresliIhriska(g, rect, sx, sz, mierka);
   g.fillStyle = '#4f7f8f';
   for (const v of d.voda ?? []) { cesta(v.body, true); g.fill(); }
   g.lineCap = 'round';
@@ -211,7 +217,8 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
 // 1 = drobné žulové kocky (uličky a dvory historického jadra); 0,63 = veľké svetlé betónové dlaždice (moderné
 // námestia a pešie zóny mimo historického jadra, napr. Kamenné námestie).
 const BETON = 160, DOSKY = 192, KOCKY = 255;
-const TRIEDA_POKRYVKY = { dlazba: DOSKY, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64 };
+// parkovisko = trieda chodníka + maska asfaltu (kanál B) → asfalt so záplatami ako chodníky popri cestách (#52, #73)
+const TRIEDA_POKRYVKY = { dlazba: DOSKY, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64, parkovisko: 128 };
 // približný obrys historického jadra (Michalská brána – Hlavné nám. – Dóm – Hviezdoslavovo nám.)
 const JADRO = { x: -60, z: 40, rx: 330, rz: 280, uhol: 0.35 };
 /** Je bod v historickom jadre? (tam sú aj obslužné uličky vydláždené kockami) */
@@ -220,6 +227,9 @@ export function vJadre(x, z) {
   const a = (dx * c + dz * s) / JADRO.rx, b = (-dx * s + dz * c) / JADRO.rz;
   return a * a + b * b < 1;
 }
+// cesty, ktoré majú 3D chodník s obrubníkom (js/mapa/cesty/chodniky.js)
+const CESTY_S_CHODNIKOM = new Set(['primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'living_street',
+  'primary_link', 'secondary_link', 'tertiary_link']);
 const TRIEDA_CHODNIKOV = { pedestrian: DOSKY, footway: 128, steps: 128, corridor: 128, platform: 128, cycleway: 128 };
 
 /** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
@@ -270,6 +280,7 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.stroke();
     g.fill();
   }
+  triedyZahrad(g, d, rect, px, vJadre);
   for (const c_ of d.cesty ?? []) {
     if (c_.nadjazd) continue;
     g.lineWidth = ((c_.sirka ?? 6) + 7) * mierka;
@@ -294,8 +305,22 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fillStyle = seda(v);
     cesta(p.body, true);
     g.fill();
-    maska(p.body, true, false);
+    maska(p.body, true, p.k === 'parkovisko');
   }
+  triedyIhrisk(g, gm, rect, sx, sz, mierka);
+  // pod vozovkou a chodníkmi s obrubníkom nesmie byť trieda trávy – inak trsy trávy zblízka
+  // (js/mapa/zelen/trava-modul.js) prerastajú cez cestu, keď park alebo lúka z OSM siaha až po os cesty
+  g.save();
+  g.strokeStyle = seda(128);
+  g.lineCap = g.lineJoin = 'round';
+  const vJadreDlazba = new Set(cestyVJadre(d.cesty));
+  for (const c_ of d.cesty ?? []) {
+    if (c_.nadjazd || vJadreDlazba.has(c_)) continue;
+    g.lineWidth = ((c_.sirka ?? 6) + (CESTY_S_CHODNIKOM.has(c_.typ) && !c_.most ? 5.6 : 0.3)) * mierka;
+    cesta(c_.body, false);
+    g.stroke();
+  }
+  g.restore();
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
   // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
   yield;

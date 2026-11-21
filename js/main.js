@@ -60,6 +60,10 @@ async function start() {
   await hra.inicializujModuly();
   aktualizujStav();
 
+  // počkáme na realistického Ďoďa (~4 MB), aby hráč nezačal s náhradnou jednoduchou postavou
+  menu.priebeh('Načítavam Ďoďa…');
+  await hra.hrac?.mesh?.userData?.pripravena;
+
   // prvý snímok vykreslíme hneď (za menu je vidieť mesto)
   hra.moduly.find((m) => m.nazov === 'kamera')?.updateVzdy?.(0.016, hra);
   svet.update(hra.stav.pozicia, hra.kamera);

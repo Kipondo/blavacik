@@ -42,6 +42,6 @@ Hrateľná verzia: GitHub Pages (Settings → Pages → vetva `feature/pamiatky`
 5. Otvorené otázky: sekcia 13 v `dizajn-hry.md`.
 
 ## Úvodná veta do nového chatu
-> Pracujeme na hre Blava City v repozitári Kipondo/blavacik. Prečítaj si CLAUDE.md,
+> Pracujeme na hre Blavačík v repozitári Kipondo/blavacik. Prečítaj si CLAUDE.md,
 > napady/POKRACOVANIE.md a napady/dizajn-hry.md (vetva feature/dizajn-pribeh, ak ešte nie je
 > zmergovaná do main) a pozri otvorené PR a issues. Pokračujeme.

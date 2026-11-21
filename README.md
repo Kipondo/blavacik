@@ -1,4 +1,4 @@
-# Blava City
+# Blavačík
 
 Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 Hlavný hrdina je študent Ďoďo z Košíc, ktorý je prvýkrát v Bratislave – dizajn hry je v [napady/dizajn-hry.md](napady/dizajn-hry.md),
@@ -21,10 +21,64 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Nastúpiť / vystúpiť | E | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
+| Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
 | Vypísať polohu (pre misie) | P | – |
 | Ukazovateľ výkonu (snímky/s, čas snímky, rozlíšenie) | F3 | – |
+| Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
+| Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
+
+## Čo je v `main` (zlúčené PR, issue #51)
+Integračná vetva `integracia/vsetko` spája všetky otvorené PR k 21. 11. 2026 (konflikty a prepočítané dáta
+dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
+
+- #24 MHD etapa b: električky, trolejbusy a autobusy jazdia presne podľa cestovného poriadku
+- #25 Ďoďo: prirodzená chôdza a beh, plávanie vo vode, mladšia tvár
+- #26 Typy budov v celom meste: panelák, rodinný dom, hala, garáž
+- #27 Premávka áut: stovky NPC áut v pruhoch, semafory, prednosť, odstupy
+- #28 Porovnanie s realitou: zoznam opráv (etapy 1–5)
+- #29 Chodci: stovky ľudí na chodníkoch a námestiach (1 na 5 m)
+- #30 Opravy podľa porovnania so skutočnosťou (etapy 1–5): dosky, vikiere, radnica, fontány, SND, hrad, parky
+- #32 Minimapa a veľká mapa mesta (M)
+- #33 Grafika G1: AO, vzdušná perspektíva, farebné ladenie, MSAA, stabilné tiene, strechy so škridlou, kvalita v menu
+- #34 Fasády 3D (G2): zapustené okná, parapety, rímsy, frontóny palácov, balkóny a štíty
+- #35 Kamenné námestie: veža Kyjeva a vyvýšené časti budov v celom meste, betónové dlaždice, dlažba CC0 v celom meste
+- #36 Podchody z OSM: podzemné chodby, schody a eskalátory, chôdza a kamera pod zemou
+- #37 Pamiatky z Blendera (G3): generátor cez bpy so zapečeným AO, Michalská brána
+- #38 Výškové budovy z Blendera: Nivy, Eurovea, Twin City, Panorama, Sky Park, Tower 115, NBS
+- #39 Mosty z Blendera: SNP s UFO, Starý most, Apollo, Prístavný, Lafranconi
+- #40 Ďalšie výškové budovy z 3D tagov OSM: CBC I, VÚB, Glória, Millennium Tower, Aupark, Technopol, Incheba, Matadorka, Centrál, Lakeside, Manderlák
+- #41 Bratislavský hrad z Blendera: palác, brány, hradby a baroková záhrada podľa terénu
+- #42 Pamiatky Starého Mesta z Blendera: Dóm, Stará radnica, Primaciálny palác, SND, Reduta, kostoly a paláce (35 budov)
+- #43 Realistickejší vzhľad: zlatá hodinka, stromy po druhoch, opotrebované cesty, asfaltové chodníky s obrubníkmi, zámková dlažba
+- #44 Pamiatky 2. dávka: hrad Devín, hradby, bunkre, Gerulata, Maximiliánova fontána, sochy v celom meste, hroby na cintorínoch
+- #45 Pamiatky 3. dávka: nový Kamzík, Rozhlas, Národná rada, Nové SND; Nivy, SNG, Národný futbalový štadión, zimný štadión, stavenisko Istropolis
+- #46 Označenia verejných služieb z OSM (tabule na fasádach, stojany, minimapa)
+- #47 Nadjazdy, lávky a nadchody z OSM (mostovky, zábradlie, piliere, chôdza a jazda po moste)
+- #48 Blavačík: názov, farby Bratislavy v UI a vlastné štylizované logo
+- #49 Zvuky (Web Audio) a hlasy postáv cez Google Gemini TTS automaticky
+- #50 Poškodenie áut pri náraze a kamera nevojde do budov
+- #61 Plynulosť: dlaždice mesta po malých krokoch, automatické rozlíšenie, F3
+- #66 Dočasné: lietanie (2× Medzerník) a presun klikom na veľkú mapu
+- #76 Mladá garda a okolie: internát, kurty, supermarket, bistro, obytné veže (Blender)
+- #77 Oprava: stĺpik neprechádza cez značky a tabule ulíc (#63)
+- #78 Kamenné námestie: Hotel Kyjev, obchodný dom s hodinami, kostoly na Špitálskej, nový Manderlák
+- #79 Átriaky: átriové domy na svahu, vstup s turniketmi a vrátnicou, ploty (Mlynská dolina)
+- #80 Priechody pod budovami z OSM: Pasáž Liga, Luxor a 1000+ ďalších (#65)
+- #81 Výšky budov v celom meste z lasera ÚGKK (63 tisíc budov) + LOD2 a stromy v Mlynskej doline
+- #82 Terén pod cestami bez skokov, pod mostom po teréne (#54)
+- #83 Cyklopruhy na cestách z OSM (#52)
+- #84 Podniky v Mlynskej doline z OSM: kluby, bary, bistrá, obchody (#73)
+- #85 Vonkajšie schody ako 3D stupne so zábradlím (#73)
+- #86 Okná na ustúpených podlažiach a nadstavbách z LOD2 striech (#64)
+- #87 Parkoviská asfaltové s ostrým okrajom v mape povrchov (#52, #73)
+- #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
+- #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
+- #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
+  bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
+  Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
 - **Nadjazdy, lávky a nadchody** (`tools/mesto/nadjazdy.mjs` → `"nadjazdy"` v dlaždiciach, `js/mapa/mosty/nadjazdy.js`,
   modul `js/mapa/mosty/nadjazdy-modul.js`): ~1 100 mostov z OSM mimo Dunaja (cesty, lávky a cyklolávky, železničné
   a električkové mosty). Laserový terén most nemá, preto mostovka ide od terénu na jednom konci k druhému (násypy sú
@@ -46,12 +100,77 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     (`node tools/mesto/typy-budov.mjs [minX,minZ,maxX,maxZ]`).
   - **Náhľad fasád bez hry:** `http://localhost:8000/tools/budovy/nahlad.html?x=250&z=1750` (Petržalka),
     `&typ=1` zafarbí budovy podľa typu. Snímky: `docs/snimky/typy-budov/`.
+- **Označenia verejných služieb z OSM** (`tools/mesto/sluzby.mjs` → `data/mapa/sluzby.json`, modul
+  `js/mapa/vybavenie/oznacenia-modul.js`): 611 miest – polícia, nemocnice a polikliniky, pošty, školy a univerzity,
+  stanice, úrady, knižnice, hasiči, obchodné centrá. Tabuľa s ikonou a názvom visí na fasáde budovy (stena
+  najbližšie k ulici alebo chodníku, nie stena susedného domu); keď je služba v OSM len bod, nájde sa budova, v ktorej
+  leží (alebo do 12 m od vchodu), z načítaných dlaždíc. Veľké areály majú stojan pri okraji. Pri príchode sa ukáže
+  názov miesta, blízke služby sú farebné značky na minimape. Tabule sa stavajú postupne (najviac ~3 ms za snímok),
+  aby hra v centre pri príchode do novej štvrte nesekala. Snímky: `docs/snimky/sluzby/`.
+- **Podniky v Mlynskej doline z OSM** (`tools/mesto/podniky.mjs` → `data/mapa/podniky.json`, issue #73): 37 klubov,
+  barov, bistier, reštaurácií, obchodov, práčovní a posilňovní (UniK Mlyny, Klub 39, Študentka, Bistro Mladosť…).
+  Menšia vývesná tabuľa nad vchodom na stene pri bode podniku: veľké meno z OSM, pod ním druh a ikona. Názvy len
+  z OSM; reťazce majú len všeobecný nápis (POTRAVINY…), obchody v obchodnom centre sa vynechajú. Pri príchode
+  sa ukáže meno podniku, kluby, bary a bistrá sú na minimape. Snímky: `docs/snimky/podniky/`.
+- **Názov Blavačík a vizuálna identita v farbách Bratislavy** (issue #17): červená a biela, doplnkovo zlatá
+  (CSS premenné v `css/style.css`, kontrast podľa WCAG AA). Vlastné štylizované logo `assets/ui/logo.svg` – červený štít,
+  biela brána s dvoma vežami a namiesto strednej veže UFO z Mosta SNP; **nie je to oficiálny erb mesta** (ten je chránený).
+  Logo je v menu (aj počas načítavania), v editore postavy a ako ikona stránky (`assets/ui/favicon.svg`), červeno-biele
+  pruhy v menu a editore, štítok s bránou pred názvom miesta v HUD. Snímky: `docs/snimky/identita/`.
+- **Zvuky a hlasy** (issue #18, `js/zvuk/`, modul `zvuk`): všetky zvuky sú syntetizované cez Web Audio
+  (jeden zvuk = jeden súbor, žiadna cudzia hudba): kroky podľa povrchu (tráva / dlažba), skok a dopad, štart, motor
+  auta podľa otáčok a prevodov, pískanie pneumatík, klaksón (**H**), dvere, nárazy, zvonček električky, siréna,
+  gong pred hlásením, holuby v centre, hukot dopravy podľa dennej doby a vietor pri Dunaji, klik v menu.
+  Priestorový zvuk podľa kamery, najviac 24 krátkych zvukov naraz. Hlasitosť zvukov, hlasov a hudby je v menu
+  (ukladá sa). Prehliadač pustí zvuk po prvom kliknutí / klávese / dotyku. Ostatné moduly prehrajú zvuk udalosťou
+  `hra.posli('zvuk', { meno: 'zvoncek', x, z })`, sirénu `hra.posli('sirena', { id, x, y, z, zapnuta })`.
+- **Hlasy postáv cez Google Gemini TTS – automaticky:** workflow `.github/workflows/hlasy.yml` pri zmene
+  `data/dialogy/**` alebo `data/misie/**` (aj ručne a raz denne) spustí `tools/hlasy/generuj.mjs`. Ten pre každú
+  repliku bez nahrávky alebo so zmeneným textom vygeneruje `assets/zvuk/dialogy/<dialóg>/<index>_<variant>.ogg`
+  (Opus, 32 kb/s) a commitne ich späť. Hlas a štýl reči každej postavy je v `data/dialogy/hlasy.json` (predpripravené
+  hlasy Gemini, žiadne klonovanie ľudí). Pri vyčerpaní bezplatného limitu pokračuje ďalší deň; bez kľúča hra ostane
+  s titulkami. **Jediný ručný krok:** na https://aistudio.google.com/apikey vytvoriť kľúč a v repozitári
+  *Settings → Secrets and variables → Actions → New repository secret* ho uložiť ako `GEMINI_API_KEY`.
+  **Pridať repliku = zmeniť JSON dialógu a pushnúť** – hlas sa dorobí sám. Hra prehrá hlas pri udalosti
+  `hra.posli('dialog-replika', { dialog, index, variant })` (posiela ju zobrazovanie dialógov).
+- **Výšky budov v celom meste z lasera** (issue #53, `python3 tools/mesto/laser/vysky.py`, laser v `.cache/laser/`):
+  pre 63 221 z 88 574 budov je výška z laserového skenovania ÚGKK (DMP − DMR), pre šikmé strechy
+  aj odkvap a hrebeň (podľa sklonu povrchu strechy).
+  - Odhad sa nahradí vždy. Výška z OSM sa nahradí, keď sa od lasera líši o viac ako 3 m.
+  - Budovy, ktoré laser z roku 2023 nevidí (novostavby), ostávajú podľa OSM.
+  - Šikmá strecha na neobdĺžnikovom pôdoryse (hrebeň hra postaví len na obdĺžniku) ostáva označená ako šikmá:
+    rodinné domy tak majú farbu škridly, nie sivú plochú strechu (zistené porovnaním so satelitom – Rusovce,
+    Záhorská Bystrica; predtým bolo ~70 % domov v predmestiach „plochých“).
+  - Dlaždice narástli len o 3,6 MB (33,9 → 37,5 MB), lebo sa menia len čísla.
+  - LOD2 strechy (`budovy.py`) ostávajú pre výrez Starého Mesta. Celé mesto by malo ~500 MB, preto čaká
+    na schválenie. Skripty `teren.py`, `budovy.py` a `stromy.py` vedia spracovať aj vybrané dlaždice
+    (`--dlazdice i_j,…`, `--mlynska-dolina`).
+  - **Mlynská dolina** (miesto príbehu, #73) má navyše podrobný terén 2 m, LOD2 strechy a stromy z lasera
+    ako Staré Mesto (`--mlynska-dolina`): 305 budov so strechou z lasera a 6369 stromov, spolu +0,7 MB.
+  - Snímky pred a po: `docs/snimky/laser-vysky/`.
+- **Terén pod cestami a pri mostoch** (issue #54):
+  - `python3 tools/mesto/laser/cesty_teren.py` zarovná podrobný terén (2 m) pod cestami. Profil po osi cesty
+    je pozdĺžne vyhladený, naprieč je cesta vodorovná a terén sa 3 m za okrajom plynulo zlieva s pôvodným
+    (múry a svahy nad 2,5 m ostávajú). Na Staromestskej klesli skoky z 0,9 m na 0,07 m.
+  - `hra.mapa.vyska(x, z, y)` berie výšku objektu: kto je pod mostovkou, ide po teréne a neskočí na most.
+    Bočný okraj nájazdovej rampy sa plynulo zlieva s terénom.
+- **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
+  k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
+  stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
+  po 2,5 m (terén cez vozovku presvital na 2 % plochy, teraz na 0,6 %), v zákrute pokos (cesta sa nezúži) a vnútorný
+  okraj ostrej zákruty sa neprekrúti. Pod vozovkou a chodníkom nie je v mape povrchu trieda trávy (trsy trávy
+  neprerastajú cez cestu).
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
     vo výreze detailný terén po 2 m,
   - výšky budov z lasera (`zdrojVysky`: `lidar` / `osm` / `odhad`), strechy rozložené na roviny (LOD2) so škridlou
-    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera); ustúpené podlažia
+    a nadstavby (stena medzi rovinami strechy tej istej budovy) majú okná po podlažiach, štítové steny medzi
+    dvoma budovami ostávajú bez okien (issue #64, `js/mapa/budovy/okna-ustupenych.js`, snímky `docs/snimky/okna-ustupene/`),
+  - mimo LOD2 dostane dom so šikmou strechou na neobdĺžnikovom pôdoryse (tvar L, výstupky) stanovú strechu
+    s vrcholom vo vnútornom bode pôdorysu (`js/mapa/budovy/stanova-strecha.js`); predtým bol plochý
+    (porovnanie so satelitom, Rusovce – snímka `docs/snimky/strechy-domov/`),
   - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
     na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
   - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch, tráva v parkoch,
@@ -89,7 +208,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Doprava a značky:** cesty s jazdnými pruhmi a značením (prerušovaná/dvojitá plná, krajnice), čisté plochy
   križovatiek, chodníky s obrubníkmi, zebry (~900 z OSM), električkové koľaje, ~215 semaforov so striedaním fáz,
   značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
-  ~780 pouličných lámp. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
+  ~780 pouličných lámp, červené cyklopruhy s bielou čiarou a piktogramom bicykla (316 úsekov, ~61 km z OSM
+  `cycleway=lane`). Značka je pred stĺpikom na dvoch objímkach (stĺpik neprechádza symbolom), tabuľa ulice
+  má stĺpik pri kraji, označník MHD je plechová skrinka okolo stĺpa. Vonkajšie schody (~3 900 schodísk z OSM
+  `highway=steps`, modul `js/mapa/cesty/schody-modul.js`) sú 3D stupne po teréne (výška schodu 15 cm, na rovine podesta)
+  s kovovým zábradlím pri dlhších schodiskách. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
 - **Grafika:** obloha so slnkom a pohyblivými oblakmi, odrazy okolia (sklo, autá, voda), Dunaj s vlnkami,
   7 typov fasád (staromestské okná s okenicami, obytné s balkónmi, kancelárie, jednoduché, panelák, rodinný dom, hala) a sklenené fasády,
   tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
@@ -127,10 +250,22 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - **Chodníky:** popri cestách mimo jadra asfaltové (svetlejšie ako vozovka) s obrubníkom (stena, vrch obrubníka aj
     zadná hrana), pri domoch sivá zámková dlažba 20 × 10 cm (vlastná textúra `tools/textury/zamkova.py`),
     na námestiach tmavšie betónové dlaždice, všade špina a nerovnomernosť vo veľkej mierke; mapa povrchu má 0,5 m.
+    Parkoviská z OSM sú asfaltové so záplatami a ostrým okrajom (predtým rozmazaná sivá plocha, snímky
+    `docs/snimky/parkoviska/`).
+    Podľa porovnania so satelitnou snímkou: **športoviská** majú povrch z OSM (antuka, tartan, umelá tráva,
+    asfalt, piesok) s bielymi čiarami a bežecké dráhy so 6 dráhami (`tools/mesto/ihriska.mjs` → `data/mapa/ihriska.json`,
+    `js/mapa/teren/ihriska.js`), ~800 vonkajších **bazénov** a fontán je tyrkysová voda s obrubou a v **obytnej
+    zástavbe** (OSM `landuse=residential`, `tools/mesto/zastavba.mjs` → `data/mapa/zastavba.json`) je nespevnená zem
+    trávnik / záhrada namiesto béžovej holej zeme – okrem hustej zástavby a historického jadra (`js/mapa/teren/zahrady.js`);
+    kde OSM obytnú zástavbu nemá (celá Petržalka), dopĺňa ju odhad z okolia obytných budov (`tools/mesto/zastavba_odhad.py`, 19 km²).
+    Snímky pred/po: `docs/snimky/povrchy/`.
   - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
   - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
     a na zatrávnených svahoch (podľa mapy tried a pokrývky dlaždice), zblízka husto, ďalej redšie a menšie;
     stredná kvalita do 18 m, vysoká do 30 m, nízka bez nej. Na strmých zrezoch tráva nerastie.
+  - **Stromy mimo ciest** (`js/mapa/zelen/miesto-stromu.js`): strom nesmie stáť na vozovke, koľajach, obslužnej
+    ceste ani v dome. Stromy z lasera majú polohu podľa stredu koruny – keď koruna presahuje nad cestu, kmeň sa
+    posunie kolmo na okraj (najviac o 4 m), inak sa strom vynechá.
   - **Vietor:** koruny stromov sa kolíšu (viac hore, kmeň stojí), listy sa trasú, trávou prechádzajú vlny;
     nárazy vetra sa striedajú s bezvetrím (spoločný čas `vietor` v `js/mapa/zelen/materialy-stromov.js`).
   - **Strmé zrezy terénu** (oporné múry Hradného kopca, svahy z lasera): namiesto natiahnutej textúry zhora
@@ -163,6 +298,14 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Vyvýšené časti budov** (`tools/mesto/casti-budov.mjs`): veže nad podnožou, horné poschodia nad presklenými
   prízemiami a lávky medzi budovami (OSM `building:part` s `min_height`) – predtým chýbali, napr. 65 m veža hotela
   Kyjev. V dátach `minVyska`, hra ich kreslí od tejto výšky s podhľadom a dá sa pod nimi prejsť.
+  **Úzke časti overuje laser** (`tools/mesto/laser/casti.py`, issue #68): časť s kratšou stranou pod 12 m,
+  nad ktorou laser nič nevidí, sa vyhodí, privysoká sa zníži na výšku z lasera. Odstránilo to falošné 75 m „veže“
+  za Kyjevom (117 znížených, 15 vyhodených častí). Širšie časti ostávajú podľa OSM, lebo laser je z roku 2023.
+- **Priechody pod budovami** (issue #65; `node --max-old-space-size=8000 tools/mesto/priechody-osm.mjs`,
+  potom `python3 tools/mesto/priechody.py`): z OSM `tunnel=building_passage` a `covered=yes/arcade` (1958 ciest)
+  a ručne doplnených v `data/mapa/priechody-rucne.json`. Budova sa rozdelí na prízemie bez priechodu (s kolíziou)
+  a hornú časť nad ním (`minVyska` 3,8 m, s podhľadom, bez kolízie). V meste je tak 1028 priechodov, ktorými sa
+  dá prejsť – napríklad Pasáž Liga (Dunajská – Grösslingova) alebo Pasáž Luxor.
 - **Dlažba v celom meste:** chodníky a námestia mimo historického jadra sú zo svetlých betónových dlaždíc 50 × 50 cm
   (`assets/textury/beton`, procedurálna CC0), v jadre kamenné dosky a kocky; dlažba a tráva z CC0 materiálov sú vo
   všetkých podrobných dlaždiciach (mimo laserového výrezu s mapou tried 512 px).
@@ -172,6 +315,138 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   nad sieťou; schody sú v jame so zábradlím, parapetom a obrubou (terén sa v jame vyreže). Hráč nimi prejde
   (`hra.podchody` – výška podlahy, steny chodby, kamera pod stropom), chodníky na povrchu nad chodbami sa odstránia.
   131 chodieb a 166 schodov (Hlavná stanica, Hodžovo nám., Trnavské mýto, Patrónka…).
+- **Pamiatky z Blendera** (issue #31, etapa G3): `tools/blender/` – generátory modelov v Blenderi cez Python
+  (`pip install bpy`, bez okna), zapečené zatienenie (AO) do textúry, export `.glb` a zmenšenie cez gltfpack (meshopt).
+  Hra ich načíta cez `js/mapa/pamiatky/model-glb.js` (pri chybe postaví starý model z telies). Zatiaľ Michalská brána
+  (87 kB + 316 kB AO): `python3 tools/blender/michalska_brana.py <cesta k gltfpack>` (gltfpack: `npm i gltfpack`).
+- **Výškové budovy z Blendera:** Nivy Tower, Eurovea Tower, Twin City Tower, Panorama City (2 veže), Sky Park
+  (4 rezidencie + kancelárie), Tower 115 a Národná banka Slovenska. Pôdorysy a časti budov z OSM
+  (`node tools/blender/osm_obrysy.mjs` → `tools/blender/data/obrysy.json`), fasády sa skladajú z panelov ako
+  skutočné závesové steny: sklo v dvoch–troch odtieňoch s nepatrne natočenými tabuľami (odraz oblohy sa láme),
+  stĺpiky a priečky, medené lamely (Twin City), biely exoskelet s „tečúcimi“ zvislicami (Sky Park), lodžie a tiara
+  rebier (Eurovea), biela mriežka s balkónmi a pergolou (Panorama), kamenná podnož s pásovými oknami (NBS),
+  technické podlažia za lamelami, antény a výstražné svetlá. Zatienenie (AO) je zapečené do farieb vrcholov,
+  modely sú zbalené meshopt + gzip (`assets/pamiatky/<meno>.glb.gz`, spolu ~1 MB). Generovanie:
+  `python3 tools/blender/vyskove_budovy.py [meno …]` (súbory v `tools/blender/vyskove/`).
+  V hre ich stavia `js/mapa/pamiatky/vyskova-budova.js` (záznam `"model": "vyskova-budova", "subor": …` v `pamiatky.json`):
+  kolízie z pôdorysov, z dlaždíc sa vynechajú bežné vysunuté budovy, ktoré model nahrádza
+  (`js/mapa/pamiatky/nahradene-budovy.js`), z diaľky (> 260 m) sa nekreslia drobné prvky (menej moaré a trojuholníkov).
+- **Pamiatky Starého Mesta z Blendera** (`python3 tools/blender/historicke_blender.py`, dáta
+  `node tools/blender/osm_pamiatky.mjs`): 35 budov – Dóm sv. Martina (gotická loď s opornými piliermi, veža z OSM
+  so zeleným ihlanom a pozlátenou korunou), Stará radnica (veža s barokovou helmicou), Primaciálny palác (portikus,
+  tympanón, kardinálsky klobúk), Grasalkovičov a Letný arcibiskupský palác, historická budova SND, Reduta, Modrý
+  kostolík, kostoly františkánov, klarisiek, jezuitov, kapucínov, trinitárov, evanjelický, paláce Pálffyho,
+  Mirbachov, Esterházyho, Apponyiho, Kutscherfeldov, Erdődyho, Zichyho, Jesenákov, Keglevičov, Aspremontov,
+  Academia Istropolitana, Dom U dobrého pastiera, Stará tržnica, Carlton, SNM a Slavín. Pôdorys s nádvoriami
+  (relácie OSM sa spájajú z úsekov), podlažia a tvar strechy z OSM, farby a doplnky v `tools/blender/historicke/zoznam.py`.
+  Strechy podľa vzdialenosti od okraja (`historicke/strechy.py`) – valby aj okolo nádvorí, mansardy, ihlany.
+- **Pamiatky 2. dávka z Blendera** (`python3 tools/blender/pamiatky2_blender.py`, dáta `node tools/blender/osm_pamiatky2.mjs`):
+  **hrad Devín** (zrúcaniny Horného a Stredného hradu a Paláca pánov z Gary s oknami, 40 úsekov hradieb a múrov
+  s rozpadnutým vrchom, základy veľkomoravského kostola, Panenská veža na skalnom pilieri, hradná studňa – všetko
+  kopíruje terén a má kolízie), **mestské hradby** v Starom Meste (cimburie, sokel), **bunkre** československého
+  opevnenia (ťažké objekty B-S v Petržalke s oceľovými zvonmi a násypom, ľahké objekty, ~100 z OSM), **Antická
+  Gerulata** (odkryté základy tábora, Dom s hypokaustom), **Maximiliánova (Rolandova) fontána** s balustrádou
+  a rytierom, **Brána slobody** a Pamätník železnej opony pod Devínom; historickým generátorom aj Kostol sv. Kríža
+  v Devíne, Rusovský kaštieľ, Mauzóleum Chatama Sofera, Uršulínsky kostol, Notre Dame, kostol na Blumentáli,
+  Kostol Svätej rodiny, Ortodoxná synagóga, Galéria Nedbalka, gréckokatolícka katedrála a Vodárenské múzeum.
+- **Pamiatky 3. dávka z Blendera** (`python3 tools/blender/vyskove_budovy.py kamzik rozhlas nr_sr nove_snd nivy sng
+  stadion_tehelne_pole zimny_stadion istropolis`): **prerobené staré modely** – TV veža Kamzík (tri šikmé nohy, kabína
+  s reštauráciou a vyhliadkou, červeno-biely stožiar so svetlami), Slovenský rozhlas (obrátená pyramída po podlažiach
+  z OSM), Národná rada SR a Nové SND (časti, výšky a materiály z OSM); **nové** – Nivy (park na streche s bežeckou
+  dráhou), Slovenská národná galéria (Vodné kasárne a premostenie), Národný futbalový štadión (tribúny okolo ihriska
+  s čiarami a bránami, biela strecha s osvetlením, fasáda z lamiel), zimný štadión (klenutá strecha) a **stavenisko
+  Istropolis** (oplotenie, výkop, rozostavaný skelet, dva vežové žeriavy, bunky).
+- **Mladá garda a okolie (Račianska)** z Blendera (`python3 tools/blender/garda_blender.py internat obchody
+  obytne_veze okolie`, dáta `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_garda.mjs`):
+  internát Mladá garda podľa častí z OSM – šesť krídel so 4 podlažiami, valbové strechy s vetracími vikiermi,
+  rímsy, šambrány, lodžie na čelách krídiel, nárožné budovy, vstupná budova s presklenou fasádou, cimburím
+  a hodinovou vežou (ciferníky, ručičky, kríž), jedáleň, spojovacie chodby, stožiare s vlajkami a socha s živým
+  plotom pred vstupom; antukové tenisové kurty s čiarami, sieťami a oplotením. Oproti cez Račiansku **supermarket**
+  (hala so šikmou strechou z OSM, plechové opláštenie, výklady s plagátmi, podlubie na stĺpoch, zádverie,
+  prístrešok na vozíky, rampa), **bistro** (drevené lamely, presklená jedáleň, terasa so slnečníkmi, stojan)
+  a **obytné veže** za supermarketom (17 a 20 podlaží + nižší blok, fasáda z posunutých rámov okien, zelené strechy).
+  Obchody majú podľa pravidiel projektu **vlastné neutrálne nápisy** („POTRAVINY“, „BISTRO“) – žiadne značky firiem.
+  Nápis je nový model `js/mapa/pamiatky/napis.js` (tabuľa s textom z plátna, záznam `"model": "napis"`).
+- **Kamenné námestie, Špitálska a Manderlák** z Blendera (issues #62, #67, #69, #70; dáta
+  `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_kamenne.mjs` a `../blender/osm_pamiatky.mjs`,
+  modely `python3 tools/blender/kamenne_blender.py kyjev prior doplnky`,
+  `python3 tools/blender/historicke_blender.py kostol-alzbetinok kostol-sv-ladislava`,
+  `python3 tools/blender/vyskove_budovy.py manderla`). Výšky sú z laserového skenovania ÚGKK (DMP − DMR).
+  - **Hotel Kyjev**: doska 61 m nad podnožou 10,5 m. Na širších stenách sú sústredné obdĺžnikové rámy
+    z bielych a tmavočervených pásov, vonku vodorovné pásy. Užšie steny sú béžové so škárami, hore tmavý veniec
+    a ustúpená technika. Podnož má presklené prízemie za stĺpmi a travertín s pásom okien.
+  - **Obchodný dom**: biely, takmer bezokenný klin na štíhlych stĺpoch, horná hrana stúpa z 19 na 23 m.
+    Na fasáde sú veľké okrúhle hodiny, pod nimi štyri stĺpce tmavých lamiel a hore vetracie lamely.
+    Má bielu vežu so štvorcovými oknami, ustúpeným podlažím a komínmi, nižšiu presklenú budovu s lávkou
+    a nadstavbou a reliéf.
+  - **Námestie**: okrúhly vyvýšený záhon s kvetmi a drevené truhlíky so stromčekmi (kopírujú terén).
+  - **Kostol sv. Alžbety** (alžbetínky): priečelie do ulice s výklenkami a sochami, veža s hodinami
+    a zelenou cibuľovou helmicou.
+  - **Kostol sv. Ladislava**: biele klasicistické priečelie s pilastrami a štítom, zvonička na streche,
+    oranžová strecha.
+  - **Manderlák**: okrovo-hnedé murivo, tmavočervené piliere s hrotmi nad atikou, samostatné okná s bielymi
+    rámami, tehlová nadstavba so stožiarom a obchody s červeným pásom.
+  - Obchody majú neutrálne pásy bez nápisov a značiek.
+  - Nový kľúč `nahradit` v `<subor>.json` modelu: pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc,
+    bez kolízie – napríklad pod blokom obchodného domu sa dá prejsť medzi stĺpmi.
+  - Snímky: `docs/snimky/kamenne/`.
+- **Átriaky v Mlynskej doline** (issue #72; dáta `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_atriaky.mjs`,
+  laser `python3 tools/blender/laser_atriaky.py`, model `python3 tools/blender/atriaky_blender.py`).
+  - **Domy**: 20 átriových domov AD-A … AD-U podľa pôdorysov z OSM, výšky a terén pod každým domom
+    z laserového skenovania ÚGKK. Areál je na svahu s rozdielom 18 m, každý dom stojí na svojej výške.
+  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, zapustené pásy okien, presklené prízemie
+    na stĺpoch, vyložené horné podlažie a strecha so zábradlím.
+  - **Átriá**: laser ukázal, že sú zastrešené, preto majú domy na streche svetlík. Otvorený dvor
+    s prechodom má len AD-I.
+  - **Vstup** podľa verejnej fotografie: tri celovýškové turnikety (poloha z OSM), sivá vrátnica
+    s červeným pásom, dvojkrídlová brána so značkou zákazu státia, skriňa a betónový múr.
+  - **Ploty a múry** okolo areálu sú z OSM a majú kolízie. Cez turnikety sa dá prejsť.
+- **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
+  z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
+  hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
+  skala pod Devínom s puklinami; odtiene kameňov, škáry, stekance a lišajník. Snímky: `docs/snimky/pamiatky-3/kamen-*.jpg`.
+- **Sklenené fasády modelov v noci** (`js/mapa/pamiatky/sklo-noc.js`): materiály „sklo…“ (Nivy Tower, Eurovea…) v noci
+  svietia po kanceláriách (moduly 3 × 3,6 m). Sila noci prichádza zo spoločného `js/grafika/noc.js`, ktorý nastavuje
+  modul deň/noc (PR realistický vzhľad); bez neho modely nesvietia. Snímka: `docs/snimky/pamiatky-3/noc-nivy.jpg`.
+- **Sochy a pamätníky v celom meste** (`js/mapa/vybavenie/sochy-modul.js`, dáta `node tools/mesto/sochy.mjs` →
+  `data/mapa/sochy.json`): 853 sôch, búst a skulptúr z OSM (Hviezdoslav, Štúr, Čumil, Schöne Náci, Napoleonský
+  vojak, svätci…). Postava je model chodca v pokojnej póze „odliaty“ do bronzu (aj s patinou) alebo vytesaný
+  z kameňa, na podstavci; busta je horná časť postavy na stĺpe, Čumil vykúka z kanála, abstraktné diela sú
+  organické tvary. Postavy sú vymyslené – socha len naznačuje pamätník.
+- **Hroby na cintorínoch** (`js/mapa/vybavenie/hroby.js`): rady hrobov na všetkých cintorínoch z OSM – kamenný rám
+  s doskou a náhrobok (stojatá doska, kríž, nízka doska, obelisk) z leštenej žuly či pieskovca. Ako na skutočnom
+  cintoríne (issue #75): sektory ≈ 8 radov × 12 hrobov oddelené alejami, 7 m pás zelene pri obvode, voľno okolo
+  ciest, chodníkov, budov a stromov, parkové sektory bez hrobov a náhodné medzery; najviac 5000 hrobov na dlaždicu.
+- **Stromy z lasera v budovách modelov** (issue #71): stromy, ktoré laser „našiel“ na streche výškovej budovy
+  s vlastným modelom (Manderlák mal v sebe 44 a 49 m stromy), sa pri načítaní dlaždice vyhodia
+  (`bezStromovVNahradenych` v `js/mapa/pamiatky/nahradene-budovy.js`), rovnako stromy vyššie ako 30 m.
+  `tools/mesto/laser/stromy.py` pri ďalšom behu maskuje aj pôdorysy modelov a takéto stromy nezapíše.
+- **Bratislavský hrad z Blendera** (`python3 tools/blender/hrad_blender.py`, dáta `node tools/blender/osm_hrad.mjs`):
+  Kráľovský palác podľa častí z OSM – štyri krídla s pravidelnými barokovými oknami (šambrány, parapety,
+  kordónové a hlavná rímsa, sokel), strmá strecha s vikiermi a komínmi, rohové veže prečnievajúce nad strechu
+  („obrátený stôl“, Korunná veža najvyššia, ~47 m), portál čestného vstupu, studňa na nádvorí; brány Viedenská,
+  Leopoldova, Žigmundova a Mikulášska (prejazd s kamenným rámom); hradby a múry z OSM s krycou doskou a živé ploty
+  barokovej záhrady pozdĺž chodníkov parteru s fontánou. Hradby a záhrada **kopírujú terén** (`"podlaTerenu": true`):
+  každý vrchol sa položí na výšku terénu a po načítaní podrobného terénu z lasera sa výšky prepočítajú; aj pevné
+  modely (palác, výškové budovy) si pri zmene terénu upravia výšku päty. Hradby majú kolízie.
+- **Ďalšie výškové budovy z 3D tagov OSM** (`tools/blender/vyskove/z_osm.py`): City Business Center I, centrála VÚB,
+  Glória, Millennium Tower I a II (myhive Vajnorská), Aupark Tower, Technopol I a II, Incheba, Matadorka, Centrál,
+  Lakeside Park a Manderlák. Každá časť budovy (`building:part`) sa postaví od `min_height` po `height` a dostane
+  fasádu podľa `building:material`, `building:colour` a druhu budovy: závesová stena, pásové okná s obkladom alebo
+  okná s balkónmi; stĺpy (malé časti) sú valce, na najvyššej časti technika a výstražné svetlá. Konkrétnu budovu
+  dolaďuje slovník štýlov (napr. Aupark: linka na každom druhom podlaží, Technopol: bronzové sklo a hnedé parapety).
+- **Mosty z Blendera:** Most SNP (A-pylón sklonený k Petržalke, UFO s presklenou reštauráciou a vyhliadkou,
+  laná v troch bodoch hlavného poľa a zadné kotvenie, komorový nosník s chodníkmi dolného podlažia pod konzolami),
+  Starý most (priehradové nosníky so zakriveným horným pásom, zvislice, diagonály, horné kríže, kamenné piliere,
+  zeleno-sivý náter), Most Apollo (dve sklonené oblúkové rebrá 231 m / 36 m, 66 závesov do vejára, tiahla),
+  Prístavný most (dvojpodlažný, priehradový nosník Warren s železničnou doskou dole) a Most Lafranconi
+  (betónový komorový nosník s náběhmi nad riečnymi piliermi). Os a šírka z OSM (`data/mapa/mesto/index.json`),
+  úseky nad riekou určujú polohu pilierov. Generovanie: `python3 tools/blender/mosty_blender.py [most …]`
+  (`tools/blender/mosty/`). V hre `js/mapa/pamiatky/most-glb.js` (záznam `"model": "most-glb", "nahradzaMost": …`):
+  model sa položí na výšku mostovky, časti pri mostovke sa v nábehoch ohnú podľa výškového profilu, všeobecný
+  model mosta (`js/mapa/mosty/mosty.js`) sa pre ne nestavia (`js/mapa/mesto.js`); ak sa model nenačíta, postaví sa on.
+- **Odrazy okolia opravené:** mapa okolia (`js/grafika/prostredie.js`) predtým nezachytila oblohu (guľa oblohy bola
+  za `far` kamery) – sklo, autá a voda odrážali len čiernu; teraz odrážajú bledšiu oblohu.
 - **Realistická postava Ďoďo** (`assets/postavy/dodo.glb`, kód `js/chodec/postava/`): rigovaný 3D človek
   z MakeHuman (CC0), 53 kostí, morph targety tela a tváre, PBR koža, oblečenie ako samostatné siete,
   šatník v `data/postavy/satnik.json` (klasický, oblek, kuriér, párty, zimné, letné, bratislavský),
@@ -191,14 +466,51 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   (4 električkové, 15 trolejbusových, 54 denných autobusových, 17 nočných), 582 zastávok s 1 370 nástupišťami,
   35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
+- **MHD – etapa b: vozidlá jazdia podľa poriadku** (`js/mhd/vozidla/`, modul `mhd-vozidla`): každý spoj z poriadku,
+  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (3 články, zberač),
+  trolejbus (kĺbový, tyče) alebo autobus (kĺbový / sólo). Poloha sa počíta priamo z poriadku: vozidlo sa rozbieha
+  a brzdí, na zastávku príde o chvíľu skôr, otvorí dvere a **odíde presne v čase z cestovného poriadku**
+  (aj po preskočení času). Články sa lámu v zákrutách, autobusy idú v pravom pruhu, vpredu, na boku a vzadu
+  je displej s číslom linky a cieľom. Do chodca a áut sa nedá prejsť (odtlačí ich). Všetko je pár volaní
+  kreslenia (InstancedMesh). Pre ostatné moduly: `hra.mhd.vozidla`.
+  Vozidlo nejde cez autá ani ľudí (`prekazky.js`): keď mu na trase do 30 m stojí auto, hráč alebo chodec, spomalí,
+  zastaví, električka zazvoní a počká; potom pokračuje s meškaním (čas spoja sa posunie). Po 10 s čakania sa pohne,
+  aby sa nezasekla s autom, ktoré čaká na ňu.
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
+- **Pohyb Ďoďa:** prirodzená chôdza (dopad na pätu, odraz zo špičky), klus a beh podľa biomechaniky,
+  rýchlosti 2 m/s chôdza a 6 m/s beh (Shift). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
+  alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
+- **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
+  po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
+  Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),
+  na križovatkách bez semaforov sa striedajú, brzdia pred električkou, autobusom, chodcom aj autom hráča,
+  stojace auto alebo autobus na zastávke obídu. Po náraze NPC šofér chvíľu stojí. **Klávesou E sa dá nastúpiť
+  aj do idúceho NPC auta.** Kreslené cez InstancedMesh (12 volaní kreslenia pre všetky autá).
+- **Chodci** (`js/chodec/chodci/`, modul `chodci`): do 120 m okolo hráča ~1 človek na 15 m chodníka (pešie zóny hustejšie,
+  námestia 1 na 110 m²), ďalej do 230 m štvrtina – najviac 450 ľudí. Chodia **len** po chodníkoch, pešich zónach,
+  cestičkách v parkoch, schodoch a prechodoch – úseky pozdĺž vozovky a cez domy sa zo siete vyhodia, na námestiach
+  sa kontroluje, že bod nie je na vozovke ani v dome. Držia sa vpravo, obchádzajú sa, občas zastanú, uhýbajú hráčovi
+  a pomalému autu. **Rýchle auto chodca zrazí** (`zrazenie.js`): odletí s rýchlosťou auta, prevráti sa, dopadne,
+  pošmykne sa, chvíľu leží, vstane a vráti sa na chodník; auto dostane malý náraz (udalosť `'naraz'` s `chodec: true`).
+  Najbližších 8 = plný model s kostrou a mimikou, ostatní sa kreslia cez InstancedMesh s **animáciou zapečenou
+  do textúry** (VAT: chôdza a státie sa pri načítaní raz prehrajú na zlúčených LOD sieťach NPC, ~2 s) – každý má vlastné
+  oblečenie a pleť (textúra paliet). Stovky ľudí za ~36 volaní kreslenia. Pre ostatné moduly: `hra.chodci.zoznam`.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
+- **Poškodenie áut** (`js/auto/poskodenie.js`, `poskodenie-modul.js`): pri náraze sa karoséria v mieste nárazu
+  preliačí (plech sa krčí nerovnomerne, najviac ~40 cm), pri silnom náraze sa rozbijú svetlá a praskne sklo,
+  vyletia iskry, zvíri sa prach a auto sa otrasie; doráňané auto sa dymí z kapoty (čím horšie, tým tmavší dym).
 - **Kamera** za postavou/autom: na PC sa pohľad ovláda myšou bez držania tlačidla (Pointer Lock, `js/vstup/mys.js`),
   pešo postava chodí v smere kamery, v aute sa myšou rozhliadneš a kamera sa vráti za auto; pri rýchlosti sa rozšíri zorné pole.
+  Budovy a pamiatky sú pre kameru plné bloky (`js/kamera/kolizia-kamery.js`): kamera sa zastaví pred stenou
+  a nikdy nevidí dovnútra ani cez budovu; nad nízkym domom (podľa výšky strechy) prejde.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
+- **Minimapa** vľavo dole (`js/ui/minimapa/`): kreslí sa z dát dlaždíc (budovy, cesty, chodníky, námestia, zeleň,
+  Dunaj, koľaje, zastávky MHD), otáča sa podľa kamery, v aute sa podľa rýchlosti oddiali; pod ňou názov ulice.
+  **M** otvorí veľkú mapu so severom hore a názvami miest (koliesko myši = priblíženie); na mape je zameriavač,
+  klik naň pošle miesto vo svete (udalosť `mapa-klik`).
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1) – príklad misie
   `data/misie/halusky-pre-stryka.json`, dialógy v `data/dialogy/`, pomenované miesta pre misie v `data/mapa/miesta.json`.
 
@@ -218,11 +530,17 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
 - Cesty ako plochy podľa skutočného tvaru (OSM area:highway v Bratislave takmer chýba – zatiaľ len ostrovčeky), NPC autá po nadjazdoch.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
+- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
+- MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
+- Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.
+- Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia, minimapa.
+- Deň a noc (svietiace lampy a okná).
+- Engine misií a dialógov, polícia (značky na minimapu už idú cez udalosť `znacka-mapy`).
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.
@@ -253,6 +571,12 @@ Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSO
 Všetko, čo modul môže použiť (`hra.stav`, `hra.mapa`, `hra.ui`, `hra.pridajAuto`, udalosti…),
 je popísané v komentári na začiatku [js/jadro/hra.js](js/jadro/hra.js).
 
+## Minimapa pre ďalšie moduly
+- `hra.posli('znacka-mapy', { id, x, z, farba?, popis? })` – pridá alebo posunie značku (cieľ misie, polícia…);
+  mimo minimapy sa ukáže ako šípka na okraji, na veľkej mape aj s popisom.
+- `hra.posli('znacka-mapy-zrus', { id })` – odstráni značku. Zoznam značiek: `hra.minimapa.znacky`.
+- `hra.na('mapa-klik', ({ x, z }) => …)` – hráč klikol na veľkú mapu (súradnice vo svete); mapa sa zavrie.
+
 ## Doprava pre ďalšie moduly
 - `hra.doprava.graf` – uzly a hrany ciest (pruhy, jednosmerky, max. rýchlosť), `hra.doprava.hranyZUzla(i)`, `hra.doprava.najblizsiUzol(x, z)`
 - `hra.doprava.semafor(x, z, smerX, smerZ)` → `'zelena' | 'oranzova' | 'cervena' | null` pre vozidlo, ktoré sa blíži ku križovatke
@@ -272,11 +596,15 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
   poskytnuté v rámci programu COPERNICUS Európskou úniou a ESA).
 - **OpenStreetMap (len centrum, záloha):** `data/mapa/osm.json` – vyrába ho `node tools/osm/stiahni.mjs && node tools/osm/prevod.mjs`.
   Návod (aj ručný export cez overpass-turbo) je v [data/osm/README.md](data/osm/README.md).
+- **Cyklopruhy:** `data/mapa/cyklopruhy.json` – vyrába ho `cd tools/mesto && node cyklopruhy.mjs` (z OSM extraktu v `.cache`).
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
 - **Údaje o obchodoch a type budov z OSM** do hotových dlaždíc: `cd tools/mesto && node --max-old-space-size=8000 osm-doplnky.mjs`.
 - **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`.
 - **Podchody z OSM** do hotových dlaždíc: `node --max-old-space-size=8000 podchody.mjs`.
+- **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`,
+  potom overenie úzkych častí laserom: `python3 tools/mesto/laser/casti.py` (potrebuje laser v `.cache/laser/`)
+  a priechody pod budovami: `node --max-old-space-size=8000 priechody-osm.mjs && python3 priechody.py`.
 - **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
   (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
 - **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).

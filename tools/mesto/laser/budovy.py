@@ -5,15 +5,19 @@
 #  - tvarStrechy: 'plocha' / 'sikma', hreben = výška hrebeňa nad odkvapom,
 #  - vnútorné dvory podľa lasera (diery v pôdoryse), ak ich OSM nemá,
 #  - strecha ako mnohouholníky rovín → data/mapa/mesto/strechy/<i>_<j>.json:
-#      { "sikme": {p, uv, c}, "ploche": {p, uv, c}, "steny": {p, uv, c} }  (trojuholníky bez indexov,
+#      { "sikme": {p, uv, c}, "ploche": {p, uv, c}, "steny": {p, uv, c}, "okna": {p, uv, c} }  (trojuholníky bez indexov,
 #      p = x,y,z v súradniciach hry, uv v metroch, c = lineárna farba RGB 0–1 na vrchol;
 #      "kominy": [[x, z, spodok, vrch, šírka, hĺbka, uhol], ...] – komíny nájdené ako malé výstupky nad strechou).
 # Postup strechy: povrch strechy sa rozloží na rovinné plochy (sklon a smer + spájanie podobných rovín),
 # hranice plôch sa prevedú na lomené čiary a zjednodušia (spoločné hranice raz → bez škár), body na
 # hrebeňoch a úžľabiach sa posunú na priesečník rovín (rovné ostré hrany), plochy sa strianguľujú (earcut)
 # a medzi rôzne vysokými plochami a na okraji sa doplnia zvislé steny (štíty, nadstavby).
+# Steny sú dvojaké: „steny“ = štítová stena medzi strechami dvoch rôznych budov (bez okien),
+# „okna“ = ustúpené podlažie / nadstavba tej istej budovy alebo stena na okraji strechy (hra na nej kreslí okná, #64).
 #
-# Spustenie (po teren.py): python3 tools/mesto/laser/budovy.py [--vsetko]
+# Spustenie (po teren.py): python3 tools/mesto/laser/budovy.py [--vsetko] [--len-strechy]
+#   --len-strechy: prepočíta len strechy (strechy/<i>_<j>.bin), dlaždice JSON nemení – LOD2 a výšku stien
+#   berie z dlaždíc (`lod2`, `vyska`). Na dlaždice, ktoré už upravili ďalšie skripty (casti.py, priechody.py…).
 import sys, os, json, math, gzip, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
@@ -21,7 +25,7 @@ from PIL import Image, ImageDraw
 from scipy import ndimage
 import mapbox_earcut as earcut
 from matplotlib.path import Path
-from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json
+from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json, vyber_dlazdic
 
 K = 0.5            # rozlíšenie lasera (m)
 OKRAJ = 30         # okraj výrezu okolo dlaždíc (m) – budovy pri hrane
@@ -31,8 +35,9 @@ MIN_DVOR = 80      # najmenší dvor (pixely = 20 m²)
 MIN_ZAHRADA = 400  # otvorená plocha pri okraji pôdorysu (pixely = 100 m²)
 ZELEN_DRSNOST = 0.45  # m – priemerná odchýlka od vyhladeného povrchu, nad ktorou je to koruna stromu, nie strecha
 
+LEN_STRECHY = '--len-strechy' in sys.argv
 index = nacitaj_index()
-dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
+dlazdice = vyber_dlazdic(index)   # --vsetko | --dlazdice i_j,… | --mlynska-dolina | výrez Starého Mesta
 detail = index.get('terenDetail', {})
 
 
@@ -55,8 +60,8 @@ PRIEMER_SKRIDLA = np.array([0.182, 0.061, 0.028])
 PRIEMER_STRK = np.array([0.226, 0.213, 0.173])
 SKRIDLA = ['#9c4a35', '#a5553c', '#8e4431', '#b0603f', '#7d4a3a']
 # veľkosť textúry v metroch (musí sedieť s js/mapa/budovy/strechy-lod2.js) – UV sa posúva o jej násobky
-PERIODA = {'sikme': 2.2, 'ploche': 1.6, 'steny': 3.0}
-KODY = {'sikme': 0, 'ploche': 1, 'steny': 2}
+PERIODA = {'sikme': 2.2, 'ploche': 1.6, 'steny': 3.0, 'okna': 3.0}
+KODY = {'sikme': 0, 'ploche': 1, 'steny': 2, 'okna': 3}
 
 
 def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
@@ -89,11 +94,12 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         kl = f'{i}_{j}'
         d = json.load(open(os.path.join(VYSTUP, 'd', f'{kl}.json'))); data[kl] = d
         for b in d['budovy']:
-            # pôvodné údaje z OSM (aby sa skript dal spustiť opakovane)
-            if 'vyskaOsm' in b: b['vyska'] = b['vyskaOsm']; b['zdrojVysky'] = b.get('zdrojOsm', b.get('zdrojVysky', 'odhad'))
-            else: b['vyskaOsm'] = b['vyska']; b['zdrojOsm'] = b.get('zdrojVysky', 'odhad')
-            for k_ in ('tvarStrechy', 'hreben', 'lod2', 'dieryLaser'): b.pop(k_, None)
-            if b.get('dieryLaser') is None and b.get('_dieryZLasera'): b.pop('diery', None)
+            # pôvodné údaje z OSM (aby sa skript dal spustiť opakovane); pri --len-strechy ostávajú výšky z dlaždice
+            if not LEN_STRECHY:
+                if 'vyskaOsm' in b: b['vyska'] = b['vyskaOsm']; b['zdrojVysky'] = b.get('zdrojOsm', b.get('zdrojVysky', 'odhad'))
+                else: b['vyskaOsm'] = b['vyska']; b['zdrojOsm'] = b.get('zdrojVysky', 'odhad')
+                for k_ in ('tvarStrechy', 'hreben', 'lod2', 'dieryLaser'): b.pop(k_, None)
+                if b.get('dieryLaser') is None and b.get('_dieryZLasera'): b.pop('diery', None)
             budovy.append(b); dlazdica_budovy.append(kl)
             dr.polygon([((x - X0) / K, (z - Z0) / K) for x, z in b['body']], fill=len(budovy))
             for d_ in b.get('diery', []):
@@ -264,6 +270,11 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if any(h is None for h in hs) or strecha_n[k] < 0.3 * max(1, plocha_b[k]) or strecha_n[k] < 16:
             stat['bez'] += 1; vrch_steny[k] = np.nan; continue
         hmax = max(hs)
+        if LEN_STRECHY:
+            # výšky z dlaždice (už ich mohli upraviť ďalšie skripty) – strecha len pre budovy s LOD2
+            if b.get('lod2'): vrch_steny[k] = hmax + b['vyska']; lod2[k] = True; stat['lidar'] += 1
+            else: vrch_steny[k] = np.nan
+            continue
         v_okraj = okraj_b(k); v_str = strecha_b(k)
         odkvap = np.percentile(v_okraj, 10) - NULA if len(v_okraj) else np.percentile(v_str, 10) - NULA
         vrchol = np.percentile(v_str, 98) - NULA
@@ -387,7 +398,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     for body, sa, sb in zjed:
         if sa > 0: kruhy.setdefault(sa, []).append(body)
         if sb > 0: kruhy.setdefault(sb, []).append(body[::-1])
-    vystup = {kl: {'sikme': [], 'ploche': [], 'steny': []} for kl in data}
+    vystup = {kl: {'sikme': [], 'ploche': [], 'steny': [], 'okna': []} for kl in data}
     def pridaj(kl, druh, tri, uvs, farba, von=None):
         # jednotné natočenie trojuholníkov: strechy normálou nahor, steny von (kvôli tieňom – normalBias)
         tri = np.array(tri, float); uvs = np.array(uvs, float)
@@ -443,6 +454,8 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if sa == 0 and sb == 0: continue
         if sa > 0 and sb > 0 and min(sa, sb) * (n + 1) + max(sa, sb) in stretnu: continue
         p = np.array([poloha[r] for r in body])
+        # štítová stena medzi dvoma budovami nemá okná; ustúpené podlažie tej istej budovy a okraj strechy áno
+        druh_steny = 'steny' if (sa > 0 and sb > 0 and int(bud_plochy[sa]) != int(bud_plochy[sb])) else 'okna'
         if sa > 0 and sb > 0:
             ha, hb = rov(sa, p[:, 0], p[:, 1]), rov(sb, p[:, 0], p[:, 1])
             hore, dole = np.maximum(ha, hb) - NULA, np.minimum(ha, hb) - NULA
@@ -467,7 +480,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
             von += [o, o]
             uvs += [((u[i], hore[i]), (u[i + 1], hore[i + 1]), (u[i + 1], dole[i + 1])), ((u[i], hore[i]), (u[i + 1], dole[i + 1]), (u[i], dole[i]))]
         if tri:
-            pridaj(kl, 'steny', np.array(tri), np.array(uvs), f_ste[k], np.array(von)); pocet_stien += len(tri)
+            pridaj(kl, druh_steny, np.array(tri), np.array(uvs), f_ste[k], np.array(von)); pocet_stien += len(tri)
     print(f'mnohouholníky: zlyhalo {zlyhalo}, trojuholníkov stien {pocet_stien}', flush=True)
 
     # --- zápis ---
@@ -480,7 +493,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if os.path.exists(stary): os.remove(stary)
         for b in data[kl]['budovy']:
             b.pop('_k', None)
-        uloz_json(os.path.join(VYSTUP, 'd', f'{kl}.json'), data[kl])
+        if not LEN_STRECHY: uloz_json(os.path.join(VYSTUP, 'd', f'{kl}.json'), data[kl])
         print(f'  {kl}: {os.path.getsize(cesta) / 1e3:.0f} kB', flush=True)
     return list(vystup)
 
@@ -492,7 +505,7 @@ def zarovnaj(kusy):
 
 def zapis_strechy(cesta, x0, z0, casti, kominy):
     """Binárny formát striech (gzip, little-endian):
-    'STR2', x0, z0 (float32), počet skupín (uint32); pre každú skupinu: kód (uint8: 0 šikmé, 1 ploché, 2 steny),
+    'STR2', x0, z0 (float32), počet skupín (uint32); pre každú skupinu: kód (uint8: 0 šikmé, 1 ploché, 2 steny, 3 steny s oknami),
     3 B výplň, nV, nI (uint32), poloha uint16×3·nV (x, z: (súr. − začiatok dlaždice + 20 m)·50, y: (y + 60 m)·50),
     uv int16×2·nV (cm), farba uint8×3·nV (sRGB), výplň na 4 B, indexy uint16/uint32 (uint32, ak nV > 65535), výplň na 4 B;
     nakoniec počet komínov (uint32) a float32×7 na komín."""
