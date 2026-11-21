@@ -14,7 +14,7 @@ import { vytvorPlochyKrizovatiek } from '../cesty/plochy-krizovatiek.js';
 import { vytvorChodniky } from '../cesty/chodniky.js';
 import { vytvorPrechody } from '../cesty/prechody.js';
 import { vytvorKolajnice } from '../cesty/kolajnice.js';
-import { vytvorBudovy } from '../budovy/budovy.js';
+import { krokyBudov } from '../budovy/budovy.js';
 import { vytvorBudovyLod } from '../budovy/lod.js';
 import { vytvorStrechyLod2 } from '../budovy/strechy-lod2.js';
 import { vytvorVikiere } from '../budovy/vikiere.js';
@@ -52,9 +52,11 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   const { krizovatky } = najdiKrizovatky(cesty);
   // cesty na nadjazdoch sa nekreslia na zem – mostovku stavia js/mapa/mosty/nadjazdy.js
   g.add(vytvorCesty(cesty.filter((c) => !c.nadjazd), vyskopis));
+  yield;
   g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
   yield;
   g.add(vytvorChodniky(cesty, krizovatky, vyskopis));
+  yield;
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
   g.add(vytvorKolajnice((d.kolajnice ?? []).filter((kl) => !kl.nadjazd), vyskopis));
   // nadjazdy, lávky a nadchody (chôdzu a jazdu po nich rieši modul js/mapa/mosty/nadjazdy-modul.js)
@@ -79,9 +81,10 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
     for (const [x, z] of b.body) hMax = Math.max(hMax, vyskopis.vyskaTerenu(x, z));
     k.pridajPolygon(b.body, { typ: 'budova', vrch: hMax + (b.vyska ?? 10) + 1.5 });
   }
-  g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
+  g.add(yield* krokyBudov(d.budovy ?? [], vyskopis, KONFIG));
   yield;
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));
+  yield;
   const vikiere = vytvorVikiere(d.budovy, d._strechy, vyskopis);
   if (vikiere) g.add(vikiere);
   yield;
@@ -103,6 +106,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorStromy(stromy, vyskopis, k));
   yield;
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
+  yield;
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
   yield;
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
