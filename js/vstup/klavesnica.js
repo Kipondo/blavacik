@@ -10,6 +10,7 @@ const SMERY = {
 const DRZANE = {
   ShiftLeft: 'beh', ShiftRight: 'beh',
   Space: 'skok',
+  KeyH: 'klaxon',
 };
 
 const STLACENE = {

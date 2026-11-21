@@ -57,6 +57,22 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   biela brána s dvoma vežami a namiesto strednej veže UFO z Mosta SNP; **nie je to oficiálny erb mesta** (ten je chránený).
   Logo je v menu (aj počas načítavania), v editore postavy a ako ikona stránky (`assets/ui/favicon.svg`), červeno-biele
   pruhy v menu a editore, štítok s bránou pred názvom miesta v HUD. Snímky: `docs/snimky/identita/`.
+- **Zvuky a hlasy** (issue #18, `js/zvuk/`, modul `zvuk`): všetky zvuky sú syntetizované cez Web Audio
+  (jeden zvuk = jeden súbor, žiadna cudzia hudba): kroky podľa povrchu (tráva / dlažba), skok a dopad, štart, motor
+  auta podľa otáčok a prevodov, pískanie pneumatík, klaksón (**H**), dvere, nárazy, zvonček električky, siréna,
+  gong pred hlásením, holuby v centre, hukot dopravy podľa dennej doby a vietor pri Dunaji, klik v menu.
+  Priestorový zvuk podľa kamery, najviac 24 krátkych zvukov naraz. Hlasitosť zvukov, hlasov a hudby je v menu
+  (ukladá sa). Prehliadač pustí zvuk po prvom kliknutí / klávese / dotyku. Ostatné moduly prehrajú zvuk udalosťou
+  `hra.posli('zvuk', { meno: 'zvoncek', x, z })`, sirénu `hra.posli('sirena', { id, x, y, z, zapnuta })`.
+- **Hlasy postáv cez Google Gemini TTS – automaticky:** workflow `.github/workflows/hlasy.yml` pri zmene
+  `data/dialogy/**` alebo `data/misie/**` (aj ručne a raz denne) spustí `tools/hlasy/generuj.mjs`. Ten pre každú
+  repliku bez nahrávky alebo so zmeneným textom vygeneruje `assets/zvuk/dialogy/<dialóg>/<index>_<variant>.ogg`
+  (Opus, 32 kb/s) a commitne ich späť. Hlas a štýl reči každej postavy je v `data/dialogy/hlasy.json` (predpripravené
+  hlasy Gemini, žiadne klonovanie ľudí). Pri vyčerpaní bezplatného limitu pokračuje ďalší deň; bez kľúča hra ostane
+  s titulkami. **Jediný ručný krok:** na https://aistudio.google.com/apikey vytvoriť kľúč a v repozitári
+  *Settings → Secrets and variables → Actions → New repository secret* ho uložiť ako `GEMINI_API_KEY`.
+  **Pridať repliku = zmeniť JSON dialógu a pushnúť** – hlas sa dorobí sám. Hra prehrá hlas pri udalosti
+  `hra.posli('dialog-replika', { dialog, index, variant })` (posiela ju zobrazovanie dialógov).
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),

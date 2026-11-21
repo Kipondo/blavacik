@@ -34,6 +34,8 @@ import semafory from './doprava/semafory.js';
 import mhd from './mhd/modul.js';
 
 // --- doplnkové moduly (polícia, misie, doprava, …) ---
+// --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
+import zvuk from './zvuk/modul.js';
 // import policia from './policia/policia.js';
 // import misie from './misie/misie.js';
 
@@ -62,6 +64,7 @@ export default [
   grafCiest,
   semafory,
   mhd,
+  zvuk,
   // policia,
   // misie,
 ];
