@@ -10,6 +10,7 @@ import prostredie from './grafika/prostredie.js';
 import efekty from './grafika/efekty/modul.js';
 import denNoc from './grafika/den-noc.js';
 import hrac from './chodec/hrac.js';
+import chodci from './chodec/chodci/modul.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
@@ -48,6 +49,7 @@ export default [
   efekty,
   denNoc,
   hrac,
+  chodci,
   riadenieHracom,
   auta,
   kamera,
