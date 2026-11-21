@@ -1,4 +1,5 @@
-// Záhrady a trávniky v obytnej zástavbe (data/mapa/zastavba.json z tools/mesto/zastavba.mjs).
+// Záhrady a trávniky v obytnej zástavbe (data/mapa/zastavba.json z tools/mesto/zastavba.mjs
+// a zastavba_odhad.py – kde OSM obytnú zástavbu nemá, odhad z okolia obytných budov).
 // Porovnanie so satelitnou snímkou: medzi rodinnými domami aj medzi panelákmi je prevažne tráva,
 // v hre bola všade, kde OSM nemá pokrývku, béžová holá zem. V obytnej zástavbe sa preto nespevnená
 // zem kreslí ako trávnik – okrem hustej zástavby (vnútrobloky v centre bývajú vydláždené): hustota
@@ -9,7 +10,8 @@ let zastavba = [];
 fetch('data/mapa/zastavba.json')
   .then((r) => (r.ok ? r.json() : { zastavba: [] }))
   .then((d) => {
-    zastavba = (d.zastavba ?? []).map((b) => {
+    // obytná zástavba z OSM + odhad z okolia obytných budov tam, kde ju OSM nemá (Petržalka…)
+    zastavba = [...(d.zastavba ?? []), ...(d.odhad ?? [])].map((b) => {
       let minX = Infinity, minZ = Infinity, maxX = -Infinity, maxZ = -Infinity;
       for (const [x, z] of b) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
       return { b, ohr: { minX, maxX, minZ, maxZ } };

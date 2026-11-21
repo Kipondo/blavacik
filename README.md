@@ -112,7 +112,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     asfalt, piesok) s bielymi čiarami a bežecké dráhy so 6 dráhami (`tools/mesto/ihriska.mjs` → `data/mapa/ihriska.json`,
     `js/mapa/teren/ihriska.js`), ~800 vonkajších **bazénov** a fontán je tyrkysová voda s obrubou a v **obytnej
     zástavbe** (OSM `landuse=residential`, `tools/mesto/zastavba.mjs` → `data/mapa/zastavba.json`) je nespevnená zem
-    trávnik / záhrada namiesto béžovej holej zeme – okrem hustej zástavby a historického jadra (`js/mapa/teren/zahrady.js`).
+    trávnik / záhrada namiesto béžovej holej zeme – okrem hustej zástavby a historického jadra (`js/mapa/teren/zahrady.js`);
+    kde OSM obytnú zástavbu nemá (celá Petržalka), dopĺňa ju odhad z okolia obytných budov (`tools/mesto/zastavba_odhad.py`, 19 km²).
     Snímky pred/po: `docs/snimky/povrchy/`.
   - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
   - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
