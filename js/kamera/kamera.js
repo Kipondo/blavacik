@@ -24,6 +24,8 @@ export default {
     this.skutocna = new THREE.Vector3();
     this.pohlad = new THREE.Vector3();
     this.skrylHraca = false;
+    // presun hráča (js/ladenie/teleport.js) – kamera skočí hneď za neho, nepreletí cez pol mesta
+    hra.na('teleport', () => { this.prvy = true; });
   },
 
   updateVzdy(dt, hra) {

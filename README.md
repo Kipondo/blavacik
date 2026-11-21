@@ -24,8 +24,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Mapa mesta (veľká) | M, koliesko myši = priblíženie | – |
 | Vypísať polohu (pre misie) | P | – |
 | Ukazovateľ výkonu (snímky/s, čas snímky, rozlíšenie) | F3 | – |
+| Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
+| Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
 ## Čo je hotové
+- **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
+  bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
+  Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
 - **Nadjazdy, lávky a nadchody** (`tools/mesto/nadjazdy.mjs` → `"nadjazdy"` v dlaždiciach, `js/mapa/mosty/nadjazdy.js`,
   modul `js/mapa/mosty/nadjazdy-modul.js`): ~1 100 mostov z OSM mimo Dunaja (cesty, lávky a cyklolávky, železničné
   a električkové mosty). Laserový terén most nemá, preto mostovka ide od terénu na jednom konci k druhému (násypy sú

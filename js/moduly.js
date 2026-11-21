@@ -40,6 +40,10 @@ import mhd from './mhd/modul.js';
 import mhdVozidla from './mhd/vozidla/modul.js';
 
 // --- doplnkové moduly (polícia, misie, doprava, …) ---
+// --- dočasné pomôcky na prezeranie mesta (lietanie 2× Medzerník, presun klikom na veľkú mapu) ---
+import letLadenie from './ladenie/let.js';
+import teleport from './ladenie/teleport.js';
+
 // --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
 import zvuk from './zvuk/modul.js';
 // import policia from './policia/policia.js';
@@ -77,6 +81,8 @@ export default [
   mhd,
   zvuk,
   mhdVozidla,
+  letLadenie,
+  teleport,
   // policia,
   // misie,
 ];
