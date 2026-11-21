@@ -131,7 +131,9 @@
     {"model": "vyskova-budova", "subor": "obchodny-dom-kamenne", "nazov": "Obchodný dom na Kamennom námestí", "x": 522.13, "z": -169.15, "dosah": 60},
     {"model": "vyskova-budova", "subor": "kamenne-namestie-doplnky", "x": 469.66, "z": -140.28},
     {"model": "vyskova-budova", "subor": "sm-kostol-alzbetinok", "nazov": "Kostol sv. Alžbety (alžbetínky)", "x": 485.15, "z": -348.79, "dosah": 40},
-    {"model": "vyskova-budova", "subor": "sm-kostol-sv-ladislava", "nazov": "Kostol sv. Ladislava", "x": 405.45, "z": -227.44, "dosah": 40}
+    {"model": "vyskova-budova", "subor": "sm-kostol-sv-ladislava", "nazov": "Kostol sv. Ladislava", "x": 405.45, "z": -227.44, "dosah": 40},
+    {"model": "vyskova-budova", "subor": "atriaky", "nazov": "Átriaky", "x": -2927.58, "z": -1896.09, "dosah": 120},
+    {"model": "vyskova-budova", "subor": "atriaky-vstup", "x": -2949.2, "z": -1785.97}
   ],
   "styly": [
     {"nazov": "Eurovea", "farba": "#b7cdd8", "vyska": 20, "sklo": true},
