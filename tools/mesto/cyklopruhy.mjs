@@ -27,7 +27,8 @@ const out = [];
 for (const w of db.cesty.values()) {
   const t = w.t;
   const zaklad = ZAKLAD[t.highway];
-  if (!zaklad || t.tunnel === 'yes' || t.area === 'yes') continue;
+  // mosty vynecháme – mostovky nadjazdov majú vlastnú výšku, pruh by ostal na teréne pod nimi
+  if (!zaklad || t.tunnel === 'yes' || t.area === 'yes' || (t.bridge && t.bridge !== 'no')) continue;
   const oba = t['cycleway:both'];
   let l = pruh(t['cycleway:left']) || pruh(oba);
   let p = pruh(t['cycleway:right']) || pruh(oba);
