@@ -192,6 +192,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     na námestiach tmavšie betónové dlaždice, všade špina a nerovnomernosť vo veľkej mierke; mapa povrchu má 0,5 m.
     Parkoviská z OSM sú asfaltové so záplatami a ostrým okrajom (predtým rozmazaná sivá plocha, snímky
     `docs/snimky/parkoviska/`).
+    Podľa porovnania so satelitnou snímkou: **športoviská** majú povrch z OSM (antuka, tartan, umelá tráva,
+    asfalt, piesok) s bielymi čiarami a bežecké dráhy so 6 dráhami (`tools/mesto/ihriska.mjs` → `data/mapa/ihriska.json`,
+    `js/mapa/teren/ihriska.js`), ~800 vonkajších **bazénov** a fontán je tyrkysová voda s obrubou a v **obytnej
+    zástavbe** (OSM `landuse=residential`, `tools/mesto/zastavba.mjs` → `data/mapa/zastavba.json`) je nespevnená zem
+    trávnik / záhrada namiesto béžovej holej zeme – okrem hustej zástavby a historického jadra (`js/mapa/teren/zahrady.js`).
+    Snímky pred/po: `docs/snimky/povrchy/`.
   - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
   - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
     a na zatrávnených svahoch (podľa mapy tried a pokrývky dlaždice), zblízka husto, ďalej redšie a menšie;
