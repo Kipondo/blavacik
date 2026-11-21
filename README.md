@@ -90,6 +90,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   aj odkvap a hrebeň (podľa sklonu povrchu strechy).
   - Odhad sa nahradí vždy. Výška z OSM sa nahradí, keď sa od lasera líši o viac ako 3 m.
   - Budovy, ktoré laser z roku 2023 nevidí (novostavby), ostávajú podľa OSM.
+  - Šikmá strecha na neobdĺžnikovom pôdoryse (hrebeň hra postaví len na obdĺžniku) ostáva označená ako šikmá:
+    rodinné domy tak majú farbu škridly, nie sivú plochú strechu (zistené porovnaním so satelitom – Rusovce,
+    Záhorská Bystrica; predtým bolo ~70 % domov v predmestiach „plochých“).
   - Dlaždice narástli len o 3,6 MB (33,9 → 37,5 MB), lebo sa menia len čísla.
   - LOD2 strechy (`budovy.py`) ostávajú pre výrez Starého Mesta. Celé mesto by malo ~500 MB, preto čaká
     na schválenie. Skripty `teren.py`, `budovy.py` a `stromy.py` vedia spracovať aj vybrané dlaždice
