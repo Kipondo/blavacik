@@ -22,6 +22,7 @@ export default {
     this.prvy = true;
     this.dosah = 1;              // podiel vzdialenosti ku kamere, ktorý nie je zakrytý budovou
     this.skutocna = new THREE.Vector3();
+    this.pohlad = new THREE.Vector3();
     this.skrylHraca = false;
   },
 
@@ -84,7 +85,9 @@ export default {
     else this.dosah += (podiel - this.dosah) * Math.min(1, dt * 2.5);
     this.skutocna.copy(this.poz).sub(this.ciel).multiplyScalar(this.dosah).add(this.ciel);
     hra.kamera.position.copy(this.skutocna);
-    hra.kamera.lookAt(this.ciel);
+    // pozerá sa po tej istej priamke (bod za cieľom) – funguje aj vtedy, keď je kamera až pri hlave
+    this.pohlad.copy(this.ciel).sub(this.poz).normalize().multiplyScalar(10).add(this.ciel);
+    hra.kamera.lookAt(this.pohlad);
 
     // kamera tesne pri hlave – postavu skryjeme, aby nezakrývala celý obraz
     const blizko = !vAute && this.skutocna.distanceTo(this.ciel) < 0.9;
