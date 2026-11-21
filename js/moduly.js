@@ -18,6 +18,7 @@ import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
+import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -39,6 +40,7 @@ export default [
   kamera,
   dohlad,
   dlazdice,
+  cyklopruhy,
   hud,
   lokality,
   poloha,
