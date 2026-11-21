@@ -112,6 +112,7 @@ export default {
     this.skupina.name = 'oznacenia';
     hra.scena.add(this.skupina);
     this.cas = 0;
+    this.fronta = [];
     this.znacky = new Set();
     this.dlazdice = new Map();
     hra.stav.miestaSluzieb = [];
@@ -259,19 +260,32 @@ export default {
     return false;
   },
 
+  /** Štvorec sa stavia postupne – tabule jeho služieb idú do fronty (pár za snímok, viď update). */
   postavStvorec(st) {
     st.skupina = new THREE.Group();
-    for (const s of st.sluzby) {
-      const budova = s.budova?.length > 2 ? s.budova : !s.areal ? this.budovaPreBod(s.x, s.z) : null;
-      if (budova) this.tabulaNaFasade(s, st.skupina, budova);
-      else this.stojan(s, st.skupina);
-    }
-    for (const o of st.skupina.children) { o.castShadow = true; o.receiveShadow = true; }
     this.skupina.add(st.skupina);
+    for (const s of st.sluzby) this.fronta.push([st, s]);
+  },
+
+  postavSluzbu(st, s) {
+    const g = new THREE.Group();
+    const budova = s.budova?.length > 2 ? s.budova : !s.areal ? this.budovaPreBod(s.x, s.z) : null;
+    if (budova) this.tabulaNaFasade(s, g, budova);
+    else this.stojan(s, g);
+    for (const o of g.children) { o.castShadow = true; o.receiveShadow = true; }
+    st.skupina.add(g);
   },
 
   update(dt, hra) {
     if (!this.stvorce?.size) return;
+    // rozostavané tabule: najviac ~3 ms za snímok (celý štvorec naraz trval v centre aj 100 ms – hra sekla)
+    if (this.fronta.length) {
+      const koniec = performance.now() + 3;
+      while (this.fronta.length && performance.now() < koniec) {
+        const [st, s] = this.fronta.shift();
+        if (st.skupina) this.postavSluzbu(st, s);
+      }
+    }
     this.cas -= dt;
     if (this.cas > 0) return;
     this.cas = 1.0;

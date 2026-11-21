@@ -51,7 +51,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   stanice, úrady, knižnice, hasiči, obchodné centrá. Tabuľa s ikonou a názvom visí na fasáde budovy (stena
   najbližšie k ulici alebo chodníku, nie stena susedného domu); keď je služba v OSM len bod, nájde sa budova, v ktorej
   leží (alebo do 12 m od vchodu), z načítaných dlaždíc. Veľké areály majú stojan pri okraji. Pri príchode sa ukáže
-  názov miesta, blízke služby sú farebné značky na minimape. Snímky: `docs/snimky/sluzby/`.
+  názov miesta, blízke služby sú farebné značky na minimape. Tabule sa stavajú postupne (najviac ~3 ms za snímok),
+  aby hra v centre pri príchode do novej štvrte nesekala. Snímky: `docs/snimky/sluzby/`.
 - **Názov Blavačík a vizuálna identita v farbách Bratislavy** (issue #17): červená a biela, doplnkovo zlatá
   (CSS premenné v `css/style.css`, kontrast podľa WCAG AA). Vlastné štylizované logo `assets/ui/logo.svg` – červený štít,
   biela brána s dvoma vežami a namiesto strednej veže UFO z Mosta SNP; **nie je to oficiálny erb mesta** (ten je chránený).
