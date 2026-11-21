@@ -261,6 +261,29 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   a **obytné veže** za supermarketom (17 a 20 podlaží + nižší blok, fasáda z posunutých rámov okien, zelené strechy).
   Obchody majú podľa pravidiel projektu **vlastné neutrálne nápisy** („POTRAVINY“, „BISTRO“) – žiadne značky firiem.
   Nápis je nový model `js/mapa/pamiatky/napis.js` (tabuľa s textom z plátna, záznam `"model": "napis"`).
+- **Kamenné námestie, Špitálska a Manderlák** z Blendera (issues #62, #67, #69, #70; dáta
+  `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_kamenne.mjs` a `../blender/osm_pamiatky.mjs`,
+  modely `python3 tools/blender/kamenne_blender.py kyjev prior doplnky`,
+  `python3 tools/blender/historicke_blender.py kostol-alzbetinok kostol-sv-ladislava`,
+  `python3 tools/blender/vyskove_budovy.py manderla`). Výšky sú z laserového skenovania ÚGKK (DMP − DMR).
+  - **Hotel Kyjev**: doska 61 m nad podnožou 10,5 m. Na širších stenách sú sústredné obdĺžnikové rámy
+    z bielych a tmavočervených pásov, vonku vodorovné pásy. Užšie steny sú béžové so škárami, hore tmavý veniec
+    a ustúpená technika. Podnož má presklené prízemie za stĺpmi a travertín s pásom okien.
+  - **Obchodný dom**: biely, takmer bezokenný klin na štíhlych stĺpoch, horná hrana stúpa z 19 na 23 m.
+    Na fasáde sú veľké okrúhle hodiny, pod nimi štyri stĺpce tmavých lamiel a hore vetracie lamely.
+    Má bielu vežu so štvorcovými oknami, ustúpeným podlažím a komínmi, nižšiu presklenú budovu s lávkou
+    a nadstavbou a reliéf.
+  - **Námestie**: okrúhly vyvýšený záhon s kvetmi a drevené truhlíky so stromčekmi (kopírujú terén).
+  - **Kostol sv. Alžbety** (alžbetínky): priečelie do ulice s výklenkami a sochami, veža s hodinami
+    a zelenou cibuľovou helmicou.
+  - **Kostol sv. Ladislava**: biele klasicistické priečelie s pilastrami a štítom, zvonička na streche,
+    oranžová strecha.
+  - **Manderlák**: okrovo-hnedé murivo, tmavočervené piliere s hrotmi nad atikou, samostatné okná s bielymi
+    rámami, tehlová nadstavba so stožiarom a obchody s červeným pásom.
+  - Obchody majú neutrálne pásy bez nápisov a značiek.
+  - Nový kľúč `nahradit` v `<subor>.json` modelu: pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc,
+    bez kolízie – napríklad pod blokom obchodného domu sa dá prejsť medzi stĺpmi.
+  - Snímky: `docs/snimky/kamenne/`.
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
@@ -274,7 +297,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   z kameňa, na podstavci; busta je horná časť postavy na stĺpe, Čumil vykúka z kanála, abstraktné diela sú
   organické tvary. Postavy sú vymyslené – socha len naznačuje pamätník.
 - **Hroby na cintorínoch** (`js/mapa/vybavenie/hroby.js`): rady hrobov na všetkých cintorínoch z OSM – kamenný rám
-  s doskou a náhrobok (stojatá doska, kríž, nízka doska, obelisk) z leštenej žuly či pieskovca, mimo chodníkov.
+  s doskou a náhrobok (stojatá doska, kríž, nízka doska, obelisk) z leštenej žuly či pieskovca. Ako na skutočnom
+  cintoríne (issue #75): sektory ≈ 8 radov × 12 hrobov oddelené alejami, 7 m pás zelene pri obvode, voľno okolo
+  ciest, chodníkov, budov a stromov, parkové sektory bez hrobov a náhodné medzery; najviac 5000 hrobov na dlaždicu.
+- **Stromy z lasera v budovách modelov** (issue #71): stromy, ktoré laser „našiel“ na streche výškovej budovy
+  s vlastným modelom (Manderlák mal v sebe 44 a 49 m stromy), sa pri načítaní dlaždice vyhodia
+  (`bezStromovVNahradenych` v `js/mapa/pamiatky/nahradene-budovy.js`), rovnako stromy vyššie ako 30 m.
+  `tools/mesto/laser/stromy.py` pri ďalšom behu maskuje aj pôdorysy modelov a takéto stromy nezapíše.
 - **Bratislavský hrad z Blendera** (`python3 tools/blender/hrad_blender.py`, dáta `node tools/blender/osm_hrad.mjs`):
   Kráľovský palác podľa častí z OSM – štyri krídla s pravidelnými barokovými oknami (šambrány, parapety,
   kordónové a hlavná rímsa, sokel), strmá strecha s vikiermi a komínmi, rohové veže prečnievajúce nad strechu

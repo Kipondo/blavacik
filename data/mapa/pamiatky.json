@@ -134,7 +134,12 @@
     {"model": "vyskova-budova", "subor": "veze-racianska", "nazov": "Obytné veže na Račianskej", "x": 1642.06, "z": -3798.89, "dosah": 70},
     {"model": "napis", "text": "POTRAVINY", "podtext": "otvorené denne", "podlaBudovy": "supermarket-racianska", "x": 1593.3, "z": -3839.78, "y": 5.3, "natocenie": -1.77, "sirka": 2.4, "vyska": 2.2, "farba": "#ffffff", "pozadie": "#2f6b4f"},
     {"model": "napis", "text": "BISTRO", "podtext": "aj z auta", "podlaBudovy": "bistro-racianska", "x": 1514.24, "z": -3663.94, "y": 4.6, "natocenie": 0, "sirka": 1.5, "vyska": 1.4, "farba": "#ffd54a", "pozadie": "#2b2b2b"},
-    {"model": "napis", "text": "BISTRO", "podtext": "aj z auta", "podlaBudovy": "bistro-racianska", "x": 1514.24, "z": -3664.22, "y": 4.6, "natocenie": 3.1416, "sirka": 1.5, "vyska": 1.4, "farba": "#ffd54a", "pozadie": "#2b2b2b"}
+    {"model": "napis", "text": "BISTRO", "podtext": "aj z auta", "podlaBudovy": "bistro-racianska", "x": 1514.24, "z": -3664.22, "y": 4.6, "natocenie": 3.1416, "sirka": 1.5, "vyska": 1.4, "farba": "#ffd54a", "pozadie": "#2b2b2b"},
+    {"model": "vyskova-budova", "subor": "hotel-kyjev", "nazov": "Hotel Kyjev", "x": 542.2, "z": -285.14, "dosah": 70},
+    {"model": "vyskova-budova", "subor": "obchodny-dom-kamenne", "nazov": "Obchodný dom na Kamennom námestí", "x": 522.13, "z": -169.15, "dosah": 60},
+    {"model": "vyskova-budova", "subor": "kamenne-namestie-doplnky", "x": 469.66, "z": -140.28},
+    {"model": "vyskova-budova", "subor": "sm-kostol-alzbetinok", "nazov": "Kostol sv. Alžbety (alžbetínky)", "x": 485.15, "z": -348.79, "dosah": 40},
+    {"model": "vyskova-budova", "subor": "sm-kostol-sv-ladislava", "nazov": "Kostol sv. Ladislava", "x": 405.45, "z": -227.44, "dosah": 40}
   ],
   "styly": [
     {"nazov": "Eurovea", "farba": "#b7cdd8", "vyska": 20, "sklo": true},

@@ -8,6 +8,7 @@
 // Jeden model môže stáť na viacerých miestach (napr. štyri rovnaké veže Sky Park).
 // Model sa načíta na pozadí – hra nečaká na stiahnutie geometrie, kolízie platia hneď.
 // "podlaTerenu": true v <subor>.json = model kopíruje terén (hradby, živé ploty): y vrcholu = terén + lokálna výška.
+// "nahradit": [[[x, z], …]] v <subor>.json = pôdorysy bez kolízie, z ktorých sa len vyhodia budovy a stromy dlaždíc.
 // Keď sa pod stavbou načíta alebo uvoľní podrobný terén z lasera, výšky sa prepočítajú.
 
 import * as THREE from 'three';
@@ -84,6 +85,8 @@ export default async function postav(p, { vyskopis, kolizie }) {
     nahradBudovy(w, 1.5);
     kolizie.pridajPolygon(w, { typ: 'pamiatka', nazov: p.nazov });
   }
+  // pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc (napr. blok na stĺpoch – pod ním sa dá prejsť)
+  for (const w of info.nahradit ?? []) nahradBudovy(svet(w), 0.5);
   // ďalšie kolízie bez nahrádzania budov (hradby, múry)
   for (const k of info.kolizie ?? []) kolizie.pridajPolygon(svet(k), { typ: 'pamiatka', nazov: p.nazov });
   const ohr = obrysy.length ? obrysy.flat().reduce((o, [x, z]) => ({
