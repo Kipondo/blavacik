@@ -32,6 +32,7 @@ import oznacenia from './mapa/vybavenie/oznacenia-modul.js';
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
 import mhd from './mhd/modul.js';
+import mhdVozidla from './mhd/vozidla/modul.js';
 
 // --- doplnkové moduly (polícia, misie, doprava, …) ---
 // --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
@@ -65,6 +66,7 @@ export default [
   semafory,
   mhd,
   zvuk,
+  mhdVozidla,
   // policia,
   // misie,
 ];
