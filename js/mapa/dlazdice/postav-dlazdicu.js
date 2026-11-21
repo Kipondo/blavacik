@@ -25,6 +25,7 @@ import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
 import { vytvorLampy } from '../vybavenie/lampy.js';
 import { vytvorLavicky } from '../vybavenie/lavicky.js';
+import { vytvorHroby } from '../vybavenie/hroby.js';
 import { vytvorVodu } from '../voda/voda.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
 import { vytvorNadjazdy } from '../mosty/nadjazdy.js';
@@ -92,6 +93,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
+  g.add(vytvorHroby(d, vyskopis));
   g.userData.krizovatky = krizovatky;
   return g;
 }

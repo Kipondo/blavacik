@@ -25,6 +25,7 @@ import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
 import minimapa from './ui/minimapa/modul.js';
+import sochy from './mapa/vybavenie/sochy-modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -55,6 +56,7 @@ export default [
   lokality,
   poloha,
   minimapa,
+  sochy,
   grafCiest,
   semafory,
   mhd,

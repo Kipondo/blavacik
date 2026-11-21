@@ -26,7 +26,7 @@ function pokojKosti(scena) {
  * Animácie Ďoďa prenesené na kostru modelu: rotácia kosti = pokoj modelu × (pokoj Ďoďa⁻¹ × animácia),
  * posun panvy sa zmenší/zväčší podľa výšky panvy.
  */
-function klipyPreModel(url, gltf) {
+export function klipyPreModel(url, gltf) {
   if (!klipy.has(url)) {
     klipy.set(url, nacitajGlb(URL_DODO).then((dodo) => {
       const d = pokojKosti(dodo.scene);

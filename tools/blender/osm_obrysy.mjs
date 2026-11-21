@@ -26,6 +26,15 @@ const CIELE = {
   'central': { cesta: '365111959' },
   'lakeside-park': { cesta: '553359037' },
   'manderla': { cesta: '38507136' },
+  // tretia dávka: významné budovy (prerobené staré modely a nové)
+  'nove-snd': { cesta: '223471545' },
+  'rozhlas': { cesta: '5215475' },
+  'nr-sr': { cesta: '5131402' },
+  'nivy': { cesta: '829898609' },
+  'sng': { cesty: ['56341128', '245884765', '56341126'] },
+  'stadion-tehelne-pole': { cesta: '678498215' },
+  'zimny-stadion': { cesta: '15104547' },
+  'istropolis': { cesty: ['1038324193', '1472519457'] },
 };
 const db = await nacitajPbf('../../.cache/mesto/bratislavsky.osm.pbf');
 const r1 = (v) => Math.round(v * 100) / 100;
