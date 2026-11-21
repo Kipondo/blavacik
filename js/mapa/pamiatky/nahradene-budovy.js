@@ -44,6 +44,15 @@ export function jeNahradene(x, z) {
   return false;
 }
 
+/** Leží bod priamo v pôdoryse niektorej nahradenej zóny (bez okraja)? */
+export function vNahradenom(x, z) {
+  for (const n of zony) {
+    if (x < n.minX || x > n.maxX || z < n.minZ || z > n.maxZ) continue;
+    if (vPolygone(x, z, n.body)) return true;
+  }
+  return false;
+}
+
 /** Zoznam budov dlaždice bez tých, ktoré nahrádza model pamiatky. */
 export function bezNahradenych(budovy) {
   if (!zony.length || !budovy?.length) return budovy;
