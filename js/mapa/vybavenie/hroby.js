@@ -1,6 +1,9 @@
 // Hroby na cintorínoch (plochy pokrývky "cintorin" z OSM landuse=cemetery): rady hrobov pozdĺž hlavnej osi
 // cintorína – kamenný rám s krycou doskou a náhrobok (stojatá doska, kríž, nízka široká doska, obelisk)
-// z leštenej žuly či pieskovca rôznych farieb. Hroby sa nekladú na chodníky ani do budov.
+// z leštenej žuly či pieskovca rôznych farieb.
+// Ako na skutočnom cintoríne (issue #75): hroby sú v sektoroch (≈ 8 radov × 12 hrobov) oddelených alejami,
+// pri okraji ostáva pás zelene, voľno je okolo ciest, chodníkov, budov a stromov, niektoré sektory
+// sú parkové (bez hrobov) a v sektoroch sú náhodné medzery.
 // InstancedMesh po štvorcoch 125 m (orezanie mimo záberu), kreslia sa do 350 m.
 
 import * as THREE from 'three';
@@ -9,9 +12,14 @@ import { bodVPolygone } from '../geometria.js';
 
 const STVOREC = 125;
 const DOHLAD = 350;
-const RAD = 2.7;          // vzdialenosť radov (hrob 2 m + ulička)
-const KROK = 1.3;         // hroby vedľa seba
-const MAX_HROBOV = 9000;  // na dlaždicu (veľké cintoríny sa zriedia)
+const RAD = 2.9;          // vzdialenosť radov (hrob 2 m + ulička)
+const KROK = 1.45;        // hroby vedľa seba
+const SEKTOR_HROBOV = 12; // hrobov v rade jedného sektora
+const SEKTOR_RADOV = 8;   // radov v sektore
+const ALEJ = 4.5;         // šírka aleje medzi sektormi
+const OKRAJ = 7;          // pás zelene pri obvode cintorína
+const PARKOVE = 0.16;     // podiel sektorov bez hrobov (urnový háj, parkové časti)
+const MAX_HROBOV = 5000;  // na dlaždicu (na veľkých cintorínoch pribudnú parkové sektory)
 
 const FARBY = ['#26272a', '#3a3b3f', '#5a5b5f', '#8f8d88', '#b7ac93', '#6e4a42', '#a49a86'];
 const hash = (x, z, k = 0) => { const s = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return s - Math.floor(s); };
@@ -38,11 +46,33 @@ function material() {
   return mat;
 }
 
+const DLAZDICA = 500;
+/** Hrana leží na hranici dlaždice (polygón je orezaný dlaždicou) – nie je to skutočný okraj cintorína. */
+function naHraniciDlazdice([ax, az], [bx, bz]) {
+  const naMriezke = (v) => Math.abs(v - Math.round(v / DLAZDICA) * DLAZDICA) < 0.15;
+  return (naMriezke(ax) && naMriezke(bx) && Math.abs(ax - bx) < 0.15) || (naMriezke(az) && naMriezke(bz) && Math.abs(az - bz) < 0.15);
+}
+
+/** Vzdialenosť bodu od skutočného obrysu polygónu (bez hraníc dlaždice). */
+function odObrysu(x, z, body) {
+  let min = Infinity;
+  for (let i = 0; i < body.length; i++) {
+    const [ax, az] = body[i], [bx, bz] = body[(i + 1) % body.length];
+    if (naHraniciDlazdice(body[i], body[(i + 1) % body.length])) continue;
+    const dx = bx - ax, dz = bz - az, l2 = dx * dx + dz * dz || 1e-9;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2));
+    min = Math.min(min, Math.hypot(x - ax - dx * t, z - az - dz * t));
+  }
+  return min;
+}
+
 /** Hlavná os polygónu (smer najdlhšej hrany). */
 function os(body) {
   let best = 0, u = [1, 0];
-  for (let i = 0; i < body.length - 1; i++) {
-    const dx = body[i + 1][0] - body[i][0], dz = body[i + 1][1] - body[i][1], l = Math.hypot(dx, dz);
+  for (let i = 0; i < body.length; i++) {
+    const q = body[(i + 1) % body.length];
+    if (naHraniciDlazdice(body[i], q)) continue;
+    const dx = q[0] - body[i][0], dz = q[1] - body[i][1], l = Math.hypot(dx, dz);
     if (l > best) { best = l; u = [dx / l, dz / l]; }
   }
   return u;
@@ -60,34 +90,51 @@ export function vytvorHroby(d, vyskopis) {
     const [ux, uz] = os(c.body), vx = -uz, vz = ux;
     const budovy = (d.budovy ?? []).filter((bu) => bu.body.some(([x, z]) => bodVPolygone(x, z, c.body)) || c.body.some(([x, z]) => bodVPolygone(x, z, bu.body)));
     const xs = c.body.map((p) => p[0] * ux + p[1] * uz), zs = c.body.map((p) => p[0] * vx + p[1] * vz);
-    const plocha = (Math.max(...xs) - Math.min(...xs)) * (Math.max(...zs) - Math.min(...zs));
-    const riedenie = Math.max(1, Math.sqrt((plocha / (KROK * RAD)) / MAX_HROBOV));
-    // chodníky v cintoríne → mriežka 1 m s obsadenými bunkami (rýchla kontrola)
+    // chodníky a cesty v cintoríne, stromy → mriežka 1 m s obsadenými bunkami (rýchla kontrola)
     const blizkoChodnika = new Set();
-    for (const ch of d.chodniky ?? []) {
+    const oznac = (px, pz, r) => {
+      const rc = Math.ceil(r);
+      for (let dx = -rc; dx <= rc; dx++) for (let dz = -rc; dz <= rc; dz++) {
+        if (dx * dx + dz * dz <= r * r) blizkoChodnika.add(`${Math.round(px) + dx},${Math.round(pz) + dz}`);
+      }
+    };
+    for (const ch of [...(d.chodniky ?? []), ...(d.cesty ?? [])]) {
       if (!ch.body.some(([x, z]) => bodVPolygone(x, z, c.body))) continue;
-      const r = (ch.sirka ?? 2) / 2 + 1.2, rc = Math.ceil(r);
+      const r = (ch.sirka ?? 2) / 2 + 2.5;
       for (let i = 0; i < ch.body.length - 1; i++) {
         const [ax, az] = ch.body[i], [bx, bz] = ch.body[i + 1];
         const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.ceil(L / 0.7));
-        for (let k = 0; k <= n; k++) {
-          const px = ax + ((bx - ax) * k) / n, pz = az + ((bz - az) * k) / n;
-          for (let dx = -rc; dx <= rc; dx++) for (let dz = -rc; dz <= rc; dz++) {
-            if (dx * dx + dz * dz <= r * r) blizkoChodnika.add(`${Math.round(px) + dx},${Math.round(pz) + dz}`);
-          }
-        }
+        for (let k = 0; k <= n; k++) oznac(ax + ((bx - ax) * k) / n, az + ((bz - az) * k) / n, r);
       }
     }
-    for (let a = Math.min(...xs) + KROK; a < Math.max(...xs); a += KROK * riedenie) {
-      for (let b = Math.min(...zs) + RAD / 2; b < Math.max(...zs); b += RAD * riedenie) {
+    for (const st of d.stromy ?? []) if (bodVPolygone(st[0], st[1], c.body)) oznac(st[0], st[1], 2.2);
+    // sektory: v smere osi SEKTOR_HROBOV hrobov, naprieč SEKTOR_RADOV radov, medzi nimi aleje
+    const dlzkaS = SEKTOR_HROBOV * KROK + ALEJ, sirkaS = SEKTOR_RADOV * RAD + ALEJ;
+    // mriežka sektorov je zarovnaná globálne, aby na hranici dlaždíc nadväzovala
+    const a0 = Math.floor(Math.min(...xs) / dlzkaS) * dlzkaS, b0 = Math.floor(Math.min(...zs) / sirkaS) * sirkaS;
+    for (let a = a0; a < Math.max(...xs); a += KROK) {
+      const ia = Math.floor(a / dlzkaS), ra = a - ia * dlzkaS;
+      if (ra > SEKTOR_HROBOV * KROK) continue;                              // alej
+      for (let b = b0; b < Math.max(...zs); b += RAD) {
+        const ib = Math.floor(b / sirkaS), rb = b - ib * sirkaS;
+        if (rb > SEKTOR_RADOV * RAD) continue;                              // alej
+        if (hash(ia, ib, 9) < PARKOVE) continue;                            // parkový sektor
         const x = a * ux + b * vx, z = a * uz + b * vz;
         if (!bodVPolygone(x, z, c.body)) continue;
-        if (hash(x, z, 1) < 0.08) continue;                                  // voľné miesto
-        if (budovy.some((bu) => bodVPolygone(x, z, bu.body))) continue;
+        if (hash(x, z, 1) < 0.12) continue;                                  // voľné miesto
         if (blizkoChodnika.has(`${Math.round(x)},${Math.round(z)}`)) continue;
-        hroby.push({ x, z, uhol: Math.atan2(ux, uz) + (hash(x, z, 2) - 0.5) * 0.05 });
+        if (budovy.some((bu) => bodVPolygone(x, z, bu.body))) continue;
+        if (odObrysu(x, z, c.body) < OKRAJ) continue;                        // pás zelene pri plote
+        hroby.push({ x, z, uhol: Math.atan2(ux, uz) + (hash(x, z, 2) - 0.5) * 0.05, sektor: hash(ia, ib, 11) });
       }
     }
+  }
+  // priveľa hrobov na dlaždicu (výkon): radšej celé sektory navyše ako parkové, než riedke rady všade
+  if (hroby.length > MAX_HROBOV) {
+    const prah = hroby.map((h) => h.sektor).sort((a, b) => a - b)[MAX_HROBOV];
+    const ostava = hroby.filter((h) => h.sektor < prah);
+    hroby.length = 0;
+    hroby.push(...ostava);
   }
   if (!hroby.length) return skupina;
   const stvorce = new Map();

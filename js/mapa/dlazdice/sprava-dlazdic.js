@@ -7,7 +7,7 @@
 
 import { postavDlazdicu, uvolniObjekt } from './postav-dlazdicu.js';
 import { nacitajDoplnky } from './doplnky.js';
-import { bezNahradenych } from '../pamiatky/nahradene-budovy.js';
+import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
 
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
@@ -51,6 +51,7 @@ export class SpravaDlazdic {
         if (strechy) d._strechy = strechy;
         // budovy, ktoré nahrádza podrobný model pamiatky (js/mapa/pamiatky/nahradene-budovy.js)
         if (d.budovy) d.budovy = bezNahradenych(d.budovy);
+        if (d.stromy) d.stromy = bezStromovVNahradenych(d.stromy);
         return d;
       }));
     }

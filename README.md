@@ -119,7 +119,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   z kameňa, na podstavci; busta je horná časť postavy na stĺpe, Čumil vykúka z kanála, abstraktné diela sú
   organické tvary. Postavy sú vymyslené – socha len naznačuje pamätník.
 - **Hroby na cintorínoch** (`js/mapa/vybavenie/hroby.js`): rady hrobov na všetkých cintorínoch z OSM – kamenný rám
-  s doskou a náhrobok (stojatá doska, kríž, nízka doska, obelisk) z leštenej žuly či pieskovca, mimo chodníkov.
+  s doskou a náhrobok (stojatá doska, kríž, nízka doska, obelisk) z leštenej žuly či pieskovca. Ako na skutočnom
+  cintoríne (issue #75): sektory ≈ 8 radov × 12 hrobov oddelené alejami, 7 m pás zelene pri obvode, voľno okolo
+  ciest, chodníkov, budov a stromov, parkové sektory bez hrobov a náhodné medzery; najviac 5000 hrobov na dlaždicu.
+- **Stromy z lasera v budovách modelov** (issue #71): stromy, ktoré laser „našiel“ na streche výškovej budovy
+  s vlastným modelom (Manderlák mal v sebe 44 a 49 m stromy), sa pri načítaní dlaždice vyhodia
+  (`bezStromovVNahradenych` v `js/mapa/pamiatky/nahradene-budovy.js`), rovnako stromy vyššie ako 30 m.
+  `tools/mesto/laser/stromy.py` pri ďalšom behu maskuje aj pôdorysy modelov a takéto stromy nezapíše.
 - **Bratislavský hrad z Blendera** (`python3 tools/blender/hrad_blender.py`, dáta `node tools/blender/osm_hrad.mjs`):
   Kráľovský palác podľa častí z OSM – štyri krídla s pravidelnými barokovými oknami (šambrány, parapety,
   kordónové a hlavná rímsa, sokel), strmá strecha s vikiermi a komínmi, rohové veže prečnievajúce nad strechu

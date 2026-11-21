@@ -53,3 +53,23 @@ export function bezNahradenych(budovy) {
     return !jeNahradene(x / b.body.length, z / b.body.length);
   });
 }
+
+// Najvyšší strom, ktorý berieme z lasera – vyššie „koruny“ sú strechy výškových budov (issue #71).
+const MAX_VYSKA_STROMU = 30;
+
+/**
+ * Stromy dlaždice bez tých, ktoré ležia v pôdoryse modelu pamiatky (laser by z jej strechy a stien
+ * spravil korunu – napr. 44 m strom v Manderláku) a bez nereálne vysokých stromov z lasera.
+ * Formát stromu: [x, z, mierka] alebo z lasera [x, z, mierka, výška, polomer].
+ */
+export function bezStromovVNahradenych(stromy) {
+  if (!stromy?.length) return stromy;
+  return stromy.filter((s) => {
+    if (s.length >= 4 && s[3] > MAX_VYSKA_STROMU) return false;
+    for (const n of zony) {
+      if (s[0] < n.minX || s[0] > n.maxX || s[1] < n.minZ || s[1] > n.maxZ) continue;
+      if (vPolygone(s[0], s[1], n.body)) return false;
+    }
+    return true;
+  });
+}
