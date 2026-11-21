@@ -202,7 +202,8 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
 // 1 = drobné žulové kocky (uličky a dvory historického jadra); 0,63 = veľké svetlé betónové dlaždice (moderné
 // námestia a pešie zóny mimo historického jadra, napr. Kamenné námestie).
 const BETON = 160, DOSKY = 192, KOCKY = 255;
-const TRIEDA_POKRYVKY = { dlazba: DOSKY, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64 };
+// parkovisko = trieda chodníka + maska asfaltu (kanál B) → asfalt so záplatami ako chodníky popri cestách (#52, #73)
+const TRIEDA_POKRYVKY = { dlazba: DOSKY, zaklad: 128, trava: 64, ihrisko: 64, cintorin: 64, parkovisko: 128 };
 // približný obrys historického jadra (Michalská brána – Hlavné nám. – Dóm – Hviezdoslavovo nám.)
 const JADRO = { x: -60, z: 40, rx: 330, rz: 280, uhol: 0.35 };
 /** Je bod v historickom jadre? (tam sú aj obslužné uličky vydláždené kockami) */
@@ -276,7 +277,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fillStyle = seda(v);
     cesta(p.body, true);
     g.fill();
-    maska(p.body, true, false);
+    maska(p.body, true, p.k === 'parkovisko');
   }
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
   // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
