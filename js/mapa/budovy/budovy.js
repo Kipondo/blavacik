@@ -45,6 +45,7 @@ function nocneSklo(mat) {
   mat.customProgramCacheKey = () => 'sklo-noc';
   return mat;
 }
+import { stanovaStrecha } from './stanova-strecha.js';
 
 let materialy = null;
 /** Materiály budov [steny, sklo, strechy] – zdieľané (3D fasády používajú materiál stien). */
@@ -239,7 +240,9 @@ function* postavGeometriu(budovy, vyskopis) {
     if (r.nad) podhlad(strechy, body, diery, spodok, c.clone().multiplyScalar(0.5));
     const valbova = b.strecha && !b.lod2 && b.tvarStrechy !== 'plocha' && body.length === 4 && !diery.length;
     if (valbova) valbovaStrecha(strechy, body, vrch, cs, b.hreben);
-    else plochaStrecha(strechy, body, diery, vrch, cs);
+    // neobdĺžnikový dom so šikmou strechou: stanová strecha (js/mapa/budovy/stanova-strecha.js)
+    else if (!(b.strecha && !b.lod2 && b.tvarStrechy !== 'plocha' && !diery.length
+      && stanovaStrecha(body, vrch, b.hreben, (A, B, C) => trojVon(strechy, A, B, C, cs, (n) => n[1] > 0)))) plochaStrecha(strechy, body, diery, vrch, cs);
   }
   yield;
 
