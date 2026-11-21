@@ -9,7 +9,7 @@ export const ZAKLAD_PLETE = new THREE.Color('#e8b493');
 export const PREDVOLENY_VZHLAD = {
   tvar: {},            // { chudy: 0..1, pupkac: 0..1, nos_velky: 0..1, … }
   ucet: 'strapate',    // vlasy_<ucet> (ziadny = plešina)
-  brada: 'strnisko',   // brada_<typ> (ziadna = oholený)
+  brada: 'ziadna',     // brada_<typ> (ziadna = oholený)
   plet: '#e8b493',
   vlasy: '#6e4c34',
 };

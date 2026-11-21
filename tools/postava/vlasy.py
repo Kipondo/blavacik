@@ -238,13 +238,13 @@ def strapate(ctx, cap, cap_alfa, ciara):
     P, faces, Nc = cap(0, 0.0025)
     vrch = lambda Q: T.smooth(ctx.oko[2] + 0.03, ctx.oko[2] + 0.09, Q[:, 2])
     vyber = (ciara(P) > 0.3) & (vrch(P) > 0.05)
-    dlzka = lambda Q: (0.012 + 0.03 * vrch(Q)) * (0.5 + 0.5 * ciara(Q))
+    dlzka = lambda Q: (0.010 + 0.021 * vrch(Q)) * (0.5 + 0.5 * ciara(Q))  # kratšie, mladistvý strih
     def smer(Q, Nn):
         # pramene idú hore a mierne dopredu (rozstrapatené), vzadu dozadu
         dopredu = np.where((Q[:, 1] - ctx.hlava[1]) < 0.02, 1.0, -0.6)[:, None]
         return Nn * 0.55 + up * 0.35 + vpred * 0.45 * dopredu
     mat_p = textura_pramenov('vlasy_strapate_pramene')
-    V1, F1, UV1 = pramene(ctx, P[vyber], Nc[vyber], 1100, dlzka, smer)
+    V1, F1, UV1 = pramene(ctx, P[vyber], Nc[vyber], 1100, dlzka, smer, ohyb=0.1)  # menej kučeravé
     V2, F2, UV2 = ostne(ctx, P[ciara(P) > 0.05], Nc[ciara(P) > 0.05], lambda Q: 0.004 + 0.004 * vrch(Q),
                         lambda Q, Nn: Nn + up * 0.3, hustota=40000)
     zlep(ctx, 'vlasy_strapate', P, faces, cap_alfa(0), [(V1, F1, UV1, mat_p), (V2, F2, UV2, mat_ostni('vlasy_strapate_ostne'))])

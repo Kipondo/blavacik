@@ -64,7 +64,7 @@ def textura(P, N, m, S, plet='#e8b493'):
     # tieň po holení (hladko oholený, len náznak)
     brada = T.smooth(usta[2] + 0.01, usta[2] - 0.015, P[..., 2]) * T.smooth(-0.05, -0.3, N[..., 1]) * \
         T.smooth(hlava[2] - 0.11, hlava[2] - 0.07, P[..., 2]) * (1 - pery)
-    a = T.mix(a, a * np.array([0.9, 0.88, 0.9]), brada * 0.35)
+    a = T.mix(a, a * np.array([0.9, 0.88, 0.9]), brada * 0.12)  # mladý – takmer bez tieňa po holení
 
     # drsnosť: čelo a nos sa lesknú, pery vlhké, obočie matné
     r = 0.52 + 0.08 * s2
