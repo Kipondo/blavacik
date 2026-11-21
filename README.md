@@ -33,6 +33,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - LOD2 strechy (`budovy.py`) ostávajú pre výrez Starého Mesta. Celé mesto by malo ~500 MB, preto čaká
     na schválenie. Skripty `teren.py`, `budovy.py` a `stromy.py` vedia spracovať aj vybrané dlaždice
     (`--dlazdice i_j,…`, `--mlynska-dolina`).
+  - **Mlynská dolina** (miesto príbehu, #73) má navyše podrobný terén 2 m, LOD2 strechy a stromy z lasera
+    ako Staré Mesto (`--mlynska-dolina`): 305 budov so strechou z lasera a 6369 stromov, spolu +0,7 MB.
   - Snímky pred a po: `docs/snimky/laser-vysky/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:

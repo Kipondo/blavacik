@@ -7,7 +7,8 @@
 #   - zdrojVysky = 'lidar'; pôvodná výška ostáva vo vyskaOsm / zdrojOsm (opakované spustenie začne od nej).
 # Výška z OSM (height, building:levels) sa nahradí, keď sa od lasera líši o viac ako 3 m; odhad vždy.
 # Budova, ktorú laser nevidí (postavená po skenovaní v roku 2023), ostane podľa OSM.
-# Preskočí budovy s LOD2 strechou (lod2) a vyvýšené časti budov (cast – tie overuje casti.py).
+# Preskočí budovy s LOD2 strechou (lod2), vyvýšené časti budov (cast – tie overuje casti.py) a kusy budov
+# rozdelené priechodom (priechody.py) – spúšťa sa pred ním.
 #
 # Spustenie (z koreňa repozitára, laser v .cache/laser/): python3 tools/mesto/laser/vysky.py [i_j …]
 import sys, os, json, glob, time
@@ -68,7 +69,9 @@ def vyska_z_lasera(H, x0, z0, body):
 def spracuj(dmp_r, dmr_r, cesta, i, j):
     d = json.load(open(cesta))
     budovy = d.get('budovy') or []
-    kandidati = [b for b in budovy if not b.get('lod2') and not b.get('cast') and len(b.get('body', [])) >= 3]
+    # bez LOD2, vyvýšených častí (cast, minVyska) a kusov budov rozdelených priechodom (tools/mesto/priechody.py)
+    kandidati = [b for b in budovy if not b.get('lod2') and not b.get('cast') and not b.get('minVyska')
+                 and not b.get('priechod') and len(b.get('body', [])) >= 3]
     if not kandidati:
         return 0, 0
     X0, Z0 = i * DLAZDICA - OKRAJ, j * DLAZDICA - OKRAJ
