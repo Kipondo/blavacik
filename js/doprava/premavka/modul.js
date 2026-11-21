@@ -396,7 +396,7 @@ export default {
           const vn = (ja.vx - sx * a.v) * nx + (ja.vz - sz * a.v) * nz;
           if (vn < 0) {
             ja.vx -= nx * vn * 1.4; ja.vz -= nz * vn * 1.4; ja.vx *= 0.75; ja.vz *= 0.75;
-            if (-vn > 4) hra.posli('naraz', { auto: ja, sila: -vn, npc: true });
+            if (-vn > 4) hra.posli('naraz', { auto: ja, sila: -vn, npc: true, nx, nz });
           }
           a.v = 0; a.cakaDo = this.cas + 3; // šofér NPC auta sa zľakol a chvíľu stojí
         } else {
