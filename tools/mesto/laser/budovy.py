@@ -28,6 +28,8 @@ OKRAJ = 30         # okraj výrezu okolo dlaždíc (m) – budovy pri hrane
 TOL = 1.3          # zjednodušenie hraníc plôch strechy (pixely)
 MIN_PLOCHA = 40    # najmenšia plocha strechy (pixely = 10 m²)
 MIN_DVOR = 80      # najmenší dvor (pixely = 20 m²)
+MIN_ZAHRADA = 400  # otvorená plocha pri okraji pôdorysu (pixely = 100 m²)
+ZELEN_DRSNOST = 0.45  # m – priemerná odchýlka od vyhladeného povrchu, nad ktorou je to koruna stromu, nie strecha
 
 index = nacitaj_index()
 dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
@@ -106,15 +108,25 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     vnutro = ndimage.binary_erosion(bid > 0, iterations=2) & (bid > 0)
     for k, b in enumerate(budovy, 1):
         b['_k'] = k
-    # dvory: súvislé oblasti vnútri pôdorysu, kde laser vidí zem
-    dvor = (bid > 0) & (ndsm < 2.0)
+    # vegetácia vnútri pôdorysov (stromy v dvoroch a záhradách): drsný povrch, nie rovina strechy –
+    # inak sa z korún stromov stane „strecha“ visiaca nad dvorom (porovnanie so skutočnosťou, etapa 2, pri Dóme)
+    hl15 = ndimage.gaussian_filter(dsm, 1.5)
+    drsnost = ndimage.uniform_filter(np.abs(dsm - hl15), 5)
+    zelen = (bid > 0) & (ndsm > 2.0) & (drsnost > ZELEN_DRSNOST)
+    zelen = ndimage.binary_opening(zelen, iterations=2)
+    zelen = ndimage.binary_closing(zelen, iterations=2) & (bid > 0)
+    print(f'vegetácia vnútri pôdorysov: {zelen.sum() * K * K:.0f} m²', flush=True)
+    # dvory: súvislé oblasti vnútri pôdorysu, kde laser vidí zem alebo stromy
+    dvor = (bid > 0) & ((ndsm < 2.0) | zelen)
     lab, nl = ndimage.label(dvor)
     if nl:
         vel = np.bincount(lab.ravel(), minlength=nl + 1)
         dotyk = np.zeros(nl + 1, bool)  # dvor dotýkajúci sa okraja pôdorysu nie je dvor (prejazd, chyba pôdorysu)
         okraj = (bid > 0) & ~ndimage.binary_erosion(bid > 0, iterations=1)
         dotyk[np.unique(lab[okraj])] = True
-        ok = (vel >= MIN_DVOR) & ~dotyk; ok[0] = False
+        # veľká otvorená plocha alebo záhrada pri okraji pôdorysu (pôdorys z OSM zahŕňa aj dvor/záhradu):
+        # otvor sa spraví tiež, len o 1 m od obrysu (ostane „múr“ okolo záhrady)
+        ok = ((vel >= MIN_DVOR) & ~dotyk) | ((vel >= MIN_ZAHRADA) & dotyk); ok[0] = False
         dvory = np.where(ok[lab], lab, 0)
     else:
         dvory = np.zeros_like(bid)
@@ -123,6 +135,9 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     for l in np.unique(dvory)[1:]:
         m = dvory == l
         k = int(np.bincount(bid[m]).argmax()); b = budovy[k - 1]
+        if dotyk[l]:
+            m = m & ndimage.binary_erosion(bid == k, iterations=2)
+            if m.sum() < MIN_DVOR: continue
         if b.get('diery') and not b.get('_dieryZLasera'): continue      # OSM dvory majú prednosť
         cont = measure.find_contours(np.pad(m, 1).astype(float), 0.5)
         if not cont: continue
@@ -134,7 +149,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     print(f'dvory z lasera: {pocet_dvorov}', flush=True)
 
     # --- 1) rovinné plochy strechy ---
-    strecha = (bid > 0) & (ndsm > 2.0)
+    strecha = (bid > 0) & (ndsm > 2.0) & ~zelen
     hl = ndimage.gaussian_filter(dsm, 1.0)
     gz, gx = np.gradient(hl, K)
     sklon = np.degrees(np.arctan(np.hypot(gx, gz))); smer = (np.degrees(np.arctan2(gz, gx)) + 360) % 360
@@ -253,6 +268,10 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         odkvap = np.percentile(v_okraj, 10) - NULA if len(v_okraj) else np.percentile(v_str, 10) - NULA
         vrchol = np.percentile(v_str, 98) - NULA
         stred = np.median(vnutro_b(k)) if len(vnutro_b(k)) else np.median(v_str) - NULA - hmax
+        # budova s nízkou prístavbou: najnižší okraj (10 %) patrí prístavbe a hlavná hmota je oveľa vyššia →
+        # steny by boli nízke a nad nimi holá „krabica“ (porovnanie so skutočnosťou, etapa 2, pri Dóme)
+        if len(v_okraj) and stred - (odkvap - hmax) > 0.6 * max(0.5, vrchol - odkvap):
+            odkvap = max(odkvap, np.percentile(v_okraj, 40) - NULA)
         b['vyska'] = round(float(max(2.5, odkvap - hmax - 0.2)), 2)
         b['vyskaLaser'] = round(float(stred), 1)       # medián (DMP − DMR) vnútri pôdorysu
         b['hreben'] = round(float(max(0.0, vrchol - odkvap)), 1)

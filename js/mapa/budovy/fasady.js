@@ -1,8 +1,10 @@
 // Fasády budov: okná s rámom, sklom, parapetom a šambránou, rímsy, výklady a dvere na prízemí.
 //
 // Atlas sa kreslí v prehliadači (žiadne cudzie textúry okien): bunka = jedna okenná os × jedno podlažie.
-//   stĺpce = štýl (0 historická, 1 obytná, 2 kancelárie, 3 jednoduchá)
-//   riadky = 0 podlažie, 1 prízemie s výkladom, 2 prízemie s dverami, 3 podlažie – druhý variant (podľa budovy)
+//   stĺpce = štýl (0 historická, 1 obytná, 2 kancelárie, 3 jednoduchá, 4 panelák, 5 rodinný dom, 6 hala)
+//   riadky = 0 podlažie, 1 prízemie s výkladom (panelák a dom: okno), 2 prízemie s dverami (hala: brána),
+//            3 podlažie – druhý variant (podľa budovy; panelák: lodžie v zvislých pásoch, hala: plech bez okien)
+// Štýl budovy vyberá js/mapa/budovy/typ-budovy.js podľa typu (panelák, rodinný dom, hala…).
 // Tri textúry: farba + maska omietky (A = 1 → nefarbí sa farbou budovy), normálová mapa, (drsnosť, tieň).
 // Jemná štruktúra omietky je CC0 textúra Plaster001 z ambientCG (assets/textury/omietka).
 //
@@ -12,18 +14,23 @@
 // aMetre = (metre pozdĺž steny, výška v m) pre omietku; aTyp = štýl + 0,9·náhoda budovy.
 
 import * as THREE from 'three';
+import { SUM_GLSL } from '../../grafika/sum-glsl.js';
+import { NOC, OKNA } from '../../grafika/noc.js';
 
-export const STYLY = { stare: 0, obytne: 1, kancelarie: 2, jednoduche: 3 };
+export const STYLY = { stare: 0, obytne: 1, kancelarie: 2, jednoduche: 3, panelak: 4, dom: 5, hala: 6 };
 // šírka okennej osi, výška prízemia a podlažia (m) podľa štýlu
 export const PARAMETRE = [
   { os: 3.3, prizemie: 4.4, podlazie: 3.7 },
   { os: 3.0, prizemie: 3.1, podlazie: 2.9 },
   { os: 2.7, prizemie: 4.4, podlazie: 3.7 },
   { os: 3.1, prizemie: 3.3, podlazie: 3.1 },
+  { os: 3.6, prizemie: 3.0, podlazie: 2.8 },   // panelák: panel 3,6 m, konštrukčná výška 2,8 m
+  { os: 3.8, prizemie: 3.0, podlazie: 2.8 },   // rodinný dom
+  { os: 6.0, prizemie: 4.5, podlazie: 4.5 },   // hala: rozpätie stĺpov 6 m
 ];
 
 const C = 384;               // pixelov na bunku
-const STLPCE = 4, RIADKY = 4;
+const STLPCE = 7, RIADKY = 4;
 
 // --- kreslenie do štyroch plátien naraz -------------------------------------------------
 function platna() {
@@ -206,7 +213,95 @@ const BUNKY = {
       prvok(P, ox, oy, { x: 0.36, y: 0.3, w: 0.28, h: 0.3, farba: '#26343c', drsnost: 0.06, hlbka: -1, hrana: 2 });
     },
   },
+  // 4 panelák: škáry medzi panelmi, plastové okno, lodžie, vchod so strieškou
+  4: {
+    variant(P, ox, oy) {                // lodžia (shader ju dáva do zvislých pásov)
+      skary(P, ox, oy);
+      prvok(P, ox, oy, { x: 0.05, y: 0.06, w: 0.9, h: 0.56, farba: '#8c8880', drsnost: 0.9, hlbka: -1, hrana: 8, tien: 0.5 });  // zadná stena lodžie v tieni
+      okno(P, ox, oy, { x: 0.14, y: 0.12, w: 0.36, h: 0.5, ram: '#f4f4f2', sklo: '#22303a', priecky: 'stlpik', ramHr: 0.02, hlbkaOstenia: 0 });   // balkónové dvere
+      okno(P, ox, oy, { x: 0.56, y: 0.2, w: 0.3, h: 0.3, ram: '#f4f4f2', sklo: '#22303a', priecky: 'ziadne', ramHr: 0.02 });
+      prvok(P, ox, oy, { x: 0.03, y: 0.6, w: 0.94, h: 0.38, drsnost: 0.85, hlbka: 1, hrana: 6 });      // parapetný panel lodžie (farba budovy)
+      prvok(P, ox, oy, { x: 0.03, y: 0.58, w: 0.94, h: 0.025, farba: '#a7a49d', drsnost: 0.5, hlbka: 1, hrana: 2 });
+      tienPod(P, ox, oy, 0.03, 0.98, 0.94, 0.02, 0.55);
+    },
+    podlazie(P, ox, oy) {
+      skary(P, ox, oy);
+      okno(P, ox, oy, { x: 0.17, y: 0.24, w: 0.66, h: 0.46, ram: '#f4f4f2', sklo: '#22303a', priecky: 'stlpik', ramHr: 0.02 });
+      parapet(P, ox, oy, 0.17, 0.7, 0.66, '#c9c9c6');
+    },
+    vyklad(P, ox, oy) {                 // prízemie paneláku: rovnaké okno, nižšie pri zemi tmavší pás
+      skary(P, ox, oy);
+      okno(P, ox, oy, { x: 0.2, y: 0.22, w: 0.6, h: 0.42, ram: '#f4f4f2', sklo: '#22303a', priecky: 'stlpik', ramHr: 0.02 });
+      parapet(P, ox, oy, 0.2, 0.64, 0.6, '#c9c9c6');
+      prvok(P, ox, oy, { x: 0, y: 0.86, w: 1, h: 0.14, farba: '#8f8b84', drsnost: 0.92, hlbka: 1, hrana: 3 });
+    },
+    dvere(P, ox, oy) {                  // vchod: strieška, hliníkové presklené dvere
+      skary(P, ox, oy);
+      prvok(P, ox, oy, { x: 0.04, y: 0.1, w: 0.92, h: 0.05, farba: '#d4d2cc', drsnost: 0.7, hlbka: 1, hrana: 4 });
+      tienPod(P, ox, oy, 0.04, 0.15, 0.92, 0.1, 0.45);
+      prvok(P, ox, oy, { x: 0.16, y: 0.2, w: 0.68, h: 0.8, farba: '#5a4a3c', drsnost: 0.45, hlbka: -1, hrana: 4, tien: 0.8 });
+      okno(P, ox, oy, { x: 0.19, y: 0.23, w: 0.29, h: 0.77, ram: '#5a4a3c', sklo: '#2a3740', priecky: 'ziadne', ramHr: 0.018, hlbkaOstenia: 0 });
+      okno(P, ox, oy, { x: 0.52, y: 0.23, w: 0.29, h: 0.77, ram: '#5a4a3c', sklo: '#2a3740', priecky: 'ziadne', ramHr: 0.018, hlbkaOstenia: 0 });
+    },
+  },
+  // 5 rodinný dom: menšie plastové okná s roletovým boxom, drevené vchodové dvere
+  5: {
+    variant(P, ox, oy) {                // drevené okno s okenicami (staršie domy)
+      okno(P, ox, oy, { x: 0.34, y: 0.26, w: 0.32, h: 0.46, ram: '#7a5c42', priecky: 'kriz' });
+      prvok(P, ox, oy, { x: 0.24, y: 0.26, w: 0.09, h: 0.46, farba: '#5f6b52', drsnost: 0.6, hlbka: 1, hrana: 3 });   // okenice (farbu mení shader)
+      prvok(P, ox, oy, { x: 0.67, y: 0.26, w: 0.09, h: 0.46, farba: '#5f6b52', drsnost: 0.6, hlbka: 1, hrana: 3 });
+      parapet(P, ox, oy, 0.34, 0.72, 0.32, '#cfc8bb');
+    },
+    podlazie(P, ox, oy) {
+      prvok(P, ox, oy, { x: 0.3, y: 0.22, w: 0.4, h: 0.06, farba: '#e4e3df', drsnost: 0.6, hlbka: 1, hrana: 2 });     // roletový box
+      okno(P, ox, oy, { x: 0.3, y: 0.28, w: 0.4, h: 0.44, ram: '#f4f4f2', priecky: 'stlpik', ramHr: 0.022 });
+      parapet(P, ox, oy, 0.3, 0.72, 0.4, '#bdbdbd');
+    },
+    vyklad(P, ox, oy) {                 // okno obývačky na prízemí (nie výklad)
+      prvok(P, ox, oy, { x: 0.22, y: 0.22, w: 0.56, h: 0.06, farba: '#e4e3df', drsnost: 0.6, hlbka: 1, hrana: 2 });
+      okno(P, ox, oy, { x: 0.22, y: 0.28, w: 0.56, h: 0.5, ram: '#f4f4f2', priecky: 'stlpik', ramHr: 0.02 });
+      parapet(P, ox, oy, 0.22, 0.78, 0.56, '#bdbdbd');
+      prvok(P, ox, oy, { x: 0, y: 0.9, w: 1, h: 0.1, farba: '#9a948a', drsnost: 0.92, hlbka: 1, hrana: 3 });          // sokel domu
+    },
+    dvere(P, ox, oy) {
+      prvok(P, ox, oy, { x: 0.26, y: 0.16, w: 0.48, h: 0.05, farba: '#d9d6cf', drsnost: 0.7, hlbka: 1, hrana: 4 });   // strieška
+      tienPod(P, ox, oy, 0.26, 0.21, 0.48, 0.07, 0.5);
+      prvok(P, ox, oy, { x: 0.34, y: 0.27, w: 0.32, h: 0.73, farba: '#5a3f2b', drsnost: 0.55, hlbka: -1, hrana: 4, tien: 0.8 });
+      prvok(P, ox, oy, { x: 0.38, y: 0.32, w: 0.24, h: 0.2, farba: '#26343c', drsnost: 0.06, hlbka: -1, hrana: 2 });
+      prvok(P, ox, oy, { x: 0, y: 0.9, w: 1, h: 0.1, farba: '#9a948a', drsnost: 0.92, hlbka: 1, hrana: 3 });
+    },
+  },
+  // 6 hala: trapézový plech, pásové okná pod strechou, sekcionálne brány
+  6: {
+    variant(P, ox, oy) { plech(P, ox, oy); },                                    // bez okien
+    podlazie(P, ox, oy) {
+      plech(P, ox, oy);
+      okno(P, ox, oy, { x: 0.015, y: 0.1, w: 0.97, h: 0.22, ram: '#8a9096', sklo: '#33434d', priecky: 'paska', ramHr: 0.014, hlbkaOstenia: 0 });
+    },
+    vyklad(P, ox, oy) { plech(P, ox, oy); },
+    dvere(P, ox, oy) {                  // sekcionálna brána
+      plech(P, ox, oy);
+      prvok(P, ox, oy, { x: 0.12, y: 0.22, w: 0.76, h: 0.78, farba: '#6f767b', drsnost: 0.5, hlbka: -1, hrana: 4, tien: 0.8 });
+      prvok(P, ox, oy, { x: 0.14, y: 0.24, w: 0.72, h: 0.76, farba: '#c3c7ca', drsnost: 0.45, hlbka: 1, hrana: 2 });
+      for (let k = 1; k < 6; k++) prvok(P, ox, oy, { x: 0.14, y: 0.24 + k * 0.127, w: 0.72, h: 0.008, hlbka: -1, hrana: 1, tien: 0.75 });
+    },
+  },
 };
+
+/** Škáry medzi panelmi paneláku (vodorovná pod stropom, zvislá na kraji osi). */
+function skary(P, ox, oy) {
+  prvok(P, ox, oy, { x: 0, y: 0, w: 1, h: 0.012, hlbka: -1, hrana: 2, tien: 0.7 });
+  prvok(P, ox, oy, { x: 0, y: 0, w: 0.008, h: 1, hlbka: -1, hrana: 2, tien: 0.7 });
+}
+
+/** Trapézový plech: zvislé vlny cez celú bunku (farba budovy). */
+function plech(P, ox, oy) {
+  for (let k = 0; k < 12; k++) prvok(P, ox, oy, { x: k / 12 + 0.02, y: 0, w: 0.035, h: 1, hlbka: 1, hrana: 3, drsnost: 0.55 });
+  P.drsnost.fillStyle = 'rgb(150,150,150)';
+  P.drsnost.globalCompositeOperation = 'darken';
+  P.drsnost.fillRect(ox, oy, C, C);
+  P.drsnost.globalCompositeOperation = 'source-over';
+}
 
 // --- atlas ------------------------------------------------------------------------------
 let atlas = null;
@@ -268,14 +363,18 @@ export function materialFasad() {
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.omietkaFarba = { value: o.farba };
     sh.uniforms.omietkaNormal = { value: o.normal };
+    sh.uniforms.uNoc = NOC;
+    sh.uniforms.uOkna = OKNA;
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aTyp;\nattribute vec2 aMetre;\nvarying float vTyp;\nvarying vec2 vMetre;')
-      .replace('#include <uv_vertex>', '#include <uv_vertex>\nvTyp = aTyp; vMetre = aMetre;');
+      .replace('#include <common>', '#include <common>\nattribute float aTyp;\nattribute vec2 aMetre;\nattribute float aZnaky;\nvarying float vTyp;\nvarying vec2 vMetre;\nvarying float vZnaky;')
+      .replace('#include <uv_vertex>', '#include <uv_vertex>\nvTyp = aTyp; vMetre = aMetre; vZnaky = aZnaky;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
 uniform sampler2D omietkaFarba; uniform sampler2D omietkaNormal;
-varying float vTyp; varying vec2 vMetre;
+uniform float uNoc, uOkna;
+varying float vTyp; varying vec2 vMetre; varying float vZnaky;
 float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+${SUM_GLSL}
 // farby štítov obchodov, okeníc a dverí (v atlase sú „značkovacie“ farby, tu sa nahradia podľa budovy a osi)
 const vec3 STITY[6] = vec3[6](vec3(0.0284, 0.0423, 0.0331), vec3(0.1022, 0.0137, 0.0137), vec3(0.0137, 0.0232, 0.0578), vec3(0.0160, 0.0160, 0.0160), vec3(0.1470, 0.0782, 0.0123), vec3(0.0437, 0.0232, 0.0685));
 const vec3 OKENICE[4] = vec3[4](vec3(0.1144, 0.1470, 0.0844), vec3(0.1470, 0.0685, 0.0319), vec3(0.1022, 0.1329, 0.1620), vec3(0.1946, 0.0437, 0.0252));
@@ -283,6 +382,11 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
       .replace('#include <map_fragment>', `
         // náhoda budovy zaokrúhlená – interpolácia atribútu dá drobné odchýlky, hash by z nich spravil šum
         float styl = floor(vTyp + 0.001), seed = floor(fract(vTyp + 0.0005) * 97.0 + 0.5);
+        // znaky budovy (budovy.js): 1 = okenice, 2 = obchod (výklady), 4·(1 + farba okeníc)
+        float znaky = floor(vZnaky + 0.5);
+        bool okenice = mod(znaky, 2.0) > 0.5;
+        bool obchod = mod(floor(znaky / 2.0), 2.0) > 0.5;
+        float farbaOkenic = floor(znaky / 4.0) - 1.0;
         vec2 uvc = vMapUv;
         bool atika = uvc.y > 99.5;
         float vv = atika ? uvc.y - 100.0 : uvc.y;
@@ -294,7 +398,14 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         // podlažia: variant podľa budovy; historické budovy majú na 1. poschodí (piano nobile) bohatšie okná
         float riadok = mod(seed, 2.0) > 0.5 ? 3.0 : 0.0;
         if (styl < 0.5 && podI > 0.5 && podI < 1.5 && mod(seed, 3.0) > 0.5) riadok = 3.0;
-        if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < 0.28 ? 2.0 : 1.0;
+        // panelák: lodžie v zvislých pásoch (každá 3. alebo 4. os podľa budovy)
+        if (styl > 3.5 && styl < 4.5) riadok = mod(osI + seed, 3.0 + mod(seed, 2.0)) < 0.5 ? 3.0 : 0.0;
+        // podiel osí s dverami na prízemí: panelák a dom menej (vchod), hala bránu častejšie
+        float podielDveri = styl > 5.5 ? 0.22 : styl > 4.5 ? 0.12 : styl > 3.5 ? 0.1 : 0.28;
+        // mestské štýly: výklady len v budovách s obchodom (OSM shop/amenity), inak obyčajné okná a menej dverí
+        bool mestsky = styl < 3.5;
+        if (mestsky && !obchod) podielDveri = 0.14;
+        if (vv >= 0.0 && vv < 1.0) riadok = hashF(vec2(osI, 7.0) + seed) < podielDveri ? 2.0 : (mestsky && !obchod ? 0.0 : 1.0);
         vec2 bunka = vec2(styl, ${RIADKY - 1}.0 - riadok);
         vec2 auv = (bunka + clamp(lok, 0.002, 0.998)) / vec2(${STLPCE}.0, ${RIADKY}.0);
         vec2 dx = dFdx(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0), dy = dFdy(uvc) / vec2(${STLPCE}.0, ${RIADKY}.0);
@@ -309,7 +420,11 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         if (maska > 0.5) {
           vec3 l = fa.rgb;
           if (distance(l, STITY[0]) < 0.012) fa.rgb = STITY[int(hashF(vec2(osI + 0.5, seed)) * 6.0) % 6];
-          else if (distance(l, OKENICE[0]) < 0.02) fa.rgb = OKENICE[int(mod(seed * 7.0, 4.0))];
+          else if (distance(l, OKENICE[0]) < 0.02) {
+            // okenice len tam, kde naozaj sú (opravy-budov.json); rodinné domy si ich nechávajú podľa náhody
+            if (okenice || styl > 4.5) fa.rgb = OKENICE[farbaOkenic >= 0.0 ? int(farbaOkenic) : int(mod(seed * 7.0, 4.0))];
+            else { maska = 0.0; fn = vec3(0.5, 0.5, 1.0); }
+          }
           else if (distance(l, DVERE[0]) < 0.012) fa.rgb = DVERE[int(hashF(vec2(seed, osI + 3.0)) * 5.0) % 5];
         }
         float tienF = fp.r, drsnF = fp.g;
@@ -321,17 +436,62 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
           if (lok.y > 0.55) { farbaBudovy *= 1.08; fn = lok.y > 0.9 ? vec3(0.5, 0.85, 0.85) : vec3(0.5, 0.5, 1.0); }
           else if (lok.y > 0.4) { tienF = 0.62; fn = vec3(0.5, 0.15, 0.85); }
         }
-        // sklo: záclony, rolety alebo tmavá izba (náhodne podľa okna)
+        // sklo: záclony, rolety alebo tmavá izba (náhodne podľa okna); v noci časť okien svieti
+        vec3 oknoSvetlo = vec3(0.0);
         if (drsnF < 0.1) {
+          float hl = hashF(vec2(osI * 3.7 + 1.0, podI * 5.3) + seed * 1.9);
+          // výklady obchodov svietia skoro všetky, byty podľa podielu (večer viac); niektoré izby modrasto (televízor)
+          float podiel = (riadok > 0.5 && riadok < 1.5 && styl < 3.5) ? 0.85 : uOkna;
+          if (hl < podiel && !atika) {
+            float h3 = hashF(vec2(podI * 1.3 + 7.0, osI * 2.9) + seed);
+            vec3 ton = h3 < 0.12 ? vec3(0.35, 0.45, 0.8) : mix(vec3(1.0, 0.55, 0.22), vec3(1.0, 0.75, 0.45), h3);
+            // záclona rozptýli svetlo rovnomerne, bez nej je jas zhora dole nerovnomerný
+            float rovnom = 0.75 + 0.25 * smoothstep(0.1, 0.9, lok.y);
+            oknoSvetlo = ton * (0.35 + 0.5 * hl / max(podiel, 0.01)) * rovnom * 0.9;
+          }
           float h2 = hashF(vec2(osI * 1.7, podI * 2.3) + seed * 3.1);
           vec3 zaclona = mix(vec3(0.78, 0.74, 0.66), vec3(0.62, 0.64, 0.66), h2);
           float horna = smoothstep(0.35, 0.5, fract(vv) + (h2 - 0.5) * 0.3);
           fa.rgb = mix(fa.rgb * mix(0.8, 1.6, hs), zaclona * 0.55, hs < 0.45 ? horna * 0.85 : 0.0);
           // výklady na prízemí: osvetlený interiér obchodu
-          if (riadok > 0.5 && riadok < 2.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
+          if (riadok > 0.5 && riadok < 1.5 && styl < 3.5) fa.rgb = mix(fa.rgb, vec3(0.62, 0.53, 0.40) * mix(0.6, 1.1, hs), 0.25 + 0.3 * hs);
           drsnF = hs < 0.45 ? mix(0.14, 0.3, horna) : 0.12;
         }
+        // panelák: škáry medzi panelmi (každá os = panel 3,6 m, vodorovne na úrovni stropov) a jemne iný odtieň panelov
+        float skaraP = 0.0;
+        if (styl > 3.5 && styl < 4.5 && !atika && vv >= 1.0 && maska < 0.5) {
+          vec2 fw = fwidth(lok) + 1e-4;
+          float sx = 1.0 - smoothstep(0.0, fw.x * 1.5 + 0.004, min(lok.x, 1.0 - lok.x));
+          float sy = 1.0 - smoothstep(0.0, fw.y * 1.5 + 0.006, lok.y);
+          skaraP = max(sx, sy);
+          farbaBudovy *= 0.97 + 0.06 * hashF(vec2(osI * 3.1, podI * 1.7) + seed);
+          if (skaraP > 0.3) fn = sx > sy ? vec3(lok.x < 0.5 ? 0.2 : 0.8, 0.5, 0.9) : vec3(0.5, 0.75, 0.9);
+        }
         diffuseColor.rgb = mix(farbaBudovy, fa.rgb, maska) * tienF;
+        diffuseColor.rgb *= 1.0 - 0.38 * skaraP;
+        // zvetranie (procedurálne, vo svetových metroch – nič sa neopakuje): fľaky na omietke, zvislé stekance,
+        // šmuhy pod parapetmi okien a špina pri zemi (odstrek z chodníka); staršie budovy viac, panelák a hala menej
+        {
+          float omie = 1.0 - maska * 0.7;
+          float vek = styl < 0.5 ? 1.0 : styl < 3.5 ? 0.8 : 0.55;
+          vec2 m = vMetre;
+          float fl = fbm2(m * vec2(0.11, 0.08) + seed * 1.37);
+          diffuseColor.rgb *= mix(1.0, mix(0.86, 1.08, fl), omie);
+          float pruh = sum2(vec2(m.x * 2.3, m.y * 0.05 + seed)) * 0.7 + sum2(vec2(m.x * 5.1, m.y * 0.11)) * 0.3;
+          float stekance = smoothstep(0.6, 0.92, pruh) * smoothstep(0.35, 0.75, fbm2(vec2(m.x * 0.35, m.y * 0.22) + seed));
+          diffuseColor.rgb *= 1.0 - 0.28 * vek * stekance * omie;
+          if (!atika && vv >= 1.0 && !slepa) {
+            float wx = smoothstep(0.24, 0.32, lok.x) * (1.0 - smoothstep(0.68, 0.76, lok.x));
+            float pod = smoothstep(-0.05, 0.27, lok.y) * (1.0 - smoothstep(0.27, 0.31, lok.y));
+            float sila = 0.4 + 0.6 * hashF(vec2(osI, podI * 3.0) + seed * 0.7);
+            diffuseColor.rgb *= 1.0 - 0.32 * vek * wx * pod * sila * (0.6 + 0.4 * sum2(vec2(m.x * 9.0, m.y * 1.5))) * omie;
+          }
+          if (!atika && vv < 0.35) {
+            float zem = 1.0 - smoothstep(-0.2, 0.35, vv);
+            diffuseColor.rgb *= 1.0 - 0.22 * zem * (0.6 + 0.4 * fbm2(m * vec2(1.3, 4.0)));
+          }
+        }
+        totalEmissiveRadiance += oknoSvetlo * uNoc;
         float fasDrsnost = drsnF;
         vec3 fasNormal = fn;
       `)
@@ -345,6 +505,6 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         normal = normalize( tbn * mapN );
       `);
   };
-  mat.customProgramCacheKey = () => 'fasady-v1';
+  mat.customProgramCacheKey = () => 'fasady-v5';
   return mat;
 }

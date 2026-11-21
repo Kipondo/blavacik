@@ -3,30 +3,25 @@
 
 import * as THREE from 'three';
 import { pridajStrukturu } from './struktura.js';
+import { pridajOpotrebenie } from './opotrebenie.js';
 import { zjemni } from './cesty.js';
 import { kluc } from './krizovatky.js';
 
 const SIRKA = 2.6;
+const OBRUBNIK = 0.16;      // šírka vrchu obrubníka (m)
 const VYSKA = 0.28;         // nad terénom (vozovka je na +0.12)
 const S_CHODNIKOM = new Set(['primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'living_street',
   'primary_link', 'secondary_link', 'tertiary_link']);
 
 let textura = null;
-function dlazba() {
+/** Základná farba asfaltového chodníka (štruktúru a opotrebenie pridá shader). */
+function asfaltChodnika() {
   if (textura) return textura;
   const c = document.createElement('canvas');
-  c.width = c.height = 64;
+  c.width = c.height = 4;
   const g = c.getContext('2d');
-  g.fillStyle = '#9a978f'; g.fillRect(0, 0, 64, 64);
-  for (let y = 0; y < 64; y += 16) {
-    for (let x = 0; x < 64; x += 16) {
-      const s = 168 + ((x * 7 + y * 13) % 24);
-      g.fillStyle = `rgb(${s},${s - 2},${s - 6})`;
-      g.fillRect(x + 1, y + 1, 14, 14);
-    }
-  }
+  g.fillStyle = '#76736e'; g.fillRect(0, 0, 4, 4);
   textura = new THREE.CanvasTexture(c);
-  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
   textura.colorSpace = THREE.SRGBColorSpace;
   return textura;
 }
@@ -51,20 +46,25 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
         let dx = next[0] - prev[0], dz = next[1] - prev[1];
         const d = Math.hypot(dx, dz) || 1; dx /= d; dz /= d;
         const nx = -dz * strana, nz = dx * strana;
-        const r0 = c.sirka / 2, r1 = r0 + SIRKA;
-        const ix = x + nx * r0, iz = z + nz * r0, ox = x + nx * r1, oz = z + nz * r1;
+        const r0 = c.sirka / 2, rk = r0 + OBRUBNIK, r1 = r0 + SIRKA;
+        const ix = x + nx * r0, iz = z + nz * r0, kx = x + nx * rk, kz = z + nz * rk, ox = x + nx * r1, oz = z + nz * r1;
         const bod = {
-          i: [ix, vyskopis.vyska(ix, iz), iz], o: [ox, vyskopis.vyska(ox, oz), oz],
+          i: [ix, vyskopis.vyska(ix, iz), iz], k: [kx, vyskopis.vyska(kx, kz), kz], o: [ox, vyskopis.vyska(ox, oz), oz],
         };
         if (pred && !blizko && !pred.blizko) {
-          const A = pred.i, B = bod.i, C = bod.o, D = pred.o;
+          const A = pred.k, B = bod.k, C = bod.o, D = pred.o;
           // vrch chodníka (normála nahor – poradie podľa strany)
           const vrch = (p) => [p[0], p[1] + VYSKA, p[2]];
           const tri = strana > 0 ? [A, C, B, A, D, C] : [A, B, C, A, C, D];
           for (const p of tri) { const q = vrch(p); poz.push(...q); uv.push(q[0] / 2, q[2] / 2); }
-          // obrubník (zvislá stena od vozovky po vrch chodníka)
+          // obrubník: zvislá stena od vozovky, vrch obrubníka a zadná stena chodníka k terénu
           const dol = (p) => [p[0], p[1] + 0.1, p[2]];
-          obrPoz.push(...dol(A), ...dol(B), ...vrch(B), ...dol(A), ...vrch(B), ...vrch(A));
+          const Ai = pred.i, Bi = bod.i;
+          obrPoz.push(...dol(Ai), ...dol(Bi), ...vrch(Bi), ...dol(Ai), ...vrch(Bi), ...vrch(Ai));
+          const trk = strana > 0 ? [Ai, B, Bi, Ai, A, B] : [Ai, Bi, B, Ai, B, A];
+          for (const p of trk) obrPoz.push(...vrch(p));
+          const zem = (p) => [p[0], p[1] - 0.05, p[2]];
+          obrPoz.push(...zem(D), ...vrch(C), ...zem(C), ...zem(D), ...vrch(D), ...vrch(C));
         }
         pred = { ...bod, blizko };
       }
@@ -76,12 +76,15 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.computeVertexNormals();
-  const vrchy = new THREE.Mesh(geo, pridajStrukturu(new THREE.MeshStandardMaterial({ map: dlazba(), roughness: 0.95 }), 'chodnik', 2.2, 1, 0.5));
+  // vrch chodníka: asfalt (svetlejší ako vozovka) so štruktúrou, záplatami a prasklinami
+  const matVrch = pridajOpotrebenie(pridajStrukturu(new THREE.MeshStandardMaterial({ map: asfaltChodnika(), roughness: 0.95 }), 'asfalt', 3.3, 0.9, 0.8), 0);
+  const vrchy = new THREE.Mesh(geo, matVrch);
   vrchy.receiveShadow = true;
   const geoO = new THREE.BufferGeometry();
   geoO.setAttribute('position', new THREE.Float32BufferAttribute(obrPoz, 3));
   geoO.computeVertexNormals();
-  const obrubniky = new THREE.Mesh(geoO, new THREE.MeshStandardMaterial({ color: '#b9b5ab', roughness: 0.9, side: THREE.DoubleSide }));
+  const obrubniky = new THREE.Mesh(geoO, new THREE.MeshStandardMaterial({ color: '#a19e97', roughness: 0.85, side: THREE.DoubleSide }));
+  obrubniky.receiveShadow = true;
   skupina.add(vrchy, obrubniky);
   return skupina;
 }

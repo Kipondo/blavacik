@@ -7,12 +7,17 @@
 
 // --- základ hry ---
 import prostredie from './grafika/prostredie.js';
+import efekty from './grafika/efekty/modul.js';
+import denNoc from './grafika/den-noc.js';
 import hrac from './chodec/hrac.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
 import kamera from './kamera/kamera.js';
 import dohlad from './kamera/dohlad.js';
 import dlazdice from './mapa/dlazdice/modul.js';
+import fasady3d from './mapa/budovy/fasady-3d-modul.js';
+import podchody from './mapa/podchody/modul.js';
+import trava from './mapa/zelen/trava-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
@@ -33,12 +38,17 @@ export default [
   hodiny,
   mys,
   prostredie,
+  efekty,
+  denNoc,
   hrac,
   riadenieHracom,
   auta,
   kamera,
   dohlad,
   dlazdice,
+  fasady3d,
+  podchody,
+  trava,
   hud,
   lokality,
   poloha,

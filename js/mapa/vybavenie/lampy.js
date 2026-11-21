@@ -1,8 +1,67 @@
 // Pouličné lampy z OSM (highway=street_lamp) – stĺp s ramenom a svietidlom,
-// v historickom jadre liatinový stĺp s lucernou. Svietidlo má vlastný materiál, aby sa dalo v noci rozsvietiť (emissive).
+// v historickom jadre liatinový stĺp s lucernou. V noci svietidlá svietia (emissive, js/grafika/noc.js)
+// a pod každou lampou je na zemi kruh svetla (aditívny kotúč, sila podľa noci).
+// Materiály sú spoločné pre všetky dlaždice.
 
 import * as THREE from 'three';
 import { vJadre } from '../teren/textura-zeme.js';
+import { NOC, svietidlo } from '../../grafika/noc.js';
+
+let mat = null;
+function materialy() {
+  if (mat) return mat;
+  mat = {
+    stlp: new THREE.MeshStandardMaterial({ color: '#3a3f42', metalness: 0.6, roughness: 0.45 }),
+    svetlo: svietidlo(new THREE.MeshStandardMaterial({ color: '#f5efd6', emissive: '#ffd27a', emissiveIntensity: 0 }), 3.0),
+    kov: new THREE.MeshStandardMaterial({ color: '#1f2622', metalness: 0.6, roughness: 0.45 }),
+    lucerna: svietidlo(new THREE.MeshStandardMaterial({ color: '#f3ead0', emissive: '#ffcf7a', emissiveIntensity: 0, roughness: 0.2, transparent: true, opacity: 0.85 }), 2.6),
+    kruh: new THREE.ShaderMaterial({
+      uniforms: { noc: NOC },
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+      vertexShader: `
+        varying vec2 vUv; varying vec3 vFarba;
+        void main() {
+          vUv = uv * 2.0 - 1.0;
+          vec4 mv = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
+          // ďaleko slabšie (v opare by svietili ako bodky)
+          vFarba = instanceColor * (1.0 - smoothstep(120.0, 380.0, -mv.z));
+          gl_Position = projectionMatrix * mv;
+        }`,
+      fragmentShader: `
+        uniform float noc; varying vec2 vUv; varying vec3 vFarba;
+        void main() {
+          float r2 = dot(vUv, vUv);
+          if (r2 > 1.0 || noc < 0.01) discard;
+          float k = pow(1.0 - r2, 2.2);
+          gl_FragColor = vec4(vFarba * k * noc, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`,
+    }),
+  };
+  return mat;
+}
+
+const TEPLA = new THREE.Color(0.55, 0.36, 0.16), STUDENA = new THREE.Color(0.42, 0.36, 0.26);
+/** Kruhy svetla na zemi pod lampami: body [x, z, polomer], farba podľa typu svietidla. */
+function kruhySvetla(body, vyskopis, farba) {
+  const geo = new THREE.PlaneGeometry(2, 2);
+  geo.rotateX(-Math.PI / 2);
+  const m = new THREE.InstancedMesh(geo, materialy().kruh, body.length);
+  const o = new THREE.Object3D();
+  body.forEach(([x, z, r], i) => {
+    o.position.set(x, vyskopis.vyska(x, z) + 0.06, z);
+    o.scale.set(r, 1, r);
+    o.updateMatrix();
+    m.setMatrixAt(i, o.matrix);
+    m.setColorAt(i, farba);
+  });
+  m.computeBoundingSphere();
+  m.renderOrder = 2;
+  m.name = 'kruhy-svetla';
+  return m;
+}
 
 export function vytvorLampy(lampyVsetky, vyskopis, kolizie, budovy = []) {
   const skupina = new THREE.Group();
@@ -19,24 +78,27 @@ export function vytvorLampy(lampyVsetky, vyskopis, kolizie, budovy = []) {
   ramenoGeo.translate(0, 6.9, 0.65);
   const hlavaGeo = new THREE.BoxGeometry(0.35, 0.18, 0.7);
   hlavaGeo.translate(0, 6.8, 1.3);
-  const matStlp = new THREE.MeshStandardMaterial({ color: '#3a3f42', metalness: 0.6, roughness: 0.45 });
-  const matSvetlo = new THREE.MeshStandardMaterial({ color: '#f5efd6', emissive: '#ffd27a', emissiveIntensity: 0 });
+  const matStlp = materialy().stlp;
+  const matSvetlo = materialy().svetlo;
   const stlpy = new THREE.InstancedMesh(stlpGeo, matStlp, n);
   const ramena = new THREE.InstancedMesh(ramenoGeo, matStlp, n);
   const hlavy = new THREE.InstancedMesh(hlavaGeo, matSvetlo, n);
   const o = new THREE.Object3D();
+  const kruhy = [];
   lampy.forEach(([x, z], i) => {
     o.position.set(x, vyskopis.vyska(x, z), z);
-    o.rotation.set(0, (Math.abs(Math.round(x * 13 + z * 7)) % 4) * (Math.PI / 2), 0);
+    const uhol = (Math.abs(Math.round(x * 13 + z * 7)) % 4) * (Math.PI / 2);
+    o.rotation.set(0, uhol, 0);
     o.updateMatrix();
+    // svietidlo je 1,3 m od stĺpa na ramene – kruh svetla pod ním
+    kruhy.push([x + Math.sin(uhol) * 1.3, z + Math.cos(uhol) * 1.3, 9]);
     stlpy.setMatrixAt(i, o.matrix);
     ramena.setMatrixAt(i, o.matrix);
     hlavy.setMatrixAt(i, o.matrix);
     kolizie?.pridajKruh(x, z, 0.15, { typ: 'lampa' });
   });
   for (const m of [stlpy, ramena, hlavy]) { m.castShadow = true; m.computeBoundingSphere(); }
-  skupina.add(stlpy, ramena, hlavy);
-  skupina.userData.materialSvetla = matSvetlo; // pre budúci deň/noc
+  skupina.add(stlpy, ramena, hlavy, kruhySvetla(kruhy, vyskopis, STUDENA));
   return skupina;
 }
 
@@ -97,8 +159,8 @@ function vytvorLucerny(lampy, vyskopis, kolizie, budovy) {
   const vzpera = new THREE.BoxGeometry(0.04, 0.04, 0.6); vzpera.rotateX(-0.75); vzpera.translate(0, 4.55, 0.2);
   const lK = lucerna(4.3, 0.72);
   const kovKonzola = spoj([konzola, vzpera, ...lK.kov]);
-  const matKov = new THREE.MeshStandardMaterial({ color: '#1f2622', metalness: 0.6, roughness: 0.45 });
-  const matSvetlo = new THREE.MeshStandardMaterial({ color: '#f3ead0', emissive: '#ffd27a', emissiveIntensity: 0, roughness: 0.2, transparent: true, opacity: 0.85 });
+  const matKov = materialy().kov;
+  const matSvetlo = materialy().lucerna;
   const stlpove = [], nastenne = [];
   for (const [x, z] of lampy) {
     const s = najblizsiaStena(x, z, budovy);
@@ -117,7 +179,8 @@ function vytvorLucerny(lampy, vyskopis, kolizie, budovy) {
     });
     for (const m of [a, b]) { m.castShadow = true; m.computeBoundingSphere(); }
     g.add(a, b);
+    // kruhy svetla pod lucernami (pri stene posunuté od múru)
+    g.add(kruhySvetla(zoznam.map(({ x, z, uhol }) => [x + Math.sin(uhol) * (kov === kovStlp ? 0 : 0.72), z + Math.cos(uhol) * (kov === kovStlp ? 0 : 0.72), 6.5]), vyskopis, TEPLA));
   }
-  g.userData.materialSvetla = matSvetlo;
   return g;
 }

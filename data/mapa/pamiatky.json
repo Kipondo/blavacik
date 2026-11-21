@@ -7,6 +7,7 @@
     {"model": "michalska-brana", "nazov": "Michalská brána", "x": -70, "z": -181, "natocenie": -0.06, "zaber": {"kruh": 7}, "dosah": 45},
     {"model": "stara-radnica", "nazov": "Stará radnica", "x": 100, "z": -25, "natocenie": -1.079, "zaber": {"obdlznik": [56, 48]}, "dosah": 40},
     {"model": "fontana", "nazov": "Hlavné námestie", "x": 34, "z": 11, "dosah": 45, "zaber": {"kruh": 5}},
+    {"model": "fontana-ganymedes", "nazov": "Ganymedova fontána", "x": 150.2, "z": 144.5, "dosah": 30, "zaber": {"kruh": 3.6}},
     {"model": "primacialny-palac", "nazov": "Primaciálny palác", "x": 160, "z": -32, "natocenie": -0.896, "zaber": {"obdlznik": [57, 64]}, "dosah": 40},
     {"nazov": "Hviezdoslavovo námestie", "x": 52, "z": 205, "dosah": 110},
     {"model": "snd", "nazov": "Slovenské národné divadlo", "x": 185, "z": 124, "natocenie": -1.039, "zaber": {"obdlznik": [36, 64]}, "dosah": 45},
