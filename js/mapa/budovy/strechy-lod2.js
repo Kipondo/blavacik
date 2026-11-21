@@ -1,16 +1,19 @@
 // Strechy budov z laserového skenovania (LOD2): roviny striech, ploché časti a štíty.
 // Dáta: data/mapa/mesto/strechy/<i>_<j>.bin (vyrába tools/mesto/laser/budovy.py, číta js/mapa/dlazdice/doplnky.js)
-//   { sikme: {p, uv, c, i}, ploche: {…}, steny: {…}, kominy } – p v súradniciach hry, uv v metroch,
+//   { sikme: {p, uv, c, i}, ploche: {…}, steny: {…}, okna: {…}, kominy } – p v súradniciach hry, uv v metroch,
+//   steny = štítové steny medzi budovami, okna = ustúpené podlažia a nadstavby (s oknami, okna-ustupenych.js),
 //   c = lineárny odtieň (násobí textúru), i = indexy trojuholníkov (vrcholy sa medzi plochami nezdieľajú).
 // Materiály sú CC0 textúry z ambientCG (assets/textury/LICENSE.md).
 
 import * as THREE from 'three';
 import { vNahradenom } from '../pamiatky/nahradene-budovy.js';
+import { stenySOknami } from './okna-ustupenych.js';
 
 const TEXTURY = {
   sikme: { priecinok: 'skridla', velkost: 2.2, drsnost: 0.85 },
   ploche: { priecinok: 'strk', velkost: 1.6, drsnost: 0.95 },
   steny: { priecinok: 'omietka', velkost: 3.0, drsnost: 0.9 },
+  okna: { priecinok: 'omietka', velkost: 3.0, drsnost: 0.9 },
 };
 
 let materialy = null;
@@ -100,7 +103,7 @@ export function vytvorStrechyLod2(data) {
   skupina.name = 'strechy-lod2';
   if (!data) return skupina;
   const mat = ziskajMaterialy();
-  for (const druh of ['sikme', 'ploche', 'steny']) {
+  for (const druh of ['sikme', 'ploche', 'steny', 'okna']) {
     const d = data[druh];
     if (!d?.p?.length) continue;
     const g = new THREE.BufferGeometry();
@@ -112,7 +115,8 @@ export function vytvorStrechyLod2(data) {
     else if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
     g.computeVertexNormals();
     g.computeBoundingSphere();
-    const m = new THREE.Mesh(g, mat[druh]);
+    // ustúpené podlažia a nadstavby dostanú okná – js/mapa/budovy/okna-ustupenych.js
+    const m = druh === 'okna' ? stenySOknami(g, mat.okna) : new THREE.Mesh(g, mat[druh]);
     m.castShadow = true;
     m.receiveShadow = true;
     m.name = `strechy-${druh}`;

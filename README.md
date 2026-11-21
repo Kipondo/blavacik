@@ -108,7 +108,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
     vo výreze detailný terén po 2 m,
   - výšky budov z lasera (`zdrojVysky`: `lidar` / `osm` / `odhad`), strechy rozložené na roviny (LOD2) so škridlou
-    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera); ustúpené podlažia
+    a nadstavby (stena medzi rovinami strechy tej istej budovy) majú okná po podlažiach, štítové steny medzi
+    dvoma budovami ostávajú bez okien (issue #64, `js/mapa/budovy/okna-ustupenych.js`, snímky `docs/snimky/okna-ustupene/`),
   - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
     na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
   - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch, tráva v parkoch,
