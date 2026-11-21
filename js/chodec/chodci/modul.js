@@ -228,10 +228,14 @@ export default {
       const h = c.hrana, ux = h.ux * c.smer, uz = h.uz * c.smer;
       // vpravo od smeru chôdze = (-uz, ux)
       let x = h.a.x + h.ux * c.s - uz * c.bocny, z = h.a.z + h.uz * c.s + ux * c.bocny;
-      // bokom nie do domu ani na vozovku – späť k osi chodníka
-      if (Math.abs(c.bocny) > 0.3 && !this.siet.jePesie(x, z)) {
-        c.bocny *= 0.5; c.bocnyCiel *= 0.3;
-        x = h.a.x + h.ux * c.s - uz * c.bocny; z = h.a.z + h.uz * c.s + ux * c.bocny;
+      // bokom nie do domu ani na vozovku – späť k osi chodníka (kontrola 3× za sekundu stačí)
+      c.kontrola = (c.kontrola ?? Math.random() * 0.33) - dt;
+      if (Math.abs(c.bocny) > 0.3 && c.kontrola <= 0) {
+        c.kontrola = 0.33;
+        if (!this.siet.jePesie(x, z)) {
+          c.bocny *= 0.5; c.bocnyCiel *= 0.3;
+          x = h.a.x + h.ux * c.s - uz * c.bocny; z = h.a.z + h.uz * c.s + ux * c.bocny;
+        }
       }
       c.vx = (x - c.x) / Math.max(dt, 1e-4); c.vz = (z - c.z) / Math.max(dt, 1e-4);
       c.x = x; c.z = z;
@@ -249,8 +253,16 @@ export default {
       }
       const dx = c.ciel[0] - c.x, dz = c.ciel[1] - c.z, d = Math.hypot(dx, dz) || 1;
       const nx = c.x + (dx / d) * c.rych * dt, nz = c.z + (dz / d) * c.rych * dt;
-      if ((!hra.mapa.kolizie || hra.mapa.kolizie.jeVolne(nx, nz, 0.3)) && this.siet.jePesie(nx, nz)) { c.x = nx; c.z = nz; }
-      else c.ciel = null; // prekážka (fontána, socha, dom, vozovka) – nový cieľ
+      // prekážka (fontána, socha, dom, vozovka) – nový cieľ; kontroluje sa 4× za sekundu bod 0,8 m vpredu
+      c.kontrola = (c.kontrola ?? Math.random() * 0.25) - dt;
+      let volno = true;
+      if (c.kontrola <= 0) {
+        c.kontrola = 0.25;
+        const px = c.x + (dx / d) * 0.8, pz = c.z + (dz / d) * 0.8;
+        volno = (!hra.mapa.kolizie || hra.mapa.kolizie.jeVolne(px, pz, 0.3)) && this.siet.jePesie(px, pz);
+      }
+      if (volno) { c.x = nx; c.z = nz; }
+      else c.ciel = null;
       if (c.rych > 0.05) {
         let du = Math.atan2(dx, dz) - c.uhol;
         du = Math.atan2(Math.sin(du), Math.cos(du));
@@ -282,12 +294,16 @@ export default {
 
   /** Chodci sa navzájom obchádzajú a uhýbajú hráčovi a autu (mriežka 2 m). */
   _odstupy(hra, dt) {
-    const mriezka = new Map();
+    // mriežka 2 × 2 m sa používa znova (nové polia každý snímok zbytočne zaťažovali zber pamäte)
+    if (!this._mriezka || this._mriezka.size > 4000) this._mriezka = new Map();
+    const mriezka = this._mriezka;
+    for (const zoz of mriezka.values()) zoz.length = 0;
     const kluc = (x, z) => (Math.floor(x / 2) * 73856093) ^ (Math.floor(z / 2) * 19349663);
     for (const c of this.chodci) {
       const k = kluc(c.x, c.z);
-      if (!mriezka.has(k)) mriezka.set(k, []);
-      mriezka.get(k).push(c);
+      let zoz = mriezka.get(k);
+      if (!zoz) mriezka.set(k, (zoz = []));
+      zoz.push(c);
     }
     const hp = hra.stav.auto ? hra.stav.auto.pozicia : hra.hrac?.pozicia;
     const auto = hra.stav.auto;

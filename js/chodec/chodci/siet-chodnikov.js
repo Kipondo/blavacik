@@ -5,11 +5,17 @@
 
 const PRE_CHODCOV = new Set(['footway', 'pedestrian', 'path', 'steps', 'platform']);
 const BUNKA = 25;
+const klucBunky = (i, j) => i * 100003 + j;
 
 /** Je bod v pôdoryse domu alebo pamiatky (z kolízií mapy; lampy, stromy a lavičky sa nerátajú)? */
 export function vBudove(kolizie, x, z) {
   if (!kolizie) return false;
-  for (const p of kolizie.vOkoli(x, z, 0.1)) {
+  // len bunka mriežky s bodom (dom je zapísaný vo všetkých bunkách, ktoré prekrýva) – bez nových objektov
+  // (volá sa často; vOkoli by pri každom volaní vyrobilo novú množinu a zbytočne zaťažilo zber pamäte)
+  const zoznam = kolizie.mriezka && kolizie._kluc
+    ? kolizie.mriezka.get(kolizie._kluc(Math.floor(x / kolizie.bunka), Math.floor(z / kolizie.bunka))) ?? []
+    : kolizie.vOkoli(x, z, 0.1);
+  for (const p of zoznam) {
     if (p.typ !== 'polygon' || (p.info?.typ !== 'budova' && p.info?.typ !== 'pamiatka')) continue;
     if (x < p.minX || x > p.maxX || z < p.minZ || z > p.maxZ) continue;
     if (vnutri(p.body, x, z)) return true;
@@ -37,7 +43,7 @@ export class SietChodnikov {
         const u = { ax, az, bx, bz, pol };
         for (let x = Math.floor((Math.min(ax, bx) - pol) / BUNKA); x <= Math.floor((Math.max(ax, bx) + pol) / BUNKA); x++) {
           for (let z = Math.floor((Math.min(az, bz) - pol) / BUNKA); z <= Math.floor((Math.max(az, bz) + pol) / BUNKA); z++) {
-            const k = `${x},${z}`;
+            const k = klucBunky(x, z);
             if (!m.has(k)) m.set(k, []);
             m.get(k).push(u);
           }
@@ -52,7 +58,7 @@ export class SietChodnikov {
    * okraj > 0 = bod musí byť aspoň takto ďaleko od okraja, aby sa nerátal (chodník tesne pri obrubníku je OK).
    */
   naVozovke(x, z, okraj = 0.3) {
-    const k = `${Math.floor(x / BUNKA)},${Math.floor(z / BUNKA)}`;
+    const k = klucBunky(Math.floor(x / BUNKA), Math.floor(z / BUNKA));
     for (const d of this.dlazdice.values()) {
       for (const u of d.vozovka?.get(k) ?? []) {
         const dx = u.bx - u.ax, dz = u.bz - u.az, l2 = dx * dx + dz * dz || 1;
