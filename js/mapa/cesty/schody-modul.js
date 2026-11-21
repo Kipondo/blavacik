@@ -192,7 +192,9 @@ export default {
     for (const p of podchody ?? []) for (const b of p.body ?? []) podZemou.add(kluc(b));
     const o = { poz: [], uv: [], farby: [], idx: [] };
     const zabradlia = [];
-    const vyska = (x, z) => hra.mapa.vyska(x, z);
+    // výška terénu (hra.mapa.vyska môže pripočítať vozovku a chodník – js/mapa/cesty/povrch-modul.js)
+    const zem = hra.mapa.vyskaZeme ?? hra.mapa.vyska;
+    const vyska = (x, z) => zem(x, z);
     for (const c of chodniky) {
       if (c.typ !== 'steps' || c.nadjazd || c.most) continue;
       if (podZemou.size && c.body.some((b) => podZemou.has(kluc(b)))) continue;
