@@ -1,5 +1,5 @@
 {
-  "name": "blava-city-nastroje-mesto",
+  "name": "blavacik-nastroje-mesto",
   "private": true,
   "type": "module",
   "description": "Nástroje na spracovanie celej Bratislavy (OSM + výškový model) do dlaždíc pre hru.",

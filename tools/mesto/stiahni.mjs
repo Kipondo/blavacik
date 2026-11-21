@@ -20,7 +20,7 @@ for (const [meno, url] of SUBORY) {
   const ciel = `${CACHE}/${meno}`;
   if (existsSync(ciel) && !process.argv.includes('--znova')) { console.log(`✓ ${meno} (už je stiahnutý)`); continue; }
   process.stdout.write(`Sťahujem ${meno} … `);
-  const r = await fetch(url, { headers: { 'User-Agent': 'BlavaCity/1.0 (hra pre srandu)' } });
+  const r = await fetch(url, { headers: { 'User-Agent': 'Blavacik/1.0 (hra pre srandu)' } });
   if (!r.ok) throw new Error(`${url}: ${r.status}`);
   await finished(Readable.fromWeb(r.body).pipe(createWriteStream(ciel)));
   console.log('ok');

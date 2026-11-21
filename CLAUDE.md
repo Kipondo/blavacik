@@ -1,4 +1,4 @@
-# Blava City – pravidlá projektu
+# Blavačík – pravidlá projektu
 
 Zábavná 3D hra v prehliadači v štýle open-world akčných hier, odohráva sa v Bratislave.
 Ide len o srandu. **Nepoužívaj názov GTA ani nič z originálnych hier** (logá, hudba, postavy, texty).
