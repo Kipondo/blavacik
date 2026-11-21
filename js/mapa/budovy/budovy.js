@@ -15,6 +15,7 @@
 // ("typ", "styl", "podlazia"; pri odhadnutej výške ju aj prispôsobí typu).
 
 import * as THREE from 'three';
+import { dokonci } from '../kroky.js';
 import { bodVPolygone, stredBodov } from '../geometria.js';
 import { materialFasad, STYLY, PARAMETRE } from './fasady.js';
 import { texturaSkla } from '../pamiatky/textury.js';
@@ -57,6 +58,11 @@ export function ziskajMaterialy() {
 }
 
 export function vytvorBudovy(budovy, vyskopis, KONFIG) {
+  return dokonci(krokyBudov(budovy, vyskopis, KONFIG));
+}
+
+/** To isté po krokoch (generátor) – správca dlaždíc stavbu rozloží do viacerých snímok. */
+export function* krokyBudov(budovy, vyskopis, KONFIG) {
   typizujBudovy(budovy);
   const chunky = new Map();
   for (const b of budovy) {
@@ -70,7 +76,7 @@ export function vytvorBudovy(budovy, vyskopis, KONFIG) {
   const skupina = new THREE.Group();
   skupina.name = 'budovy';
   for (const zoznam of chunky.values()) {
-    const mesh = new THREE.Mesh(postavGeometriu(zoznam, vyskopis), ziskajMaterialy());
+    const mesh = new THREE.Mesh(yield* postavGeometriu(zoznam, vyskopis), ziskajMaterialy());
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     skupina.add(mesh);
@@ -193,12 +199,16 @@ function pasyVyvysenej(spodok, vrch, par) {
   return [[spodok, vrch - atika, 1, 1 + f], [vrch - atika, vrch, 100, 101]];
 }
 
-function postavGeometriu(budovy, vyskopis) {
+const BUDOV_NA_KROK = 30;
+
+function* postavGeometriu(budovy, vyskopis) {
   const skupiny = [0, 1, 2].map(() => ({ poz: [], uv: [], farba: [], typ: [], metre: [], znaky: [] }));
   const [steny, sklo, strechy] = skupiny;
   const cs = new THREE.Color();
 
+  let n = 0;
   for (const b of budovy) {
+    if (++n % BUDOV_NA_KROK === 0) yield;
     const r = rozlozenieBudovy(b, vyskopis);
     const { body, diery, spodok, vrch, typ, par, seed, pasy, znaky } = r;
     const c = r.farba;
@@ -231,6 +241,7 @@ function postavGeometriu(budovy, vyskopis) {
     if (valbova) valbovaStrecha(strechy, body, vrch, cs, b.hreben);
     else plochaStrecha(strechy, body, diery, vrch, cs);
   }
+  yield;
 
   const geo = new THREE.BufferGeometry();
   const spoj = (k) => skupiny.flatMap((s) => s[k]);

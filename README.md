@@ -22,6 +22,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Vypísať polohu (pre misie) | P | – |
+| Ukazovateľ výkonu (snímky/s, čas snímky, rozlíšenie) | F3 | – |
 
 ## Čo je hotové
 - **Nadjazdy, lávky a nadchody** (`tools/mesto/nadjazdy.mjs` → `"nadjazdy"` v dlaždiciach, `js/mapa/mosty/nadjazdy.js`,
@@ -94,6 +95,17 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   tmavší sokel budov, stromy (listnaté zo zhlukov, ihličnany) s tieňovaním koruny, zaoblené autá
   (sedan, hatchback, SUV) s lesklým lakom, diskami, svetlami a ŠPZ, postava s kĺbmi a animáciou chôdze/behu.
   Na mobile sa automaticky vypnú tiene a drahšie materiály.
+- **Plynulosť (hra nesekala pri načítaní mesta):** dlaždica mesta sa stavia po malých krokoch (najviac ~7 ms za snímok):
+  zem po krokoch (textúra, mapa tried, výšky po 30 riadkoch, normály – `js/mapa/teren/zem-dlazdica.js`), budovy po 30
+  (`krokyBudov`), cesty, chodníky, koľaje, podchody, značky a lampy každé zvlášť (`js/mapa/dlazdice/postav-dlazdicu.js`).
+  Mapa tried zeme sa skladá bez čítania pixelov (trieda do R, zatienenie a maska asfaltu sa prefarbia a pripočítajú),
+  zatienenie pri domoch je jedno rozmazanie v 4× menšom plátne (predtým rozmazanie pri každom dome – v centre to trvalo
+  aj sekundy), šum textúry je hotové plátno. Hotová dlaždica sa pred ukázaním pripraví pre grafickú kartu
+  (`js/mapa/dlazdice/pripravit-dlazdicu.js`: shadery na pozadí cez `compileAsync`, veľké textúry zeme po jednej).
+  3D fasády sa stavajú po podlažiach a do typovaných polí (menej odpadu v pamäti). **Automatické rozlíšenie**
+  (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na 55 %,
+  pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **F3** ukáže snímky/s, priemerný
+  a najhorší čas snímky, počet kreslení, trojuholníky a rozlíšenie (`js/ui/vykon.js`).
 - **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
   kúty, dvory a ulice pri pohľade zhora), vzdušná perspektíva (vzdialené mestá a kopce blednú do farby oblohy),
   farebné ladenie, vyhladzovanie hrán (MSAA), jemná vineta; tiene slnka sú ostrejšie, stred tieňov je kúsok pred
