@@ -5,6 +5,7 @@
 // Materiály sú CC0 textúry z ambientCG (assets/textury/LICENSE.md).
 
 import * as THREE from 'three';
+import { vNahradenom } from '../pamiatky/nahradene-budovy.js';
 
 const TEXTURY = {
   sikme: { priecinok: 'skridla', velkost: 2.2, drsnost: 0.85 },
@@ -73,6 +74,26 @@ function vytvorKominy(kominy) {
   return m;
 }
 
+/**
+ * Index trojuholníkov bez tých, ktorých stred leží v pôdoryse modelu pamiatky (Átriaky, Manderlák, obchodný dom…) –
+ * laserová strecha by inak trčala z modelu. Vráti null, keď sa nič nevyhadzuje.
+ */
+function bezNahradenychTrojuholnikov(d) {
+  const p = d.p;
+  const pocet = d.i ? d.i.length / 3 : p.length / 9;
+  const vrchol = (t, k) => (d.i ? d.i[t * 3 + k] : t * 3 + k);
+  const ostava = [];
+  let vyhodene = 0;
+  for (let t = 0; t < pocet; t++) {
+    const a = vrchol(t, 0), b = vrchol(t, 1), c = vrchol(t, 2);
+    const x = (p[a * 3] + p[b * 3] + p[c * 3]) / 3, z = (p[a * 3 + 2] + p[b * 3 + 2] + p[c * 3 + 2]) / 3;
+    if (vNahradenom(x, z)) { vyhodene++; continue; }
+    ostava.push(a, b, c);
+  }
+  if (!vyhodene) return null;
+  return p.length / 3 > 65535 ? new Uint32Array(ostava) : new Uint16Array(ostava);
+}
+
 /** Sieť striech jednej dlaždice (skupina troch sietí podľa materiálu). */
 export function vytvorStrechyLod2(data) {
   const skupina = new THREE.Group();
@@ -86,7 +107,9 @@ export function vytvorStrechyLod2(data) {
     g.setAttribute('position', new THREE.Float32BufferAttribute(d.p, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(d.uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(d.c, 3));
-    if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
+    const index = bezNahradenychTrojuholnikov(d);
+    if (index) g.setIndex(new THREE.BufferAttribute(index, 1));
+    else if (d.i) g.setIndex(new THREE.BufferAttribute(d.i, 1));
     g.computeVertexNormals();
     g.computeBoundingSphere();
     const m = new THREE.Mesh(g, mat[druh]);
@@ -95,6 +118,7 @@ export function vytvorStrechyLod2(data) {
     m.name = `strechy-${druh}`;
     skupina.add(m);
   }
-  if (data.kominy?.length) skupina.add(vytvorKominy(data.kominy));
+  const kominy = (data.kominy ?? []).filter(([x, z]) => !vNahradenom(x, z));
+  if (kominy.length) skupina.add(vytvorKominy(kominy));
   return skupina;
 }
