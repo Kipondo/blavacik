@@ -1,4 +1,4 @@
-# Blava City
+# Blavačík
 
 Zábavná 3D hra v prehliadači, odohráva sa v Bratislave. Len pre srandu.
 Hlavný hrdina je študent Ďoďo z Košíc, ktorý je prvýkrát v Bratislave – dizajn hry je v [napady/dizajn-hry.md](napady/dizajn-hry.md),
@@ -24,6 +24,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Názov Blavačík a vizuálna identita v farbách Bratislavy** (issue #17): červená a biela, doplnkovo zlatá
+  (CSS premenné v `css/style.css`, kontrast podľa WCAG AA). Vlastné štylizované logo `assets/ui/logo.svg` – červený štít,
+  biela brána s dvoma vežami a namiesto strednej veže UFO z Mosta SNP; **nie je to oficiálny erb mesta** (ten je chránený).
+  Logo je v menu (aj počas načítavania), v editore postavy a ako ikona stránky (`assets/ui/favicon.svg`), červeno-biele
+  pruhy v menu a editore, štítok s bránou pred názvom miesta v HUD. Snímky: `docs/snimky/identita/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),

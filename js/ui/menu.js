@@ -5,7 +5,9 @@ export function vytvorMenu(koren, { dotyk }) {
   menu.className = 'menu';
   menu.innerHTML = `
     <div class="menu-okno">
-      <h1>Blava<span>City</span></h1>
+      <img class="menu-logo" src="assets/ui/logo.svg" alt="">
+      <div class="menu-pruhy" aria-hidden="true"></div>
+      <h1>Blava<span>čík</span></h1>
       <p class="menu-podtitul">Bratislava. Bez zákazu vjazdu.</p>
       <p class="menu-stav">Načítavam…</p>
       <button class="menu-hrat" disabled>Hrať</button>
@@ -20,7 +22,7 @@ export function vytvorMenu(koren, { dotyk }) {
           <p><b>E</b> – nastúpiť / vystúpiť z auta</p>
           <p><b>Klikni do hry</b> – myš ovláda pohľad, <b>Esc</b> = pauza · <b>P</b> – vypíše polohu</p>`}
       </div>
-      <p class="menu-pata">Hra pre srandu. Všetky postavy a príbehy sú vymyslené.<br>Mapa © prispievatelia OpenStreetMap (ODbL).<br>Terén a budovy: laserové skenovanie © ÚGKK SR (CC BY 4.0), Copernicus DEM. Textúry: ambientCG (CC0).</p>
+      <p class="menu-pata">Hra pre srandu. Všetky postavy a príbehy sú vymyslené. Znak je vlastná štylizácia, nie erb mesta.<br>Mapa © prispievatelia OpenStreetMap (ODbL).<br>Terén a budovy: laserové skenovanie © ÚGKK SR (CC BY 4.0), Copernicus DEM. Textúry: ambientCG (CC0).</p>
     </div>`;
   koren.appendChild(menu);
 

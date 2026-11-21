@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" role="img" aria-labelledby="t">
+  <title id="t">Blavačík – vlastná štylizácia (nie oficiálny erb mesta)</title>
+  <!-- štít: červený s tenkým zlatým lemom -->
+  <path d="M12 12H188V118C188 178 146 214 100 230C54 214 12 178 12 118Z" fill="#c8102e" stroke="#7d0a1d" stroke-width="4"/>
+  <path d="M22 22H178V118C178 171 140 202 100 217C60 202 22 171 22 118Z" fill="none" stroke="#d4a017" stroke-width="2.5"/>
+  <!-- UFO na dvoch šikmých nohách (namiesto strednej veže) -->
+  <g fill="#fff">
+    <path d="M84 126L94 70H99L92 126Z"/>
+    <path d="M116 126L106 70H101L108 126Z"/>
+    <ellipse cx="100" cy="64" rx="34" ry="9"/>
+    <path d="M78 62C80 50 120 50 122 62Z"/>
+    <rect x="98.5" y="34" width="3" height="16"/>
+  </g>
+  <rect x="72" y="61" width="56" height="3.5" fill="#d4a017"/>
+  <circle cx="100" cy="33" r="3" fill="#d4a017"/>
+  <!-- hradba s bránou -->
+  <path d="M48 196V128H56V122H64V128H72V122H80V128H88V122H96V128H104V122H112V128H120V122H128V128H136V122H144V128H152V196Z" fill="#fff"/>
+  <path d="M84 196V172C84 160 116 160 116 172V196Z" fill="#7d0a1d"/>
+  <path d="M90 196V176M100 196V172M110 196V176M86 182H114M86 190H114" stroke="#d4a017" stroke-width="1.6" opacity=".55"/>
+  <!-- bočné veže s cimburím -->
+  <path d="M34 196V100H38V93H44V100H50V93H56V100H60V93H66V100H70V196Z" fill="#fff"/>
+  <path d="M130 196V100H134V93H140V100H146V93H152V100H156V93H162V100H166V196Z" fill="#fff"/>
+  <g fill="#7d0a1d">
+    <rect x="48" y="112" width="8" height="15" rx="4"/>
+    <rect x="48" y="146" width="8" height="15" rx="4"/>
+    <rect x="144" y="112" width="8" height="15" rx="4"/>
+    <rect x="144" y="146" width="8" height="15" rx="4"/>
+  </g>
+  <!-- zem pod hradbou -->
+  <path d="M30 196H170" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+</svg>

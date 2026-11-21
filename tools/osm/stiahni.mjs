@@ -27,7 +27,7 @@ for (let lat = OBLAST.lat0; lat < OBLAST.lat1 - 1e-9; lat += KROK.lat) {
     const bbox = [lon, lat, Math.min(lon + KROK.lon, OBLAST.lon1), Math.min(lat + KROK.lat, OBLAST.lat1)].map((v) => v.toFixed(4)).join(',');
     const url = `https://api.openstreetmap.org/api/0.6/map?bbox=${bbox}`;
     process.stdout.write(`Sťahujem ${bbox} … `);
-    const r = await fetch(url, { headers: { 'User-Agent': 'BlavaCity/1.0 (hra pre srandu)' } });
+    const r = await fetch(url, { headers: { 'User-Agent': 'Blavacik/1.0 (hra pre srandu)' } });
     if (!r.ok) { console.log(`chyba ${r.status}`); await pockaj(5000); continue; }
     writeFileSync(subor, await r.text());
     console.log('ok');
