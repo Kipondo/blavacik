@@ -31,6 +31,7 @@ import oznacenia from './mapa/vybavenie/oznacenia-modul.js';
 import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
+import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -66,6 +67,7 @@ export default [
   podchody,
   nadjazdy,
   trava,
+  cyklopruhy,
   hud,
   lokality,
   poloha,
