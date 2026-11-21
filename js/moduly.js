@@ -17,6 +17,7 @@ import dohlad from './kamera/dohlad.js';
 import dlazdice from './mapa/dlazdice/modul.js';
 import fasady3d from './mapa/budovy/fasady-3d-modul.js';
 import podchody from './mapa/podchody/modul.js';
+import nadjazdy from './mapa/mosty/nadjazdy-modul.js';
 import trava from './mapa/zelen/trava-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
@@ -48,6 +49,7 @@ export default [
   dlazdice,
   fasady3d,
   podchody,
+  nadjazdy,
   trava,
   hud,
   lokality,

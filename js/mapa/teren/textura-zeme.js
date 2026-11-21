@@ -153,12 +153,14 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const ch of d.chodniky ?? []) {
+    if (ch.nadjazd) continue;            // lávka / nadchod – kreslí sa ako most (js/mapa/mosty/nadjazdy.js)
     g.strokeStyle = FARBY_CHODNIKOV[ch.typ] ?? FARBY_CHODNIKOV.footway;
     g.lineWidth = Math.max(1, ch.sirka * mierka);
     cesta(ch.body, false);
     g.stroke();
   }
   for (const k of d.kolajnice ?? []) {
+    if (k.nadjazd) continue;
     g.strokeStyle = '#7a7268';
     g.lineWidth = Math.max(1, 3.4 * mierka);
     cesta(k.body, false);
@@ -254,6 +256,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fill();
   }
   for (const c_ of d.cesty ?? []) {
+    if (c_.nadjazd) continue;
     g.lineWidth = ((c_.sirka ?? 6) + 7) * mierka;
     cesta(c_.body, false);
     g.stroke();
@@ -299,6 +302,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const ch of d.chodniky ?? []) {
+    if (ch.nadjazd) continue;            // lávka / nadchod – kreslí sa ako most (js/mapa/mosty/nadjazdy.js)
     let v = TRIEDA_CHODNIKOV[ch.typ];
     if (v === undefined) continue;
     // v historickom jadre nie sú samostatné chodníky – celá ulica je z kamenných dosiek
