@@ -141,7 +141,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Doprava a značky:** cesty s jazdnými pruhmi a značením (prerušovaná/dvojitá plná, krajnice), čisté plochy
   križovatiek, chodníky s obrubníkmi, zebry (~900 z OSM), električkové koľaje, ~215 semaforov so striedaním fáz,
   značky STOP, daj prednosť, zákaz vjazdu, jednosmerka, obmedzenie rýchlosti, modré tabule s názvami ulíc,
-  ~780 pouličných lámp, červené cyklopruhy s bielou čiarou a piktogramom bicykla (319 úsekov, ~61 km z OSM
+  ~780 pouličných lámp, červené cyklopruhy s bielou čiarou a piktogramom bicykla (316 úsekov, ~61 km z OSM
   `cycleway=lane`). Značka je pred stĺpikom na dvoch objímkach (stĺpik neprechádza symbolom), tabuľa ulice
   má stĺpik pri kraji, označník MHD je plechová skrinka okolo stĺpa. Graf ciest pre NPC dopravu (`data/mapa/graf-ciest.json`, modul `hra.doprava`).
 - **Grafika:** obloha so slnkom a pohyblivými oblakmi, odrazy okolia (sklo, autá, voda), Dunaj s vlnkami,
