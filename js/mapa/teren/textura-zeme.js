@@ -3,6 +3,8 @@
 // Cesty pre autá sa kreslia zvlášť ako 3D pásy (js/mapa/cesty/).
 
 import * as THREE from 'three';
+import { kresliIhriska, triedyIhrisk } from './ihriska.js';
+import { kresliZahrady, triedyZahrad } from './zahrady.js';
 import { dieryPodchodov } from '../podchody/tuby.js';
 
 export const FARBY_POKRYVKY = {
@@ -143,11 +145,15 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
 
   g.fillStyle = FARBY_POKRYVKY.zaklad;
   g.fillRect(0, 0, px, px);
+  // záhrady a trávniky v obytnej zástavbe (js/mapa/teren/zahrady.js)
+  kresliZahrady(g, d, rect, px, vJadre);
   for (const p of d.pokryvka ?? []) {
     g.fillStyle = FARBY_POKRYVKY[p.k] ?? FARBY_POKRYVKY.zaklad;
     cesta(p.body, true);
     g.fill();
   }
+  // športoviská: povrch a čiary z OSM (js/mapa/teren/ihriska.js)
+  kresliIhriska(g, rect, sx, sz, mierka);
   g.fillStyle = '#4f7f8f';
   for (const v of d.voda ?? []) { cesta(v.body, true); g.fill(); }
   g.lineCap = 'round';
@@ -254,6 +260,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.stroke();
     g.fill();
   }
+  triedyZahrad(g, d, rect, px, vJadre);
   for (const c_ of d.cesty ?? []) {
     g.lineWidth = ((c_.sirka ?? 6) + 7) * mierka;
     cesta(c_.body, false);
@@ -279,6 +286,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fill();
     maska(p.body, true, p.k === 'parkovisko');
   }
+  triedyIhrisk(g, gm, rect, sx, sz, mierka);
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
   // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
   if (vyskopis) {
