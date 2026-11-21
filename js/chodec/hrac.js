@@ -144,7 +144,7 @@ export default {
     }
 
     // skok a gravitácia (vo vode sa pláva – výšku rieši plavanie.js; podchody a mosty majú vlastnú výšku)
-    const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mosty?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
+    const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mosty?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y);
     const pliva = aktualizujVodu(dt, hra, h);
     if (pliva) {
       // nič – postava drží pri hladine
