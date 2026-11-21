@@ -55,9 +55,10 @@ export function vytvorOznacnik(THREE, textura) {
   g.add(s);
   const mat = new THREE.MeshStandardMaterial({ map: textura, roughness: 0.6 });
   const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.9), mat);
-  tab.position.set(0, 2.55, 0.06);
-  const zad = tab.clone(); zad.rotation.y = Math.PI; zad.position.z = -0.06;
-  g.add(tab, zad);
+  tab.position.set(0, 2.55, 0.085); // stĺpik má polomer 6 cm – tabuľa (aj zadná) musí byť mimo neho
+  const zad = tab.clone(); zad.rotation.y = Math.PI; zad.position.z = -0.085;
+  // plechová skrinka tabule okolo stĺpika (predná a zadná tabuľa sú jej steny)
+  g.add(tab, zad, kvader(THREE, S, S.kov, 0.6, 0.9, 0.165, 0, 2.55, 0));
   g.userData.uvolni = () => { tab.geometry.dispose(); mat.dispose(); textura.dispose(); };
   return g;
 }
