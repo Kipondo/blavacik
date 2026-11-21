@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { dieryPodchodov } from '../podchody/tuby.js';
+import { dokonci } from '../kroky.js';
 
 export const FARBY_POKRYVKY = {
   zaklad: '#8c887d',
@@ -356,6 +357,7 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   g2.imageSmoothingEnabled = true;
   g2.imageSmoothingQuality = 'high';
   g2.drawImage(rozmazaneBudovy(d.budovy, rect, px), 0, 0, px, px);
+  yield;
   // šedá → len zelený kanál; maska asfaltu → len modrý kanál; potom sa sčítajú s triedou (R)
   g2.globalCompositeOperation = 'multiply';
   g2.fillStyle = 'rgb(0,255,0)'; g2.fillRect(0, 0, px, px);
@@ -369,13 +371,6 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;
   return t;
-}
-
-/** Dokončí generátor naraz (pre volania mimo streamovania dlaždíc). */
-export function dokonci(gen) {
-  let r = gen.next();
-  while (!r.done) r = gen.next();
-  return r.value;
 }
 
 /** Pôdorysy budov (biela na čiernom) v plátne px/4 × px/4, rozmazané o 2,2 m – mäkké zatienenie pri päte domov. */

@@ -3,11 +3,12 @@
 // do viacerých snímok, aby hra pri načítaní dlaždice nesekala.
 
 import * as THREE from 'three';
-import { krokyTexturyDlazdice, krokyTriedDlazdice, dokonci } from './textura-zeme.js';
+import { krokyTexturyDlazdice, krokyTriedDlazdice } from './textura-zeme.js';
+import { dokonci } from '../kroky.js';
 import { materialZeme } from './material-zeme.js';
 
 const KROK = 5, KROK_DETAIL = 2;
-const RIADKOV_NA_KROK = 50;   // koľko riadkov siete sa spočíta naraz (potom sa vráti riadenie hre)
+const RIADKOV_NA_KROK = 30;   // koľko riadkov siete sa spočíta naraz (potom sa vráti riadenie hre)
 const SUKNA = 2;              // m – o koľko nižšie ide „sukňa“ na okraji dlaždice
 
 export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
