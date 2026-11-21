@@ -24,10 +24,22 @@ const PROFILY = {
 };
 
 const geoCache = new Map();
-function extruzia(body, hlbka, zaoblenie) {
+
+/** Doplní body na hranách profilu (aby sa plech pri náraze mohol preliačiť lokálne, nie celá strana). */
+function zhusti(body, krok) {
+  const out = [];
+  for (let i = 0; i < body.length; i++) {
+    const a = body[i], b = body[(i + 1) % body.length];
+    const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / krok));
+    for (let k = 0; k < n; k++) out.push([a[0] + ((b[0] - a[0]) * k) / n, a[1] + ((b[1] - a[1]) * k) / n]);
+  }
+  return out;
+}
+
+function extruzia(body, hlbka, zaoblenie, kroky = 1) {
   const tvar = new THREE.Shape(body.map(([z, y]) => new THREE.Vector2(z, y)));
   const geo = new THREE.ExtrudeGeometry(tvar, {
-    depth: hlbka, bevelEnabled: zaoblenie > 0, bevelThickness: zaoblenie, bevelSize: zaoblenie, bevelSegments: 3, curveSegments: 4,
+    depth: hlbka, steps: kroky, bevelEnabled: zaoblenie > 0, bevelThickness: zaoblenie, bevelSize: zaoblenie, bevelSegments: 3, curveSegments: 4,
   });
   // tvar je v rovine XY (x = dĺžka) → otočíme, aby dĺžka bola v osi z
   geo.translate(0, 0, -hlbka / 2);
@@ -46,8 +58,8 @@ function geometrie(typ) {
     [kabina[2][0] - 0.02, kabina[2][1] + 0.02], [kabina[2][0] - 0.06, kabina[2][1] - 0.04],
   ];
   const g = {
-    telo: extruzia(p.spodok, SIRKA - 0.16, 0.08),
-    sklo: extruzia(kabina, SIRKA - 0.2, 0.04),
+    telo: extruzia(zhusti(p.spodok, 0.4), SIRKA - 0.16, 0.08, 4),
+    sklo: extruzia(zhusti(kabina, 0.5), SIRKA - 0.2, 0.04, 3),
     strecha: extruzia(strecha, SIRKA - 0.22, 0.03),
     dlzka: Math.max(...p.spodok.map((b) => b[0])) - Math.min(...p.spodok.map((b) => b[0])),
     predok: Math.max(...p.spodok.map((b) => b[0])),
@@ -156,6 +168,6 @@ export function vytvorModelAuta(farba = '#c8102e', typ = null) {
   auto.add(tien);
 
   auto.traverse((o) => { if (o.isMesh && o !== tien) o.castShadow = true; });
-  auto.userData = { telo, kolesa, predneKlby, matKaroseria, typ };
+  auto.userData = { telo, kolesa, predneKlby, matKaroseria, typ, dlzka: g.dlzka, predok: g.predok, zadok: g.zadok };
   return auto;
 }
