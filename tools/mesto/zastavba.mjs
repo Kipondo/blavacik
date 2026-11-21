@@ -1,7 +1,9 @@
 // Obytná zástavba z OSM (landuse=residential) → data/mapa/zastavba.json. Hra v nej kreslí nezastavanú
 // a nespevnenú zem ako záhrady / trávniky (js/mapa/teren/zahrady.js) – podľa satelitnej snímky sú
 // sídliská aj rodinné domy zelené, v hre bola všade béžová „holá“ zem.
-// Spustenie: cd tools/mesto && node --max-old-space-size=8000 zastavba.mjs
+// Kde OSM obytnú zástavbu nemá (napr. celá Petržalka), dopĺňa ju odhad z obytných budov
+// (tools/mesto/zastavba_odhad.py – okolie bytoviek 30 m a domov 20 m, zlúčené a zjednodušené).
+// Spustenie: cd tools/mesto && node --max-old-space-size=8000 zastavba.mjs && python3 zastavba_odhad.py
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { nacitajPbf } from './pbf.mjs';
@@ -58,6 +60,16 @@ for (const rel of db.relacie.values()) {
     pridaj(kruh);
   }
 }
+// obytné budovy pre odhad (tools/mesto/zastavba_odhad.py)
+const OBYTNE = { apartments: 30, residential: 30, dormitory: 30, house: 20, detached: 20, semidetached_house: 20, terrace: 20, bungalow: 20, villa: 20 };
+const budovy = [];
+for (const w of db.cesty.values()) {
+  const r_ = OBYTNE[w.t.building];
+  if (!r_ || w.nd.length < 4 || w.nd[0] !== w.nd[w.nd.length - 1]) continue;
+  budovy.push({ r: r_, b: body(w.nd).map(([x, z]) => [r(x), r(z)]) });
+}
+writeFileSync(join(CACHE, 'obytne-budovy.json'), JSON.stringify(budovy));
+console.log(budovy.length, 'obytných budov pre odhad');
 console.log(vystup.length, 'plôch obytnej zástavby,', vystup.reduce((s, b) => s + b.length, 0), 'bodov');
 writeFileSync(join(CACHE, '..', '..', 'data', 'mapa', 'zastavba.json'), JSON.stringify({
   popis: 'VYGENEROVANÉ z OpenStreetMap (tools/mesto/zastavba.mjs): obrysy obytnej zástavby (landuse=residential). © prispievatelia OpenStreetMap, ODbL.',
