@@ -24,6 +24,15 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Vypísať polohu (pre misie) | P | – |
 
 ## Čo je hotové
+- **Nadjazdy, lávky a nadchody** (`tools/mesto/nadjazdy.mjs` → `"nadjazdy"` v dlaždiciach, `js/mapa/mosty/nadjazdy.js`,
+  modul `js/mapa/mosty/nadjazdy-modul.js`): ~1 100 mostov z OSM mimo Dunaja (cesty, lávky a cyklolávky, železničné
+  a električkové mosty). Laserový terén most nemá, preto mostovka ide od terénu na jednom konci k druhému (násypy sú
+  v teréne) a nad cestou, koľajou alebo potokom sa zdvihne na podjazdnú výšku (4,8 m, 6 m, 1,6 m) s rampami;
+  keď koniec ostane vysoko, pokračuje rampou (cesta) alebo schodmi (lávka). Mostovka má boky a spodok, cesta betónový
+  parapet, lávka kovové zábradlie, koľaj koľajnice; piliere stoja mimo podjazdov (s kolíziou), na koncoch opory.
+  Mosty, ktoré sa napájajú na iný most (rampy križovatiek), majú „voľný“ koniec bez kotvy na teréne. Po mostoch
+  sa dá chodiť aj jazdiť (`hra.mosty.vyska(x, z, y)` – na mostovke, ak je hráč alebo auto v jej výške, pod mostom terén).
+  Cesty, chodníky a koľaje na moste sa už nekreslia na zem. Snímky: `docs/snimky/nadjazdy/`.
 - **Typy budov v celom meste** (`js/mapa/budovy/typ-budovy.js`): každá budova dostane typ – panelák, rodinný dom,
   meštiansky dom, bytovka, hala, garáž/kôlňa, obchod, kancelárie, historická – podľa OSM typu (prezradeného odhadnutou
   výškou, neskôr `typOsm`), tvaru pôdorysu (plocha, šírka, doska/bod), strechy a štvrte. Podľa typu sa vyberie fasáda,
@@ -195,7 +204,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
-- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
+- Cesty ako plochy podľa skutočného tvaru (OSM area:highway v Bratislave takmer chýba – zatiaľ len ostrovčeky), NPC autá po nadjazdoch.
 - MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
