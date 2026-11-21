@@ -3,6 +3,7 @@
 // berie svoj výrez cez vlastný atribút inštancie – celé je to jeden draw call.
 
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { kluc } from '../cesty/krizovatky.js';
 
 const STLPCE = 4, RIADKY = 64;           // 256 názvov v atlase
@@ -87,19 +88,31 @@ export function vytvorTabuleUlic(cesty, krizovatky, vyskopis) {
       .replace('#include <uv_vertex>', `#include <uv_vertex>\nvMapUv = vMapUv * vec2(${(1 / STLPCE).toFixed(6)}, ${(1 / RIADKY).toFixed(6)}) + aPosun;`);
   };
   const tabMesh = new THREE.InstancedMesh(spojena, mat, platne.length);
-  const stlpGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.9, 6);
-  stlpGeo.translate(0, 1.45, 0);
-  const stlpy = new THREE.InstancedMesh(stlpGeo, new THREE.MeshStandardMaterial({ color: '#2d3236', metalness: 0.5 }), platne.length);
+  // stĺpik je pri kraji tabule (nie v jej strede), končí tesne nad ňou; tabuľa drží na dvoch objímkach
+  const stlpGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.75 + VYSKA_M / 2 + 0.06, 6);
+  stlpGeo.translate(0, (2.75 + VYSKA_M / 2 + 0.06) / 2, 0);
+  const BOK = SIRKA_M / 2 + 0.06;
+  const objimky = mergeGeometries([-1, 1].map((s) => {
+    const g = new THREE.BoxGeometry(0.1, 0.03, 0.05);
+    g.translate(-BOK + 0.03, s * VYSKA_M * 0.3, 0);
+    return g;
+  }));
+  const matStlpa = new THREE.MeshStandardMaterial({ color: '#2d3236', metalness: 0.5 });
+  const stlpy = new THREE.InstancedMesh(stlpGeo, matStlpa, platne.length);
+  const objMesh = new THREE.InstancedMesh(objimky, matStlpa, platne.length);
   const o = new THREE.Object3D();
   platne.forEach((t, i) => {
     const y = vyskopis.vyska(t.x, t.z) + 0.25;
     o.position.set(t.x, y, t.z); o.rotation.set(0, 0, 0); o.updateMatrix();
     stlpy.setMatrixAt(i, o.matrix);
-    o.position.set(t.x, y + 2.75, t.z); o.rotation.set(0, t.uhol, 0); o.updateMatrix();
+    // tabuľa posunutá bokom (v jej rovine), stĺpik je pri jej ľavom kraji
+    const c = Math.cos(t.uhol), sn = Math.sin(t.uhol);
+    o.position.set(t.x + c * BOK, y + 2.75, t.z - sn * BOK); o.rotation.set(0, t.uhol, 0); o.updateMatrix();
     tabMesh.setMatrixAt(i, o.matrix);
+    objMesh.setMatrixAt(i, o.matrix);
   });
-  tabMesh.computeBoundingSphere(); stlpy.computeBoundingSphere();
-  skupina.add(tabMesh, stlpy);
+  tabMesh.computeBoundingSphere(); stlpy.computeBoundingSphere(); objMesh.computeBoundingSphere();
+  skupina.add(tabMesh, stlpy, objMesh);
   return skupina;
 }
 

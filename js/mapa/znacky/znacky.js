@@ -3,11 +3,14 @@
 // Všetky značky jedného druhu sú jeden InstancedMesh.
 
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { texturaZnacky, ZADNA_STRANA } from './textury-znaciek.js';
 import { kluc } from '../cesty/krizovatky.js';
 import { najblizsiNaUsecke } from '../geometria.js';
 
 const VYSKA = 2.3, VELKOST = 0.75;
+// predná strana tabule je 6 cm pred osou stĺpika (polomer 4 cm + 2 cm), aby stĺpik neprechádzal symbolom
+const ODSTUP_TABULE = 0.06;
 
 export function vytvorZnacky(data, krizovatky, vyskopis) {
   const zoznam = []; // { typ, x, z, smerX, smerZ } – smer = kam ide vodič, ktorý značku vidí
@@ -105,15 +108,25 @@ function postavZnacky(zoznam, vyskopis) {
     if (!podlaTypu.has(z.typ)) podlaTypu.set(z.typ, []);
     podlaTypu.get(z.typ).push(z);
   }
+  // tabuľa je PRED stĺpikom (polomer 4 cm + medzera), zadná strana 1 cm za prednou;
+  // medzi stĺpikom a zadnou stranou dve objímky, aby tabuľa nevisela vo vzduchu
   const predna = new THREE.PlaneGeometry(VELKOST, VELKOST);
+  predna.translate(0, 0, ODSTUP_TABULE);
   const zadna = new THREE.PlaneGeometry(VELKOST, VELKOST);
   zadna.rotateY(Math.PI);
-  zadna.translate(0, 0, -0.01);
+  zadna.translate(0, 0, ODSTUP_TABULE - 0.01);
+  const objimky = mergeGeometries([-1, 1].map((s) => {
+    const g = new THREE.BoxGeometry(0.1, 0.035, ODSTUP_TABULE - 0.01);
+    g.translate(0, s * VELKOST * 0.28, (ODSTUP_TABULE - 0.01) / 2);
+    return g;
+  }));
   const matZadna = new THREE.MeshStandardMaterial({ color: ZADNA_STRANA, metalness: 0.5, roughness: 0.5 });
+  const matObjimky = new THREE.MeshStandardMaterial({ color: '#7d8489', metalness: 0.6, roughness: 0.45 });
   for (const [typ, z2] of podlaTypu) {
     const mat = new THREE.MeshStandardMaterial({ map: texturaZnacky(typ), transparent: true, alphaTest: 0.5, roughness: 0.6 });
     const p = new THREE.InstancedMesh(predna, mat, z2.length);
     const b = new THREE.InstancedMesh(zadna, matZadna, z2.length);
+    const ob = new THREE.InstancedMesh(objimky, matObjimky, z2.length);
     z2.forEach((z, i) => {
       o.position.set(z.x, vyskopis.vyska(z.x, z.z) + 0.25 + VYSKA - VELKOST / 2, z.z);
       // predná strana hľadí proti jazdnému smeru (na vodiča)
@@ -121,9 +134,10 @@ function postavZnacky(zoznam, vyskopis) {
       o.updateMatrix();
       p.setMatrixAt(i, o.matrix);
       b.setMatrixAt(i, o.matrix);
+      ob.setMatrixAt(i, o.matrix);
     });
-    p.computeBoundingSphere(); b.computeBoundingSphere();
-    skupina.add(p, b);
+    p.computeBoundingSphere(); b.computeBoundingSphere(); ob.computeBoundingSphere();
+    skupina.add(p, b, ob);
   }
   skupina.userData.pocet = zoznam.length;
   return skupina;
