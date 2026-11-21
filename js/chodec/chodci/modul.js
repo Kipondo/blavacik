@@ -1,9 +1,10 @@
 // Modul: chodci na chodníkoch a námestiach okolo hráča.
 //
-// Hustota: do 120 m približne 1 človek na 5 m chodníka (širšie pešie zóny viac, námestia 1 na 30 m²),
-// ďalej (do 230 m) štvrtina. Chodci idú po sieti chodníkov z dlaždíc mesta (siet-chodnikov.js),
-// držia sa vpravo, obchádzajú sa, občas zastanú, na námestiach sa prechádzajú medzi náhodnými bodmi
-// a uhnú hráčovi aj autu.
+// Hustota: do 120 m približne 1 človek na 15 m chodníka (širšie pešie zóny viac, námestia 1 na 110 m²),
+// ďalej (do 230 m) štvrtina. Chodci idú len po chodníkoch, pešich zónach, cestičkách v parkoch, schodoch
+// a prechodoch (siet-chodnikov.js) – nie po vozovke a nie cez domy. Držia sa vpravo, obchádzajú sa,
+// občas zastanú, na námestiach sa prechádzajú medzi náhodnými bodmi a pomalému autu uhnú.
+// Rýchle auto hráča chodca zrazí (zrazenie.js): odletí, spadne, chvíľu leží, vstane a vráti sa na chodník.
 //
 // Kreslenie: najbližších 8 = plný model (model-npc.js, kostra, mimika), ostatní = InstancedMesh
 // s animáciou v textúre (vat.js, material-vat.js) – stovky chodcov za pár volaní kreslenia.
@@ -15,12 +16,13 @@ import { nacitajNpcData, poskladajChodca } from '../npc/profily-npc.js';
 import { vytvorNpc, farbySlotov } from '../npc/model-npc.js';
 import { zapecModel } from './vat.js';
 import { vytvorMaterialyVat, Palety } from './material-vat.js';
-import { SietChodnikov, nahodnyBod, vnutri } from './siet-chodnikov.js';
+import { SietChodnikov, nahodnyBod, vnutri, vBudove } from './siet-chodnikov.js';
+import { zasiahnutyAutom, zraz, pohybZrazeneho, maticaZrazeneho, MIN_RYCHLOST } from './zrazenie.js';
 
 const R_HUSTE = 120, R_RIEDKE = 230, R_ZMAZ = 270;
-const NA_METER = 1 / 5;            // chodcov na meter chodníka šírky 2,5 m
-const NA_M2_NAMESTIA = 1 / 30;
-const MAX_CHODCOV = 1400;
+const NA_METER = 1 / 15;           // chodcov na meter chodníka šírky 2,5 m
+const NA_M2_NAMESTIA = 1 / 110;
+const MAX_CHODCOV = 450;
 const PLNY_DOSAH = 12, MAX_PLNYCH = 8;   // plný model (kostra)
 const L1_DOSAH = 40, MAX_L1 = 70;        // zlúčená sieť LOD1
 const KAP_L1 = 70, KAP_L2 = 500;          // kapacita InstancedMesh na variant
@@ -45,9 +47,10 @@ export default {
     this.frustum = new THREE.Frustum();
     hra.chodci = { zoznam: [] };
 
+    this.siet.kolizie = hra.mapa.kolizie;
     const sprava = hra.mapa.dlazdice;
     if (sprava) {
-      const pridaj = (kluc, data) => this.siet.pridajDlazdicu(kluc, data.chodniky, data.pokryvka);
+      const pridaj = (kluc, data) => this.siet.pridajDlazdicu(kluc, data.chodniky, data.pokryvka, data.cesty);
       for (const [kluc, a] of sprava.aktivne) if (a.uroven === 'detail') pridaj(kluc, a.data);
       hra.na('dlazdica-nacitana', ({ kluc, uroven, data }) => { if (uroven === 'detail') pridaj(kluc, data); });
       hra.na('dlazdica-uvolnena', ({ kluc }) => this.siet.odoberDlazdicu(kluc));
@@ -153,6 +156,7 @@ export default {
         if (vx * dirK.x + vz * dirK.z > -5 || d < 25) continue; // blízko len za chrbtom
       }
       if (hra.mapa.kolizie && !hra.mapa.kolizie.jeVolne(x, z, 0.35)) continue;
+      if (!h && !this.siet.jePesie(x, z)) continue;
       const spec = poskladajChodca(this.data);
       const c = this._novyChodec(spec);
       if (!c) continue;
@@ -203,6 +207,8 @@ export default {
   },
 
   _pohyb(c, dt, hra) {
+    if (c.zrazeny) { pohybZrazeneho(c, dt, hra, (x, z) => vBudove(this.siet.kolizie, x, z)); return; }
+    if (c.navrat) { this._navrat(c, dt, hra); return; }
     if (c.pauza > 0) { c.pauza -= dt; c.cielV = 0; }
     else c.cielV = c.rychlost;
     c.rych += (Math.min(c.cielV, c.cielV * c.brzda) - c.rych) * Math.min(1, dt * 4);
@@ -221,7 +227,12 @@ export default {
       c.bocny += (c.bocnyCiel - c.bocny) * Math.min(1, dt * 1.5);
       const h = c.hrana, ux = h.ux * c.smer, uz = h.uz * c.smer;
       // vpravo od smeru chôdze = (-uz, ux)
-      const x = h.a.x + h.ux * c.s - uz * c.bocny, z = h.a.z + h.uz * c.s + ux * c.bocny;
+      let x = h.a.x + h.ux * c.s - uz * c.bocny, z = h.a.z + h.uz * c.s + ux * c.bocny;
+      // bokom nie do domu ani na vozovku – späť k osi chodníka
+      if (Math.abs(c.bocny) > 0.3 && !this.siet.jePesie(x, z)) {
+        c.bocny *= 0.5; c.bocnyCiel *= 0.3;
+        x = h.a.x + h.ux * c.s - uz * c.bocny; z = h.a.z + h.uz * c.s + ux * c.bocny;
+      }
       c.vx = (x - c.x) / Math.max(dt, 1e-4); c.vz = (z - c.z) / Math.max(dt, 1e-4);
       c.x = x; c.z = z;
       if (c.rych > 0.05) {
@@ -238,8 +249,8 @@ export default {
       }
       const dx = c.ciel[0] - c.x, dz = c.ciel[1] - c.z, d = Math.hypot(dx, dz) || 1;
       const nx = c.x + (dx / d) * c.rych * dt, nz = c.z + (dz / d) * c.rych * dt;
-      if (!hra.mapa.kolizie || hra.mapa.kolizie.jeVolne(nx, nz, 0.3)) { c.x = nx; c.z = nz; }
-      else c.ciel = null; // prekážka (fontána, socha) – nový cieľ
+      if ((!hra.mapa.kolizie || hra.mapa.kolizie.jeVolne(nx, nz, 0.3)) && this.siet.jePesie(nx, nz)) { c.x = nx; c.z = nz; }
+      else c.ciel = null; // prekážka (fontána, socha, dom, vozovka) – nový cieľ
       if (c.rych > 0.05) {
         let du = Math.atan2(dx, dz) - c.uhol;
         du = Math.atan2(Math.sin(du), Math.cos(du));
@@ -247,6 +258,26 @@ export default {
       }
       c.vx = (dx / d) * c.rych; c.vz = (dz / d) * c.rych;
     }
+  },
+
+  /** Po zrazení: vstal a ide (rýchlejšie) späť na svoj chodník, potom pokračuje. */
+  _navrat(c, dt, hra) {
+    let tx, tz;
+    if (c.hrana && !c.hrana.zmazana) {
+      const h = c.hrana;
+      c.s = Math.max(0, Math.min(h.dlzka, (c.x - h.a.x) * h.ux + (c.z - h.a.z) * h.uz));
+      tx = h.a.x + h.ux * c.s; tz = h.a.z + h.uz * c.s;
+    } else if (c.namestie && !c.namestie.zmazana) { c.navrat = false; return; }
+    else { this._zrus(c); return; }
+    const dx = tx - c.x, dz = tz - c.z, d = Math.hypot(dx, dz);
+    if (d < 0.4) { c.navrat = false; c.bocny = c.bocnyCiel = 0; return; }
+    c.rych = Math.min(c.rychlost * 1.6, 2.4);
+    const krok = Math.min(d, c.rych * dt);
+    c.x += (dx / d) * krok; c.z += (dz / d) * krok;
+    c.vx = (dx / d) * c.rych; c.vz = (dz / d) * c.rych;
+    let du = Math.atan2(dx, dz) - c.uhol;
+    du = Math.atan2(Math.sin(du), Math.cos(du));
+    c.uhol += du * Math.min(1, dt * 6);
   },
 
   /** Chodci sa navzájom obchádzajú a uhýbajú hráčovi a autu (mriežka 2 m). */
@@ -261,6 +292,9 @@ export default {
     const hp = hra.stav.auto ? hra.stav.auto.pozicia : hra.hrac?.pozicia;
     const auto = hra.stav.auto;
     for (const c of this.chodci) {
+      if (c.zrazeny) continue;
+      // rýchle auto hráča chodca zrazí (neuhne)
+      if (auto && zasiahnutyAutom(c, auto)) { zraz(c, auto, hra); continue; }
       let px = 0, pz = 0;
       const cx = Math.floor(c.x / 2), cz = Math.floor(c.z / 2);
       for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
@@ -277,10 +311,10 @@ export default {
           if (pred > 0.2 && o.rych < c.rych) c.brzda = Math.min(c.brzda, 0.6);
         }
       }
-      // hráč (pešo) a auto hráča
-      if (hp) {
+      // hráč (pešo) a pomalé auto hráča – odtlačí; rýchle auto už nie (chodec nestihne uhnúť a auto ho zrazí)
+      if (hp && !(auto && Math.hypot(auto.vx, auto.vz) >= MIN_RYCHLOST)) {
         const dx = c.x - hp.x, dz = c.z - hp.z, d = Math.hypot(dx, dz);
-        const r = auto ? 2.6 + Math.min(4, Math.abs(auto.rychlostDopredu) * 0.4) : 0.9;
+        const r = auto ? 2.6 : 0.9;
         if (d < r && d > 1e-3) { const s = ((r - d) / d) * (auto ? 3 : 1.2); px += dx * s; pz += dz * s; }
       }
       if (px === 0 && pz === 0) continue;
@@ -288,7 +322,7 @@ export default {
       if (c.hrana) {
         const ux = c.hrana.ux * c.smer, uz = c.hrana.uz * c.smer;
         const vpravo = px * -uz + pz * ux;
-        const max = Math.max(0, c.hrana.sirka / 2 - 0.3) + (auto ? 2 : 0);
+        const max = Math.max(0, c.hrana.sirka / 2 - 0.3) + (auto ? 0.6 : 0);
         c.bocny = Math.max(-max, Math.min(max, c.bocny + vpravo * k));
         c.bocnyCiel = Math.max(-max, Math.min(max, c.bocnyCiel + vpravo * k * 0.3));
       } else {
@@ -331,7 +365,8 @@ export default {
     const viditelni = [];
     for (const c of this.chodci) {
       const y = hra.mapa.vyska(c.x, c.z);
-      c.y = Math.abs(y - c.y) > 1.5 ? y : c.y + (y - c.y) * Math.min(1, dt * 10);
+      if (c.zrazeny) c.y = c.zrazeny.y;
+      else c.y = Math.abs(y - c.y) > 1.5 ? y : c.y + (y - c.y) * Math.min(1, dt * 10);
       c.d = Math.hypot(c.x - kx, c.z - kz);
       if (c.d > R_RIEDKE + 20) continue;
       gula.center.set(c.x, c.y + 0.9, c.z);
@@ -352,9 +387,15 @@ export default {
           plniTeraz.add(c);
           const k = plny.npc.koren;
           k.visible = true;
-          k.position.set(c.x, c.y, c.z);
-          k.rotation.y = c.uhol;
-          plny.npc.rychlost = c.rych;
+          if (c.zrazeny) {
+            maticaZrazeneho(c, 1, _m);
+            _m.decompose(k.position, k.quaternion, _s);
+            plny.npc.rychlost = 0;
+          } else {
+            k.position.set(c.x, c.y, c.z);
+            k.rotation.set(0, c.uhol, 0);
+            plny.npc.rychlost = c.rych;
+          }
           plny.npc.animuj(dt);
           continue;
         }
@@ -365,10 +406,13 @@ export default {
       if (uroven === 0) nL1++;
       const i = l.pocet++;
       const m = c.spec.mierka ?? 1;
-      _q.setFromAxisAngle(_y, c.uhol);
-      _m.compose(_p.set(c.x, c.y, c.z), _q, _s.set(m, m, m));
+      if (c.zrazeny) maticaZrazeneho(c, m, _m);
+      else {
+        _q.setFromAxisAngle(_y, c.uhol);
+        _m.compose(_p.set(c.x, c.y, c.z), _q, _s.set(m, m, m));
+      }
       l.siet.setMatrixAt(i, _m);
-      const stoji = c.rych < 0.15;
+      const stoji = c.rych < 0.15 || !!c.zrazeny;
       const rych = stoji ? 1 / c.v.trvanieStoja : (c.rych / RYCHLOST_KLIPU) / c.v.trvanieChodze;
       // fáza tak, aby sa pri zmene rýchlosti postava „neprepla“ v kroku
       if (c._rych !== rych) { c.faza = (c.faza + this.cas * ((c._rych ?? rych) - rych)) % 1; c._rych = rych; }
