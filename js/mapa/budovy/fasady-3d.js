@@ -228,7 +228,7 @@ export function planFasad3d(budovy, vyskopis) {
 }
 
 /** Plášť jednej steny. */
-function plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 }) {
+function* plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 }) {
   const { typ, seed, seedInt, farba: c, znaky, pasy, vrch } = r;
   const S = stena(w.p, w.e, w.n, zb, typ + seed, znaky);
   const cRimsa = c.clone().multiplyScalar(1.07);
@@ -276,6 +276,7 @@ function plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 
       if (znacky.balkony && Math.floor(vj + 0.001) === 1 && w.osi >= 3) balkon(S, w.osi, sw, ya, vStred, KAMEN);
       // podlažná rímsa na spodku podlažia (v atlase je nakreslená na rovnakom mieste)
       S.kvader(sA, sB, ya + 0.012 * hf, ya + 0.05 * hf, HRUBKA, HRUBKA + 0.07, cRimsa, vStred, { boky: false, spodok: 0.6 });
+      yield;   // po každom podlaží vráti riadenie (dlhé steny palácov by inak zdržali snímok)
     }
   }
 
@@ -338,7 +339,7 @@ function obrysStitu(sm, W, y0) {
 /** Postaví sieť jedného dielu (steny z plánu) – generátor, vráti riadenie po každej stene; výsledok = sieť alebo null. */
 export function* postavDiel(diel) {
   const zb = new Zberac();
-  for (const s of diel.steny) { plastSteny(zb, s); yield; }
+  for (const s of diel.steny) { yield* plastSteny(zb, s); yield; }
   if (!zb.pocet) return null;
   const mesh = new THREE.Mesh(zb.geometria(), ziskajMaterialy()[0]);
   mesh.castShadow = true;
