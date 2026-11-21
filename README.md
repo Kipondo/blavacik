@@ -22,8 +22,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Vypísať polohu (pre misie) | P | – |
+| Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
+| Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
 ## Čo je hotové
+- **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
+  bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
+  Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
