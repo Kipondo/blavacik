@@ -18,7 +18,8 @@ import { geometrieNpc, TYPY_AUT, nahodnaFarba, typPodlaFarby } from './model.js'
 const R = 380;            // m – v tomto okruhu okolo hráča jazdia autá
 const R_ZMAZ = 460;       // m – ďalej sa autá zrušia
 const R_NEVIDNO = 170;    // m – bližšie sa nové auto objaví len mimo pohľadu kamery
-const MAX_AUT = 520;
+const MAX_AUT = 200;
+const RIEDKOST = 3;       // premávka je 3× redšia, ako by zodpovedalo hustote ciest (HUSTOTA v siet.js)
 const SIRKA_AUTA = 1.8;
 // model inteligentného vodiča (IDM)
 const A_MAX = 1.9, B_KOMF = 2.8, S0 = 2.3, T_ODSTUP = 1.25;
@@ -122,7 +123,7 @@ export default {
       const mx = (h.a.x + h.b.x) / 2, mz = (h.a.z + h.b.z) / 2;
       const d = Math.hypot(mx - p.x, mz - p.z);
       if (d > R) continue;
-      const w = (h.pruhy * h.dlzka) / h.hustota;
+      const w = (h.pruhy * h.dlzka) / (h.hustota * RIEDKOST);
       ziadane += w;
       sucet += w;
       kandidati.push([sucet, h, d]);
@@ -395,7 +396,7 @@ export default {
           const vn = (ja.vx - sx * a.v) * nx + (ja.vz - sz * a.v) * nz;
           if (vn < 0) {
             ja.vx -= nx * vn * 1.4; ja.vz -= nz * vn * 1.4; ja.vx *= 0.75; ja.vz *= 0.75;
-            if (-vn > 4) hra.posli('naraz', { auto: ja, sila: -vn, npc: true });
+            if (-vn > 4) hra.posli('naraz', { auto: ja, sila: -vn, npc: true, nx, nz });
           }
           a.v = 0; a.cakaDo = this.cas + 3; // šofér NPC auta sa zľakol a chvíľu stojí
         } else {
