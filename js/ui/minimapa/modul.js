@@ -8,6 +8,7 @@
 //   hra.posli('znacka-mapy', { id, x, z, farba?, popis? })  – pridá značku alebo ju posunie
 //   hra.posli('znacka-mapy-zrus', { id })                   – odstráni ju
 // Značka mimo minimapy sa ukáže ako šípka na okraji. Na čítanie: hra.minimapa.znacky (Map id → značka).
+// Klik na veľkú mapu (zameriavač) pošle hra.posli('mapa-klik', { x, z }) – miesto vo svete; mapa sa zavrie.
 
 import { BitmapyDlazdic, DLAZDICA, rozlozKluc } from './bitmapy.js';
 import {
@@ -60,7 +61,7 @@ export default {
       <div class="ui-velka-mapa-okno">
         <canvas></canvas>
         <div class="ui-velka-mapa-pata">
-          <span><b>M</b> – zavrieť · <b>koliesko myši</b> – priblížiť / oddialiť</span>
+          <span><b>M</b> – zavrieť · <b>koliesko myši</b> – priblížiť / oddialiť · <b>klik</b> – presun sem</span>
           <span>© prispievatelia OpenStreetMap</span>
         </div>
       </div>`;
@@ -72,13 +73,36 @@ export default {
       if (this.velka.hidden) return;
       this.velkaMierka *= Math.exp(-e.deltaY * 0.0012);
     }, { passive: true });
+
+    // kurzor na veľkej mape: pri zamknutej myši (Pointer Lock) ho posúva pohyb myši, inak je pod šípkou;
+    // klik pošle udalosť 'mapa-klik' { x, z } (napr. presun hráča – js/ladenie/teleport.js) a mapu zavrie
+    this.kurzor = null;
+    document.addEventListener('mousemove', (e) => {
+      if (this.velka.hidden || !this.kurzor) return;
+      const r = this.velkePlatno.getBoundingClientRect();
+      if (document.pointerLockElement) { this.kurzor[0] += e.movementX; this.kurzor[1] += e.movementY; }
+      else { this.kurzor[0] = e.clientX - r.left; this.kurzor[1] = e.clientY - r.top; }
+      this.kurzor[0] = Math.max(0, Math.min(r.width, this.kurzor[0]));
+      this.kurzor[1] = Math.max(0, Math.min(r.height, this.kurzor[1]));
+    });
+    document.addEventListener('mousedown', (e) => {
+      if (this.velka.hidden || e.button !== 0 || !this.kurzor || !this.pohladVelkej) return;
+      const p = this.pohladVelkej;
+      const x = p.stredX + (this.kurzor[0] - p.cx) / p.mierka, z = p.stredZ + (this.kurzor[1] - p.cy) / p.mierka;
+      hra.posli('mapa-klik', { x, z });
+      this.velka.hidden = true;
+    });
   },
 
   updateVzdy(dt, hra) {
     const { x, z } = hra.stav.pozicia;
     this.bitmapy.update(x, z, 3);
 
-    if (hra.vstup.stlacil('mapa') && !hra.stav.pauza) this.velka.hidden = !this.velka.hidden;
+    if (hra.vstup.stlacil('mapa') && !hra.stav.pauza) {
+      this.velka.hidden = !this.velka.hidden;
+      // kurzor začína na hráčovi (stred mapy)
+      if (!this.velka.hidden) this.kurzor = [this.velkePlatno.clientWidth / 2, this.velkePlatno.clientHeight / 2];
+    }
     if (hra.stav.pauza && !this.velka.hidden) this.velka.hidden = true;
     this.obal.hidden = !this.velka.hidden;
 
@@ -140,6 +164,8 @@ export default {
     kresliNazvy(ctx, pohlad, Object.values(hra.mapa?.miesta ?? {}).filter((m) => m?.nazov));
     kresliZnacky(ctx, pohlad, this.znacky.values(), [pohlad.cx, pohlad.cy], 14, true);
     kresliHraca(ctx, pohlad.cx, pohlad.cy, pohlad.uhol(Math.sin(s.uhol), Math.cos(s.uhol)), 11);
+    this.pohladVelkej = pohlad;
+    if (this.kurzor) kresliKurzor(ctx, dpr, this.kurzor[0], this.kurzor[1]);
   },
 
   /** Nástupištia MHD zo zverejnených dát modulu MHD (ak beží). */
@@ -178,6 +204,20 @@ export default {
 };
 
 /** Nastaví rozlíšenie plátna podľa jeho veľkosti na obrazovke. */
+/** Zameriavač kurzora na veľkej mape (kam sa dá kliknúť). */
+function kresliKurzor(ctx, dpr, x, y) {
+  ctx.save();
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  for (const [w, farba] of [[3, 'rgba(0,0,0,0.6)'], [1.5, '#ffffff']]) {
+    ctx.lineWidth = w; ctx.strokeStyle = farba;
+    ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.moveTo(x - 16, y); ctx.lineTo(x - 5, y); ctx.moveTo(x + 5, y); ctx.lineTo(x + 16, y);
+    ctx.moveTo(x, y - 16); ctx.lineTo(x, y - 5); ctx.moveTo(x, y + 5); ctx.lineTo(x, y + 16);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function prisposobPlatno(platno) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = platno.clientWidth || 1, h = platno.clientHeight || 1;

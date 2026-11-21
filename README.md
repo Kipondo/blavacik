@@ -347,7 +347,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
 - **Minimapa** vľavo dole (`js/ui/minimapa/`): kreslí sa z dát dlaždíc (budovy, cesty, chodníky, námestia, zeleň,
   Dunaj, koľaje, zastávky MHD), otáča sa podľa kamery, v aute sa podľa rýchlosti oddiali; pod ňou názov ulice.
-  **M** otvorí veľkú mapu so severom hore a názvami miest (koliesko myši = priblíženie).
+  **M** otvorí veľkú mapu so severom hore a názvami miest (koliesko myši = priblíženie); na mape je zameriavač,
+  klik naň pošle miesto vo svete (udalosť `mapa-klik`).
 - **Formát misií a dialógov:** [data/misie/FORMAT.md](data/misie/FORMAT.md) (PR #1) – príklad misie
   `data/misie/halusky-pre-stryka.json`, dialógy v `data/dialogy/`, pomenované miesta pre misie v `data/mapa/miesta.json`.
 
@@ -412,6 +413,7 @@ je popísané v komentári na začiatku [js/jadro/hra.js](js/jadro/hra.js).
 - `hra.posli('znacka-mapy', { id, x, z, farba?, popis? })` – pridá alebo posunie značku (cieľ misie, polícia…);
   mimo minimapy sa ukáže ako šípka na okraji, na veľkej mape aj s popisom.
 - `hra.posli('znacka-mapy-zrus', { id })` – odstráni značku. Zoznam značiek: `hra.minimapa.znacky`.
+- `hra.na('mapa-klik', ({ x, z }) => …)` – hráč klikol na veľkú mapu (súradnice vo svete); mapa sa zavrie.
 
 ## Doprava pre ďalšie moduly
 - `hra.doprava.graf` – uzly a hrany ciest (pruhy, jednosmerky, max. rýchlosť), `hra.doprava.hranyZUzla(i)`, `hra.doprava.najblizsiUzol(x, z)`
