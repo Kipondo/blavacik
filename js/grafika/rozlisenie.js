@@ -1,7 +1,8 @@
 // Modul: automatické rozlíšenie. Meria skutočný čas snímok a keď grafická karta nestíha
 // (menej ako ~50 snímok za sekundu), zníži rozlíšenie kreslenia (pixel ratio) po krokoch až na 55 %.
 // Keď je rezerva, pomaly ho vráti späť. Krátke zaseknutia (načítanie dlaždice) sa nerátajú – rozhoduje medián.
-// Ak zníženie nepomohlo (brzdí procesor, nie grafická karta), vráti sa späť a pol minúty to neskúša.
+// Ak zníženie nepomohlo (brzdí procesor, nie grafická karta), vráti sa späť a chvíľu to neskúša
+// (pol minúty, pri ďalšom neúspechu dvakrát dlhšie, najviac 5 minút).
 // Pre ostatné moduly: hra.stav.rozlisenie = aktuálny podiel (0,55 – 1).
 
 import { KONFIG } from '../config.js';
@@ -24,6 +25,7 @@ export default {
     this.dobrych = 0;
     this.skuska = null;          // { pred: medián pred znížením, podiel: podiel pred znížením }
     this.blokDo = 0;
+    this.blokTrvanie = 30000;
     hra.stav.rozlisenie = 1;
     // po zmene veľkosti okna (main.js nastaví veľkosť) ostane naše rozlíšenie
     window.addEventListener('resize', () => this._nastav(hra));
@@ -47,7 +49,13 @@ export default {
     if (this.skuska) {
       const { pred, podiel } = this.skuska;
       this.skuska = null;
-      if (median > pred * 0.92) { this.podiel = podiel; this._nastav(hra); this.blokDo = teraz + 30000; return; }
+      if (median > pred * 0.92) {
+        this.podiel = podiel; this._nastav(hra);
+        this.blokDo = teraz + this.blokTrvanie;
+        this.blokTrvanie = Math.min(300000, this.blokTrvanie * 2);
+        return;
+      }
+      this.blokTrvanie = 30000;
     }
     if (median > POMALE_MS && this.podiel > MIN && teraz > this.blokDo) {
       this.skuska = { pred: median, podiel: this.podiel };
