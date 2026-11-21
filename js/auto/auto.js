@@ -100,10 +100,10 @@ export class Auto {
 
     // výška a náklon podľa terénu
     const s = this.smer;
-    const hP = mapa.vyska(this.pozicia.x + s.x * 1.4, this.pozicia.z + s.z * 1.4);
-    const hZ = mapa.vyska(this.pozicia.x - s.x * 1.4, this.pozicia.z - s.z * 1.4);
-    const hL = mapa.vyska(this.pozicia.x - s.z * 0.9, this.pozicia.z + s.x * 0.9);
-    const hR = mapa.vyska(this.pozicia.x + s.z * 0.9, this.pozicia.z - s.x * 0.9);
+    const hP = mapa.vyska(this.pozicia.x + s.x * 1.4, this.pozicia.z + s.z * 1.4, this.pozicia.y);
+    const hZ = mapa.vyska(this.pozicia.x - s.x * 1.4, this.pozicia.z - s.z * 1.4, this.pozicia.y);
+    const hL = mapa.vyska(this.pozicia.x - s.z * 0.9, this.pozicia.z + s.x * 0.9, this.pozicia.y);
+    const hR = mapa.vyska(this.pozicia.x + s.z * 0.9, this.pozicia.z - s.x * 0.9, this.pozicia.y);
     const cielY = (hP + hZ + hL + hR) / 4;
     this.pozicia.y += (cielY - this.pozicia.y) * Math.min(1, dt * 15);
     if (Math.abs(cielY - this.pozicia.y) > 3) this.pozicia.y = cielY;

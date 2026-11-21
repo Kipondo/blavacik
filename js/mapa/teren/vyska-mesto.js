@@ -150,6 +150,7 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
   }
 
   // --- mosty ---
+  const OKRAJ_RAMPY = 1.5;   // m – šírka plynulého prechodu na bočnom okraji nájazdu
   const mosty = (data.mosty ?? []).map((m) => {
     const [ax, az] = m.od, [bx, bz] = m.do;
     const p = { ...m, ax, az, bx, bz, dlzka: Math.hypot(bx - ax, bz - az), polSirka2: (m.sirka / 2) ** 2, nabeh: m.nabeh ?? 30 };
@@ -161,7 +162,10 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
     return p;
   });
 
-  function vyskaMostu(x, z) {
+  // y = výška objektu (auto, chodec): kto je hlboko pod mostovkou (cesta popod most), ide po teréne.
+  // Na okraji nájazdovej rampy (mostovka tesne nad terénom) sa výška do strán plynulo zlieva s terénom,
+  // aby auto pri vjazde z boku neskočilo o pol metra (issue #54).
+  function vyskaMostu(x, z, y) {
     for (const m of mosty) {
       if (x < m.ohr.minX || x > m.ohr.maxX || z < m.ohr.minZ || z > m.ohr.maxZ) continue;
       const n = najblizsiNaUsecke(x, z, m.ax, m.az, m.bx, m.bz);
@@ -169,14 +173,20 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
       const s = n.t * m.dlzka;
       const odKonca = Math.min(s, m.dlzka - s);
       const hKonca = s < m.dlzka / 2 ? m.hA : m.hB;
-      if (odKonca >= m.nabeh) return m.vrch;
-      return hKonca + (m.vrch - hKonca) * plynulo(odKonca / m.nabeh);
+      let h = odKonca >= m.nabeh ? m.vrch : hKonca + (m.vrch - hKonca) * plynulo(odKonca / m.nabeh);
+      if (y !== undefined && y < h - 3) continue;
+      const okraj = m.sirka / 2 - Math.sqrt(n.d2);
+      if (okraj < OKRAJ_RAMPY) {
+        const t = vyskaTerenu(x, z);
+        if (h - t < 1.5) h = t + (h - t) * plynulo(Math.max(0, okraj) / OKRAJ_RAMPY);
+      }
+      return h;
     }
     return null;
   }
 
-  function vyska(x, z) {
-    const hm = vyskaMostu(x, z);
+  function vyska(x, z, y) {
+    const hm = vyskaMostu(x, z, y);
     return hm !== null ? hm : vyskaTerenu(x, z);
   }
 

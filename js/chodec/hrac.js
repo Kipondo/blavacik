@@ -140,7 +140,7 @@ export default {
     }
 
     // skok a gravitácia
-    const zem = hra.mapa.vyska(h.pozicia.x, h.pozicia.z);
+    const zem = hra.mapa.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y);   // pod mostom po teréne
     if (h.naZemi && hra.vstup.drzi('skok')) {
       h.vy = K.SKOK;
       h.naZemi = false;
