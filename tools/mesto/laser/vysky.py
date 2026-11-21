@@ -93,6 +93,9 @@ def spracuj(dmp_r, dmr_r, cesta, i, j):
         if not v:
             continue
         vyska, hreben = v
+        # hrebeň vie hra postaviť len na obdĺžniku; inak výška do polovice strechy, ale strecha ostáva „šikmá“
+        # (rodinný dom potom dostane farbu škridly – porovnanie so satelitom: domy v Rusovciach boli sivé ploché)
+        sikma = hreben > 0
         if hreben > 0 and len(b['body']) != 4:
             vyska, hreben = vyska + hreben * 0.5, 0.0
         zdroj = b.get('zdrojVysky', 'odhad')
@@ -106,6 +109,9 @@ def spracuj(dmp_r, dmr_r, cesta, i, j):
         if hreben > 0:
             b['tvarStrechy'] = 'sikma'
             b['hreben'] = round(hreben, 1)
+        elif sikma:
+            b['tvarStrechy'] = 'sikma'
+            b.pop('hreben', None)
         else:
             b['tvarStrechy'] = 'plocha'
             b.pop('hreben', None)
