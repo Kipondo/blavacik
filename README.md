@@ -31,6 +31,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   leží (alebo do 12 m od vchodu), z načítaných dlaždíc. Veľké areály majú stojan pri okraji. Pri príchode sa ukáže
   názov miesta, blízke služby sú farebné značky na minimape. Tabule sa stavajú postupne (najviac ~3 ms za snímok),
   aby hra v centre pri príchode do novej štvrte nesekala. Snímky: `docs/snimky/sluzby/`.
+- **Podniky v Mlynskej doline z OSM** (`tools/mesto/podniky.mjs` → `data/mapa/podniky.json`, issue #73): 37 klubov,
+  barov, bistier, reštaurácií, obchodov, práčovní a posilňovní (UniK Mlyny, Klub 39, Študentka, Bistro Mladosť…).
+  Menšia vývesná tabuľa nad vchodom na stene pri bode podniku: veľké meno z OSM, pod ním druh a ikona. Názvy len
+  z OSM; reťazce majú len všeobecný nápis (POTRAVINY…), obchody v obchodnom centre sa vynechajú. Pri príchode
+  sa ukáže meno podniku, kluby, bary a bistrá sú na minimape. Snímky: `docs/snimky/podniky/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
