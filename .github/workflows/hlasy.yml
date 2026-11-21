@@ -1,0 +1,49 @@
+# Hlasy postáv: Google Gemini TTS vygeneruje nahrávky replík z data/dialogy/*.json (tools/hlasy/generuj.mjs)
+# a commitne ich späť do tej istej vetvy. Kľúč je v Settings → Secrets and variables → Actions ako GEMINI_API_KEY.
+# Bez kľúča len upozorní a skončí úspešne. Bezplatný limit: robí sa postupne, raz denne pokračuje (schedule).
+name: Hlasy postáv (Gemini TTS)
+
+on:
+  push:
+    paths:
+      - 'data/dialogy/**'
+      - 'data/misie/**'
+      - 'tools/hlasy/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hlasy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  hlasy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: ffmpeg
+        run: which ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Generovanie hlasov
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node tools/hlasy/generuj.mjs
+      - name: Commit nových nahrávok
+        run: |
+          if [ -n "$(git status --porcelain assets/zvuk/dialogy)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/zvuk/dialogy
+            git commit -m "Hlasy: automaticky vygenerované"
+            git pull --rebase --autostash || true
+            git push
+          else
+            echo "Žiadne nové nahrávky."
+          fi
