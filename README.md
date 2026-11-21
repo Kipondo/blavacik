@@ -27,6 +27,54 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
 | Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
+## Čo je v `main` (zlúčené PR, issue #51)
+Integračná vetva `integracia/vsetko` spája všetky otvorené PR k 21. 11. 2026 (konflikty a prepočítané dáta
+dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
+
+- #24 MHD etapa b: električky, trolejbusy a autobusy jazdia presne podľa cestovného poriadku
+- #25 Ďoďo: prirodzená chôdza a beh, plávanie vo vode, mladšia tvár
+- #26 Typy budov v celom meste: panelák, rodinný dom, hala, garáž
+- #27 Premávka áut: stovky NPC áut v pruhoch, semafory, prednosť, odstupy
+- #28 Porovnanie s realitou: zoznam opráv (etapy 1–5)
+- #29 Chodci: stovky ľudí na chodníkoch a námestiach (1 na 5 m)
+- #30 Opravy podľa porovnania so skutočnosťou (etapy 1–5): dosky, vikiere, radnica, fontány, SND, hrad, parky
+- #32 Minimapa a veľká mapa mesta (M)
+- #33 Grafika G1: AO, vzdušná perspektíva, farebné ladenie, MSAA, stabilné tiene, strechy so škridlou, kvalita v menu
+- #34 Fasády 3D (G2): zapustené okná, parapety, rímsy, frontóny palácov, balkóny a štíty
+- #35 Kamenné námestie: veža Kyjeva a vyvýšené časti budov v celom meste, betónové dlaždice, dlažba CC0 v celom meste
+- #36 Podchody z OSM: podzemné chodby, schody a eskalátory, chôdza a kamera pod zemou
+- #37 Pamiatky z Blendera (G3): generátor cez bpy so zapečeným AO, Michalská brána
+- #38 Výškové budovy z Blendera: Nivy, Eurovea, Twin City, Panorama, Sky Park, Tower 115, NBS
+- #39 Mosty z Blendera: SNP s UFO, Starý most, Apollo, Prístavný, Lafranconi
+- #40 Ďalšie výškové budovy z 3D tagov OSM: CBC I, VÚB, Glória, Millennium Tower, Aupark, Technopol, Incheba, Matadorka, Centrál, Lakeside, Manderlák
+- #41 Bratislavský hrad z Blendera: palác, brány, hradby a baroková záhrada podľa terénu
+- #42 Pamiatky Starého Mesta z Blendera: Dóm, Stará radnica, Primaciálny palác, SND, Reduta, kostoly a paláce (35 budov)
+- #43 Realistickejší vzhľad: zlatá hodinka, stromy po druhoch, opotrebované cesty, asfaltové chodníky s obrubníkmi, zámková dlažba
+- #44 Pamiatky 2. dávka: hrad Devín, hradby, bunkre, Gerulata, Maximiliánova fontána, sochy v celom meste, hroby na cintorínoch
+- #45 Pamiatky 3. dávka: nový Kamzík, Rozhlas, Národná rada, Nové SND; Nivy, SNG, Národný futbalový štadión, zimný štadión, stavenisko Istropolis
+- #46 Označenia verejných služieb z OSM (tabule na fasádach, stojany, minimapa)
+- #47 Nadjazdy, lávky a nadchody z OSM (mostovky, zábradlie, piliere, chôdza a jazda po moste)
+- #48 Blavačík: názov, farby Bratislavy v UI a vlastné štylizované logo
+- #49 Zvuky (Web Audio) a hlasy postáv cez Google Gemini TTS automaticky
+- #50 Poškodenie áut pri náraze a kamera nevojde do budov
+- #61 Plynulosť: dlaždice mesta po malých krokoch, automatické rozlíšenie, F3
+- #66 Dočasné: lietanie (2× Medzerník) a presun klikom na veľkú mapu
+- #76 Mladá garda a okolie: internát, kurty, supermarket, bistro, obytné veže (Blender)
+- #77 Oprava: stĺpik neprechádza cez značky a tabule ulíc (#63)
+- #78 Kamenné námestie: Hotel Kyjev, obchodný dom s hodinami, kostoly na Špitálskej, nový Manderlák
+- #79 Átriaky: átriové domy na svahu, vstup s turniketmi a vrátnicou, ploty (Mlynská dolina)
+- #80 Priechody pod budovami z OSM: Pasáž Liga, Luxor a 1000+ ďalších (#65)
+- #81 Výšky budov v celom meste z lasera ÚGKK (63 tisíc budov) + LOD2 a stromy v Mlynskej doline
+- #82 Terén pod cestami bez skokov, pod mostom po teréne (#54)
+- #83 Cyklopruhy na cestách z OSM (#52)
+- #84 Podniky v Mlynskej doline z OSM: kluby, bary, bistrá, obchody (#73)
+- #85 Vonkajšie schody ako 3D stupne so zábradlím (#73)
+- #86 Okná na ustúpených podlažiach a nadstavbách z LOD2 striech (#64)
+- #87 Parkoviská asfaltové s ostrým okrajom v mape povrchov (#52, #73)
+- #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
+- #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
+- #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
+
 ## Čo je hotové
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
