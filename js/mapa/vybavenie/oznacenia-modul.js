@@ -238,8 +238,10 @@ export default {
     }
     const y = this.hra.mapa.vyska(x, z);
     const sir = 2.6, vys = 0.65;
-    const telo = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.6, 0.2), this.matStojan);
-    telo.position.set(x, y + 1.3, z);
+    // stĺp končí pod rámom tabule – nesmie prechádzať cez nápis (issue #63)
+    const vyskaTela = 2.5 - vys / 2 - 0.05;
+    const telo = new THREE.Mesh(new THREE.BoxGeometry(0.2, vyskaTela, 0.2), this.matStojan);
+    telo.position.set(x, y + vyskaTela / 2, z);
     g.add(telo);
     const t = texturaTabule(s);
     const mat = new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: '#ffffff', emissiveIntensity: 0.22, roughness: 0.45, metalness: 0.1, side: THREE.DoubleSide });
