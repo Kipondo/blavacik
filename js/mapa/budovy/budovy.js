@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { bodVPolygone, stredBodov } from '../geometria.js';
 import { materialFasad, STYLY, PARAMETRE } from './fasady.js';
 import { texturaSkla } from '../pamiatky/textury.js';
+import { stanovaStrecha } from './stanova-strecha.js';
 
 let materialy = null;
 function ziskajMaterialy() {
@@ -142,7 +143,9 @@ function postavGeometriu(budovy, vyskopis) {
 
     const valbova = b.strecha && !b.lod2 && b.tvarStrechy !== 'plocha' && body.length === 4 && !diery.length;
     if (valbova) valbovaStrecha(strechy, body, vrch, cs, b.hreben);
-    else plochaStrecha(strechy, body, diery, vrch, cs);
+    // neobdĺžnikový dom so šikmou strechou: stanová strecha (js/mapa/budovy/stanova-strecha.js)
+    else if (!(b.strecha && !b.lod2 && b.tvarStrechy !== 'plocha' && !diery.length
+      && stanovaStrecha(body, vrch, b.hreben, (A, B, C) => trojVon(strechy, A, B, C, cs, (n) => n[1] > 0)))) plochaStrecha(strechy, body, diery, vrch, cs);
   }
 
   const geo = new THREE.BufferGeometry();

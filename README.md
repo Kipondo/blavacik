@@ -30,6 +30,9 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     vo výreze detailný terén po 2 m,
   - výšky budov z lasera (`zdrojVysky`: `lidar` / `osm` / `odhad`), strechy rozložené na roviny (LOD2) so škridlou
     a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+  - mimo LOD2 dostane dom so šikmou strechou na neobdĺžnikovom pôdoryse (tvar L, výstupky) stanovú strechu
+    s vrcholom vo vnútornom bode pôdorysu (`js/mapa/budovy/stanova-strecha.js`); predtým bol plochý
+    (porovnanie so satelitom, Rusovce – snímka `docs/snimky/strechy-domov/`),
   - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
     na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
   - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch, tráva v parkoch,
