@@ -3,7 +3,8 @@
 // vznikne pravidelné schodisko a na rovine podesta. Stupeň je vždy celý nad terénom (zem ho neprerazí),
 // pri dlhšom schodisku je po oboch stranách kovové zábradlie.
 // Stavia sa spolu s detailnou dlaždicou (udalosť 'dlazdica-nacitana'); sieť patrí objektu dlaždice
-// a uvoľní sa s ňou. Schody na mostoch a lávkach (nadjazd) a v podchodoch sa nekreslia (majú vlastnú stavbu).
+// a uvoľní sa s ňou. Schody na mostoch a lávkach (nadjazd) a schody do podchodov (zdieľajú bod s data.podchody)
+// sa nekreslia – majú vlastnú stavbu.
 
 const STUPEN = 0.3;        // m – dĺžka stupňa (nástupnica)
 const VYSKA = 0.15;        // m – výška schodu
@@ -175,7 +176,7 @@ export default {
     this.matZabradlie = new T.MeshStandardMaterial({ color: '#3d4247', roughness: 0.45, metalness: 0.7, side: T.DoubleSide });
     const pridaj = ({ uroven, data, objekt }) => {
       if (uroven !== 'detail' || !data?.chodniky || objekt.getObjectByName('schody')) return;
-      const m = this.postav(hra, data.chodniky);
+      const m = this.postav(hra, data.chodniky, data.podchody);
       if (m) objekt.add(m);
     };
     for (const [kluc, a] of sprava.aktivne) pridaj({ kluc, uroven: a.uroven, data: a.data, objekt: a.objekt });
@@ -183,13 +184,18 @@ export default {
   },
 
   /** Skupina so schodiskami jednej dlaždice (alebo null). */
-  postav(hra, chodniky) {
+  postav(hra, chodniky, podchody = []) {
     const T = hra.THREE;
+    // body podchodov (rovnaký uzol OSM = rovnaké súradnice) – schody, ktoré ich zdieľajú, vedú pod zem
+    const kluc = ([x, z]) => `${Math.round(x * 10)},${Math.round(z * 10)}`;
+    const podZemou = new Set();
+    for (const p of podchody ?? []) for (const b of p.body ?? []) podZemou.add(kluc(b));
     const o = { poz: [], uv: [], farby: [], idx: [] };
     const zabradlia = [];
     const vyska = (x, z) => hra.mapa.vyska(x, z);
     for (const c of chodniky) {
       if (c.typ !== 'steps' || c.nadjazd || c.most) continue;
+      if (podZemou.size && c.body.some((b) => podZemou.has(kluc(b)))) continue;
       schodisko(c, vyska, o, zabradlia);
     }
     if (!o.idx.length) return null;
