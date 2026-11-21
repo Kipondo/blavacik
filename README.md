@@ -396,13 +396,28 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   laser `python3 tools/blender/laser_atriaky.py`, model `python3 tools/blender/atriaky_blender.py`).
   - **Domy**: 20 átriových domov AD-A … AD-U podľa pôdorysov z OSM, výšky a terén pod každým domom
     z laserového skenovania ÚGKK. Areál je na svahu s rozdielom 18 m, každý dom stojí na svojej výške.
-  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, zapustené pásy okien, presklené prízemie
-    na stĺpoch, vyložené horné podlažie a strecha so zábradlím.
+  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, tehlovočervené pásy pod oknami, zapustené pásy
+    okien, presklené prízemie na stĺpoch, **ustúpené najvyššie podlažie s terasou** (biele zábradlie) a strecha.
   - **Átriá**: laser ukázal, že sú zastrešené, preto majú domy na streche svetlík. Otvorený dvor
     s prechodom má len AD-I.
   - **Vstup** podľa verejnej fotografie: tri celovýškové turnikety (poloha z OSM), sivá vrátnica
     s červeným pásom, dvojkrídlová brána so značkou zákazu státia, skriňa a betónový múr.
   - **Ploty a múry** okolo areálu sú z OSM a majú kolízie. Cez turnikety sa dá prejsť.
+  - **Lávky a terasy, po ktorých sa dá chodiť** (issue #91, `js/mapa/atriaky/modul.js`): úzke prepojenia v OSM
+    pôdorysoch sú lávky v dvoch podlažiach nad sebou (betónová doska, tehlovočervený pás, biele zábradlie), pod nimi
+    je voľný prechod (predtým tam bola plná stena). Dolná lávka je prvé podlažie aspoň 3,1 m nad zemou, horná je
+    zvyčajne v úrovni terasy – z nej sa prejde rovno na terasu. Pri lávkach sú schodiská zo zeme na dolnú
+    a z dolnej na hornú lávku, kde to nestačí, aj na terasu. Zábradlia lávok, terás a schodov majú kolíziu s výškou
+    (`js/mapa/kolizie.js`, `info.vyska`), takže sa nedá spadnúť a pod lávkou sa dá prejsť; dom bráni len po úroveň
+    terasy, ustúpené podlažie po strechu. Pochôdzne plochy idú do modulu nadjazdov udalosťou `'pochodzne-plochy'`.
+  - **Okolie podľa fotiek majiteľa**: pri bloku T oranžová tabuľa „T“ so smerovkou „UKc →“, v dvore medzi R, O, S, T
+    nízke betónové múriky, hranaté kvetináče, sivý kôš a vysoká lampa s bielou pätkou.
+  - **Internátna izba cez teleport** (`js/mapa/atriaky/internat.js`): pri vchode do bloku T „E – Vojsť do internátu“
+    prepne do malej samostatnej scény – chodba (sprchy, WC, kuchynka) a trojlôžková izba 214 (postele, stolíky,
+    stoličky, poličky, vešiaková skriňa, umývadlo so zrkadlom, chladnička, okno s výhľadom na susedný dom s lávkou).
+    Mesto sa medzitým nekreslí, hráč v meste stojí. Vnútri WASD a myš, pri dverách na konci chodby „E – Von“.
+  - **Verejné fotky a odkiaľ sú fotené**: `data/atriaky-fotky.json` (Wikimedia Commons s GPS + fotky majiteľa).
+    Snímky pred/po: `docs/snimky/atriaky/a91-*.jpg`.
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
@@ -527,6 +542,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Átriaky (#91): schody vedľa lávok sú zatiaľ v hre (JS), zábradlie modelu lávky pri prestupe na schody ostáva
+  (prechádza sa cez neho); chodby a terasy všetkých 18 domov podľa fotiek, viac izieb a blokov s interiérom.
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
