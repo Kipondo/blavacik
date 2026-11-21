@@ -9,6 +9,9 @@
 //   hra.posli('znacka-mapy-zrus', { id })                   – odstráni ju
 // Značka mimo minimapy sa ukáže ako šípka na okraji. Na čítanie: hra.minimapa.znacky (Map id → značka).
 // Klik na veľkú mapu (zameriavač) pošle hra.posli('mapa-klik', { x, z }) – miesto vo svete; mapa sa zavrie.
+// Na otvorenej veľkej mape: ťahanie myšou posúva mapu, koliesko približuje k miestu pod zameriavačom,
+// WASD / šípky posúvajú, C vráti mapu na hráča. Kým je mapa otvorená, hra nedostáva pohyb ani otáčanie
+// kamery (hra.vstup.blokovane).
 
 import { BitmapyDlazdic, DLAZDICA, rozlozKluc } from './bitmapy.js';
 import {
@@ -61,7 +64,7 @@ export default {
       <div class="ui-velka-mapa-okno">
         <canvas></canvas>
         <div class="ui-velka-mapa-pata">
-          <span><b>M</b> – zavrieť · <b>koliesko myši</b> – priblížiť / oddialiť · <b>klik</b> – presun sem</span>
+          <span><b>M</b> – zavrieť · <b>ťahaj myšou</b> / <b>WASD</b> – posun · <b>koliesko</b> – priblížiť / oddialiť · <b>C</b> – na hráča · <b>klik</b> – presun sem</span>
           <span>© prispievatelia OpenStreetMap</span>
         </div>
       </div>`;
@@ -69,28 +72,59 @@ export default {
     this.velka = velka;
     this.velkePlatno = velka.querySelector('canvas');
     this.velkyCtx = this.velkePlatno.getContext('2d', { alpha: false });
+    // koliesko: priblíženie k miestu pod zameriavačom (to miesto ostane pod ním)
     window.addEventListener('wheel', (e) => {
-      if (this.velka.hidden) return;
-      this.velkaMierka *= Math.exp(-e.deltaY * 0.0012);
+      if (this.velka.hidden || !this.stredMapy) return;
+      const p = this.pohladVelkej, k = this.kurzor;
+      const stara = this.velkaMierka;
+      this.velkaMierka = Math.min(3, Math.max(this.minMierka ?? 0.05, stara * Math.exp(-e.deltaY * 0.0015)));
+      if (p && k) {
+        const wx = this.stredMapy.x + (k[0] - p.cx) / stara, wz = this.stredMapy.z + (k[1] - p.cy) / stara;
+        this.stredMapy.x = wx - (k[0] - p.cx) / this.velkaMierka;
+        this.stredMapy.z = wz - (k[1] - p.cy) / this.velkaMierka;
+      }
     }, { passive: true });
+    window.addEventListener('keydown', (e) => {
+      if (this.velka.hidden || e.code !== 'KeyC' || !this.stredMapy) return;
+      this.stredMapy.x = hra.stav.pozicia.x; this.stredMapy.z = hra.stav.pozicia.z;
+    });
 
     // kurzor na veľkej mape: pri zamknutej myši (Pointer Lock) ho posúva pohyb myši, inak je pod šípkou;
     // klik pošle udalosť 'mapa-klik' { x, z } (napr. presun hráča – js/ladenie/teleport.js) a mapu zavrie
+    // ťahanie so stlačeným ľavým tlačidlom posúva mapu (zameriavač ostáva na mieste); krátky klik bez
+    // pohybu je „klik na mapu“
     this.kurzor = null;
+    this.tahanie = null;
     document.addEventListener('mousemove', (e) => {
       if (this.velka.hidden || !this.kurzor) return;
       const r = this.velkePlatno.getBoundingClientRect();
-      if (document.pointerLockElement) { this.kurzor[0] += e.movementX; this.kurzor[1] += e.movementY; }
-      else { this.kurzor[0] = e.clientX - r.left; this.kurzor[1] = e.clientY - r.top; }
+      let dx, dy;
+      if (document.pointerLockElement) { dx = e.movementX; dy = e.movementY; }
+      else { dx = e.clientX - r.left - this.kurzor[0]; dy = e.clientY - r.top - this.kurzor[1]; }
+      if (this.tahanie && this.stredMapy) {
+        this.tahanie.drah += Math.abs(dx) + Math.abs(dy);
+        this.stredMapy.x -= dx / this.velkaMierka;
+        this.stredMapy.z -= dy / this.velkaMierka;
+        if (!document.pointerLockElement) { this.kurzor[0] += dx; this.kurzor[1] += dy; }
+      } else {
+        this.kurzor[0] += dx; this.kurzor[1] += dy;
+      }
       this.kurzor[0] = Math.max(0, Math.min(r.width, this.kurzor[0]));
       this.kurzor[1] = Math.max(0, Math.min(r.height, this.kurzor[1]));
     });
     document.addEventListener('mousedown', (e) => {
-      if (this.velka.hidden || e.button !== 0 || !this.kurzor || !this.pohladVelkej) return;
+      if (this.velka.hidden || e.button !== 0 || !this.kurzor) return;
+      this.tahanie = { drah: 0 };
+    });
+    document.addEventListener('mouseup', (e) => {
+      if (e.button !== 0 || !this.tahanie) return;
+      const klik = this.tahanie.drah < 5;
+      this.tahanie = null;
+      if (this.velka.hidden || !klik || !this.kurzor || !this.pohladVelkej) return;
       const p = this.pohladVelkej;
       const x = p.stredX + (this.kurzor[0] - p.cx) / p.mierka, z = p.stredZ + (this.kurzor[1] - p.cy) / p.mierka;
       hra.posli('mapa-klik', { x, z });
-      this.velka.hidden = true;
+      this._zavriVelku(hra);
     });
   },
 
@@ -99,11 +133,22 @@ export default {
     this.bitmapy.update(x, z, 3);
 
     if (hra.vstup.stlacil('mapa') && !hra.stav.pauza) {
-      this.velka.hidden = !this.velka.hidden;
-      // kurzor začína na hráčovi (stred mapy)
-      if (!this.velka.hidden) this.kurzor = [this.velkePlatno.clientWidth / 2, this.velkePlatno.clientHeight / 2];
+      if (this.velka.hidden) {
+        this.velka.hidden = false;
+        // mapa aj zameriavač začínajú na hráčovi; hra kým je mapa otvorená nedostáva pohyb ani myš
+        this.stredMapy = { x, z };
+        this.kurzor = [this.velkePlatno.clientWidth / 2, this.velkePlatno.clientHeight / 2];
+        hra.vstup.blokovane = true;
+      } else this._zavriVelku(hra);
     }
-    if (hra.stav.pauza && !this.velka.hidden) this.velka.hidden = true;
+    if (hra.stav.pauza && !this.velka.hidden) this._zavriVelku(hra);
+    // posun mapy klávesami (WASD / šípky), rýchlosť v pixeloch obrazovky
+    if (!this.velka.hidden && this.stredMapy) {
+      const sm = hra.vstup.surovyPohyb();
+      const v = 500 * dt / this.velkaMierka;
+      this.stredMapy.x += sm.x * v;
+      this.stredMapy.z -= sm.y * v;
+    }
     this.obal.hidden = !this.velka.hidden;
 
     if (this.velka.hidden) this._kresliMinimapu(dt, hra);
@@ -148,22 +193,33 @@ export default {
     kresliSever(ctx, pohlad);
   },
 
+  _zavriVelku(hra) {
+    this.velka.hidden = true;
+    this.stredMapy = null;
+    this.tahanie = null;
+    hra.vstup.blokovane = false;
+  },
+
   _kresliVelkuMapu(hra) {
     const s = hra.stav;
     const { w, h, dpr } = prisposobPlatno(this.velkePlatno);
-    // najďalej toľko, kam siahajú načítané dlaždice
-    const minMierka = Math.max(w, h) / 2 / 2000;
-    this.velkaMierka = Math.min(3, Math.max(minMierka, this.velkaMierka));
+    // najďalej toľko, kam siahajú načítané dlaždice (hrubé bitmapy do 2,2 km od hráča)
+    this.minMierka = Math.max(w, h) / 2 / 2000;
+    this.velkaMierka = Math.min(3, Math.max(this.minMierka, this.velkaMierka));
+    const st = this.stredMapy ?? { x: s.pozicia.x, z: s.pozicia.z };
+    const dx = st.x - s.pozicia.x, dz = st.z - s.pozicia.z, d = Math.hypot(dx, dz), MAX = 1800;
+    if (d > MAX) { st.x = s.pozicia.x + dx / d * MAX; st.z = s.pozicia.z + dz / d * MAX; }
     const pohlad = vytvorPohlad({
-      w, h, dpr, stredX: s.pozicia.x, stredZ: s.pozicia.z,
+      w, h, dpr, stredX: st.x, stredZ: st.z,
       otocenie: 0, mierka: this.velkaMierka, cx: w / 2, cy: h / 2,
     });
+    const [hx, hy] = pohlad.naObrazovku(s.pozicia.x, s.pozicia.z);
     const ctx = this.velkyCtx;
     kresliPodklad(ctx, pohlad, this.bitmapy);
     if (this.velkaMierka >= MIERKA_ZASTAVKY) kresliZastavky(ctx, pohlad, this._zastavkyMhd(hra));
     kresliNazvy(ctx, pohlad, Object.values(hra.mapa?.miesta ?? {}).filter((m) => m?.nazov));
-    kresliZnacky(ctx, pohlad, this.znacky.values(), [pohlad.cx, pohlad.cy], 14, true);
-    kresliHraca(ctx, pohlad.cx, pohlad.cy, pohlad.uhol(Math.sin(s.uhol), Math.cos(s.uhol)), 11);
+    kresliZnacky(ctx, pohlad, this.znacky.values(), [hx, hy], 14, true);
+    kresliHraca(ctx, hx, hy, pohlad.uhol(Math.sin(s.uhol), Math.cos(s.uhol)), 11);
     this.pohladVelkej = pohlad;
     if (this.kurzor) kresliKurzor(ctx, dpr, this.kurzor[0], this.kurzor[1]);
   },
