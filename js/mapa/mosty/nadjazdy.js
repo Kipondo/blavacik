@@ -43,20 +43,41 @@ export function profilMosta(m, vyskaTerenu) {
     body[i].ux = dx / l; body[i].uz = dz / l;
     body[i].teren = vyskaTerenu(body[i].x, body[i].z);
   }
-  const hA = body[0].teren, hB = body.at(-1).teren;
+  const volne = m.volne ?? [0, 0];
   const pod = m.pod ?? [];
   const potreba = body.map((p) => {
     let clr = D.nad;
     for (const [s0, s1, co] of pod) if (p.s >= s0 && p.s <= s1) clr = Math.max(clr, (PODJAZD[co] ?? 2) + D.hrubka);
     return p.teren + clr;
   });
+  // kotvy: koniec na zemi = výška terénu, voľný koniec (napája sa na iný most) sa riadi len podjazdmi
+  const hA = volne[0] ? null : body[0].teren, hB = volne[1] ? null : body.at(-1).teren;
+  const zaklad = (p) => (hA !== null && hB !== null ? hA + (hB - hA) * (p.s / s) : hA ?? hB ?? Math.max(...potreba));
   for (let i = 0; i < body.length; i++) {
     const p = body[i];
-    let h = hA + (hB - hA) * (p.s / s);
+    let h = zaklad(p);
     for (let j = 0; j < body.length; j++) h = Math.max(h, potreba[j] - D.sklon * Math.abs(p.s - body[j].s));
     p.h = h;
   }
-  return { m, D, body, dlzka: s, sirka: m.sirka };
+  // koniec na zemi, ktorý ostal vysoko (nad cestou hneď pri konci): rampa (cesta) alebo schody (lávka) za koniec
+  const predlz = (naKonci) => {
+    const kraj = naKonci ? body.at(-1) : body[0];
+    if (volne[naKonci ? 1 : 0] || m.druh === 'kolaj' || kraj.h - kraj.teren < 0.7) return [];
+    const ux = naKonci ? kraj.ux : -kraj.ux, uz = naKonci ? kraj.uz : -kraj.uz;
+    const sklon = m.druh === 'cesta' ? D.sklon : 0.55;
+    const out = [];
+    let h = kraj.h;
+    for (let k = 1; k < 80; k++) {
+      const x = kraj.x + ux * KROK * k, z = kraj.z + uz * KROK * k;
+      const t = vyskaTerenu(x, z);
+      h -= sklon * KROK;
+      if (h <= t + 0.05) break;
+      out.push({ x, z, s: naKonci ? s + KROK * k : -KROK * k, ux: kraj.ux, uz: kraj.uz, teren: t, h, predlzenie: m.druh === 'cesta' ? 'rampa' : 'schody' });
+    }
+    return out;
+  };
+  const zac = predlz(false).reverse(), kon = predlz(true);
+  return { m, D, body: [...zac, ...body, ...kon], dlzka: s, sirka: m.sirka, od: zac.length ? zac[0].s : 0, po: kon.length ? kon.at(-1).s : s };
 }
 
 /** Výška mostovky v bode (x, z), alebo null, ak bod nie je na moste. */
@@ -159,8 +180,19 @@ function postavMost(pr, Z, kolizie) {
   const vrch = Z.vrch[m.druh] ?? Z.vrch.chodnik;
   for (let i = 1; i < b.length; i++) {
     const a = b[i - 1], c = b[i];
-    // vrch mostovky (pochôdzna / jazdná plocha) a rímsy po okrajoch
-    vrch.stvor(bod(a, w, a.h), bod(a, -w, a.h), bod(c, -w, c.h), bod(c, w, c.h));
+    // vrch mostovky (pochôdzna / jazdná plocha) a rímsy po okrajoch; schody ku koncu lávky po stupňoch
+    if (a.predlzenie === 'schody' || c.predlzenie === 'schody') {
+      const n = Math.max(1, Math.round(Math.abs(c.h - a.h) / 0.17));
+      for (let k = 0; k < n; k++) {
+        const t0 = k / n, t1 = (k + 1) / n;
+        const p0 = { x: a.x + (c.x - a.x) * t0, z: a.z + (c.z - a.z) * t0, ux: a.ux, uz: a.uz };
+        const p1 = { x: a.x + (c.x - a.x) * t1, z: a.z + (c.z - a.z) * t1, ux: a.ux, uz: a.uz };
+        // stupeň k: nášľap vo výške začiatku úseku, na konci úseku podstupnica k ďalšiemu stupňu
+        const y0 = a.h + (c.h - a.h) * t0, y1 = a.h + (c.h - a.h) * t1;
+        vrch.stvor(bod(p0, w, y0), bod(p0, -w, y0), bod(p1, -w, y0), bod(p1, w, y0));
+        vrch.stvor(bod(p1, w, Math.min(y0, y1)), bod(p1, -w, Math.min(y0, y1)), bod(p1, -w, Math.max(y0, y1)), bod(p1, w, Math.max(y0, y1)));
+      }
+    } else vrch.stvor(bod(a, w, a.h), bod(a, -w, a.h), bod(c, -w, c.h), bod(c, w, c.h));
     for (const s of [1, -1]) {
       const o0 = s * w, o1 = s * W;
       if (s > 0) Z.beton.stvor(bod(a, o1, a.h + 0.12), bod(a, o0, a.h + 0.12), bod(c, o0, c.h + 0.12), bod(c, o1, c.h + 0.12));
@@ -222,7 +254,7 @@ function postavMost(pr, Z, kolizie) {
   const volne = (s) => !pod.some(([s0, s1]) => s > s0 - 3 && s < s1 + 3);
   let posledny = -1e9;
   for (const p of b) {
-    if (p.s - posledny < D.rozpatie || p.s < 4 || p.s > pr.dlzka - 4) continue;
+    if (p.s - posledny < D.rozpatie || p.s < pr.od + 4 || p.s > pr.po - 4) continue;
     const spodok = p.h - D.hrubka;
     if (spodok - p.teren < 1.2 || !volne(p.s)) continue;
     posledny = p.s;
@@ -246,7 +278,7 @@ function postavMost(pr, Z, kolizie) {
   // opory na koncoch (mostovka nad terénom): stena pod mostovkou až po zem
   for (const p of [b[0], b.at(-1)]) {
     const spodok = p.h - D.hrubka;
-    if (p.h - p.teren < 0.8) continue;
+    if (p.h - p.teren < 0.8 || p.predlzenie) continue;
     Z.beton.kvader(p.x, p.teren - 0.5, Math.max(spodok, p.teren), p.z, 1.2, pr.sirka + 2 * kraj, p.ux, p.uz);
   }
 }

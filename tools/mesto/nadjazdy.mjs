@@ -4,9 +4,10 @@
 // preto hra mostovku vedie od výšky terénu na jednom konci k druhému a nad cestou / koľajou ju zdvihne
 // na podjazdnú výšku (js/mapa/mosty/nadjazdy.js).
 //
-// Do dlaždice (podľa stredu mosta) pribudne "nadjazdy": [{ druh, typ, sirka, body: [[x,z],…], pod: [[s0, s1, co], …] }]
+// Do dlaždice (podľa stredu mosta) pribudne "nadjazdy": [{ druh, typ, sirka, body: [[x,z],…], pod: [[s0, s1, co], …], volne }]
 //   druh – 'cesta' | 'chodnik' | 'kolaj'; typ – highway / railway z OSM; sirka v m
 //   pod  – úseky (v m od začiatku), pod ktorými je cesta (co = 1), koľaj (2) alebo voda (3) – tam treba podjazdnú výšku
+//   volne – [začiatok, koniec]: 1 = koniec sa napája na iný most (výšku neurčuje terén)
 // Cesty, chodníky a koľaje dlaždíc, ktoré ležia na moste, dostanú "nadjazd": 1 – hra ich nekreslí na zem.
 // Opakované spustenie najprv zmaže výsledok predchádzajúceho behu.
 // Spustenie: cd tools/mesto && node --max-old-space-size=8000 nadjazdy.mjs
@@ -99,7 +100,9 @@ for (const m of mostne.values()) {
   pokracuj(true);
   pokracuj(false);
   const b = uzly.map((n) => db.uzly.get(n)).filter(Boolean).map((u) => naMetre(u.lon, u.lat));
-  retaze.push({ druh: m.druh, typ: m.t.highway ?? m.t.railway, sirka: r1(sirka(m.t, m.druh)), body: b, nazov: m.t.name ?? '' });
+  // voľný koniec = v uzle sa stretáva s iným mostom (rampy mimoúrovňových križovatiek) – výšku tam neurčuje terén
+  const volny = (n) => ((vUzle.get(n) ?? []).length > 1 ? 1 : 0);
+  retaze.push({ druh: m.druh, typ: m.t.highway ?? m.t.railway, sirka: r1(sirka(m.t, m.druh)), body: b, nazov: m.t.name ?? '', volne: [volny(uzly[0]), volny(uzly.at(-1))] });
 }
 console.log(`mostov (reťazí): ${retaze.length}`);
 
@@ -177,6 +180,7 @@ for (const r of retaze) {
   const { dlzka, ...zapis } = r;
   if (!zapis.nazov) delete zapis.nazov;
   if (!zapis.pod.length) delete zapis.pod;
+  if (!zapis.volne[0] && !zapis.volne[1]) delete zapis.volne;
   zaradenie.get(k).push(zapis);
 }
 const odLomenej = (x, z, b) => { let m = Infinity; for (let i = 1; i < b.length; i++) m = Math.min(m, odUsecky(x, z, b[i - 1], b[i])); return m; };
