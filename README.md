@@ -200,7 +200,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
-- Deň a noc (svietiace lampy a okná) – nálada v `js/grafika/nalada.js` podľa herného času; vietor v korunách stromov.
+- Svetlomety áut v noci, dážď a hmla ako počasie.
 - Engine misií a dialógov, polícia, minimapa.
 
 ## Ako pridať misiu
