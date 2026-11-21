@@ -86,9 +86,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
-- **Chodci** (`js/chodec/chodci/`, modul `chodci`): do 120 m okolo hráča ~1 človek na 5 m chodníka (pešie zóny hustejšie,
-  námestia 1 na 30 m²), ďalej do 230 m štvrtina – v Starom Meste ~600 ľudí do 120 m. Chodia po sieti chodníkov z dlaždíc
-  mesta, držia sa vpravo, obchádzajú sa, občas zastanú, na námestiach sa prechádzajú, uhýbajú hráčovi aj autu.
+- **Chodci** (`js/chodec/chodci/`, modul `chodci`): do 120 m okolo hráča ~1 človek na 15 m chodníka (pešie zóny hustejšie,
+  námestia 1 na 110 m²), ďalej do 230 m štvrtina – najviac 450 ľudí. Chodia **len** po chodníkoch, pešich zónach,
+  cestičkách v parkoch, schodoch a prechodoch – úseky pozdĺž vozovky a cez domy sa zo siete vyhodia, na námestiach
+  sa kontroluje, že bod nie je na vozovke ani v dome. Držia sa vpravo, obchádzajú sa, občas zastanú, uhýbajú hráčovi
+  a pomalému autu. **Rýchle auto chodca zrazí** (`zrazenie.js`): odletí s rýchlosťou auta, prevráti sa, dopadne,
+  pošmykne sa, chvíľu leží, vstane a vráti sa na chodník; auto dostane malý náraz (udalosť `'naraz'` s `chodec: true`).
   Najbližších 8 = plný model s kostrou a mimikou, ostatní sa kreslia cez InstancedMesh s **animáciou zapečenou
   do textúry** (VAT: chôdza a státie sa pri načítaní raz prehrajú na zlúčených LOD sieťach NPC, ~2 s) – každý má vlastné
   oblečenie a pleť (textúra paliet). Stovky ľudí za ~36 volaní kreslenia. Pre ostatné moduly: `hra.chodci.zoznam`.
