@@ -28,6 +28,7 @@ export class SpravaDlazdic {
     this.aktivne = new Map();   // kluc → { uroven, objekt, data }
     this.data = new Map();      // kluc → Promise(data)
     this.uloha = null;          // práve stavaná dlaždica { kluc, uroven, gen, data }
+    this.priprav = null;        // (objekt) → Promise: príprava shaderov a textúr pred ukázaním (nastaví modul dlaždíc)
     this.poslednaKontrola = -1e9;
     this.stred = { x: 0, z: 0 };
   }
@@ -95,10 +96,22 @@ export class SpravaDlazdic {
     // 1) pokračuj v rozostavanej dlaždici v rámci časového rozpočtu
     const zaciatok = performance.now();
     if (this.uloha?.caka) return;
-    while (this.uloha && performance.now() - zaciatok < ROZPOCET_MS) {
+    while (this.uloha && !this.uloha.caka && performance.now() - zaciatok < ROZPOCET_MS) {
       const r = this.uloha.gen.next();
       if (r.done) {
         const { kluc, uroven, data } = this.uloha;
+        if (this.priprav) {
+          // shadery a textúry dlaždice sa pripravia vopred (na pozadí), až potom sa dlaždica ukáže –
+          // inak by ich grafická karta pripravovala pri prvom kreslení a hra by sa na chvíľu zasekla
+          const uloha = this.uloha;
+          uloha.caka = true;
+          Promise.resolve().then(() => this.priprav(r.value)).catch(() => {}).then(() => {
+            if (this.uloha !== uloha) return;
+            this.uloha = null;
+            this._pridaj(kluc, uroven, r.value, data);
+          });
+          return;
+        }
         this.uloha = null;
         this._pridaj(kluc, uroven, r.value, data);
       }
