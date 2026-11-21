@@ -1,0 +1,4 @@
+{
+  "popis": "Ručne doplnené priechody pod budovami, ktoré v OSM chýbajú (formát ako .cache/mesto/priechody.json: id, typ, sirka, vyska, meno, body [[x, z], ...] v metroch hry). Spracuje tools/mesto/priechody.py.",
+  "priechody": []
+}

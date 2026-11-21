@@ -204,6 +204,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   **Úzke časti overuje laser** (`tools/mesto/laser/casti.py`, issue #68): časť s kratšou stranou pod 12 m,
   nad ktorou laser nič nevidí, sa vyhodí, privysoká sa zníži na výšku z lasera. Odstránilo to falošné 75 m „veže“
   za Kyjevom (117 znížených, 15 vyhodených častí). Širšie časti ostávajú podľa OSM, lebo laser je z roku 2023.
+- **Priechody pod budovami** (issue #65; `node --max-old-space-size=8000 tools/mesto/priechody-osm.mjs`,
+  potom `python3 tools/mesto/priechody.py`): z OSM `tunnel=building_passage` a `covered=yes/arcade` (1958 ciest)
+  a ručne doplnených v `data/mapa/priechody-rucne.json`. Budova sa rozdelí na prízemie bez priechodu (s kolíziou)
+  a hornú časť nad ním (`minVyska` 3,8 m, s podhľadom, bez kolízie). V meste je tak 1028 priechodov, ktorými sa
+  dá prejsť – napríklad Pasáž Liga (Dunajská – Grösslingova) alebo Pasáž Luxor.
 - **Dlažba v celom meste:** chodníky a námestia mimo historického jadra sú zo svetlých betónových dlaždíc 50 × 50 cm
   (`assets/textury/beton`, procedurálna CC0), v jadre kamenné dosky a kocky; dlažba a tráva z CC0 materiálov sú vo
   všetkých podrobných dlaždiciach (mimo laserového výrezu s mapou tried 512 px).
@@ -500,7 +505,8 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 - **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`.
 - **Podchody z OSM** do hotových dlaždíc: `node --max-old-space-size=8000 podchody.mjs`.
 - **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`,
-  potom overenie úzkych častí laserom: `python3 tools/mesto/laser/casti.py` (potrebuje laser v `.cache/laser/`).
+  potom overenie úzkych častí laserom: `python3 tools/mesto/laser/casti.py` (potrebuje laser v `.cache/laser/`)
+  a priechody pod budovami: `node --max-old-space-size=8000 priechody-osm.mjs && python3 priechody.py`.
 - **Laserové skenovanie:** [data/lidar/README.md](data/lidar/README.md) – terén, budovy, strechy a stromy
   (`python3 tools/mesto/laser/*.py`). Zdroj: letecké laserové skenovanie ÚGKK SR (DMR 6.0, DMP 2.0), **© ÚGKK SR, CC BY 4.0**.
 - **Textúry** (omietka, škridla, štrk, dlažba): ambientCG, CC0 – zoznam v [assets/textury/LICENSE.md](assets/textury/LICENSE.md).
