@@ -80,6 +80,18 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   *Settings → Secrets and variables → Actions → New repository secret* ho uložiť ako `GEMINI_API_KEY`.
   **Pridať repliku = zmeniť JSON dialógu a pushnúť** – hlas sa dorobí sám. Hra prehrá hlas pri udalosti
   `hra.posli('dialog-replika', { dialog, index, variant })` (posiela ju zobrazovanie dialógov).
+- **Výšky budov v celom meste z lasera** (issue #53, `python3 tools/mesto/laser/vysky.py`, laser v `.cache/laser/`):
+  pre 63 221 z 88 574 budov je výška z laserového skenovania ÚGKK (DMP − DMR), pre šikmé strechy
+  aj odkvap a hrebeň (podľa sklonu povrchu strechy).
+  - Odhad sa nahradí vždy. Výška z OSM sa nahradí, keď sa od lasera líši o viac ako 3 m.
+  - Budovy, ktoré laser z roku 2023 nevidí (novostavby), ostávajú podľa OSM.
+  - Dlaždice narástli len o 3,6 MB (33,9 → 37,5 MB), lebo sa menia len čísla.
+  - LOD2 strechy (`budovy.py`) ostávajú pre výrez Starého Mesta. Celé mesto by malo ~500 MB, preto čaká
+    na schválenie. Skripty `teren.py`, `budovy.py` a `stromy.py` vedia spracovať aj vybrané dlaždice
+    (`--dlazdice i_j,…`, `--mlynska-dolina`).
+  - **Mlynská dolina** (miesto príbehu, #73) má navyše podrobný terén 2 m, LOD2 strechy a stromy z lasera
+    ako Staré Mesto (`--mlynska-dolina`): 305 budov so strechou z lasera a 6369 stromov, spolu +0,7 MB.
+  - Snímky pred a po: `docs/snimky/laser-vysky/`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
