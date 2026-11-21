@@ -28,7 +28,12 @@ def cislo(v, d=None):
 
 
 def hrana_k_smeru(obrys, smer):
-    """Index najdlhšej hrany, ktorej vonkajšia normála najlepšie mieri do smeru (x, z hry → Blender y = −z)."""
+    """Index najdlhšej hrany, ktorej vonkajšia normála najlepšie mieri do smeru (x, z hry → Blender y = −z).
+    Smer môže byť aj ('bod', x, y) v rovine modelu – vtedy hrana so stredom najbližšie k bodu (dlhšia ako 4 m)."""
+    if smer and smer[0] == 'bod':
+        n = len(obrys)
+        return min((i for i in range(n) if dlzka(obrys[i], obrys[(i + 1) % n]) > 4),
+                   key=lambda i: math.hypot((obrys[i][0] + obrys[(i + 1) % n][0]) / 2 - smer[1], (obrys[i][1] + obrys[(i + 1) % n][1]) / 2 - smer[2]))
     sx, sy = smer[0], -smer[1]
     n = len(obrys)
     return max(range(n), key=lambda i: (normala(obrys[i], obrys[(i + 1) % n])[0] * sx + normala(obrys[i], obrys[(i + 1) % n])[1] * sy)
@@ -69,7 +74,8 @@ def portikus(G, obrys, smer, z_rimsy, mat_stlp, mat_tymp, mat_strecha, stlpy=4, 
         G.valec(klobuk, T, 0.75, z + h + 0.45, z + h + 1.0, seg=16, r1=0.6)
 
 
-def veza(G, c, sirka, vyska, mat, mat_strecha, sklo_m, rimsa, typ='barok', osem=None, strecha_h=None, koruna=None, natocenie=(1, 0)):
+def veza(G, c, sirka, vyska, mat, mat_strecha, sklo_m, rimsa, typ='barok', osem=None, strecha_h=None, koruna=None, natocenie=(1, 0),
+         hodiny=False, od=-1.0):
     """Veža so štvorcovým telom, voliteľnou osembokou nadstavbou a strechou (barok = cibuľa s lucernou,
     ihlan, gotika = vysoký osemboký ihlan)."""
     u = natocenie
@@ -84,10 +90,24 @@ def veza(G, c, sirka, vyska, mat, mat_strecha, sklo_m, rimsa, typ='barok', osem=
         barokova_fasada(G, o, [vyska - 9.0, vyska], stena=mat, sambrana=rimsa, sklo_m=sklo_m, rimsa=rimsa,
                         os_okien=sirka / 2, min_dlzka=3.0, okno=(1.3, 5.6), seed=3)
     else:
-        pocet = max(2, round(vyska / 4.5))
-        kz = [-1.0] + [vyska * k / pocet for k in range(1, pocet + 1)]
+        pocet = max(2, round((vyska - od) / 4.5))
+        kz = [od] + [od + (vyska - od) * k / pocet for k in range(1, pocet + 1)]
         barokova_fasada(G, o, kz, stena=mat, sambrana=rimsa, sklo_m=sklo_m, rimsa=rimsa, os_okien=sirka, min_dlzka=3.0,
                         okno=(min(1.3, sirka * 0.25), 2.4), seed=3)
+    if hodiny:
+        cif = material('cifernik-veze', '#f3efe4', drsnost=0.5)
+        ruc = material('rucicka-veze', '#2a2622', drsnost=0.4, kov=0.5)
+        for i in range(4):
+            a, b = o[i], o[(i + 1) % 4]
+            m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+            kruh_na_stene(G, cif, a, b, m, vyska - 2.4, sirka * 0.27, von=0.08)
+            kruh_na_stene(G, ruc, a, b, m, vyska - 2.4, sirka * 0.29, von=0.04)
+            L = dlzka(a, b)
+            ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            nx, ny = normala(a, b)
+            p0 = (m[0] + nx * 0.14, m[1] + ny * 0.14, vyska - 2.4)
+            for uhol, dl in ((-1.0, sirka * 0.15), (0.9, sirka * 0.22)):
+                G.tram(ruc, p0, (p0[0] + ux * dl * math.sin(uhol), p0[1] + uy * dl * math.sin(uhol), p0[2] + dl * math.cos(uhol)), 0.09)
     z = vyska
     if osem:
         r, hh = sirka * 0.42, osem
@@ -119,6 +139,72 @@ def veza(G, c, sirka, vyska, mat, mat_strecha, sklo_m, rimsa, typ='barok', osem=
     else:
         G.kvader(rimsa, c, u, 0.12, 0.12, z, z + 1.6)
     return z
+
+
+def kruh_na_stene(G, mat, a, b, stred, z, r, von=0.05, seg=20):
+    """Kruh na stene (ciferník, okrúhle okienko) – líce von od steny a→b."""
+    L = dlzka(a, b)
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, ny = normala(a, b)
+    c = (stred[0] + nx * von, stred[1] + ny * von)
+    G.plocha(mat, [(c[0] + ux * r * math.cos(2 * math.pi * k / seg), c[1] + uy * r * math.cos(2 * math.pi * k / seg),
+                    z + r * math.sin(2 * math.pi * k / seg)) for k in range(seg)])
+
+
+def stit(G, obrys, smer, z, vyska, mat, mat_rimsa, oculus=None):
+    """Trojuholníkový štít (tympanón) nad hlavnou rímsou na priečelí; voliteľne okrúhle okienko."""
+    i = hrana_k_smeru(obrys, smer)
+    a, b = obrys[i], obrys[(i + 1) % len(obrys)]
+    nx, ny = normala(a, b)
+    m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    for d, mt in ((0.25, mat), (-0.4, mat)):
+        A = (a[0] + nx * d, a[1] + ny * d, z)
+        B = (b[0] + nx * d, b[1] + ny * d, z)
+        T = (m[0] + nx * d, m[1] + ny * d, z + vyska)
+        G.plocha(mt, [A, B, T] if d > 0 else [T, B, A])
+    for p, q in ((a, m), (m, b)):
+        G.plocha(mat, [(p[0] + nx * 0.25, p[1] + ny * 0.25, z + (vyska if p is m else 0)), (p[0] - nx * 0.4, p[1] - ny * 0.4, z + (vyska if p is m else 0)),
+                       (q[0] - nx * 0.4, q[1] - ny * 0.4, z + (vyska if q is m else 0)), (q[0] + nx * 0.25, q[1] + ny * 0.25, z + (vyska if q is m else 0))])
+    # rímsy po šikmých hranách a pod štítom
+    for p, q, zp, zq in ((a, m, z, z + vyska), (m, b, z + vyska, z)):
+        G.tram(mat_rimsa, (p[0] + nx * 0.4, p[1] + ny * 0.4, zp + 0.15), (q[0] + nx * 0.4, q[1] + ny * 0.4, zq + 0.15), 0.35)
+    G.tram(mat_rimsa, (a[0] + nx * 0.45, a[1] + ny * 0.45, z), (b[0] + nx * 0.45, b[1] + ny * 0.45, z), 0.4)
+    if oculus:
+        kruh_na_stene(G, mat_rimsa, a, b, m, z + vyska * 0.4, vyska * 0.2, von=0.27)
+        kruh_na_stene(G, oculus, a, b, m, z + vyska * 0.4, vyska * 0.15, von=0.29)
+
+
+def pilastre(G, obrys, smer, H, mat, pocet=4):
+    """Pilastre (ploché piliere s hlavicou) na priečelí."""
+    i = hrana_k_smeru(obrys, smer)
+    a, b = obrys[i], obrys[(i + 1) % len(obrys)]
+    L = dlzka(a, b)
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, ny = normala(a, b)
+    for k in range(pocet):
+        t = 0.06 + 0.88 * k / max(1, pocet - 1)
+        c = (a[0] + (b[0] - a[0]) * t + nx * 0.18, a[1] + (b[1] - a[1]) * t + ny * 0.18)
+        G.kvader(mat, c, (ux, uy), 0.85, 0.36, -1.0, H - 0.6)
+        G.kvader(mat, (c[0] + nx * 0.05, c[1] + ny * 0.05), (ux, uy), 1.1, 0.5, H - 0.9, H - 0.4)
+
+
+def niky(G, obrys, smer, H, mat_nika, mat_socha, pocet=4):
+    """Výklenky so sochami svätých na priečelí."""
+    i = hrana_k_smeru(obrys, smer)
+    a, b = obrys[i], obrys[(i + 1) % len(obrys)]
+    L = dlzka(a, b)
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, ny = normala(a, b)
+    z0 = H * 0.42
+    for k in range(pocet):
+        t = (k + 0.5) / pocet if pocet > 2 else (0.17 if k == 0 else 0.83)   # pri dvoch nikách po stranách veže
+        m = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+        G.plocha(mat_nika, [(m[0] - ux * 0.65 + nx * 0.03, m[1] - uy * 0.65 + ny * 0.03, z0), (m[0] + ux * 0.65 + nx * 0.03, m[1] + uy * 0.65 + ny * 0.03, z0),
+                            (m[0] + ux * 0.65 + nx * 0.03, m[1] + uy * 0.65 + ny * 0.03, z0 + 2.6), (m[0] - ux * 0.65 + nx * 0.03, m[1] - uy * 0.65 + ny * 0.03, z0 + 2.6)])
+        c = (m[0] + nx * 0.3, m[1] + ny * 0.3)
+        G.kvader(mat_socha, c, (ux, uy), 0.9, 0.5, z0 - 0.25, z0 + 0.05)
+        G.valec(mat_socha, c, 0.3, z0 + 0.05, z0 + 1.6, seg=8, r1=0.22)
+        G.valec(mat_socha, c, 0.16, z0 + 1.6, z0 + 1.95, seg=8, r1=0.12)
 
 
 def postav_zaznam(kluc, zaznam, spec, poradie=0):
@@ -205,7 +291,21 @@ def postav_zaznam(kluc, zaznam, spec, poradie=0):
         if v.get('koruna'):
             kor = (material('zlato', '#e3b23c', drsnost=0.3, kov=0.9), material('vankus', '#9b2335', drsnost=0.7))
         vyska_max = max(vyska_max, veza(G, c, sirka, v['vyska'], stena if not kostol else stena, mat_v, sklo_o, detail,
-                                        typ=v.get('typ', 'barok'), osem=v.get('osem'), strecha_h=v.get('strecha_h'), koruna=kor))
+                                        typ=v.get('typ', 'barok'), osem=v.get('osem'), strecha_h=v.get('strecha_h'), koruna=kor,
+                                        hodiny=v.get('hodiny', False), od=v.get('od', -1.0)))
+    def smer_dopl(d):
+        if 'bod' in d:
+            return ('bod', d['bod'][0] - stred[0], -(d['bod'][1] - stred[1]))
+        return d['smer']
+    if spec.get('pilastre'):
+        pilastre(G, obrys, smer_dopl(spec['pilastre']), vrch_strechy, detail, spec['pilastre'].get('pocet', 4))
+    if spec.get('niky'):
+        niky(G, obrys, smer_dopl(spec['niky']), vrch_strechy, material('nika', '#cbbd9f', drsnost=0.9),
+             material('kamen-socha', '#d8cfbd', drsnost=0.8), spec['niky'].get('pocet', 4))
+    if spec.get('stit'):
+        st = spec['stit']
+        stit(G, obrys, smer_dopl(st), vrch_strechy, st.get('vyska', 5.0), stena, detail,
+             oculus=sklo_o if st.get('oculus') else None)
     # ďalšie časti z OSM (napr. Modrý kostolík, Slavín) – jednoduché telesá s výškou z OSM
     if spec.get('casti_osm'):
         for c in zaznam.get('casti', []):

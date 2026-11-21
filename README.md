@@ -106,6 +106,29 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   dráhou), Slovenská národná galéria (Vodné kasárne a premostenie), Národný futbalový štadión (tribúny okolo ihriska
   s čiarami a bránami, biela strecha s osvetlením, fasáda z lamiel), zimný štadión (klenutá strecha) a **stavenisko
   Istropolis** (oplotenie, výkop, rozostavaný skelet, dva vežové žeriavy, bunky).
+- **Kamenné námestie, Špitálska a Manderlák** z Blendera (issues #62, #67, #69, #70; dáta
+  `cd tools/mesto && node --max-old-space-size=8000 ../blender/osm_kamenne.mjs` a `../blender/osm_pamiatky.mjs`,
+  modely `python3 tools/blender/kamenne_blender.py kyjev prior doplnky`,
+  `python3 tools/blender/historicke_blender.py kostol-alzbetinok kostol-sv-ladislava`,
+  `python3 tools/blender/vyskove_budovy.py manderla`). Výšky sú z laserového skenovania ÚGKK (DMP − DMR).
+  - **Hotel Kyjev**: doska 61 m nad podnožou 10,5 m. Na širších stenách sú sústredné obdĺžnikové rámy
+    z bielych a tmavočervených pásov, vonku vodorovné pásy. Užšie steny sú béžové so škárami, hore tmavý veniec
+    a ustúpená technika. Podnož má presklené prízemie za stĺpmi a travertín s pásom okien.
+  - **Obchodný dom**: biely, takmer bezokenný klin na štíhlych stĺpoch, horná hrana stúpa z 19 na 23 m.
+    Na fasáde sú veľké okrúhle hodiny, pod nimi štyri stĺpce tmavých lamiel a hore vetracie lamely.
+    Má bielu vežu so štvorcovými oknami, ustúpeným podlažím a komínmi, nižšiu presklenú budovu s lávkou
+    a nadstavbou a reliéf.
+  - **Námestie**: okrúhly vyvýšený záhon s kvetmi a drevené truhlíky so stromčekmi (kopírujú terén).
+  - **Kostol sv. Alžbety** (alžbetínky): priečelie do ulice s výklenkami a sochami, veža s hodinami
+    a zelenou cibuľovou helmicou.
+  - **Kostol sv. Ladislava**: biele klasicistické priečelie s pilastrami a štítom, zvonička na streche,
+    oranžová strecha.
+  - **Manderlák**: okrovo-hnedé murivo, tmavočervené piliere s hrotmi nad atikou, samostatné okná s bielymi
+    rámami, tehlová nadstavba so stožiarom a obchody s červeným pásom.
+  - Obchody majú neutrálne pásy bez nápisov a značiek.
+  - Nový kľúč `nahradit` v `<subor>.json` modelu: pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc,
+    bez kolízie – napríklad pod blokom obchodného domu sa dá prejsť medzi stĺpmi.
+  - Snímky: `docs/snimky/kamenne/`.
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
