@@ -21,6 +21,7 @@ import podchody from './mapa/podchody/modul.js';
 import nadjazdy from './mapa/mosty/nadjazdy-modul.js';
 import trava from './mapa/zelen/trava-modul.js';
 import schody from './mapa/cesty/schody-modul.js';
+import povrch from './mapa/cesty/povrch-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
@@ -70,6 +71,7 @@ export default [
   trava,
   cyklopruhy,
   schody,
+  povrch,
   hud,
   lokality,
   poloha,
