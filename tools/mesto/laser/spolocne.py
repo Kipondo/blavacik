@@ -17,6 +17,21 @@ DLAZDICA = 500
 
 # výrez, na ktorom ladíme (Staré Mesto 1 × 1 km + Hradný kopec = 1,5 × 1 km); --vsetko spracuje celé mesto
 VYREZ = [(-2, -1), (-1, -1), (0, -1), (-2, 0), (-1, 0), (0, 0)]
+# Mlynská dolina (miesto príbehu, issue #73): internáty Mlyny, Átriaky, Družba, fakulty
+MLYNSKA_DOLINA = [(-7, -4), (-6, -4), (-6, -3), (-6, -5), (-5, -4)]
+
+
+def vyber_dlazdic(index):
+    """Dlaždice na spracovanie podľa argumentov: --vsetko | --dlazdice i_j,i_j… | --mlynska-dolina | výrez Starého Mesta."""
+    import sys
+    if '--vsetko' in sys.argv:
+        return [(d[0], d[1]) for d in index['dlazdice']]
+    if '--mlynska-dolina' in sys.argv:
+        return MLYNSKA_DOLINA
+    if '--dlazdice' in sys.argv:
+        zoz = sys.argv[sys.argv.index('--dlazdice') + 1]
+        return [tuple(int(v) for v in k.split('_')) for k in zoz.split(',')]
+    return VYREZ
 
 SUBORY = {
     'dmr': ('LOT08_DMR6_sjtsk03_bpv.zip', 'sjtsk03_bpv/dmr6_08_23_s.tif', 'sjtsk03_bpv/dmr6_08_23_s.tfw'),

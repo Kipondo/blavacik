@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw
 from scipy import ndimage
 import mapbox_earcut as earcut
 from matplotlib.path import Path
-from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json
+from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json, vyber_dlazdic
 
 K = 0.5            # rozlíšenie lasera (m)
 OKRAJ = 30         # okraj výrezu okolo dlaždíc (m) – budovy pri hrane
@@ -30,7 +30,7 @@ MIN_PLOCHA = 40    # najmenšia plocha strechy (pixely = 10 m²)
 MIN_DVOR = 80      # najmenší dvor (pixely = 20 m²)
 
 index = nacitaj_index()
-dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
+dlazdice = vyber_dlazdic(index)   # --vsetko | --dlazdice i_j,… | --mlynska-dolina | výrez Starého Mesta
 detail = index.get('terenDetail', {})
 
 

@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage
-from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json
+from spolocne import Raster, VYSTUP, NULA, DLAZDICA, VYREZ, nacitaj_index, uloz_json, vyber_dlazdic
 
 K = 0.5
 MIN_VYSKA = 3.0       # m nad terénom
@@ -17,7 +17,7 @@ MIN_ROZOSTUP = 3.0    # m medzi vrcholmi korún
 index = nacitaj_index()
 from spolocne import KOREN
 PAMIATKY = json.load(open(os.path.join(KOREN, 'data', 'mapa', 'pamiatky.json')))['pamiatky']
-dlazdice = [(d[0], d[1]) for d in index['dlazdice']] if '--vsetko' in sys.argv else VYREZ
+dlazdice = vyber_dlazdic(index)   # --vsetko | --dlazdice i_j,… | --mlynska-dolina | výrez Starého Mesta
 dmp_r, dmr_r = Raster('dmp'), Raster('dmr')
 OKRAJ = 10
 spolu = 0
