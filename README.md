@@ -190,6 +190,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   - **Chodníky:** popri cestách mimo jadra asfaltové (svetlejšie ako vozovka) s obrubníkom (stena, vrch obrubníka aj
     zadná hrana), pri domoch sivá zámková dlažba 20 × 10 cm (vlastná textúra `tools/textury/zamkova.py`),
     na námestiach tmavšie betónové dlaždice, všade špina a nerovnomernosť vo veľkej mierke; mapa povrchu má 0,5 m.
+    Parkoviská z OSM sú asfaltové so záplatami a ostrým okrajom (predtým rozmazaná sivá plocha, snímky
+    `docs/snimky/parkoviska/`).
   - **Tráva** menej do žlta, sýtejšie a suchšie miesta, štruktúra trávy aj v parkoch z mapy pokrývky.
   - **Tráva zblízka** (`js/mapa/zelen/trava-modul.js`, `trava.js`): trsy stebiel okolo kamery na trávnikoch, v parkoch
     a na zatrávnených svahoch (podľa mapy tried a pokrývky dlaždice), zblízka husto, ďalej redšie a menšie;
