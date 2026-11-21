@@ -7,6 +7,7 @@
 
 import { postavDlazdicu, uvolniObjekt } from './postav-dlazdicu.js';
 import { nacitajDoplnky } from './doplnky.js';
+import { bezNahradenych } from '../pamiatky/nahradene-budovy.js';
 
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
@@ -48,6 +49,8 @@ export class SpravaDlazdic {
         // detailný terén sa zaregistruje skôr, než sa dlaždica začne stavať (budovy, cesty aj zem ho už použijú)
         if (teren && this.data.has(kluc)) { this.vyskopis.pridajDetail?.(i, j, teren.v, teren.n, teren.krok); d._detailTerenu = true; }
         if (strechy) d._strechy = strechy;
+        // budovy, ktoré nahrádza podrobný model pamiatky (js/mapa/pamiatky/nahradene-budovy.js)
+        if (d.budovy) d.budovy = bezNahradenych(d.budovy);
         return d;
       }));
     }
