@@ -1,5 +1,6 @@
 .osm-cache/
 
-node_modules/
-.cache/
+# bez lomky na konci – aby sa nezachytili ani symbolické odkazy (GitHub Pages na nich padá)
+node_modules
+.cache
 __pycache__/

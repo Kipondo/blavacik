@@ -7,6 +7,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Ako hru spustiť
 - **Online:** GitHub Pages z vetvy `main` (Settings → Pages → Source: *Deploy from a branch*, vetva `main`, priečinok `/ (root)`).
   Hra potom beží na `https://kipondo.github.io/blavacik/`.
+  Do repozitára nepatria symbolické odkazy (napr. `node_modules` → priečinok mimo repozitára) –
+  zostavenie GitHub Pages na nich padá (*File removed before we read it*).
 - **Bez inštalácie, hneď:** `https://raw.githack.com/Kipondo/blavacik/main/index.html` (servíruje priamo vetvu `main`).
 - **Lokálne:** v priečinku projektu spusti `python3 -m http.server 8000` a otvor `http://localhost:8000`
   (cez dvojklik na `index.html` to nepôjde – prehliadač nedovolí načítať moduly a JSON zo súboru).
