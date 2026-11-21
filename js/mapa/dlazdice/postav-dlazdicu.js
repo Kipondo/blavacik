@@ -45,7 +45,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   const k = kolizie.preDlazdicu(kluc);
   g.add(yield* krokyZemeDlazdice(d, rect, vyskopis, rieky));   // po krokoch (textúry, výšky po pásoch)
   yield;
-  if (d.voda?.length) g.add(vytvorVodu(d.voda.map((v) => ({ ...v, reka: false })), KONFIG, vyskopis));
+  if (d.voda?.length) { g.add(vytvorVodu(d.voda.map((v) => ({ ...v, reka: false })), KONFIG, vyskopis)); yield; }
   // v detailnom výreze sú obslužné uličky historického jadra vydláždené (kreslí ich zem), nie asfaltové
   const dlazdene = d._detailTerenu ? new Set(cestyVJadre(d.cesty)) : null;
   const cesty = dlazdene?.size ? d.cesty.filter((c) => !dlazdene.has(c)) : d.cesty ?? [];
@@ -59,12 +59,14 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   yield;
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
   g.add(vytvorKolajnice((d.kolajnice ?? []).filter((kl) => !kl.nadjazd), vyskopis));
+  yield;
   // nadjazdy, lávky a nadchody (chôdzu a jazdu po nich rieši modul js/mapa/mosty/nadjazdy-modul.js)
   if (d.nadjazdy?.length) {
     const nadj = vytvorNadjazdy(d.nadjazdy, vyskopis, k);
     g.add(nadj.skupina);
     g.userData.nadjazdy = nadj.profily;
   }
+  yield;
   // podchody: chodby pod zemou, schody, zábradlie (chôdzu rieši modul js/mapa/podchody/modul.js)
   if (d.podchody?.length) g.add(vytvorPodchody(pripravTuby(d.podchody, vyskopis.vyskaTerenu), vyskopis.vyskaTerenu, k).skupina);
   yield;
@@ -110,6 +112,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorTabuleUlic(cesty, krizovatky, vyskopis));
   yield;
   g.add(vytvorLampy(d.prvky?.lampy, vyskopis, k, d.budovy ?? []));
+  yield;
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
   g.add(vytvorHroby(d, vyskopis));
   g.userData.krizovatky = krizovatky;
