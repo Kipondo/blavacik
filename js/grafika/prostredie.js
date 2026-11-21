@@ -3,6 +3,7 @@
 // Navyše posúva oblaky na oblohe.
 
 import * as THREE from 'three';
+import { NALADA } from './nalada.js';
 
 export default {
   nazov: 'prostredie',
@@ -16,7 +17,7 @@ export default {
     const kopia = new THREE.Mesh(obloha.geometry, obloha.material);
     envScena.add(kopia);
     // „zem“ v odraze – aby spodná polovica nebola obloha
-    const zem = new THREE.Mesh(new THREE.CircleGeometry(3000, 16), new THREE.MeshBasicMaterial({ color: '#5f5c55' }));
+    const zem = new THREE.Mesh(new THREE.CircleGeometry(3000, 16), new THREE.MeshBasicMaterial({ color: NALADA.odrazy.zem }));
     zem.rotation.x = -Math.PI / 2;
     zem.position.y = -40;
     envScena.add(zem);
