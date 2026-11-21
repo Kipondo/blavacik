@@ -59,6 +59,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   leží (alebo do 12 m od vchodu), z načítaných dlaždíc. Veľké areály majú stojan pri okraji. Pri príchode sa ukáže
   názov miesta, blízke služby sú farebné značky na minimape. Tabule sa stavajú postupne (najviac ~3 ms za snímok),
   aby hra v centre pri príchode do novej štvrte nesekala. Snímky: `docs/snimky/sluzby/`.
+- **Podniky v Mlynskej doline z OSM** (`tools/mesto/podniky.mjs` → `data/mapa/podniky.json`, issue #73): 37 klubov,
+  barov, bistier, reštaurácií, obchodov, práčovní a posilňovní (UniK Mlyny, Klub 39, Študentka, Bistro Mladosť…).
+  Menšia vývesná tabuľa nad vchodom na stene pri bode podniku: veľké meno z OSM, pod ním druh a ikona. Názvy len
+  z OSM; reťazce majú len všeobecný nápis (POTRAVINY…), obchody v obchodnom centre sa vynechajú. Pri príchode
+  sa ukáže meno podniku, kluby, bary a bistrá sú na minimape. Snímky: `docs/snimky/podniky/`.
 - **Názov Blavačík a vizuálna identita v farbách Bratislavy** (issue #17): červená a biela, doplnkovo zlatá
   (CSS premenné v `css/style.css`, kontrast podľa WCAG AA). Vlastné štylizované logo `assets/ui/logo.svg` – červený štít,
   biela brána s dvoma vežami a namiesto strednej veže UFO z Mosta SNP; **nie je to oficiálny erb mesta** (ten je chránený).
