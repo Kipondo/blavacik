@@ -22,6 +22,7 @@ import mys from './vstup/mys.js';
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
+import premavka from './doprava/premavka/modul.js';
 import mhd from './mhd/modul.js';
 
 // --- doplnkové moduly (polícia, misie, minimapa, doprava, …) ---
@@ -44,6 +45,7 @@ export default [
   poloha,
   grafCiest,
   semafory,
+  premavka,
   mhd,
   // policia,
   // misie,
