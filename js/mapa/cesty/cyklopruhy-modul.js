@@ -97,6 +97,8 @@ export default {
   postavStvorec(hra, x0, z0, velkost) {
     const T = hra.THREE;
     const x1 = x0 + velkost, z1 = z0 + velkost;
+    // výška terénu (hra.mapa.vyska môže pripočítať vozovku – js/mapa/cesty/povrch-modul.js)
+    const zem = hra.mapa.vyskaZeme ?? hra.mapa.vyska;
     const poz = [], uv = [], idx = [];
     for (const p of this.pruhy) {
       if (p.ohr.maxX < x0 - 20 || p.ohr.minX > x1 + 20 || p.ohr.maxZ < z0 - 20 || p.ohr.minZ > z1 + 20) continue;
@@ -120,7 +122,7 @@ export default {
               // u = 0 na strane áut (bližšie k osi cesty)
               const ix = px - nx * s * SIRKA / 2, iz = pz - nz * s * SIRKA / 2;
               const ox = px + nx * s * SIRKA / 2, oz = pz + nz * s * SIRKA / 2;
-              poz.push(ix, hra.mapa.vyska(ix, iz) + NAD_TERENOM + 0.04, iz, ox, hra.mapa.vyska(ox, oz) + NAD_TERENOM + 0.04, oz);
+              poz.push(ix, zem(ix, iz) + NAD_TERENOM + 0.04, iz, ox, zem(ox, oz) + NAD_TERENOM + 0.04, oz);
               uv.push(0, vv, 1, vv);
             }
             // normála nahor bez ohľadu na stranu
