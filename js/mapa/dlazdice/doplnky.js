@@ -29,11 +29,11 @@ async function nacitajTeren(kluc, info) {
   return { v, n, krok: info.krok };
 }
 
-const DRUHY = ['sikme', 'ploche', 'steny'];
+const DRUHY = ['sikme', 'ploche', 'steny', 'okna'];   // kód skupiny v súbore (3 = steny s oknami, #64)
 const doLin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 const LIN = Float32Array.from({ length: 256 }, (_, i) => doLin(i / 255));
 
-/** Rozbalí binárne strechy na { sikme|ploche|steny: { p, uv, c, i }, kominy }. */
+/** Rozbalí binárne strechy na { sikme|ploche|steny|okna: { p, uv, c, i }, kominy }. */
 function citajStrechy(buf) {
   const dv = new DataView(buf);
   if (String.fromCharCode(...new Uint8Array(buf, 0, 4)) !== 'STR2') return null;

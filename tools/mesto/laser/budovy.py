@@ -5,13 +5,15 @@
 #  - tvarStrechy: 'plocha' / 'sikma', hreben = výška hrebeňa nad odkvapom,
 #  - vnútorné dvory podľa lasera (diery v pôdoryse), ak ich OSM nemá,
 #  - strecha ako mnohouholníky rovín → data/mapa/mesto/strechy/<i>_<j>.json:
-#      { "sikme": {p, uv, c}, "ploche": {p, uv, c}, "steny": {p, uv, c} }  (trojuholníky bez indexov,
+#      { "sikme": {p, uv, c}, "ploche": {p, uv, c}, "steny": {p, uv, c}, "okna": {p, uv, c} }  (trojuholníky bez indexov,
 #      p = x,y,z v súradniciach hry, uv v metroch, c = lineárna farba RGB 0–1 na vrchol;
 #      "kominy": [[x, z, spodok, vrch, šírka, hĺbka, uhol], ...] – komíny nájdené ako malé výstupky nad strechou).
 # Postup strechy: povrch strechy sa rozloží na rovinné plochy (sklon a smer + spájanie podobných rovín),
 # hranice plôch sa prevedú na lomené čiary a zjednodušia (spoločné hranice raz → bez škár), body na
 # hrebeňoch a úžľabiach sa posunú na priesečník rovín (rovné ostré hrany), plochy sa strianguľujú (earcut)
 # a medzi rôzne vysokými plochami a na okraji sa doplnia zvislé steny (štíty, nadstavby).
+# Steny sú dvojaké: „steny“ = štítová stena medzi strechami dvoch rôznych budov (bez okien),
+# „okna“ = ustúpené podlažie / nadstavba tej istej budovy alebo stena na okraji strechy (hra na nej kreslí okná, #64).
 #
 # Spustenie (po teren.py): python3 tools/mesto/laser/budovy.py [--vsetko]
 import sys, os, json, math, gzip, time
@@ -53,8 +55,8 @@ PRIEMER_SKRIDLA = np.array([0.182, 0.061, 0.028])
 PRIEMER_STRK = np.array([0.226, 0.213, 0.173])
 SKRIDLA = ['#9c4a35', '#a5553c', '#8e4431', '#b0603f', '#7d4a3a']
 # veľkosť textúry v metroch (musí sedieť s js/mapa/budovy/strechy-lod2.js) – UV sa posúva o jej násobky
-PERIODA = {'sikme': 2.2, 'ploche': 1.6, 'steny': 3.0}
-KODY = {'sikme': 0, 'ploche': 1, 'steny': 2}
+PERIODA = {'sikme': 2.2, 'ploche': 1.6, 'steny': 3.0, 'okna': 3.0}
+KODY = {'sikme': 0, 'ploche': 1, 'steny': 2, 'okna': 3}
 
 
 def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
@@ -368,7 +370,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
     for body, sa, sb in zjed:
         if sa > 0: kruhy.setdefault(sa, []).append(body)
         if sb > 0: kruhy.setdefault(sb, []).append(body[::-1])
-    vystup = {kl: {'sikme': [], 'ploche': [], 'steny': []} for kl in data}
+    vystup = {kl: {'sikme': [], 'ploche': [], 'steny': [], 'okna': []} for kl in data}
     def pridaj(kl, druh, tri, uvs, farba, von=None):
         # jednotné natočenie trojuholníkov: strechy normálou nahor, steny von (kvôli tieňom – normalBias)
         tri = np.array(tri, float); uvs = np.array(uvs, float)
@@ -424,6 +426,8 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         if sa == 0 and sb == 0: continue
         if sa > 0 and sb > 0 and min(sa, sb) * (n + 1) + max(sa, sb) in stretnu: continue
         p = np.array([poloha[r] for r in body])
+        # štítová stena medzi dvoma budovami nemá okná; ustúpené podlažie tej istej budovy a okraj strechy áno
+        druh_steny = 'steny' if (sa > 0 and sb > 0 and int(bud_plochy[sa]) != int(bud_plochy[sb])) else 'okna'
         if sa > 0 and sb > 0:
             ha, hb = rov(sa, p[:, 0], p[:, 1]), rov(sb, p[:, 0], p[:, 1])
             hore, dole = np.maximum(ha, hb) - NULA, np.minimum(ha, hb) - NULA
@@ -448,7 +452,7 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
             von += [o, o]
             uvs += [((u[i], hore[i]), (u[i + 1], hore[i + 1]), (u[i + 1], dole[i + 1])), ((u[i], hore[i]), (u[i + 1], dole[i + 1]), (u[i], dole[i]))]
         if tri:
-            pridaj(kl, 'steny', np.array(tri), np.array(uvs), f_ste[k], np.array(von)); pocet_stien += len(tri)
+            pridaj(kl, druh_steny, np.array(tri), np.array(uvs), f_ste[k], np.array(von)); pocet_stien += len(tri)
     print(f'mnohouholníky: zlyhalo {zlyhalo}, trojuholníkov stien {pocet_stien}', flush=True)
 
     # --- zápis ---
@@ -473,7 +477,7 @@ def zarovnaj(kusy):
 
 def zapis_strechy(cesta, x0, z0, casti, kominy):
     """Binárny formát striech (gzip, little-endian):
-    'STR2', x0, z0 (float32), počet skupín (uint32); pre každú skupinu: kód (uint8: 0 šikmé, 1 ploché, 2 steny),
+    'STR2', x0, z0 (float32), počet skupín (uint32); pre každú skupinu: kód (uint8: 0 šikmé, 1 ploché, 2 steny, 3 steny s oknami),
     3 B výplň, nV, nI (uint32), poloha uint16×3·nV (x, z: (súr. − začiatok dlaždice + 20 m)·50, y: (y + 60 m)·50),
     uv int16×2·nV (cm), farba uint8×3·nV (sRGB), výplň na 4 B, indexy uint16/uint32 (uint32, ak nV > 65535), výplň na 4 B;
     nakoniec počet komínov (uint32) a float32×7 na komín."""
