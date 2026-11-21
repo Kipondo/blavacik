@@ -130,7 +130,7 @@ export class Auto {
         this.vx -= r.nx * vn * 1.3;
         this.vz -= r.nz * vn * 1.3;
         this.vx *= 0.8; this.vz *= 0.8;
-        if (-vn > 4) hra?.posli('naraz', { auto: this, sila: -vn });
+        if (-vn > 4) hra?.posli('naraz', { auto: this, sila: -vn, nx: r.nx, nz: r.nz });
       }
     }
   }

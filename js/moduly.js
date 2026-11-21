@@ -28,6 +28,7 @@ import mys from './vstup/mys.js';
 import minimapa from './ui/minimapa/modul.js';
 import sochy from './mapa/vybavenie/sochy-modul.js';
 import oznacenia from './mapa/vybavenie/oznacenia-modul.js';
+import poskodenieAut from './auto/poskodenie-modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -65,6 +66,7 @@ export default [
   minimapa,
   sochy,
   oznacenia,
+  poskodenieAut,
   grafCiest,
   semafory,
   premavka,

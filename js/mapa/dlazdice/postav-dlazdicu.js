@@ -73,7 +73,10 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   for (const b of d.budovy ?? []) {
     if ((b.minVyska ?? 0) > 2.5) continue;
     if (vstupy.some(([x, z]) => bodVPolygone(x, z, b.body))) continue;
-    k.pridajPolygon(b.body, { typ: 'budova' });
+    // vrch = výška strechy (kamera nad nízkou budovou sa nemusí približovať) – rovnako ako v budovy.js
+    let hMax = -Infinity;
+    for (const [x, z] of b.body) hMax = Math.max(hMax, vyskopis.vyskaTerenu(x, z));
+    k.pridajPolygon(b.body, { typ: 'budova', vrch: hMax + (b.vyska ?? 10) + 1.5 });
   }
   g.add(vytvorBudovy(d.budovy ?? [], vyskopis, KONFIG));
   if (d._strechy) g.add(vytvorStrechyLod2(d._strechy));

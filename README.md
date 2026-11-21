@@ -320,8 +320,13 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   oblečenie a pleť (textúra paliet). Stovky ľudí za ~36 volaní kreslenia. Pre ostatné moduly: `hra.chodci.zoznam`.
 - **Hráč pešo:** chôdza, beh, skok, kolízie s budovami, stromami a autami.
 - **Autá:** arkádová fyzika (plyn, brzda, cúvanie, drift ručnou brzdou), kolízie, nárazy medzi autami.
+- **Poškodenie áut** (`js/auto/poskodenie.js`, `poskodenie-modul.js`): pri náraze sa karoséria v mieste nárazu
+  preliačí (plech sa krčí nerovnomerne, najviac ~40 cm), pri silnom náraze sa rozbijú svetlá a praskne sklo,
+  vyletia iskry, zvíri sa prach a auto sa otrasie; doráňané auto sa dymí z kapoty (čím horšie, tým tmavší dym).
 - **Kamera** za postavou/autom: na PC sa pohľad ovláda myšou bez držania tlačidla (Pointer Lock, `js/vstup/mys.js`),
   pešo postava chodí v smere kamery, v aute sa myšou rozhliadneš a kamera sa vráti za auto; pri rýchlosti sa rozšíri zorné pole.
+  Budovy a pamiatky sú pre kameru plné bloky (`js/kamera/kolizia-kamery.js`): kamera sa zastaví pred stenou
+  a nikdy nevidí dovnútra ani cez budovu; nad nízkym domom (podľa výšky strechy) prejde.
 - **Ovládanie** klávesnicou aj dotykom (joystick + tlačidlá).
 - **HUD:** rýchlomer, nápoveda, krátke správy, názov miesta pri pamiatkach.
 - **Minimapa** vľavo dole (`js/ui/minimapa/`): kreslí sa z dát dlaždíc (budovy, cesty, chodníky, námestia, zeleň,

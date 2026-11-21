@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { KONFIG } from '../config.js';
+import { volnyPodiel } from './kolizia-kamery.js';
 
 const K = KONFIG.KAMERA;
 
@@ -19,6 +20,9 @@ export default {
     this.ciel = new THREE.Vector3();
     this.poz = new THREE.Vector3();
     this.prvy = true;
+    this.dosah = 1;              // podiel vzdialenosti ku kamere, ktorý nie je zakrytý budovou
+    this.skutocna = new THREE.Vector3();
+    this.skrylHraca = false;
   },
 
   updateVzdy(dt, hra) {
@@ -75,8 +79,19 @@ export default {
 
     if (this.prvy) { this.poz.copy(cielovaPoz); this.prvy = false; }
     this.poz.lerp(cielovaPoz, Math.min(1, dt * K.PLYNULOST));
-    hra.kamera.position.copy(this.poz);
+
+    // budovy sú plné bloky: kamera sa pred stenou zastaví (hneď), späť sa vzďaľuje plynulo
+    const podiel = volnyPodiel(hra.mapa.kolizie, this.ciel, this.poz, (x, z) => hra.mapa.vyska(x, z));
+    if (podiel < this.dosah) this.dosah = podiel;
+    else this.dosah += (podiel - this.dosah) * Math.min(1, dt * 2.5);
+    this.skutocna.copy(this.poz).sub(this.ciel).multiplyScalar(this.dosah).add(this.ciel);
+    hra.kamera.position.copy(this.skutocna);
     hra.kamera.lookAt(this.ciel);
+
+    // kamera tesne pri hlave – postavu skryjeme, aby nezakrývala celý obraz
+    const blizko = !vAute && this.skutocna.distanceTo(this.ciel) < 0.9;
+    if (blizko && hra.hrac.mesh.visible) { hra.hrac.mesh.visible = false; this.skrylHraca = true; }
+    else if (!blizko && this.skrylHraca) { if (!vAute) hra.hrac.mesh.visible = true; this.skrylHraca = false; }
 
     // širší uhol pri vysokej rýchlosti
     const fov = 62 + (vAute ? Math.min(14, objekt.rychlostKmh / 10) : 0);
