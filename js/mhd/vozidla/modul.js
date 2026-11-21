@@ -19,6 +19,7 @@ import { VykreslenieVozidiel } from './vykreslenie.js';
 import { Displeje } from './displeje.js';
 import { riesKolizie } from './kolizie.js';
 import { prekazkaPred } from './prekazky.js';
+import { spojeVOkne } from './okno-spojov.js';
 
 const OKOLIE_LINIEK = 1600;  // m – linky so zastávkou v tomto okolí sa sledujú
 const VIDITELNOST = 1200;    // m – vozidlá ďalej sa nekreslia
@@ -92,6 +93,8 @@ export default {
     }
     this._sluzby(teraz);
     const sek = sekundyDnaPresne(teraz);
+    let maxMesk = 0;
+    for (const m of this.meskanie.values()) if (m > maxMesk) maxMesk = m;
     const spoje = [];
     for (const linka of linky) {
       const t = data.nacitane(linka);
@@ -99,21 +102,27 @@ export default {
       const info = data.linky.get(linka);
       const typ = typVozidla(info);
       const { trasy, poriadok } = t;
-      poriadok.spoje.forEach(([ti, pi, start, sluzba, ciel], k) => {
+      // len spoje, ktoré môžu byť práve na ceste (dnešné a včerajšie po polnoci), nie všetky tisíce
+      const kandidati = [
+        ...spojeVOkne(poriadok, sek - maxMesk - 2, sek + PRED_ODCHODOM),
+        ...spojeVOkne(poriadok, sek + 86400 - maxMesk - 2, sek + 86400 + PRED_ODCHODOM),
+      ];
+      for (const k of kandidati) {
+        const [ti, pi, start, sluzba, ciel] = poriadok.spoje[k];
         const prof = poriadok.profily[pi];
         const koniec = start + prof[prof.length - 1] + 2;
         let zaciatok = null;
         const sm = sek - (this.meskanie.get(`${linka}:${k}`) ?? 0);
         if (this.dnes.has(sluzba) && sm >= start - PRED_ODCHODOM && sm <= koniec) zaciatok = start;
         else if (this.vcera.has(sluzba) && sm + 86400 >= start - PRED_ODCHODOM && sm + 86400 <= koniec) zaciatok = start - 86400;
-        if (zaciatok === null) return;
+        if (zaciatok === null) continue;
         const tr = trasy.trasy[ti];
-        if (!tr || tr.km.length < 2) return;
+        if (!tr || tr.km.length < 2) continue;
         spoje.push({
           kluc: `${linka}:${k}`, linka, typ, farba: info.farba, ciel: poriadok.ciele[ciel],
           tr, prof, km: tr.km.length === prof.length ? tr.km : tr.km.slice(0, prof.length), zaciatok,
         });
-      });
+      }
     }
     this.spoje = spoje;
   },
