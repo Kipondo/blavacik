@@ -15,6 +15,7 @@
 
 import * as THREE from 'three';
 import { SUM_GLSL } from '../../grafika/sum-glsl.js';
+import { NOC, OKNA } from '../../grafika/noc.js';
 
 export const STYLY = { stare: 0, obytne: 1, kancelarie: 2, jednoduche: 3, panelak: 4, dom: 5, hala: 6 };
 // šírka okennej osi, výška prízemia a podlažia (m) podľa štýlu
@@ -362,12 +363,15 @@ export function materialFasad() {
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.omietkaFarba = { value: o.farba };
     sh.uniforms.omietkaNormal = { value: o.normal };
+    sh.uniforms.uNoc = NOC;
+    sh.uniforms.uOkna = OKNA;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float aTyp;\nattribute vec2 aMetre;\nattribute float aZnaky;\nvarying float vTyp;\nvarying vec2 vMetre;\nvarying float vZnaky;')
       .replace('#include <uv_vertex>', '#include <uv_vertex>\nvTyp = aTyp; vMetre = aMetre; vZnaky = aZnaky;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
 uniform sampler2D omietkaFarba; uniform sampler2D omietkaNormal;
+uniform float uNoc, uOkna;
 varying float vTyp; varying vec2 vMetre; varying float vZnaky;
 float hashF(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 ${SUM_GLSL}
@@ -432,8 +436,19 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
           if (lok.y > 0.55) { farbaBudovy *= 1.08; fn = lok.y > 0.9 ? vec3(0.5, 0.85, 0.85) : vec3(0.5, 0.5, 1.0); }
           else if (lok.y > 0.4) { tienF = 0.62; fn = vec3(0.5, 0.15, 0.85); }
         }
-        // sklo: záclony, rolety alebo tmavá izba (náhodne podľa okna)
+        // sklo: záclony, rolety alebo tmavá izba (náhodne podľa okna); v noci časť okien svieti
+        vec3 oknoSvetlo = vec3(0.0);
         if (drsnF < 0.1) {
+          float hl = hashF(vec2(osI * 3.7 + 1.0, podI * 5.3) + seed * 1.9);
+          // výklady obchodov svietia skoro všetky, byty podľa podielu (večer viac); niektoré izby modrasto (televízor)
+          float podiel = (riadok > 0.5 && riadok < 1.5 && styl < 3.5) ? 0.85 : uOkna;
+          if (hl < podiel && !atika) {
+            float h3 = hashF(vec2(podI * 1.3 + 7.0, osI * 2.9) + seed);
+            vec3 ton = h3 < 0.12 ? vec3(0.35, 0.45, 0.8) : mix(vec3(1.0, 0.55, 0.22), vec3(1.0, 0.75, 0.45), h3);
+            // záclona rozptýli svetlo rovnomerne, bez nej je jas zhora dole nerovnomerný
+            float rovnom = 0.75 + 0.25 * smoothstep(0.1, 0.9, lok.y);
+            oknoSvetlo = ton * (0.35 + 0.5 * hl / max(podiel, 0.01)) * rovnom * 0.9;
+          }
           float h2 = hashF(vec2(osI * 1.7, podI * 2.3) + seed * 3.1);
           vec3 zaclona = mix(vec3(0.78, 0.74, 0.66), vec3(0.62, 0.64, 0.66), h2);
           float horna = smoothstep(0.35, 0.5, fract(vv) + (h2 - 0.5) * 0.3);
@@ -476,6 +491,7 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
             diffuseColor.rgb *= 1.0 - 0.22 * zem * (0.6 + 0.4 * fbm2(m * vec2(1.3, 4.0)));
           }
         }
+        totalEmissiveRadiance += oknoSvetlo * uNoc;
         float fasDrsnost = drsnF;
         vec3 fasNormal = fn;
       `)
@@ -489,6 +505,6 @@ const vec3 DVERE[5] = vec3[5](vec3(0.1022, 0.0497, 0.0242), vec3(0.0467, 0.0232,
         normal = normalize( tbn * mapN );
       `);
   };
-  mat.customProgramCacheKey = () => 'fasady-v4';
+  mat.customProgramCacheKey = () => 'fasady-v5';
   return mat;
 }

@@ -122,6 +122,15 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     špina pri zemi (odstrek z chodníka) – historické domy viac, paneláky a haly menej; paneláky majú škáry medzi
     panelmi (3,6 m × podlažie) a jemne iný odtieň každého panelu. Všetko procedurálne vo svetových metroch.
   Snímky pred/po: `docs/snimky/realisticky-vzhlad/`.
+- **Deň a noc podľa herného času** (`js/grafika/den-noc.js`): slnko je tam, kde nad Bratislavou naozaj je v daný
+  deň a hodinu (`js/grafika/poloha-slnka.js`), nálada sa plynulo mení podľa výšky slnka – noc, súmrak, zlatá hodinka,
+  deň (`js/grafika/nalady.js`: obloha, farba a sila svetla, svetlo z oblohy, hmla, opar, expozícia), odrazy oblohy sa
+  prepočítajú pri väčšej zmene. V noci svieti mesiac (aj vrhá tiene), na oblohe sú hviezdy a mesiac, oblaky stmavnú;
+  lampy a lucerny svietia a pod nimi je na zemi kruh svetla, v domoch svieti časť okien (večer viac, nadránom málo,
+  výklady obchodov takmer všetky, občas modrastý televízor), sklenené budovy svietia po kanceláriách.
+  Spoločný stav pre materiály je v `js/grafika/noc.js` (NOC, OKNA, svietidlá), modulom chodí udalosť `nalada`
+  a `hra.stav.svetlo = { vyskaSlnka, noc }`. Čas sa dá posunúť v konzole: `hra.hodiny.nastav(new Date(2026, 10, 20, 21, 30))`.
+  Snímky: `docs/snimky/realisticky-vzhlad/den-*.jpg`, `sumrak-*.jpg`, `noc-*.jpg`.
 - **3D fasády historických budov** (issue #31, etapa G2, `js/mapa/budovy/fasady-3d.js`): okná sú naozaj zapustené
   20 cm v murive (pred stenou s oknami z atlasu stojí „plášť“ s otvormi, rovnaké rozloženie ako atlas), kamenné
   parapety, nadokenné rímsy a trojuholníkové frontóny, podlažné rímsy a dvojstupňová hlavná rímsa pod strechou;

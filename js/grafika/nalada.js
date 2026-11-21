@@ -1,7 +1,7 @@
 // Nálada osvetlenia: farby oblohy, slnka, hmly a farebné ladenie na jednom mieste.
 // Predvolená je „zlatá hodinka“ – nízke teplé slnko, dlhé tiene, modrasté tiene a teplý opar.
 // Čítajú ju svet.js (obloha, slnko, hmla), prostredie.js (odrazy) a modul efektov (opar, ladenie).
-// Neskôr sa sem dá pridať deň/noc – stačí meniť tieto hodnoty podľa herného času.
+// Deň a noc podľa herného času: js/grafika/den-noc.js (nálady noc, súmrak, zlatá hodinka, deň v js/grafika/nalady.js).
 
 export const NALADA = {
   nazov: 'zlatá hodinka',

@@ -37,6 +37,8 @@ export default {
     this.vykreslovac = new Vykreslovac(hra.renderer, hra.scena, hra.kamera);
     this._smer = new THREE.Vector3();
     this.nastavNaladu(hra, NALADA);
+    // deň a noc (js/grafika/den-noc.js) posiela náladu podľa herného času
+    hra.na('nalada', (n) => this.nastavNaladu(hra, n));
 
     this.kvalita = nacitajKvalitu(predvolenaKvalita(hra.renderer));
     vlozKvalituDoMenu(this.kvalita, (k) => this.nastavKvalitu(k));

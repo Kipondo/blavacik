@@ -8,6 +8,7 @@
 // --- základ hry ---
 import prostredie from './grafika/prostredie.js';
 import efekty from './grafika/efekty/modul.js';
+import denNoc from './grafika/den-noc.js';
 import hrac from './chodec/hrac.js';
 import riadenieHracom from './auto/riadenie-hracom.js';
 import auta from './auto/sprava-aut.js';
@@ -38,6 +39,7 @@ export default [
   mys,
   prostredie,
   efekty,
+  denNoc,
   hrac,
   riadenieHracom,
   auta,
