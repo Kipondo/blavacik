@@ -174,15 +174,14 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
     g.stroke();
   }
   yield;
-  // jemný šum
-  const obr = g.getImageData(0, 0, px, px);
-  let seed = 12345 + Math.round(rect.minX * 7 + rect.minZ * 13);
-  for (let i = 0; i < obr.data.length; i += 4) {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    const n = ((seed >> 16) & 15) - 8;
-    obr.data[i] += n; obr.data[i + 1] += n; obr.data[i + 2] += n;
-  }
-  g.putImageData(obr, 0, 0);
+  // jemný šum ±8 – pripočíta sa hotové plátno šumu („lighter“ pripočíta, „difference“ odpočíta),
+  // bez čítania pixelov (to trvalo pri každej dlaždici desiatky ms)
+  const sum = plataSumu(px);
+  g.globalCompositeOperation = 'lighter';
+  g.drawImage(sum.plus, 0, 0);
+  g.globalCompositeOperation = 'difference';
+  g.drawImage(sum.minus, 0, 0);
+  g.globalCompositeOperation = 'source-over';
   // rieky vyrežeme
   g.globalCompositeOperation = 'destination-out';
   g.fillStyle = '#000';
@@ -371,6 +370,29 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;
   return t;
+}
+
+const platnaSumu = new Map();
+/** Dve plátna jemného šumu (kladná a záporná časť, hodnoty 0 – 8) – vyrobia sa raz pre každú veľkosť. */
+function plataSumu(px) {
+  if (platnaSumu.has(px)) return platnaSumu.get(px);
+  const plus = document.createElement('canvas'), minus = document.createElement('canvas');
+  plus.width = plus.height = minus.width = minus.height = px;
+  const gp = plus.getContext('2d', { willReadFrequently: true }), gm = minus.getContext('2d', { willReadFrequently: true });
+  const op = gp.createImageData(px, px), om = gm.createImageData(px, px);
+  let seed = 12345;
+  for (let i = 0; i < op.data.length; i += 4) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const n = ((seed >> 16) & 15) - 8;
+    const a = n > 0 ? n : 0, b = n < 0 ? -n : 0;
+    op.data[i] = op.data[i + 1] = op.data[i + 2] = a; op.data[i + 3] = 255;
+    om.data[i] = om.data[i + 1] = om.data[i + 2] = b; om.data[i + 3] = 255;
+  }
+  gp.putImageData(op, 0, 0);
+  gm.putImageData(om, 0, 0);
+  const v = { plus, minus };
+  platnaSumu.set(px, v);
+  return v;
 }
 
 /** Pôdorysy budov (biela na čiernom) v plátne px/4 × px/4, rozmazané o 2,2 m – mäkké zatienenie pri päte domov. */
