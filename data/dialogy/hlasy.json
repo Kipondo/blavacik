@@ -1,0 +1,28 @@
+{
+  "popis": "Hlasy postáv pre Google Gemini TTS (tools/hlasy/generuj.mjs). Kľúč = 'kto' z dialógov. Hlasy sú predpripravené hlasy Gemini (žiadne klonovanie skutočných ľudí). 'styl' sa pridá pred text repliky ako pokyn, ako ju povedať.",
+  "model": "gemini-3.1-flash-tts-preview",
+  "zalozneModely": ["gemini-2.5-flash-preview-tts"],
+  "jazyk": null,
+  "pauzaMs": 6500,
+  "maxNaBeh": 60,
+  "aliasy": { "hrac": "dodo" },
+  "varianty": {
+    "zaklad": "",
+    "vychod": "Výrazne s východniarskym prízvukom.",
+    "mix": "Mierne s východniarskym prízvukom, miešaným s bratislavským.",
+    "blava": "Po bratislavsky, mestsky, s bratislavskými slovami."
+  },
+  "postavy": {
+    "dodo": { "hlas": "Puck", "styl": "Povedz po slovensky s východniarskym prízvukom, nadšene a trochu naivne, ako mladý chalan z Košíc, ktorý ide prvýkrát do Bratislavy:" },
+    "babka": { "hlas": "Gacrux", "styl": "Povedz po slovensky ako milá stará babka z dediny, pomaly a láskavo:" },
+    "mama": { "hlas": "Aoede", "styl": "Povedz po slovensky s východniarskym prízvukom ako starostlivá mama po telefóne, trochu ustarostene:" },
+    "revizor": { "hlas": "Charon", "styl": "Povedz po slovensky ako unavený revízor, ktorý to už dnes hovorí po stýkrát:" },
+    "ujo": { "hlas": "Fenrir", "styl": "Povedz po slovensky ako trochu opitý, ale srdečný ujo vo vlaku, rozťahovane:" },
+    "fero": { "hlas": "Orus", "styl": "Povedz po slovensky ako unavený chlap ráno cestou do roboty, stručne a mrzuto:" },
+    "baba": { "hlas": "Leda", "styl": "Povedz po slovensky ako mladá žena pri okne, s úsmevom, ale stručne:" },
+    "rozhlas": { "hlas": "Kore", "styl": "Povedz po slovensky ako hlásateľka v rozhlase vo vlaku, monotónne a úradne:" },
+    "jozo": { "hlas": "Algenib", "styl": "Povedz po slovensky ako bratislavský strýko v rokoch, rázne a s humorom:" },
+    "cert": { "hlas": "Charon", "styl": "Povedz po česky ako zlomyseľný čert, ktorý sa dobre baví:" },
+    "taskarka": { "hlas": "Despina", "styl": "Povedz po slovensky ako rýchla a podozrievavá žena s taškou, ktorá sa ponáhľa:" }
+  }
+}
