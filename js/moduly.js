@@ -31,6 +31,7 @@ import oznacenia from './mapa/vybavenie/oznacenia-modul.js';
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
+import premavka from './doprava/premavka/modul.js';
 import mhd from './mhd/modul.js';
 import mhdVozidla from './mhd/vozidla/modul.js';
 
@@ -64,6 +65,7 @@ export default [
   oznacenia,
   grafCiest,
   semafory,
+  premavka,
   mhd,
   zvuk,
   mhdVozidla,

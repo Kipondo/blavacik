@@ -8,7 +8,7 @@ import { KONFIG } from '../config.js';
 const SIRKA = 1.72;
 
 // bočné profily (z = dĺžka, y = výška); spodná línia ide rovno
-const PROFILY = {
+export const PROFILY = {
   sedan: {
     spodok: [[-2.22, 0.32], [-2.28, 0.72], [-2.05, 0.95], [-1.35, 1.0], [1.12, 1.0], [2.0, 0.86], [2.28, 0.62], [2.22, 0.32]],
     kabina: [[-1.38, 0.98], [-0.72, 1.44], [0.42, 1.46], [1.12, 0.98]],
@@ -36,7 +36,7 @@ function extruzia(body, hlbka, zaoblenie) {
   return geo;
 }
 
-function geometrie(typ) {
+export function geometrie(typ) {
   if (geoCache.has(typ)) return geoCache.get(typ);
   const p = PROFILY[typ];
   const kabina = p.kabina;
