@@ -1,24 +1,28 @@
 // Modul: automatické rozlíšenie. Meria skutočný čas snímok a keď grafická karta nestíha
-// (menej ako ~50 snímok za sekundu), zníži rozlíšenie kreslenia (pixel ratio) po krokoch až na 55 %.
+// (menej ako ~50 snímok za sekundu), zníži rozlíšenie kreslenia (pixel ratio) po krokoch až na minimum predvoľby.
 // Keď je rezerva, pomaly ho vráti späť. Krátke zaseknutia (načítanie dlaždice) sa nerátajú – rozhoduje medián.
 // Ak zníženie nepomohlo (brzdí procesor, nie grafická karta), vráti sa späť a chvíľu to neskúša
 // (pol minúty, pri ďalšom neúspechu dvakrát dlhšie, najviac 5 minút).
-// Pre ostatné moduly: hra.stav.rozlisenie = aktuálny podiel (0,55 – 1).
+// Rozsah pomeru pixelov je podľa kvality grafiky (hra.stav.grafika.pixel = [min, max], js/grafika/predvolby.js).
+// Pre ostatné moduly: hra.stav.rozlisenie = aktuálny podiel (0 – 1),
+//   hra.stav.meranieSnimok = { poradie, medianMs, podiel, naMinime } – posledné meranie (každých 1,5 s);
+//   naMinime = rozlíšenie už nejde znížiť alebo znižovanie nepomáha (js/grafika/kvalita.js potom skráti dohľad).
 
 import { KONFIG } from '../config.js';
 
 const OKNO = 1.5;            // s – dĺžka merania
 const POMALE_MS = 20;        // medián nad týmto → znížiť
 const RYCHLE_MS = 13.5;      // medián pod týmto (po 3 oknách) → zvýšiť
-const MIN = 0.55, KROK_DOLE = 0.1, KROK_HORE = 0.05;
+const MIN = 0.55, KROK_DOLE = 0.1, KROK_HORE = 0.05;   // MIN = bez predvoľby kvality
 
 export default {
   nazov: 'rozlisenie',
   poradie: 1,
 
   init(hra) {
-    this.zaklad = Math.min(window.devicePixelRatio || 1, KONFIG.MAX_PIXEL_RATIO);
+    this.nastavRozsah(hra);
     this.podiel = 1;
+    this.poradie = 0;
     this.casy = [];
     this.posledny = performance.now();
     this.okno = 0;
@@ -29,6 +33,15 @@ export default {
     hra.stav.rozlisenie = 1;
     // po zmene veľkosti okna (main.js nastaví veľkosť) ostane naše rozlíšenie
     window.addEventListener('resize', () => this._nastav(hra));
+    hra.na('kvalita', () => { this.nastavRozsah(hra); this.podiel = Math.max(this.min, Math.min(1, this.podiel)); this._nastav(hra); });
+    this._nastav(hra);
+  },
+
+  /** Rozsah pomeru pixelov podľa predvoľby: základ = min(pomer obrazovky, max), najmenší podiel = min / základ. */
+  nastavRozsah(hra) {
+    const [pMin, pMax] = hra.stav.grafika?.pixel ?? [0, KONFIG.MAX_PIXEL_RATIO];
+    this.zaklad = Math.min(window.devicePixelRatio || 1, KONFIG.MAX_PIXEL_RATIO, pMax);
+    this.min = pMin ? Math.min(1, pMin / this.zaklad) : MIN;
   },
 
   updateVzdy(dt, hra) {
@@ -45,6 +58,10 @@ export default {
     const median = zoradene[zoradene.length >> 1];
     this.casy = [];
     this.okno = 0;
+    hra.stav.meranieSnimok = {
+      poradie: ++this.poradie, medianMs: median, podiel: this.podiel,
+      naMinime: this.podiel <= this.min + 1e-3 || teraz < this.blokDo,
+    };
     // pomohlo posledné zníženie?
     if (this.skuska) {
       const { pred, podiel } = this.skuska;
@@ -57,9 +74,9 @@ export default {
       }
       this.blokTrvanie = 30000;
     }
-    if (median > POMALE_MS && this.podiel > MIN && teraz > this.blokDo) {
+    if (median > POMALE_MS && this.podiel > this.min && teraz > this.blokDo) {
       this.skuska = { pred: median, podiel: this.podiel };
-      this.podiel = Math.max(MIN, this.podiel - KROK_DOLE);
+      this.podiel = Math.max(this.min, this.podiel - KROK_DOLE);
       this.dobrych = 0;
       this._nastav(hra);
     } else if (median < RYCHLE_MS && this.podiel < 1) {

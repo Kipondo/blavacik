@@ -22,7 +22,7 @@ export default {
 
   init(hra) {
     hra.scena.traverse((o) => {
-      if (o.isDirectionalLight && o.castShadow && !this.svetlo) this.svetlo = o;
+      if (o.isDirectionalLight && o.userData.smer && !this.svetlo) this.svetlo = o; // slnko zo svet.js (na nízkej kvalite bez tieňa)
       if (o.isHemisphereLight && !this.hemi) this.hemi = o;
       if (o.name === 'obloha') this.obloha = o;
     });
