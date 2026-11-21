@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="sk"><head><meta charset="utf-8"><title>Blaváčik – úvodná obrazovka</title>
+<link rel="stylesheet" href="pisma.css">
+<style>
+  :root { --noc: #13203d; --noc2: #0b1530; --cervena: #c8102e; --biela: #fbfaf7; --zlata: #e2b12e; }
+  * { box-sizing: border-box; margin: 0; }
+  ::selection { background: var(--zlata); color: var(--noc2); }
+  body { width: 1600px; height: 900px; overflow: hidden; position: relative; font-family: 'Barlow Condensed', sans-serif; background: var(--noc2); }
+  .pasy { position: absolute; left: -70px; right: -70px; top: -20px; height: 720px; display: flex; transform: skewX(-12deg); }
+  .pas { flex: 1; position: relative; overflow: hidden; box-shadow: -2px 0 0 rgba(11,21,48,.5); }
+  .pas img { position: absolute; left: -110px; top: 0; width: calc(100% + 220px); height: 100%; object-fit: cover; transform: skewX(12deg); }
+  .pas b { position: absolute; left: 50%; top: 46px; transform: translateX(-50%) skewX(12deg); background: var(--noc); color: var(--biela);
+    font-weight: 800; font-size: 16px; letter-spacing: .07em; text-transform: uppercase; padding: 5px 12px 4px; white-space: nowrap; }
+  .pas:first-child, .pas:last-child { flex: 1.45; }
+  .pas:first-child b { left: 64%; } .pas:last-child b { left: 34%; }
+  .pas:first-child img { object-position: 85% 50% !important; } .pas:last-child img { object-position: 30% 50%; }
+  .panel { position: absolute; left: 0; right: 0; top: 640px; bottom: 0; background: linear-gradient(var(--noc), var(--noc2)); }
+  .panel::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--zlata); }
+  .stred { position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; }
+  .erb { width: 112px; height: auto; filter: drop-shadow(0 10px 16px rgba(5,10,25,.55)); }
+  h1 { position: relative; font-family: 'Anton'; font-weight: 400; font-size: 120px; line-height: 1; text-transform: uppercase; color: var(--biela); letter-spacing: .02em; margin-top: -6px; }
+  h1 .tien { position: absolute; left: 6px; top: 5px; color: var(--cervena); }
+  h1 .text { position: relative; }
+  nav { display: flex; gap: 12px; margin-top: 4px; align-items: center; }
+  nav a { font-weight: 800; font-size: 25px; text-transform: uppercase; color: var(--biela); text-decoration: none; letter-spacing: .04em; padding: 8px 20px 6px; border: 2px solid rgba(251,250,247,.35); }
+  nav a.hrat { font-size: 36px; color: var(--noc2); background: var(--zlata); border-color: var(--zlata); padding: 5px 44px 3px; }
+  nav a:hover:not(.hrat) { border-color: var(--zlata); color: var(--zlata); }
+  .dodo { position: absolute; left: 90px; bottom: -12px; height: 440px; filter: drop-shadow(0 18px 22px rgba(5,10,25,.6)); }
+  .pata { position: absolute; right: 40px; bottom: 12px; font-family: 'Bricolage Grotesque'; font-size: 12px; color: #9fb0d6; }
+</style></head>
+<body>
+<div class="pasy">
+  <div class="pas"><img style="object-position:62% 50%" src="pamiatky/hrad.jpg" alt="Hrad v hre"><b>Hrad</b></div>
+  <div class="pas"><img src="pamiatky/dom.jpg" alt="Dóm sv. Martina v hre"><b>Dóm sv. Martina</b></div>
+  <div class="pas"><img src="pamiatky/michalska.jpg" alt="Michalská brána v hre"><b>Michalská brána</b></div>
+  <div class="pas"><img src="pamiatky/modry.jpg" alt="Modrý kostolík v hre"><b>Modrý kostolík</b></div>
+  <div class="pas"><img src="pamiatky/ufo.jpg" alt="UFO v hre"><b>UFO</b></div>
+  <div class="pas"><img src="pamiatky/eurovea.jpg" alt="Eurovea Tower v hre"><b>Eurovea Tower</b></div>
+  <div class="pas"><img src="pamiatky/slavin.jpg" alt="Slavín v hre"><b>Slavín</b></div>
+</div>
+<div class="panel"></div>
+<img class="dodo" src="dodo-mava.png" alt="Ďoďo máva">
+<div class="stred">
+  <img class="erb" src="erb.svg" alt="Znak Blaváčika">
+  <h1><span class="tien" aria-hidden="true">Blaváčik</span><span class="text">Blaváčik</span></h1>
+  <nav><a href="#" class="hrat">Hrať</a><a href="#">Upraviť Ďoďa</a><a href="#">Nastavenia</a><a href="#">Ovládanie</a></nav>
+</div>
+<p class="pata">Hra pre srandu. Postavy a príbehy sú vymyslené. Mapa © prispievatelia OpenStreetMap (ODbL), terén Copernicus DEM.</p>
+</body></html>
