@@ -114,6 +114,10 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
     a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera); ustúpené podlažia
     a nadstavby (stena medzi rovinami strechy tej istej budovy) majú okná po podlažiach, štítové steny medzi
     dvoma budovami ostávajú bez okien (issue #64, `js/mapa/budovy/okna-ustupenych.js`, snímky `docs/snimky/okna-ustupene/`),
+    a štrkom, štíty, ~5 800 komínov, vnútorné dvory (z OSM multipolygónov aj z lasera),
+  - mimo LOD2 dostane dom so šikmou strechou na neobdĺžnikovom pôdoryse (tvar L, výstupky) stanovú strechu
+    s vrcholom vo vnútornom bode pôdorysu (`js/mapa/budovy/stanova-strecha.js`); predtým bol plochý
+    (porovnanie so satelitom, Rusovce – snímka `docs/snimky/strechy-domov/`),
   - fasády: okná s rámom, priečkami, sklom s odrazom oblohy, záclony, parapety, šambrány, rímsy, výklady a dvere
     na prízemí, kamenný sokel, okná zarovnané na celé podlažia a osi; omietka CC0,
   - dlažba z CC0 textúr: žulové kocky v historickom jadre a pešej zóne, kamenné dlaždice na chodníkoch, tráva v parkoch,
