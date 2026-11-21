@@ -68,7 +68,8 @@ export function bezStromovVNahradenych(stromy) {
     if (s.length >= 4 && s[3] > MAX_VYSKA_STROMU) return false;
     for (const n of zony) {
       if (s[0] < n.minX || s[0] > n.maxX || s[1] < n.minZ || s[1] > n.maxZ) continue;
-      if (vPolygone(s[0], s[1], n.body)) return false;
+      // laser často „vidí“ strom aj tesne pri stene (okraj strechy) – berieme aj meter za hranou
+      if (vPolygone(s[0], s[1], n.body) || vzdialenostOdHrany(s[0], s[1], n.body) < n.okraj + 1) return false;
     }
     return true;
   });
