@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { dieryPodchodov } from '../podchody/tuby.js';
+import { dokonci } from '../kroky.js';
 
 export const FARBY_POKRYVKY = {
   zaklad: '#8c887d',
@@ -130,9 +131,15 @@ export function texturaDetailu() {
  * rieky = globálne polygóny riek (vyrežú sa – alfa 0).
  */
 export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
+  return dokonci(krokyTexturyDlazdice(d, rieky, rect, px));
+}
+
+/** To isté po krokoch (generátor) – správca dlaždíc to rozloží do viacerých snímok. */
+export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
   const c = document.createElement('canvas');
   c.width = c.height = px;
-  const g = c.getContext('2d');
+  // plátno v pamäti (nie na grafickej karte) – čítanie pixelov (šum, maska trávy) nečaká na kartu
+  const g = c.getContext('2d', { willReadFrequently: true });
   const mierka = px / (rect.maxX - rect.minX);
   const sx = (x) => (x - rect.minX) * mierka, sz = (z) => (z - rect.minZ) * mierka;
   const cesta = (body, uzavriet) => {
@@ -166,15 +173,15 @@ export function vytvorTexturuDlazdice(d, rieky, rect, px = 512) {
     cesta(k.body, false);
     g.stroke();
   }
-  // jemný šum
-  const obr = g.getImageData(0, 0, px, px);
-  let seed = 12345 + Math.round(rect.minX * 7 + rect.minZ * 13);
-  for (let i = 0; i < obr.data.length; i += 4) {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    const n = ((seed >> 16) & 15) - 8;
-    obr.data[i] += n; obr.data[i + 1] += n; obr.data[i + 2] += n;
-  }
-  g.putImageData(obr, 0, 0);
+  yield;
+  // jemný šum ±8 – pripočíta sa hotové plátno šumu („lighter“ pripočíta, „difference“ odpočíta),
+  // bez čítania pixelov (to trvalo pri každej dlaždici desiatky ms)
+  const sum = plataSumu(px);
+  g.globalCompositeOperation = 'lighter';
+  g.drawImage(sum.plus, 0, 0);
+  g.globalCompositeOperation = 'difference';
+  g.drawImage(sum.minus, 0, 0);
+  g.globalCompositeOperation = 'source-over';
   // rieky vyrežeme
   g.globalCompositeOperation = 'destination-out';
   g.fillStyle = '#000';
@@ -217,6 +224,14 @@ const TRIEDA_CHODNIKOV = { pedestrian: DOSKY, footway: 128, steps: 128, corridor
 
 /** Mapa tried povrchu dlaždice (pre dlažbu z CC0 textúr v detailných dlaždiciach). */
 export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
+  return dokonci(krokyTriedDlazdice(d, rect, px, vyskopis));
+}
+
+/**
+ * To isté po krokoch (generátor). Kanály sa skladajú bez čítania pixelov: trieda sa kreslí len do R,
+ * zatienenie (G) a maska asfaltu (B) sa prefarbia násobením a pripočítajú („lighter“).
+ */
+export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   const c = document.createElement('canvas');
   c.width = c.height = px;
   const g = c.getContext('2d', { willReadFrequently: true });
@@ -227,7 +242,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     body.forEach(([x, z], i) => (i ? g.lineTo(sx(x), sz(z)) : g.moveTo(sx(x), sz(z))));
     if (uzavriet) g.closePath();
   };
-  const seda = (v) => `rgb(${v},${v},${v})`;
+  const seda = (v) => `rgb(${v},0,0)`;   // trieda len v kanáli R (G a B sa doplnia na konci)
   // nezaradená plocha je chodník len v zástavbe (okolo budov a ciest), inde (svahy, okraje parkov) ostáva prírodná
   g.fillStyle = seda(0);
   g.fillRect(0, 0, px, px);
@@ -236,7 +251,7 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   // kanál B: asfaltový chodník (mimo historického jadra sú chodníky popri cestách väčšinou asfaltové);
   // maska sa kreslí do zvláštneho plátna a pri námestiach, pešej zóne a jadre sa zmaže
   const m = document.createElement('canvas'); m.width = m.height = px;
-  const gm = m.getContext('2d', { willReadFrequently: true });
+  const gm = m.getContext('2d', { willReadFrequently: true });   // v pamäti ako hlavné plátno (rýchle drawImage)
   gm.fillStyle = '#000'; gm.fillRect(0, 0, px, px);
   gm.lineCap = 'round'; gm.lineJoin = 'round';
   const maska = (body, uzavriet, biela, sirka) => {
@@ -283,9 +298,11 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
   }
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina
   // (porovnanie so skutočnosťou, etapa 4) – len tam, kde je zatiaľ „príroda“ (trieda 0)
+  yield;
+  // (štvorce strmého svahu sa vyplnia trávou cez „lighten“ – zmení sa len trieda 0, vyššie triedy ostanú)
   if (vyskopis) {
     const K = 4, n = Math.round((rect.maxX - rect.minX) / K);
-    const obr = g.getImageData(0, 0, px, px), dt = obr.data;
+    g.beginPath();
     for (let j = 0; j < n; j++) {
       for (let i = 0; i < n; i++) {
         const x = rect.minX + (i + 0.5) * K, z = rect.minZ + (j + 0.5) * K;
@@ -294,11 +311,15 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
         if (Math.hypot(sx_, sz_) / 4 <= 0.28) continue;
         const x0 = Math.floor(i * K * mierka), x1 = Math.min(px, Math.ceil((i + 1) * K * mierka));
         const y0 = Math.floor(j * K * mierka), y1 = Math.min(px, Math.ceil((j + 1) * K * mierka));
-        for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) { const o = (yy * px + xx) * 4; if (dt[o] < 8) { dt[o] = dt[o + 1] = dt[o + 2] = TRIEDA_POKRYVKY.trava; } }
+        g.rect(x0, y0, x1 - x0, y1 - y0);
       }
     }
-    g.putImageData(obr, 0, 0);
+    g.globalCompositeOperation = 'lighten';
+    g.fillStyle = seda(TRIEDA_POKRYVKY.trava);
+    g.fill();
+    g.globalCompositeOperation = 'source-over';
   }
+  yield;
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const ch of d.chodniky ?? []) {
@@ -326,26 +347,72 @@ export function vytvorTriedyDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.stroke();
     maska(c_.body, false, false, g.lineWidth);
   }
+  yield;
   // kanál G: zatienenie zeme pri budovách (mäkký tieň pri päte domov – ulice nepôsobia „vznášajúco“)
-  const obr = g.getImageData(0, 0, px, px);
+  // domy sa nakreslia do 4× menšieho plátna, to sa raz rozmaže a zväčší (rozmazanie pri každom dome zvlášť
+  // trvalo v hustej zástavbe aj sekundy – hra pri načítaní dlaždice zamrzla)
   const t2 = document.createElement('canvas'); t2.width = t2.height = px;
   const g2 = t2.getContext('2d', { willReadFrequently: true });
-  g2.fillStyle = '#000'; g2.fillRect(0, 0, px, px);
-  g2.filter = `blur(${Math.max(1, 2.2 * mierka)}px)`;
-  g2.fillStyle = '#fff';
-  for (const b of d.budovy ?? []) {
-    g2.beginPath();
-    b.body.forEach(([x, z], i) => (i ? g2.lineTo(sx(x), sz(z)) : g2.moveTo(sx(x), sz(z))));
-    g2.closePath(); g2.fill();
-  }
-  const ao = g2.getImageData(0, 0, px, px).data;
-  const as = gm.getImageData(0, 0, px, px).data;
-  for (let i = 0; i < obr.data.length; i += 4) { obr.data[i + 1] = ao[i]; obr.data[i + 2] = as[i]; }
-  g.putImageData(obr, 0, 0);
+  g2.imageSmoothingEnabled = true;
+  g2.imageSmoothingQuality = 'high';
+  g2.drawImage(rozmazaneBudovy(d.budovy, rect, px), 0, 0, px, px);
+  yield;
+  // šedá → len zelený kanál; maska asfaltu → len modrý kanál; potom sa sčítajú s triedou (R)
+  g2.globalCompositeOperation = 'multiply';
+  g2.fillStyle = 'rgb(0,255,0)'; g2.fillRect(0, 0, px, px);
+  gm.globalCompositeOperation = 'multiply';
+  gm.fillStyle = 'rgb(0,0,255)'; gm.fillRect(0, 0, px, px);
+  g.globalCompositeOperation = 'lighter';
+  g.drawImage(t2, 0, 0);
+  g.drawImage(m, 0, 0);
+  g.globalCompositeOperation = 'source-over';
   const t = new THREE.CanvasTexture(c);
   t.flipY = false;
   t.colorSpace = THREE.NoColorSpace;
   return t;
+}
+
+const platnaSumu = new Map();
+/** Dve plátna jemného šumu (kladná a záporná časť, hodnoty 0 – 8) – vyrobia sa raz pre každú veľkosť. */
+function plataSumu(px) {
+  if (platnaSumu.has(px)) return platnaSumu.get(px);
+  const plus = document.createElement('canvas'), minus = document.createElement('canvas');
+  plus.width = plus.height = minus.width = minus.height = px;
+  const gp = plus.getContext('2d', { willReadFrequently: true }), gm = minus.getContext('2d', { willReadFrequently: true });
+  const op = gp.createImageData(px, px), om = gm.createImageData(px, px);
+  let seed = 12345;
+  for (let i = 0; i < op.data.length; i += 4) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const n = ((seed >> 16) & 15) - 8;
+    const a = n > 0 ? n : 0, b = n < 0 ? -n : 0;
+    op.data[i] = op.data[i + 1] = op.data[i + 2] = a; op.data[i + 3] = 255;
+    om.data[i] = om.data[i + 1] = om.data[i + 2] = b; om.data[i + 3] = 255;
+  }
+  gp.putImageData(op, 0, 0);
+  gm.putImageData(om, 0, 0);
+  const v = { plus, minus };
+  platnaSumu.set(px, v);
+  return v;
+}
+
+/** Pôdorysy budov (biela na čiernom) v plátne px/4 × px/4, rozmazané o 2,2 m – mäkké zatienenie pri päte domov. */
+function rozmazaneBudovy(budovy, rect, px) {
+  const mp = Math.max(64, px >> 2), mm = mp / (rect.maxX - rect.minX);
+  const ostre = document.createElement('canvas'); ostre.width = ostre.height = mp;
+  const go = ostre.getContext('2d', { willReadFrequently: true });
+  go.fillStyle = '#000'; go.fillRect(0, 0, mp, mp);
+  go.fillStyle = '#fff';
+  for (const b of budovy ?? []) {
+    go.beginPath();
+    b.body.forEach(([x, z], i) => (i ? go.lineTo((x - rect.minX) * mm, (z - rect.minZ) * mm) : go.moveTo((x - rect.minX) * mm, (z - rect.minZ) * mm)));
+    go.closePath(); go.fill();
+  }
+  const rozm = document.createElement('canvas'); rozm.width = rozm.height = mp;
+  const gr = rozm.getContext('2d', { willReadFrequently: true });
+  gr.fillStyle = '#000'; gr.fillRect(0, 0, mp, mp);
+  gr.filter = `blur(${Math.max(0.5, 2.2 * mm)}px)`;
+  gr.drawImage(ostre, 0, 0);
+  return rozm;
 }
 
 /** Obslužné cesty v historickom jadre – kreslia sa ako dlažba, nie ako asfalt. */

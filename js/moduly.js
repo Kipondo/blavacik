@@ -24,6 +24,8 @@ import lokality from './ui/lokality.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
+import rozlisenie from './grafika/rozlisenie.js';
+import vykon from './ui/vykon.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -54,6 +56,8 @@ export default [
   hud,
   lokality,
   poloha,
+  rozlisenie,
+  vykon,
   grafCiest,
   semafory,
   mhd,

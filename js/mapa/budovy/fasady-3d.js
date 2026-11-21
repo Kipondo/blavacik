@@ -35,36 +35,65 @@ function riadokPodlazia(seedInt, podI) {
   return riadok;
 }
 
+/** Rastúce typované pole (menej odpadu v pamäti ako obyčajné pole s push – hra menej seká pri zbere pamäte). */
+class Pole {
+  constructor(T, n = 2048) { this.T = T; this.a = new T(n); this.n = 0; }
+  /** Zabezpečí miesto pre k ďalších hodnôt a vráti pole na zápis od indexu this.n. */
+  miesto(k) {
+    if (this.n + k > this.a.length) {
+      const nove = new this.T(Math.max(this.a.length * 2, this.n + k));
+      nove.set(this.a.subarray(0, this.n));
+      this.a = nove;
+    }
+    return this.a;
+  }
+  hotove() { return this.a.slice(0, this.n); }
+}
+
 /** Zberač geometrie: plochy so 4 (alebo 3) vrcholmi, indexované, normála na plochu. */
 class Zberac {
   constructor() {
-    this.poz = []; this.nor = []; this.uv = []; this.farba = []; this.typ = []; this.metre = []; this.znaky = []; this.ind = [];
+    this.poz = new Pole(Float32Array); this.nor = new Pole(Float32Array); this.uv = new Pole(Float32Array);
+    this.farba = new Pole(Float32Array); this.typ = new Pole(Float32Array); this.metre = new Pole(Float32Array);
+    this.znaky = new Pole(Float32Array); this.ind = new Pole(Uint32Array);
   }
   plocha(body, uv, metre, f, typ, znaky) {
-    const n = body.length, i0 = this.poz.length / 3;
+    const n = body.length, i0 = this.poz.n / 3;
     const [a, b, c] = body;
     const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
     const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
     let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
+    const P = this.poz.miesto(n * 3), N = this.nor.miesto(n * 3), U = this.uv.miesto(n * 2), M = this.metre.miesto(n * 2);
+    const F = this.farba.miesto(n * 3), T = this.typ.miesto(n), Z = this.znaky.miesto(n);
     for (let i = 0; i < n; i++) {
-      this.poz.push(...body[i]); this.nor.push(nx, ny, nz); this.uv.push(...uv[i]); this.metre.push(...metre[i]);
-      this.farba.push(f.r, f.g, f.b); this.typ.push(typ); this.znaky.push(znaky);
+      const p = body[i], q = uv[i], m = metre[i];
+      P[this.poz.n++] = p[0]; P[this.poz.n++] = p[1]; P[this.poz.n++] = p[2];
+      N[this.nor.n++] = nx; N[this.nor.n++] = ny; N[this.nor.n++] = nz;
+      U[this.uv.n++] = q[0]; U[this.uv.n++] = q[1];
+      M[this.metre.n++] = m[0]; M[this.metre.n++] = m[1];
+      F[this.farba.n++] = f.r; F[this.farba.n++] = f.g; F[this.farba.n++] = f.b;
+      T[this.typ.n++] = typ; Z[this.znaky.n++] = znaky;
     }
-    if (n === 3) this.ind.push(i0, i0 + 1, i0 + 2);
-    else this.ind.push(i0, i0 + 1, i0 + 2, i0, i0 + 2, i0 + 3);
+    const I = this.ind.miesto(6);
+    if (n === 3) { I[this.ind.n++] = i0; I[this.ind.n++] = i0 + 1; I[this.ind.n++] = i0 + 2; }
+    else {
+      I[this.ind.n++] = i0; I[this.ind.n++] = i0 + 1; I[this.ind.n++] = i0 + 2;
+      I[this.ind.n++] = i0; I[this.ind.n++] = i0 + 2; I[this.ind.n++] = i0 + 3;
+    }
   }
-  get pocet() { return this.poz.length / 3; }
+  get pocet() { return this.poz.n / 3; }
   geometria() {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.poz, 3));
-    g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
-    g.setAttribute('color', new THREE.Float32BufferAttribute(this.farba, 3));
-    g.setAttribute('aTyp', new THREE.Float32BufferAttribute(this.typ, 1));
-    g.setAttribute('aMetre', new THREE.Float32BufferAttribute(this.metre, 2));
-    g.setAttribute('aZnaky', new THREE.Float32BufferAttribute(this.znaky, 1));
-    g.setIndex(this.pocet > 65535 ? new THREE.Uint32BufferAttribute(this.ind, 1) : new THREE.Uint16BufferAttribute(this.ind, 1));
+    g.setAttribute('position', new THREE.BufferAttribute(this.poz.hotove(), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(this.nor.hotove(), 3));
+    g.setAttribute('uv', new THREE.BufferAttribute(this.uv.hotove(), 2));
+    g.setAttribute('color', new THREE.BufferAttribute(this.farba.hotove(), 3));
+    g.setAttribute('aTyp', new THREE.BufferAttribute(this.typ.hotove(), 1));
+    g.setAttribute('aMetre', new THREE.BufferAttribute(this.metre.hotove(), 2));
+    g.setAttribute('aZnaky', new THREE.BufferAttribute(this.znaky.hotove(), 1));
+    const ind = this.ind.hotove();
+    g.setIndex(new THREE.BufferAttribute(this.pocet > 65535 ? ind : Uint16Array.from(ind), 1));
     g.computeBoundingSphere();
     return g;
   }
@@ -228,7 +257,7 @@ export function planFasad3d(budovy, vyskopis) {
 }
 
 /** Plášť jednej steny. */
-function plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 }) {
+function* plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 }) {
   const { typ, seed, seedInt, farba: c, znaky, pasy, vrch } = r;
   const S = stena(w.p, w.e, w.n, zb, typ + seed, znaky);
   const cRimsa = c.clone().multiplyScalar(1.07);
@@ -276,6 +305,7 @@ function plastSteny(zb, { r, w, predOk, poOk, znacky = {}, ex0, ex1, exR0, exR1 
       if (znacky.balkony && Math.floor(vj + 0.001) === 1 && w.osi >= 3) balkon(S, w.osi, sw, ya, vStred, KAMEN);
       // podlažná rímsa na spodku podlažia (v atlase je nakreslená na rovnakom mieste)
       S.kvader(sA, sB, ya + 0.012 * hf, ya + 0.05 * hf, HRUBKA, HRUBKA + 0.07, cRimsa, vStred, { boky: false, spodok: 0.6 });
+      yield;   // po každom podlaží vráti riadenie (dlhé steny palácov by inak zdržali snímok)
     }
   }
 
@@ -338,7 +368,7 @@ function obrysStitu(sm, W, y0) {
 /** Postaví sieť jedného dielu (steny z plánu) – generátor, vráti riadenie po každej stene; výsledok = sieť alebo null. */
 export function* postavDiel(diel) {
   const zb = new Zberac();
-  for (const s of diel.steny) { plastSteny(zb, s); yield; }
+  for (const s of diel.steny) { yield* plastSteny(zb, s); yield; }
   if (!zb.pocet) return null;
   const mesh = new THREE.Mesh(zb.geometria(), ziskajMaterialy()[0]);
   mesh.castShadow = true;
