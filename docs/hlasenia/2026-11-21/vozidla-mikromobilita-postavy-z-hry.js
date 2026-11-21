@@ -77,6 +77,15 @@ function skuter(farba) {
   g.add(tyc(V(-0.32, 1.12, 0.6), V(0.32, 1.12, 0.6), 0.02, '#222'));
   return g;
 }
+function motorka(farba = '#B3261E') {
+  const g = new THREE.Group();
+  g.add(koleso(0.31, 0.12, 0, 0.31, 0.72)); g.add(koleso(0.31, 0.14, 0, 0.31, -0.68));
+  g.add(box(0.26, 0.3, 0.75, '#3A3F46', 0, 0.5, 0)); g.add(box(0.32, 0.22, 0.5, farba, 0, 0.82, 0.22));
+  g.add(box(0.28, 0.1, 0.6, '#1E1E1E', 0, 0.8, -0.32)); g.add(box(0.2, 0.12, 0.5, farba, 0, 0.78, -0.72));
+  g.add(tyc(V(0, 0.31, 0.72), V(0, 1.0, 0.5), 0.035, '#9AA0A6'));
+  g.add(tyc(V(-0.36, 1.02, 0.5), V(0.36, 1.02, 0.5), 0.02, '#222')); g.add(box(0.18, 0.16, 0.08, '#E8E8E8', 0, 0.92, 0.66));
+  return g;
+}
 function taxi(farba, nazov) {
   const g = new THREE.Group();
   g.add(box(1.8, 0.6, 4.3, '#ECEFF1', 0, 0.62, 0)); g.add(box(1.6, 0.55, 2.2, '#ECEFF1', 0, 1.18, -0.2));
@@ -119,6 +128,28 @@ async function dodo(oblecenie, poza, cas, nadZemou, rodic, x = 0, z = 0, ry = 0)
   g.userData.animacie.hraj(poza, 0); g.userData.mixer.update(cas);
   osad(g, nadZemou, rodic, x, z, ry); return g;
 }
+// jednoduché IK (CCD): ruky na riadidlá, nohy na pedále/stupačky; trup sa predkloní
+const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3(), _q = new THREE.Quaternion(), _qw = new THREE.Quaternion(), _qp = new THREE.Quaternion();
+function kosti(obj) { const k = {}; obj.traverse((o) => { if (o.isBone && !k[o.name]) k[o.name] = o; }); return k; }
+function ik(retaz, ciel, iter = 16) {
+  const koniec = retaz[retaz.length - 1];
+  for (let n = 0; n < iter; n++) for (let i = retaz.length - 2; i >= 0; i--) {
+    const b = retaz[i]; b.updateMatrixWorld(true);
+    b.getWorldPosition(_a); koniec.getWorldPosition(_b);
+    _b.sub(_a).normalize(); _c.copy(ciel).sub(_a).normalize();
+    _q.setFromUnitVectors(_b, _c); b.getWorldQuaternion(_qw); b.parent.getWorldQuaternion(_qp);
+    b.quaternion.copy(_qp.invert().multiply(_q.multiply(_qw))); b.updateMatrixWorld(true);
+  }
+}
+function drz(obj, voz, { ruky, nohy = null, predklon = 0 }) {
+  const k = kosti(obj); sc.updateMatrixWorld(true);
+  if (predklon) { k.spine_01.rotateX(predklon * 0.5); k.spine_02.rotateX(predklon * 0.5); k.neck_01.rotateX(-predklon * 0.6); }
+  for (const s of ['l', 'r']) {
+    const x = s === 'l' ? 1 : -1;
+    ik([k['upperarm_' + s], k['lowerarm_' + s], k['hand_' + s]], voz.localToWorld(V(ruky[0] * x, ruky[1], ruky[2])));
+    if (nohy) { const f = nohy[s]; ik([k['thigh_' + s], k['calf_' + s], k['foot_' + s]], voz.localToWorld(V(f[0] * x, f[1], f[2]))); }
+  }
+}
 (async () => {
   const data = await nacitajNpcData();
   const k1 = pridaj(kolobezka('#2A2E33'), -9, 2);
@@ -126,20 +157,28 @@ async function dodo(oblecenie, poza, cas, nadZemou, rodic, x = 0, z = 0, ry = 0)
   const b2 = pridaj(bicykel('#3A3F46', true), -3.6, 2); b2.add(box(0.42, 0.42, 0.36, FICAK, 0, 1.45, -0.5));
   const h1 = pridaj(hoverboard(), -1.2, 2);
   const o1 = pridaj(onewheel(), 0.9, 2);
+  const m1 = pridaj(motorka(), 6.0, 2.2);
   const s1 = pridaj(skuter(FICAK), 3.4, 2); s1.add(box(0.42, 0.42, 0.36, FICAK, 0, 1.55, -0.62));
-  await Promise.all([
-    npc(data, 'studentka', 3, 'stoj', 0.5, 0.24, k1),
-    npc(data, 'kurier', 1, 'sedenie', 0.6, 0.18, b1, 0, -0.12),
-    npc(data, 'kurier', 7, 'sedenie', 0.6, 0.18, b2, 0, -0.12),
+  const [j1, j2, j3, , , j6, , , j9] = await Promise.all([
+    npc(data, 'studentka', 3, 'stoj', 0.5, 0.24, k1, 0, -0.12),
+    npc(data, 'kurier', 1, 'sedenie', 0.6, 0.18, b1, 0, -0.2),
+    npc(data, 'kurier', 7, 'sedenie', 0.6, 0.18, b2, 0, -0.2),
     npc(data, 'student', 5, 'stoj', 0.5, 0.17, h1),
     npc(data, 'korporat', 2, 'stoj', 0.5, 0.27, o1, 0, 0, Math.PI / 2.3),
-    dodo('kurier', 'sedenie', 0.6, 0.3, s1, 0, -0.2),
-    npc(data, 'dochodkyna', 4, 'mavanie', 0.6, 0, sc, 7.6, -1.6, -0.4),
+    dodo('kurier', 'sedenie', 0.6, 0.3, s1, 0, -0.28),
+    npc(data, 'dochodkyna', 4, 'mavanie', 0.6, 0, sc, 7.9, -1.6, -0.4),
     npc(data, 'dochodca', 6, 'stoj', 0.5, 0, sc, -11.5, 1.2, 0.5),
+    npc(data, 'turista', 3, 'sedenie', 0.6, 0.3, m1, 0, -0.38),
   ]);
+  const pedale = { l: [0.11, 0.2, 0.08], r: [0.11, 0.5, -0.08] };
+  drz(j1.koren, k1, { ruky: [0.2, 1.1, 0.52], predklon: 0.1 });
+  drz(j2.koren, b1, { ruky: [0.22, 1.02, 0.42], nohy: pedale, predklon: 0.45 });
+  drz(j3.koren, b2, { ruky: [0.22, 1.02, 0.42], nohy: pedale, predklon: 0.45 });
+  drz(j6, s1, { ruky: [0.28, 1.12, 0.6], nohy: { l: [0.13, 0.42, 0.25], r: [0.13, 0.42, 0.25] }, predklon: 0.1 });
+  drz(j9.koren, m1, { ruky: [0.32, 1.02, 0.5], nohy: { l: [0.2, 0.4, 0.05], r: [0.2, 0.4, 0.05] }, predklon: 0.35 });
   r.render(sc, kam); document.body.dataset.hotovo = '1';
 })().catch((e) => { console.error('CHYBA', e?.stack || e); document.body.dataset.hotovo = '1'; });
 
 const kam = new THREE.PerspectiveCamera(33, innerWidth / innerHeight, 0.1, 200);
-kam.position.set(-1.2, 6.2, 18.5); kam.lookAt(-1.2, 0.7, -0.8);
+kam.position.set(-0.6, 6.2, 18.5); kam.lookAt(-0.6, 0.7, -0.8);
 r.render(sc, kam);
