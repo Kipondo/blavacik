@@ -30,11 +30,16 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
 - **Overenie zoznamu chýb (fáza 2a):** #62, #65, #67, #68, #69, #70, #71, #72, #75 už vyriešili skoršie PR
   (#78, #80, #45, #35, #79) – v hre (main) som overil obchodný dom s hodinami, záhony a truhlíky, Manderlák z tehly.
 
+- **Fáza 2b → PR #104** `feature/pamiatky-presne-1`: Slavín, Modrý kostolík (`tools/blender/presne/`), Grasalkovičov
+  palác (portikus), `nahlad-pamiatky.html`. Ostatné stavby zo zoznamu prezreté v náhľade – OK; SND a Reduta čakajú
+  na podklady. Komentár v #59.
+
 ## Rozpracované
 - (nič)
 
 ## Ďalšie na rade
-- Fáza 2a: #62 …
+- Fáza 3: #96 chôdza a chodci, #97 vozidlá (rozpracované v `/home/claude/vozidla2`, nie commitnuté).
+- Ráno: súhrn do #59, 3 issues s najväčšími problémami.
 
 ## Rozhodnutia a poznámky
 - Otvorené PR z predchádzajúcich dní (#98, #99, #100) ostávajú nezlúčené – majiteľ v noci zakázal merge.
