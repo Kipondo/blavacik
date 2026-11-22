@@ -1,7 +1,7 @@
 {
  "nazov": "stanica-po",
  "commit": "?",
- "cas": "2026-11-22T16:28",
+ "cas": "2026-11-22T17:24",
  "hodina": 13.0,
  "body": [
   {
@@ -9,7 +9,7 @@
    "nazov": "Hlavná stanica",
    "x": -97,
    "z": -1640,
-   "ms": 12500,
+   "ms": 3098,
    "hotovo": true,
    "snimky": [
     [
@@ -27,7 +27,7 @@
    "nazov": "Hlavná stanica – historická hala s freskou",
    "x": -110.5,
    "z": -1684.6,
-   "ms": 3380,
+   "ms": 3663,
    "hotovo": true,
    "snimky": [
     [
@@ -41,7 +41,7 @@
    "nazov": "Hlavná stanica – 1. nástupište",
    "x": -140.4,
    "z": -1727,
-   "ms": 12658,
+   "ms": 3154,
    "hotovo": true,
    "snimky": [
     [

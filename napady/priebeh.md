@@ -60,3 +60,7 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
   jednu výšku a sklo v línii obrysu z OSM.
 - Okolie stanice: zastávky s prístreškami a lampy už v hre sú; chýba trakčné vedenie električiek a trolejbusov →
   samostatná vetva (celé mesto, nie len stanica).
+- Majiteľ 22. 11.: dvere, vchody a východy stanice napasovať, chodci po schodoch a cez dvere, „rampy“ nie do múrov →
+  dvere sú tam, kde pešia cesta z OSM prechádza múrom; bočný priechod má otvor po celej šírke (vonkajšie schody pri
+  Skleníku viedli do vnútorného múru medzi časťami budovy); chodci nechodia cez múry stanice (udalosť
+  'steny-chodcov'), chodia podchodom a po nástupištiach (udalosť 'ciary-chodcov'), výšku majú ako hráč.
