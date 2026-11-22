@@ -25,6 +25,11 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
 - **#101 → PR #102** `feature/titulka-v2`: titulka v2 + načítavanie s vlakom (reliéf `tools/ui/relief_slovenska.py`).
   Komentár v #101. Testy: Playwright `/tmp/tit/test.py` (titulka, Nastavenia, Ovládanie, pauza), `/tmp/tit/nac.py`.
 
+- **#53/#64 → PR #103** `feature/lod2-centrum`: LOD2 strechy, stromy a terén z lasera v 64 dlaždiciach
+  (`--sirsie-centrum`), budovy.py nemení časti nad priechodmi. Komentáre v #53 a #64.
+- **Overenie zoznamu chýb (fáza 2a):** #62, #65, #67, #68, #69, #70, #71, #72, #75 už vyriešili skoršie PR
+  (#78, #80, #45, #35, #79) – v hre (main) som overil obchodný dom s hodinami, záhony a truhlíky, Manderlák z tehly.
+
 ## Rozpracované
 - (nič)
 
