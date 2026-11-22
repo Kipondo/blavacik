@@ -27,6 +27,8 @@ BBOX = '48.1560,17.1000,48.1615,17.1135'
 STARA_BUDOVA = 78147458      # výpravná budova (1905, krídla), building:levels 3, valbová strecha
 HALA = 78147585              # nová odbavovacia hala (1988), 2 podlažia, plochá strecha
 VYCHODNE_KRIDLO = 78147593   # východné krídlo (pošta), 3 podlažia, valbová strecha
+SVETLIK = 1523818057         # presklený svetlík Skleníka pred historickou fasádou (building:part, roof:shape apse_gabled)
+VEZICKY = (1523818063, 1523818064)   # nárožné vežičky stredného rizalitu (building:part, roof:shape pyramidal, ~4,6 × 4,6 m)
 STRED = (-116.0, -1700.0)    # bod záznamu v data/mapa/pamiatky.json
 
 
@@ -43,6 +45,20 @@ out body geom;"""
                                  data=urllib.parse.urlencode({'data': q}).encode(),
                                  headers={'User-Agent': 'blavacik-mapa/1.0'})
     return json.load(urllib.request.urlopen(req, timeout=120))
+
+
+def doplnok_cesty(osm, way_id):
+    """Cesta, ktorá v uloženom výsledku Overpass chýba (napr. building:part) – z API OSM, s geometriou ako Overpass."""
+    if any(e['type'] == 'way' and e['id'] == way_id for e in osm['elements']):
+        return False
+    req = urllib.request.Request(f'https://api.openstreetmap.org/api/0.6/way/{way_id}/full.json',
+                                 headers={'User-Agent': 'blavacik-mapa/1.0'})
+    r = json.load(urllib.request.urlopen(req, timeout=60))
+    uzly = {e['id']: e for e in r['elements'] if e['type'] == 'node'}
+    w = next(e for e in r['elements'] if e['type'] == 'way')
+    osm['elements'].append({'type': 'way', 'id': way_id, 'tags': w.get('tags', {}),
+                            'geometry': [{'lat': uzly[n]['lat'], 'lon': uzly[n]['lon']} for n in w['nodes']]})
+    return True
 
 
 def bod(lat, lon):
@@ -112,6 +128,9 @@ def main():
         osm = stiahni()
         with open(cache, 'w', encoding='utf8') as f:
             json.dump(osm, f, ensure_ascii=False, separators=(',', ':'))
+    if any([doplnok_cesty(osm, w) for w in (SVETLIK, *VEZICKY)]):
+        with open(cache, 'w', encoding='utf8') as f:
+            json.dump(osm, f, ensure_ascii=False, separators=(',', ':'))
 
     budovy, nastupistia, pristresky, vchody = {}, [], [], []
     for e in osm['elements']:
@@ -125,7 +144,7 @@ def main():
             p = p[:-1]
         if len(p) < 3:
             continue
-        if e['id'] in (STARA_BUDOVA, HALA, VYCHODNE_KRIDLO):
+        if e['id'] in (STARA_BUDOVA, HALA, VYCHODNE_KRIDLO, SVETLIK, *VEZICKY):
             budovy[str(e['id'])] = p
         elif t.get('building') == 'roof':
             cx = sum(q[0] for q in p) / len(p)
@@ -144,7 +163,9 @@ def main():
     data = {
         'popis': 'VYGENEROVANÉ tools/blender/osm_stanica.py z OpenStreetMap (© prispievatelia OpenStreetMap, ODbL) a dlaždíc mesta.',
         'stred': STRED,
-        'budovy': {'stara': budovy[str(STARA_BUDOVA)], 'hala': budovy[str(HALA)], 'vychod': budovy[str(VYCHODNE_KRIDLO)]},
+        'budovy': {'stara': budovy[str(STARA_BUDOVA)], 'hala': budovy[str(HALA)], 'vychod': budovy[str(VYCHODNE_KRIDLO)],
+                   'svetlik': budovy.get(str(SVETLIK)),
+                   'vezicky': [budovy[str(w)] for w in VEZICKY if str(w) in budovy]},
         'nastupistia': nastupistia,
         'pristresky': pristresky,
         'vchody': vchody,

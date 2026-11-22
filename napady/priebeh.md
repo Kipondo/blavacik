@@ -29,7 +29,7 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 ## Rozpracované (22. 11. popoludní) – pracovné kópie vedľa repozitára
 | vetva | priečinok | stav |
 |---|---|---|
-| `feature/hlavna-stanica` | `blavacik` | stanica + pavilóny podľa pohľadov, sklo haly, bez trávy; **čaká:** interiér podľa fotiek a freska Františka Gajdoša v hale (prieskum), potom trasa po, PR |
+| `feature/hlavna-stanica` | `blavacik` | interiér a freska podľa fotiek, schody z podchodu vo výške nástupišťa, chôdza počas hovoru s mamou, strechy podľa prieskumu (správa `reports/Strechy Hlavnej stanice Bratislava.md` – mimo gitu); **čaká:** trasa po, meranie, PR |
 | `fix/atriaky-budovy` | `../blavacik-atriaky` | pushnutá; pavlače bez dier, izba 314 v meste, voľná ulička na terasu; **čaká:** trasa pred/po, PR |
 | `fix/titulka-zlata-linka` | `../blavacik-main` | PR #116 otvorený – zlúčenie zablokovali oprávnenia (treba majiteľa) |
 | `feature/vykon-tiene` | `../blavacik-vykon` | #110: tiene stromov cez zástupné koruny, malé objekty bez tieňa ďalej ako 45 m, vikiere bez tieňa, bez vetra (listy, tráva) – meranie |
@@ -51,3 +51,12 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
 - Nástupište je v hre 0,35 m nad terénom (skutočných 0,55 m nad koľajou): menší schod pri výstupe z podchodu.
 - Interiér výpravnej budovy (1905) nie je prístupný okrem priechodu z haly na 1. nástupište; hala (1988) celá.
 - Vlak pri spawne zatiaľ nie je (príde s A2) – scénka začína na nástupišti po príchode vlaku.
+- Majiteľ 22. 11.: počas hovoru s mamou sa má dať chodiť; úvodné scénky pri testoch preskakovať (`?bezScenok`,
+  Playwright a `?meranie` ich vynechávajú samy).
+- Strechy stanice (prieskum 22. 11.): výšky z výkresov majú prednosť pred 3D vrstvou ZBGIS (LOD1, výšky blokov);
+  z OSM building:part sú svetlík Skleníka (way 1523818057) a dve nárožné vežičky rizalitu; farby z ortofota ZBGIS 2023.
+  Nápis na Skleníku bez loga a značky dopravcu – len „BRATISLAVA HLAVNÁ STANICA“.
+  Nerobené: prízemná (5,5 m) východná časť Skleníka a ustúpené prízemie pod vysunutým poschodím – hala má zatiaľ
+  jednu výšku a sklo v línii obrysu z OSM.
+- Okolie stanice: zastávky s prístreškami a lampy už v hre sú; chýba trakčné vedenie električiek a trolejbusov →
+  samostatná vetva (celé mesto, nie len stanica).

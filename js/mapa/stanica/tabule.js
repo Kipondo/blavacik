@@ -137,6 +137,23 @@ export function pokladnica() {
   return sk;
 }
 
+/** Svetelný nápis na páse strechy Skleníka: biele písmená (v noci svietia), tenký tmavý obrys kvôli čitateľnosti cez deň. */
+export function napisStrechy(text, sirka) {
+  const { c, g, t } = platno(2048, 128);
+  g.clearRect(0, 0, c.width, c.height);
+  g.font = '600 92px system-ui, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.lineWidth = 6;
+  g.strokeStyle = 'rgba(70, 72, 76, 0.9)';
+  g.strokeText(text, 1024, 66, 2000);
+  g.fillStyle = '#ffffff';
+  g.fillText(text, 1024, 66, 2000);
+  t.needsUpdate = true;
+  return new THREE.Mesh(new THREE.PlaneGeometry(sirka, sirka * 128 / 2048),
+    new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false }));
+}
+
 /** Jednoduchý obojstranný nápis (tabuľka nad pokladňami, bufetom, priechodom). */
 export function napis(text, farba, pozadie, sirka = 3) {
   const { c, g, t } = platno(512, 96);

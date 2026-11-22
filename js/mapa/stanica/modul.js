@@ -9,7 +9,7 @@
 // Zverejní hra.stanica = { miesta, nastupiste(ref) → { x, z, y, smer } } pre spawn a postavy (A4).
 
 import * as THREE from 'three';
-import { tabulaOdchodov, hodiny, napis, navigacia, pasPokladni, pokladnica } from './tabule.js';
+import { tabulaOdchodov, hodiny, napis, navigacia, pasPokladni, pokladnica, napisStrechy } from './tabule.js';
 import { freska } from './freska.js';
 
 const SKUPINA = 'modul:stanica';
@@ -80,17 +80,19 @@ export default {
     this.prekresliTabule();
   },
 
-  /** Sklo haly je priehľadné (zvonka vidno do haly, zvnútra na námestie) – raz po načítaní modelu. */
+  /** Sklo haly je priehľadné (zvonka vidno do haly, zvnútra na námestie) – raz po načítaní modelu.
+   *  Prízemie číre, pásové okno poschodia tmavšie, svetlík na streche číry. */
   skloHaly() {
     if (this.skloHotovo) return;
     const m = this.model('plast');
+    const PRIEHLADNOST = { 'sklo-hala': 0.32, 'sklo-hala-tmave': 0.62, 'sklo-svetlik': 0.3 };
     let n = 0;
     m?.traverse((o) => {
       if (!o.isMesh) return;
       for (const mat of Array.isArray(o.material) ? o.material : [o.material]) {
-        if (mat.name !== 'sklo-hala') continue;
+        if (!(mat.name in PRIEHLADNOST)) continue;
         mat.transparent = true;
-        mat.opacity = 0.32;
+        mat.opacity = PRIEHLADNOST[mat.name];
         mat.depthWrite = false;
         mat.needsUpdate = true;
         o.castShadow = false;
@@ -149,8 +151,30 @@ export default {
       ...(this.plast.obrysy ?? []).map((o) => o.map((p) => this.svet('plast', p))),
       ...(this.nastupistia?.nahradit ?? []).map((o) => o.map((p) => this.svet('nastupistia', p))),
     ];
+    // aj do stavu – modul trávy sa môže inicializovať až po stanici (udalosť by zmeškal)
+    hra.stav.bezTravy = { ...(hra.stav.bezTravy ?? {}), stanica: polygony };
     hra.posli('bez-travy', { kluc: 'stanica', polygony });
     this.postavTabule();
+    this.postavNapisy(z0);
+  },
+
+  /** Nápisy na plášti (svetelný nápis na šikmom páse Skleníka) – vidno ich aj zďaleka, nie len s interiérom. */
+  postavNapisy(z0) {
+    if (!this.napisy) {
+      this.napisy = new THREE.Group();
+      this.napisy.name = 'stanica-napisy';
+      this.hra.scena.add(this.napisy);
+    }
+    for (const c of [...this.napisy.children]) { this.napisy.remove(c); c.geometry?.dispose(); c.material?.map?.dispose(); c.material?.dispose(); }
+    for (const n of this.plast.napisy ?? []) {
+      const m = napisStrechy(n.text, n.sirka);
+      const [x, z] = this.svet('plast', n.p);
+      m.position.set(x, z0 + n.vyska, z);
+      m.rotation.order = 'YXZ';
+      m.rotation.y = Math.atan2(n.smer[0], n.smer[1]);
+      m.rotation.x = n.sklon ?? 0;      // pás sa hore vykláňa von – nápis leží na ňom
+      this.napisy.add(m);
+    }
   },
 
   /** Poloha na nástupišti `ref` (t = 0…1 pozdĺž osi) – pre spawn a scénku (A4). */
@@ -212,6 +236,14 @@ export default {
     this.hodiny?.userData.prekresli(d);
   },
 };
+
+function vnutri(x, z, b) {
+  let c = false;
+  for (let i = 0, j = b.length - 1; i < b.length; j = i++) {
+    if ((b[i][1] > z) !== (b[j][1] > z) && x < ((b[j][0] - b[i][0]) * (z - b[i][1])) / (b[j][1] - b[i][1]) + b[i][0]) c = !c;
+  }
+  return c;
+}
 
 /** Obdĺžnik okolo úsečky a→b s danou hrúbkou. */
 function pasUsecky(a, b, hrubka) {

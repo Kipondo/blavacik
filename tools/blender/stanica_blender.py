@@ -60,6 +60,26 @@ def B(p):
     return (p[0] - SX, -(p[1] - SZ))
 
 
+def priechod_os():
+    """Os a šírka bočného priechodu (Blender): medzi vchodmi z OSM, posunutá a rozšírená tak, aby v ňom ležali celé
+    schody do podchodu, ktoré v ňom začínajú (OSM ich má ~5 m bokom od osi vchodov – inak by boli v múre)."""
+    pa, pb = B(PRIECHOD[0]), B(PRIECHOD[1])
+    L = math.hypot(pb[0] - pa[0], pb[1] - pa[1])
+    ux, uy = (pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L
+    vx, vy = -uy, ux
+    odsadenia = [-PRIECHOD_SIRKA / 2, PRIECHOD_SIRKA / 2]
+    for s in D['schody']:
+        konce = [B(p) for p in (s['body'][0], s['body'][-1])]
+        t = [(p[0] - pa[0]) * ux + (p[1] - pa[1]) * uy for p in konce]
+        o = [(p[0] - pa[0]) * vx + (p[1] - pa[1]) * vy for p in konce]
+        if all(-2 < ti < L + 2 for ti in t) and all(abs(oi) < 8 for oi in o):
+            w = s.get('sirka', 3) / 2 + 0.4
+            odsadenia += [min(o) - w, max(o) + w]
+    o0, o1 = min(odsadenia), max(odsadenia)
+    c = (o0 + o1) / 2
+    return (pa[0] + vx * c, pa[1] + vy * c), (pb[0] + vx * c, pb[1] + vy * c), o1 - o0
+
+
 def H(p):
     """Bod Blendera → lokálne metre hry (pre JSON)."""
     return [round(p[0], 2), round(-p[1], 2)]
@@ -135,12 +155,27 @@ def materialy():
         'ram': material('detail-ram', '#e9e4d8', drsnost=0.6),
         'okno': sklo('okna-stanica', '#26323b', drsnost=0.18, kov=0.55),
         'dvere': material('dvere-stanica', '#4a3426', drsnost=0.7),
-        'strecha': material('strecha-stanica', '#5d5550', drsnost=0.75),
+        # strechy (prieskum fotiek a ortofota ZBGIS 2023 – mediány farieb): drobná krytina tmavá modrosivá, stredný
+        # rizalit najtmavší, svetlejšie oplechovanie nároží, odkvapový žľab so zelenkavou patinou, komíny
+        'strecha': material('strecha-stanica', '#5b6369', drsnost=0.8),
+        'strecha_stred': material('strecha-stred', '#4f5d67', drsnost=0.75),
+        'naroznik': material('detail-naroznik', '#b9b4a0', drsnost=0.5, kov=0.4),
+        'zlab': material('detail-zlab', '#5c6650', drsnost=0.5, kov=0.4),
+        'komin_tehla': material('komin-tehla', '#6b3a32', drsnost=0.9),
+        'komin_omietka': material('komin-omietka', '#e4d9c1', drsnost=0.9),
+        'rura': material('detail-rura', '#6d7072', drsnost=0.4, kov=0.7),
+        'socha': material('socha-bronz', '#b8953e', drsnost=0.35, kov=0.75),
         'podhlad': material('podhlad-stanica', '#cfc6b3', drsnost=0.9),
         'sklo_hala': sklo('hala', '#8ea3ae', drsnost=0.08, kov=0.45),
         'hlinik': material('detail-hlinik', '#9aa3a8', drsnost=0.4, kov=0.7),
         'atika': material('atika-hala', '#cdc8bd', drsnost=0.85),
-        'strecha_plocha': material('strecha-hala', '#6f6f6c', drsnost=0.95),
+        # Skleník (prieskum fotiek 2019–2023): tmavosivá fólia na plochej streche, okraj = šikmý pás svetlého
+        # zvislo rebrovaného plechu, poschodie s tmavým pásovým oknom, presklený svetlík pred historickou fasádou
+        'strecha_plocha': material('strecha-hala', '#676e73', drsnost=0.95),
+        'plech_hala': material('plech-hala', '#d4d2c6', drsnost=0.55, kov=0.3),
+        'plech_rebra': material('detail-plech-rebra', '#c2bfb2', drsnost=0.55, kov=0.3),
+        'sklo_hala_tmave': sklo('hala-tmave', '#2f3b44', drsnost=0.08, kov=0.5),
+        'sklo_svetlik': sklo('svetlik', '#a9bcc4', drsnost=0.05, kov=0.4),
         'strop': material('strop-hala', '#dedbd3', drsnost=0.9),
         'priechod': material('steny-priechod', '#d8cfbd', drsnost=0.9),
         # interiér (farby podľa prieskumu fotiek – odhad reálnych farieb)
@@ -148,10 +183,11 @@ def materialy():
         'podlaha_b': material('zula-b', '#b0aea8', drsnost=0.3),
         'terakota': material('terakota-hist', '#8e4a3c', drsnost=0.3),    # historická hala: terakotová podlaha
         'krem': material('krem-pasy', '#e3d6be', drsnost=0.35),           # … s krémovými pásmi
-        'kamen_hist': material('kamen-lesteny', '#7a6656', drsnost=0.25),  # hnedosivý leštený kameň (dole)
+        # hnedosivý leštený obklad (dole) – meno bez „kamen“, inak by hra dala kamennú textúru (kamen-material.js)
+        'kamen_hist': material('obklad-lesteny', '#7a6656', drsnost=0.25),
         'mata': material('omietka-matova', '#d6ddcc', drsnost=0.9),        # bledá mätová omietka (hore)
         'rimsa_biela': material('rimsa-biela', '#e6e2da', drsnost=0.7),
-        'strop_biely': material('strop-hist', '#eceae5', drsnost=0.9),
+        'strop_biely': svetlo('strop-hist', '#eceae5', sila=0.3),         # biely strop, slabo presvetlený bodovkami
         'kachle': material('kachle-zelene', '#4e6248', drsnost=0.35),     # tmavozelené „šupinové“ obkladačky
         'kachle_rebro': material('detail-kachle-rebro', '#5d7356', drsnost=0.3),
         'mramor_zeleny': material('mramor-zeleny', '#2b3530', drsnost=0.25),
@@ -160,7 +196,7 @@ def materialy():
         'ocel_tmava': material('detail-ocel-rebra', '#2e2f33', drsnost=0.5, kov=0.6),
         'svetlik': svetlo('svetlo-svetlik', '#e6eef2', sila=1.3),
         'stlp_tmavy': material('stlp-tmavy', '#5a5048', drsnost=0.5),
-        'pult_kamen': material('pult-kamen', '#cfc3a8', drsnost=0.5),
+        'pult_kamen': material('pult-travertin', '#cfc3a8', drsnost=0.5),
         'bronz': material('detail-bronz', '#5a4632', drsnost=0.4, kov=0.5),
         'modry_pas': material('modry-pas', '#1e3a8a', drsnost=0.6),
         'automat_o': material('automat-oranzovy', '#e07a1f', drsnost=0.5),
@@ -187,8 +223,14 @@ def materialy():
         'okraj': material('okraj-nastupista', '#e6e3da', drsnost=0.8),
         'pas': material('detail-pas-zlty', '#dcc21f', drsnost=0.7),
         'pristresok': material('pristresok', '#7d8884', drsnost=0.7, kov=0.15),
-        'podhlad_pristresku': material('podhlad-pristresku', '#3a3330', drsnost=0.8),
-        'oceľ': material('stlp-ocel-modry', '#1f3268', drsnost=0.45, kov=0.5),
+        # vrch prístreškov podľa ortofota 2023: 4. a 5. nástupište takmer biele, 2. a 3. stredne sivé
+        'pristresok_biely': material('pristresok-biely', '#cfdedc', drsnost=0.7, kov=0.15),
+        'pristresok_sivy': material('pristresok-sivy', '#8c928f', drsnost=0.7, kov=0.15),
+        'podhlad_pristresku': material('podhlad-pristresku', '#303236', drsnost=0.8),
+        'hrana_pristresku': material('hrana-pristresku', '#c9ccc9', drsnost=0.6, kov=0.2),
+        'plech_n1': material('plech-nastupiste1', '#7d8a7e', drsnost=0.6, kov=0.3),
+        'svetlo_pristresku': svetlo('svetlo-pristresok', '#f4f1e6', sila=1.6),
+        'oceľ': material('stlp-ocel-modry', '#1f4a8f', drsnost=0.45, kov=0.5),
         'drevo_lavicka': material('drevo-lavicka', '#8a5a34', drsnost=0.7),
         'kos_nast': material('kos-nastupiste', '#d8dad8', drsnost=0.5),
     }
@@ -278,10 +320,11 @@ def murovana_fasada(G, poly, poschodia, M, otvory_hran, os_okna=3.4, vnor=0.28, 
     G.pas(M['rimsa'], poly, zr - 0.25, zr, von=0.55)
 
 
-def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=12.0, vyska=None):
+def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=12.0, vyska=None, mat=None):
     """Valbová strecha nad ľubovoľným obrysom: šikmé plochy od odkvapu po plochý vrch (odsadený obrys).
     Odsadenie sa zmenšuje, kým je vrchný obrys jednoduchý polygón (úzke krídla). vyska = výška strechy
-    od odkvapu po hrebeň (z pohľadov); inak sa ráta zo sklonu."""
+    od odkvapu po hrebeň (z pohľadov); inak sa ráta zo sklonu. Na nárožiach svetlé oplechovanie, po odkvape žľab."""
+    ms = mat or M['strecha']
     O = odsad(poly, presah)
     d = max_vnor
     while d > 0.8:
@@ -294,16 +337,70 @@ def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=12.0, vyska=None)
     n = len(poly)
     for i in range(n):
         j = (i + 1) % n
-        G.plocha(M['strecha'], [(O[i][0], O[i][1], z), (O[j][0], O[j][1], z), (I[j][0], I[j][1], z + h), (I[i][0], I[i][1], z + h)])
+        G.plocha(ms, [(O[i][0], O[i][1], z), (O[j][0], O[j][1], z), (I[j][0], I[j][1], z + h), (I[i][0], I[i][1], z + h)])
         # podhľad presahu (zospodu)
         G.plocha(M['podhlad'], [(poly[i][0], poly[i][1], z), (O[i][0], O[i][1], z), (O[j][0], O[j][1], z), (poly[j][0], poly[j][1], z)][::-1])
-    G.vodorovna(M['strecha'], I, z + h)
+        # oplechovanie nárožia – len na výraznom rohu (nie na takmer rovnej hrane z OSM)
+        a, b = poly[i - 1], poly[(i + 1) % n]
+        e1 = (poly[i][0] - a[0], poly[i][1] - a[1]); e2 = (b[0] - poly[i][0], b[1] - poly[i][1])
+        l1, l2 = math.hypot(*e1) or 1, math.hypot(*e2) or 1
+        if (e1[0] * e2[0] + e1[1] * e2[1]) / (l1 * l2) < 0.94:
+            G.tram(M['naroznik'], (O[i][0], O[i][1], z + 0.04), (I[i][0], I[i][1], z + h + 0.04), 0.18)
+    # odkvapový žľab so zelenkavou patinou
+    G.pas(M['zlab'], O, z - 0.18, z + 0.02, von=0.1, dnu=0.05, spodok=False)
+    G.vodorovna(ms, I, z + h)
     return z + h
+
+
+def komin(G, M, stred, smer, z0, z1, tehla=True):
+    """Komín (tehlový s oceľovou vložkou, alebo omietaný) s krycou doskou."""
+    mat = M['komin_tehla'] if tehla else M['komin_omietka']
+    G.kvader(mat, stred, smer, 1.0, 0.65, z0, z1)
+    G.kvader(M['rimsa'], stred, smer, 1.2, 0.85, z1, z1 + 0.12)
+    if tehla:
+        G.valec(M['rura'], stred, 0.13, z1 + 0.12, z1 + 0.9, seg=8)
+
+
+def okridlene_koleso(G, M, stred, von, z):
+    """Socha „okrídlené koleso“ na guli (symbol železnice, na streche od 1939) – na atike nad námestím.
+    von = jednotkový smer k námestiu (koleso stojí v rovine fasády). Voľne zjednodušený tvar."""
+    ux, uy = -von[1], von[0]          # pozdĺž fasády
+    c = stred
+    G.kvader(M['rimsa'], c, (ux, uy), 1.6, 1.2, z, z + 0.9)                     # podstavec
+    G.valec(M['socha'], c, 0.25, z + 0.9, z + 1.2, seg=10)
+    # guľa (16-uholníkové pásy)
+    r, zc = 0.75, z + 1.2 + 0.75
+    pasy = 6
+    for k in range(pasy):
+        a0, a1 = -math.pi / 2 + math.pi * k / pasy, -math.pi / 2 + math.pi * (k + 1) / pasy
+        G.valec(M['socha'], c, r * math.cos(a0), zc + r * math.sin(a0), zc + r * math.sin(a1), seg=14, vrch=False, r1=r * math.cos(a1))
+    # koleso nad guľou: obruč a spice v zvislej rovine fasády
+    R, zk = 1.15, zc + r + 1.05
+    P = lambda t, rr: (c[0] + ux * math.cos(t) * rr, c[1] + uy * math.cos(t) * rr, zk + math.sin(t) * rr)
+    seg = 16
+    for i in range(seg):
+        t0, t1 = 2 * math.pi * i / seg, 2 * math.pi * (i + 1) / seg
+        G.tram(M['socha'], P(t0, R), P(t1, R), 0.16)
+        if i % 2 == 0:
+            G.tram(M['socha'], P(t0, 0.15), P(t0, R), 0.07)
+    G.tram(M['socha'], (c[0], c[1], zc + r - 0.05), P(-math.pi / 2, R), 0.2)     # stopka
+    # krídla: dve perute naširoko do strán, perá ako šikmé platne (obojstranne)
+    for s in (1, -1):
+        for k, (dl, zd) in enumerate(((2.6, 0.55), (2.25, 0.2), (1.85, -0.15), (1.4, -0.45))):
+            a = (c[0] + ux * s * 0.9, c[1] + uy * s * 0.9, zk + 0.35 - k * 0.12)
+            b = (c[0] + ux * s * (0.9 + dl), c[1] + uy * s * (0.9 + dl), zk + zd + 0.45)
+            d_ = (c[0] + ux * s * (0.9 + dl * 0.8), c[1] + uy * s * (0.9 + dl * 0.8), zk + zd + 0.05)
+            e = (c[0] + ux * s * 0.9, c[1] + uy * s * 0.9, zk - 0.05 - k * 0.12)
+            body = [a, b, d_, e]
+            G.plocha(M['socha'], body if s > 0 else body[::-1])
+            G.plocha(M['socha'], body[::-1] if s > 0 else body)
 
 
 # Časti výpravnej budovy a východného krídla pozdĺž osi (0 = západný koniec, 1 = východný) podľa pohľadu južného
 # a severného: dvojpodlažné krídla (arkáda na prízemí, rímsa +9,48, nízka strecha po +10,3) a trojpodlažné
 # pavilóny s valbovými strechami. (od, do, poschodia, hrebeň)
+VEZICKA_STENA = 16.4         # nárožné vežičky: vrch múru (o podlažie nad rímsou rizalitu)
+VEZICKA_VRCH = 19.0          # vrchol ihlanovej strechy (+ hrot ~0,9 m; 3D vrstva ZBGIS: najvyšší prvok ~19,6 m)
 KRIDLO = [0.88, 5.18, 9.48]
 PAVILON = [0.88, 5.18, 9.48, 13.2]
 CASTI = [
@@ -411,7 +508,7 @@ def plast(M):
     stara = obrys(D['budovy']['stara'])
     hala = obrys(D['budovy']['hala'])
     vychod = obrys(D['budovy']['vychod'])
-    pa, pb = B(PRIECHOD[0]), B(PRIECHOD[1])
+    pa, pb, sirka_pr = priechod_os()
     # predĺženie osi priechodu cez oba múry
     L = dlzka(pa, pb)
     ux, uy = (pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L
@@ -430,7 +527,7 @@ def plast(M):
             # šírka otvoru v smere hrany (priechod nemusí byť kolmý)
             hx, hy = (b[0] - a[0]) / Lh, (b[1] - a[1]) / Lh
             sin = abs(ux * hy - uy * hx) or 1
-            w = PRIECHOD_SIRKA / sin / 2
+            w = sirka_pr / sin / 2
             t = dlzka(a, p)
             otv.setdefault(i, []).append((t - w, t + w, -3.0, STARA_PODLAHA + PRIECHOD_VYSKA, 'priechod'))
             kriz.append((t_osi, p))
@@ -465,15 +562,18 @@ def plast(M):
         otvory_historickej_haly(c['poly'], otv, stara, vychod)
         dvere_z_osm(c['poly'], otv, STARA_PODLAHA)
         murovana_fasada(G, c['poly'], c['poschodia'], M, otv)
-        valbova_strecha(G, c['poly'], c['poschodia'][-1], None, 0.6, M, vyska=c['hreben'] - c['poschodia'][-1])
+        stredna = c['hreben'] == STARA_HREBEN
+        valbova_strecha(G, c['poly'], c['poschodia'][-1], None, 0.6, M, vyska=c['hreben'] - c['poschodia'][-1],
+                        mat=M['strecha_stred'] if stredna else None)
         c['otvory'] = otv
     print('časti výpravnej budovy:', len(casti))
+    strecha_doplnky(G, M, casti, stara, vychod)
 
     # priechod: bočné steny, strop (podlahu kreslí interiér podľa terénu)
     if len(krizenia) >= 2:
         p0, p1 = krizenia[0][1], krizenia[-1][1]
         vx, vy = -uy, ux
-        w = PRIECHOD_SIRKA / 2
+        w = sirka_pr / 2
         z0, z1 = STARA_PODLAHA - 0.9 - 0.5, STARA_PODLAHA + PRIECHOD_VYSKA
         for s in (1, -1):
             a = (p0[0] + vx * w * s, p0[1] + vy * w * s)
@@ -483,7 +583,7 @@ def plast(M):
                 G.stena(M['priechod'], b, a, z0, z1)
             else:
                 G.stena(M['priechod'], a, b, z0, z1)
-            steny_kol.append({'a': H(a), 'b': H(b), 'hrubka': 0.4, 'od': -4, 'po': STARA_RIMSA, 'vrch': STARA_RIMSA + 1})
+            steny_kol.append({'a': H(a), 'b': H(b), 'hrubka': 0.4, 'od': -1.2, 'po': STARA_RIMSA, 'vrch': STARA_RIMSA + 1})
         G.plocha(M['priechod'], [(p0[0] + vx * w, p0[1] + vy * w, z1), (p1[0] + vx * w, p1[1] + vy * w, z1),
                                   (p1[0] - vx * w, p1[1] - vy * w, z1), (p0[0] - vx * w, p0[1] - vy * w, z1)])
 
@@ -507,11 +607,25 @@ def plast(M):
                 dvere_hala.setdefault(i, []).append((t - 2.0, t + 2.0))
                 break
     hala_steny = sklenena_hala(G, hala, spolocne, dvere_hala, M)
-    # strecha haly a podhľad
-    from veze import strecha as plocha_strecha
-    plocha_strecha(G, hala, HALA_STRECHA, M['strecha_plocha'], M['atika'], atika=0.7)
-    G.vodorovna(M['strop'], hala, HALA_STROP, hore=False)
-    # strop nad pásom pri výpravnej budove (hala je nižšia než budova – medzera po rímsu sa zakryje stenou budovy)
+    # strecha haly: plochá s výrezom pre presklený svetlík, šikmý plechový pás po okraji, podhľad (strop) s výrezom
+    strecha_sklenika(G, M, hala, spolocne)
+    # nápis na šikmom páse nad námestím (najdlhšia voľná hrana na juh) – kreslí ho hra (js/mapa/stanica/modul.js)
+    (_, _), (vx_b, vy_b), *_ = os_budovy(stara, vychod)
+    najlepsia = None
+    for i in range(nh):
+        if i in spolocne:
+            continue
+        a, b = hala[i], hala[(i + 1) % nh]
+        nx, ny = normala(a, b)
+        if nx * vx_b + ny * vy_b < -0.6 and (najlepsia is None or dlzka(a, b) > najlepsia[0]):
+            najlepsia = (dlzka(a, b), a, b, (nx, ny))
+    napisy = []
+    if najlepsia:
+        L, a, b, (nx, ny) = najlepsia
+        stred = ((a[0] + b[0]) / 2 + nx * (PAS_VON / 2 + 0.08), (a[1] + b[1]) / 2 + ny * (PAS_VON / 2 + 0.08))
+        napisy.append({'text': 'BRATISLAVA HLAVNÁ STANICA', 'p': H(stred), 'smer': H((nx, ny)),
+                       'vyska': round((PAS_OD + PAS_DO) / 2, 2), 'sirka': round(min(L - 4, 34), 1),
+                       'sklon': round(math.atan2(PAS_VON, PAS_DO - PAS_OD), 3)})
 
     # kolízie plášťa: múry výpravnej budovy a krídla po obvode s medzerami (priechod, otvory), steny haly
     for poly, otv, vrch in ((c['poly'], c['otvory'], c['hreben']) for c in casti):
@@ -526,17 +640,179 @@ def plast(M):
                 if t0 - x > 0.05:
                     pa_ = (a[0] + (b[0] - a[0]) * x / Lh, a[1] + (b[1] - a[1]) * x / Lh)
                     pb_ = (a[0] + (b[0] - a[0]) * min(Lh, t0) / Lh, a[1] + (b[1] - a[1]) * min(Lh, t0) / Lh)
-                    steny_kol.append({'a': H(pa_), 'b': H(pb_), 'hrubka': 0.8, 'od': -4, 'po': vrch, 'vrch': vrch})
+                    steny_kol.append({'a': H(pa_), 'b': H(pb_), 'hrubka': 0.8, 'od': -1.2, 'po': vrch, 'vrch': vrch})
                 x = max(x, t1)
     steny_kol.extend(hala_steny)
-    return G, [stara, hala, vychod], steny_kol, krizenia
+    return G, [stara, hala, vychod], steny_kol, krizenia, napisy
+
+
+def strecha_doplnky(G, M, casti, stara, vychod):
+    """Komíny na pavilónoch a okrídlené koleso na atike stredného bloku nad Skleníkom (prieskum fotiek)."""
+    (ux, uy), (vx, vy), *_ = os_budovy(stara, vychod)
+    for c in casti:
+        poly = c['poly']
+        us = [p[0] * ux + p[1] * uy for p in poly]
+        vs = [p[0] * vx + p[1] * vy for p in poly]
+        um, vm = (min(us) + max(us)) / 2, (min(vs) + max(vs)) / 2
+        zr, zh = c['poschodia'][-1], c['hreben']
+        if c['poschodia'] is PAVILON or (c['hreben'] != STARA_HREBEN and len(c['poschodia']) == 4):
+            # pavilón: komín pri hrebeni na strane nástupíšť (tehlový na pavilóne 0,25–0,31, inde omietaný)
+            tehla = abs(zh - 17.41) < 0.01
+            p = (ux * um + vx * (vm + 2.2), uy * um + vy * (vm + 2.2))
+            komin(G, M, p, (ux, uy), zr, zh + 1.1, tehla=tehla)
+        if c['hreben'] == STARA_HREBEN:
+            # okrídlené koleso: na južnej (námestie) atike stredného bloku, v strede jeho šírky
+            v_juh = min(vs)
+            p = (ux * um + vx * (v_juh + 1.3), uy * um + vy * (v_juh + 1.3))
+            okridlene_koleso(G, M, p, (-vx, -vy), zr)
+    # nárožné vežičky stredného rizalitu (OSM building:part, pyramidal, 4 podlažia; vrch ~+19,6 podľa 3D vrstvy ZBGIS)
+    for v in D['budovy'].get('vezicky') or []:
+        poly = obrys(v)
+        z0, zs, zv = HALA_STRECHA - 0.5, VEZICKA_STENA, VEZICKA_VRCH
+        G.hranol(M['omietka'], poly, z0, zs, vrch=False)
+        G.pas(M['rimsa'], poly, STARA_RIMSA - 0.3, STARA_RIMSA, von=0.15)
+        G.pas(M['rimsa'], poly, zs - 0.35, zs, von=0.3)
+        # okno na každej stene najvyššieho podlažia
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            L = dlzka(a, b)
+            if L < 2.0:
+                continue
+            nx, ny = normala(a, b)
+            m = ((a[0] + b[0]) / 2 + nx * 0.03, (a[1] + b[1]) / 2 + ny * 0.03)
+            hx, hy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            q = [(m[0] - hx * 0.45, m[1] - hy * 0.45, zs - 2.3), (m[0] + hx * 0.45, m[1] + hy * 0.45, zs - 2.3),
+                 (m[0] + hx * 0.45, m[1] + hy * 0.45, zs - 0.7), (m[0] - hx * 0.45, m[1] - hy * 0.45, zs - 0.7)]
+            G.plocha(M['okno'], q)
+        # ihlanová strecha s presahom a hrotom
+        O = odsad(poly, 0.35)
+        c = (sum(p[0] for p in poly) / len(poly), sum(p[1] for p in poly) / len(poly))
+        for i in range(len(O)):
+            j = (i + 1) % len(O)
+            G.plocha(M['strecha_stred'], [(O[i][0], O[i][1], zs), (O[j][0], O[j][1], zs), (c[0], c[1], zv)])
+        G.valec(M['rura'], c, 0.05, zv - 0.1, zv + 0.9, seg=6)
+
+
+# Skleník – okraj strechy a svetlík (prieskum fotiek Wikimedia Commons 2015–2026, OSM way 1523818057)
+PAS_OD = 8.1                       # spodná hrana šikmého pásu pri fasáde (nad tmavým pásovým oknom poschodia)
+PAS_DO = HALA_STRECHA + 0.6        # horná hrana pásu
+PAS_VON = 0.9                      # o koľko je horná hrana pásu vysunutá von
+PAS2 = (HALA_GALERIA - 0.9, HALA_GALERIA + 0.35, 0.55)   # druhý (nižší) šikmý pás nad prízemím: od, do, von
+SVETLIK_HREBEN = 3.0               # výška hrebeňa svetlíka nad strechou (odhad – nad ním je ešte rímsa budovy +13,88)
+
+
+def svetlik_obrys():
+    s = D['budovy'].get('svetlik')
+    return obrys(s) if s else None
+
+
+def svetlik_tvar(sv, stara):
+    """Svetlík „apse_gabled“: rovná hrana pri historickej fasáde (body blízko obrysu výpravnej budovy), oproti
+    zaoblený koniec. Vráti (hrebeň a, hrebeň b, zoznam (bod obrysu, bod hrebeňa)) – každý bod obrysu sa spojí
+    s najbližším bodom hrebeňa (dvojsklon na dlhých stranách, vejár plôch na zaoblenom konci)."""
+    pri_fasade = [p for p in sv if vzd_obrys(p, stara) < 1.5]
+    if len(pri_fasade) < 2:
+        return None
+    a = min(pri_fasade, key=lambda p: (p[0], p[1]))
+    b = max(pri_fasade, key=lambda p: (p[0], p[1]))
+    m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    L = dlzka(a, b)
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    vx, vy = -uy, ux
+    # os svetlíka kolmo na fasádu, smerom od budovy
+    if sum((p[0] - m[0]) * vx + (p[1] - m[1]) * vy for p in sv) < 0:
+        vx, vy = -vx, -vy
+    hlbka = max((p[0] - m[0]) * vx + (p[1] - m[1]) * vy for p in sv)
+    pol = L / 2
+    r0 = m
+    r1 = (m[0] + vx * max(0.5, hlbka - pol), m[1] + vy * max(0.5, hlbka - pol))
+
+    def na_hreben(p):
+        s = (p[0] - r0[0]) * vx + (p[1] - r0[1]) * vy
+        s = min(max(s, 0.0), dlzka(r0, r1))
+        return (r0[0] + vx * s, r0[1] + vy * s)
+    return r0, r1, [(p, na_hreben(p)) for p in sv]
+
+
+def strecha_sklenika(G, M, hala, spolocne):
+    from shapely.geometry import Polygon as SP
+    from shapely.geometry.polygon import orient
+    stara = obrys(D['budovy']['stara'])
+    sv = svetlik_obrys()
+    zr = HALA_STRECHA
+    # plochá strecha (tmavá fólia) a podhľad haly – s výrezom pre svetlík
+    g = SP(hala).buffer(0)
+    if sv:
+        g = g.difference(SP(sv).buffer(0.02))
+    if hasattr(g, 'geoms'):
+        g = max(g.geoms, key=lambda q: q.area)
+    g = orient(g.simplify(0.02), 1.0)
+    vonkajsi = [tuple(c) for c in list(g.exterior.coords)[:-1]]
+    G.vodorovna(M['strecha_plocha'], vonkajsi, zr + 0.05)
+    G.vodorovna(M['strop'], vonkajsi, HALA_STROP, hore=False)
+    # okraj: šikmý pás rebrovaného plechu (spodok pri fasáde, hore vysunutý von), navrchu krycí plech; na hranách
+    # pri výpravnej budove len nízka atika
+    n = len(hala)
+    O = odsad(hala, PAS_VON)
+    O2 = odsad(hala, PAS2[2])
+    for i in range(n):
+        j = (i + 1) % n
+        a, b = hala[i], hala[j]
+        if i in spolocne:
+            G.stena(M['atika'], a, b, zr, zr + 0.5)
+            continue
+        G.plocha(M['plech_hala'], [(a[0], a[1], PAS_OD), (b[0], b[1], PAS_OD), (O[j][0], O[j][1], PAS_DO), (O[i][0], O[i][1], PAS_DO)])
+        G.plocha(M['plech_hala'], [(O[i][0], O[i][1], PAS_DO), (O[j][0], O[j][1], PAS_DO), (b[0], b[1], PAS_DO), (a[0], a[1], PAS_DO)])
+        G.stena(M['plech_hala'], b, a, zr, PAS_DO)        # vnútorná strana pásu (k streche)
+        # nižší pás nad prízemím (rovnaký šikmý plech)
+        G.plocha(M['plech_hala'], [(a[0], a[1], PAS2[0]), (b[0], b[1], PAS2[0]), (O2[j][0], O2[j][1], PAS2[1]), (O2[i][0], O2[i][1], PAS2[1])])
+        G.plocha(M['plech_hala'], [(O2[i][0], O2[i][1], PAS2[1]), (O2[j][0], O2[j][1], PAS2[1]), (b[0], b[1], PAS2[1]), (a[0], a[1], PAS2[1])])
+        # zvislé rebrá plechu po ~1,2 m (šikmé lamely na líci pásu)
+        L = dlzka(a, b)
+        nx, ny = normala(a, b)
+        for k in range(1, int(L / 1.2)):
+            t = k * 1.2 / L
+            p0 = (a[0] + (b[0] - a[0]) * t + nx * 0.05, a[1] + (b[1] - a[1]) * t + ny * 0.05, PAS_OD + 0.05)
+            p1 = (O[i][0] + (O[j][0] - O[i][0]) * t + nx * 0.05, O[i][1] + (O[j][1] - O[i][1]) * t + ny * 0.05, PAS_DO - 0.05)
+            G.tram(M['plech_rebra'], p0, p1, 0.08)
+    if not sv:
+        return
+    # presklený svetlík: dvojsklon s hrebeňom kolmo na fasádu a zaobleným koncom k námestiu, tmavé oceľové rebrá
+    tvar = svetlik_tvar(sv, stara)
+    if not tvar:
+        return
+    r0, r1, pary = tvar
+    zh = zr + SVETLIK_HREBEN
+    m = len(pary)
+    for i in range(m):
+        (p, rp), (q, rq) = pary[i], pary[(i + 1) % m]
+        if vzd_obrys(p, stara) < 1.5 and vzd_obrys(q, stara) < 1.5:
+            continue                      # hrana pri fasáde – štít zakryje múr budovy
+        body = [(p[0], p[1], zr + 0.3), (q[0], q[1], zr + 0.3), (rq[0], rq[1], zh)]
+        if dlzka(rp, rq) > 0.05:
+            body.append((rp[0], rp[1], zh))
+        G.plocha(M['sklo_svetlik'], body)
+        G.plocha(M['sklo_svetlik'], body[::-1])           # aj zospodu (pohľad z haly)
+        G.tram(M['ocel_tmava'], (p[0], p[1], zr + 0.3), (rp[0], rp[1], zh), 0.14)
+        # medziľahlé priečle po ~1,8 m na dlhých stranách
+        Lpq = dlzka(p, q)
+        for k in range(1, int(Lpq / 1.8)):
+            t = k / int(Lpq / 1.8)
+            a = (p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t)
+            r = (rp[0] + (rq[0] - rp[0]) * t, rp[1] + (rq[1] - rp[1]) * t)
+            G.tram(M['ocel_tmava'], (a[0], a[1], zr + 0.3), (r[0], r[1], zh), 0.08)
+        # obruba svetlíka (podstava nad strechou) a svetlá šachta pod ním (od podhľadu po strechu)
+        G.stena(M['atika'], p, q, zr, zr + 0.3)
+        G.stena(M['strop'], q, p, HALA_STROP - 0.6, zr + 0.3)
+    G.tram(M['ocel_tmava'], (r0[0], r0[1], zh), (r1[0], r1[1], zh), 0.2)
 
 
 def sklenena_hala(G, poly, spolocne, dvere, M):
-    """Závesová stena haly: hliníkové stĺpiky po ~1,9 m, priečky, nad 2,6 m sklo; vo dverách otvor do 2,6 m."""
+    """Závesová stena haly: hliníkové stĺpiky po ~1,9 m, priečky, nad 2,6 m sklo; vo dverách otvor do 2,6 m.
+    Nad galériou tmavé pásové okno poschodia; nad PAS_OD zakrýva stenu šikmý plechový pás (strecha_sklenika)."""
     kol = []
     n = len(poly)
-    urovne = [0.0, 2.6, HALA_GALERIA, 7.75, HALA_STRECHA]
+    urovne = [0.0, 2.6, HALA_GALERIA, 7.75, PAS_OD]
     for i in range(n):
         if i in spolocne:
             continue
@@ -557,21 +833,21 @@ def sklenena_hala(G, poly, spolocne, dvere, M):
                 z0, z1 = urovne[r], urovne[r + 1]
                 if r == 0 and otvor:
                     continue
-                G.plocha(M['sklo_hala'], [P(t0, z0), P(t1, z0), P(t1, z1), P(t0, z1)])
+                G.plocha(M['sklo_hala_tmave'] if r >= 2 else M['sklo_hala'], [P(t0, z0), P(t1, z0), P(t1, z1), P(t0, z1)])
         # sokel pod halou
         G.plocha(M['sokel'], [P(0, -3.0), P(L, -3.0), P(L, 0.0), P(0, 0.0)])
         nx, ny = normala(a, b)
         for j in range(k + 1):
             t = L * j / k
             c = (a[0] + ux * t + nx * 0.04, a[1] + uy * t + ny * 0.04)
-            G.kvader(M['hlinik'], c, (ux, uy), 0.08, 0.16, 0.0, HALA_STRECHA)
+            G.kvader(M['hlinik'], c, (ux, uy), 0.08, 0.16, 0.0, PAS_OD)
         for z in urovne[1:-1]:
             G.pas(M['hlinik'], [a, b], z - 0.06, z + 0.06, von=0.1, uzavreta=False)
         # kolízia steny so štrbinami vo dverách
         x = 0.0
         for (d0, d1) in sorted(dv) + [(L, L)]:
             if d0 - x > 0.05:
-                kol.append({'a': H(P(x, 0)[:2]), 'b': H(P(min(L, d0), 0)[:2]), 'hrubka': 0.3, 'od': -4, 'po': HALA_STRECHA, 'vrch': HALA_STRECHA + 0.8})
+                kol.append({'a': H(P(x, 0)[:2]), 'b': H(P(min(L, d0), 0)[:2]), 'hrubka': 0.3, 'od': -1.2, 'po': HALA_STRECHA, 'vrch': HALA_STRECHA + 0.8})
             x = max(x, d1)
     return kol
 
@@ -579,6 +855,7 @@ def sklenena_hala(G, poly, spolocne, dvere, M):
 # --- interiér (kopíruje terén) ---
 def interier(M, krizenia):
     G = Geo()
+    _, _, sirka_pr = priechod_os()
     hala = obrys(D['budovy']['hala'])
     stara = obrys(D['budovy']['stara'])
     schody = []
@@ -603,7 +880,7 @@ def interier(M, krizenia):
         pas_priechodu = (p0, p1)
 
     def v_priechode(p, rez=0.0):
-        return pas_priechodu and vzd_usecka(p, *pas_priechodu) < PRIECHOD_SIRKA / 2 + rez
+        return pas_priechodu and vzd_usecka(p, *pas_priechodu) < sirka_pr / 2 + rez
 
     # historická hala (stredný trakt s freskou) – vnútro odsadené o hrúbku múru
     vychod = obrys(D['budovy']['vychod'])
@@ -657,17 +934,7 @@ def interier(M, krizenia):
                 continue
             G.kvader(M['svetlo'], p, (ux, uy), 0.6, 0.6, HALA_GALERIA - 0.39, HALA_GALERIA - 0.35, vrch=False, spodok=True)
 
-    # svetlík: mnohouholníkový presklený strop nad stredom Skleníka, tmavé oceľové rebrá zbiehajúce sa do stredu
-    zr, zv = HALA_STROP - 1.6, HALA_STROP - 0.15
-    cs = (sum(p[0] for p in vnutorny) / len(vnutorny), sum(p[1] for p in vnutorny) / len(vnutorny))
-    G.pas(M['lamely'], vnutorny, zr - 0.3, zr, von=0.0, dnu=0.4)
-    for i in range(len(vnutorny)):
-        a, b = vnutorny[i], vnutorny[(i + 1) % len(vnutorny)]
-        G.plocha(M['svetlik'], [(b[0], b[1], zr), (a[0], a[1], zr), (cs[0], cs[1], zv)])
-        G.tram(M['ocel_tmava'], (a[0], a[1], zr), (cs[0], cs[1], zv), 0.14)
-        # medziľahlé rebrá v strede hrany
-        m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-        G.tram(M['ocel_tmava'], (m[0], m[1], zr), (cs[0], cs[1], zv), 0.08)
+    # svetlík (presklený dvojsklon pred historickou fasádou) je súčasťou plášťa – strecha_sklenika()
 
     prvky = []   # kolízie interiéru: {typ: 'kruh'|'obdlznik', …} v lokálnych metroch hry
 
@@ -978,15 +1245,98 @@ def nastupistia(M):
                 G.stena(M['okraj'], e1, e0, -0.6, h)
         profily.append({'ref': n['ref'], 'body': [H(p) for p in os_], 'sirky': sirky, 'vyska': NASTUPISTE})
 
-    # prístrešky: plochá strecha na modrých oceľových stĺpoch v osi (~9 m), tmavý podhľad (prieskum fotiek)
+    # prístrešky (prieskum fotiek 2018–2026): ostrovné nástupištia 2–5 – „motýlia“ strecha do V na jednom rade
+    # modrých stĺpov v osi s kužeľovitými priečnikmi do strán, žľab v strede, tmavý podhľad, tenká svetlá hrana;
+    # 1. nástupište – prístrešok pri budove, plochý, k trati šikmý zelenosivý rebrovaný plech
+    stara = obrys(D['budovy']['stara'])
+    osi_nastupist = [(n['ref'], [B((q['x'], q['z'])) for q in n['os']]) for n in D['nastupistia']]
+
+    def nastupiste_pod(c):
+        """Číslo nástupišťa najbližšieho k bodu c (prístrešok nad ním)."""
+        return min(osi_nastupist, key=lambda r: min(dlzka(c, q) for q in r[1]))[0]
     for p in D['pristresky']:
         poly = obrys(p['obrys'])
-        h0 = PRISTRESOK
-        G.hranol(M['podhlad_pristresku'], poly, h0, h0 + 0.35, vrch=False, spodok=True)
-        G.vodorovna(M['pristresok'], poly, h0 + 0.35)
         os_ = [B((q['x'], q['z'])) for q in p['os']]
-        for q in os_[1:-1]:
-            G.kvader(M['oceľ'], q, (1, 0), 0.3, 0.3, NASTUPISTE, h0)
+        sir = [q['sirka'] for q in p['os']]
+        pri_budove = min(vzd_obrys(q, stara) for q in poly) < 2.0
+        ref = str(nastupiste_pod(os_[len(os_) // 2]))
+        vrch = M['pristresok_biely'] if ref in ('4', '5') else M['pristresok_sivy'] if ref in ('2', '3') else M['pristresok']
+        # 1. nástupište: prístrešok vyšší (3D vrstva ZBGIS: ~5,8 m nad povrchom)
+        h0 = PRISTRESOK + 0.5 if pri_budove else PRISTRESOK
+        if pri_budove:
+            G.hranol(M['podhlad_pristresku'], poly, h0, h0 + 0.35, vrch=False, spodok=True)
+            G.vodorovna(M['pristresok'], poly, h0 + 0.35)
+            for k in range(len(os_) - 1):
+                a, b = os_[k], os_[k + 1]
+                L = dlzka(a, b)
+                if L < 0.1:
+                    continue
+                tx, ty = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+                nx, ny = -ty, tx
+                # strana k trati = ďalej od výpravnej budovy
+                if vzd_obrys((a[0] + nx * 3, a[1] + ny * 3), stara) < vzd_obrys((a[0] - nx * 3, a[1] - ny * 3), stara):
+                    nx, ny = -nx, -ny
+                wa, wb = sir[k] / 2, sir[k + 1] / 2
+                ea, eb = (a[0] + nx * wa, a[1] + ny * wa), (b[0] + nx * wb, b[1] + ny * wb)
+                fa, fb = (ea[0] + nx * 0.5, ea[1] + ny * 0.5), (eb[0] + nx * 0.5, eb[1] + ny * 0.5)
+                q = [(ea[0], ea[1], h0 - 0.25), (eb[0], eb[1], h0 - 0.25), (fb[0], fb[1], h0 + 0.65), (fa[0], fa[1], h0 + 0.65)]
+                G.plocha(M['plech_n1'], q)
+                G.plocha(M['plech_n1'], q[::-1])
+            for q in os_[1:-1]:
+                G.kvader(M['oceľ'], q, (1, 0), 0.3, 0.3, NASTUPISTE, h0)
+                G.kvader(M['oceľ'], q, (1, 0), 0.6, 0.6, h0 - 0.3, h0)        # rozšírená hlavica stĺpa
+            continue
+        zc, ze = h0 + 0.25, h0 + 0.75          # vrch strechy: žľab v strede, okraje vyššie
+        sc, se = h0, h0 + 0.5                  # podhľad
+        for k in range(len(os_) - 1):
+            a, b = os_[k], os_[k + 1]
+            L = dlzka(a, b)
+            if L < 0.1:
+                continue
+            tx, ty = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            nx, ny = -ty, tx
+            wa, wb = sir[k] / 2, sir[k + 1] / 2
+            La, Lb = (a[0] + nx * wa, a[1] + ny * wa), (b[0] + nx * wb, b[1] + ny * wb)
+            Ra, Rb = (a[0] - nx * wa, a[1] - ny * wa), (b[0] - nx * wb, b[1] - ny * wb)
+            # strecha (hore) a podhľad (dole), ľavá a pravá polovica
+            G.plocha(vrch, [(a[0], a[1], zc), (b[0], b[1], zc), (Lb[0], Lb[1], ze), (La[0], La[1], ze)])
+            G.plocha(vrch, [(Ra[0], Ra[1], ze), (Rb[0], Rb[1], ze), (b[0], b[1], zc), (a[0], a[1], zc)])
+            G.plocha(M['podhlad_pristresku'], [(La[0], La[1], se), (Lb[0], Lb[1], se), (b[0], b[1], sc), (a[0], a[1], sc)])
+            G.plocha(M['podhlad_pristresku'], [(a[0], a[1], sc), (b[0], b[1], sc), (Rb[0], Rb[1], se), (Ra[0], Ra[1], se)])
+            # svetlá hrana (čelo) po oboch stranách
+            G.plocha(M['hrana_pristresku'], [(Lb[0], Lb[1], se - 0.12), (La[0], La[1], se - 0.12), (La[0], La[1], ze + 0.04), (Lb[0], Lb[1], ze + 0.04)])
+            G.plocha(M['hrana_pristresku'], [(Ra[0], Ra[1], se - 0.12), (Rb[0], Rb[1], se - 0.12), (Rb[0], Rb[1], ze + 0.04), (Ra[0], Ra[1], ze + 0.04)])
+            # pásové svietidlá pod podhľadom v polovici šírky
+            for s in (1, -1):
+                m0 = (a[0] + nx * wa * 0.5 * s, a[1] + ny * wa * 0.5 * s)
+                m1 = (b[0] + nx * wb * 0.5 * s, b[1] + ny * wb * 0.5 * s)
+                zs = sc + (se - sc) * 0.5 - 0.03
+                d0, d1 = (m0[0] + tx * 0.6, m0[1] + ty * 0.6), (m1[0] - tx * 0.6, m1[1] - ty * 0.6)
+                q = [(d0[0] - nx * 0.08, d0[1] - ny * 0.08, zs), (d1[0] - nx * 0.08, d1[1] - ny * 0.08, zs),
+                     (d1[0] + nx * 0.08, d1[1] + ny * 0.08, zs), (d0[0] + nx * 0.08, d0[1] + ny * 0.08, zs)]
+                G.plocha(M['svetlo_pristresku'], q[::-1])
+        # čelá na koncoch prístrešku (obojstranne)
+        for k, j in ((0, 1), (len(os_) - 1, len(os_) - 2)):
+            a, b = os_[k], os_[j]
+            L = dlzka(a, b) or 1
+            nx, ny = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+            w = sir[k] / 2
+            for s in (1, -1):
+                e = (a[0] + nx * w * s, a[1] + ny * w * s)
+                q = [(a[0], a[1], sc), (e[0], e[1], se), (e[0], e[1], ze), (a[0], a[1], zc)]
+                G.plocha(M['hrana_pristresku'], q)
+                G.plocha(M['hrana_pristresku'], q[::-1])
+        # stĺpy v osi a kužeľovité priečniky do strán pod podhľadom
+        for k in range(1, len(os_) - 1):
+            q = os_[k]
+            a, b = os_[k - 1], os_[k + 1]
+            L = dlzka(a, b) or 1
+            nx, ny = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+            G.kvader(M['oceľ'], q, (1, 0), 0.3, 0.3, NASTUPISTE, sc)
+            w = sir[k] / 2 * 0.95
+            for s in (1, -1):
+                e = (q[0] + nx * w * s, q[1] + ny * w * s)
+                G.tram(M['oceľ'], (q[0], q[1], sc - 0.25), (e[0], e[1], sc + (se - sc) * 0.95 - 0.08), 0.2)
     # lavičky (drevené latky na kovovom ráme) a koše pozdĺž osi nástupíšť, každých ~30 m
     for n in D['nastupistia']:
         os_ = [B((q['x'], q['z'])) for q in n['os']]
@@ -1018,10 +1368,10 @@ def nastupistia(M):
 
 def main():
     M = materialy()
-    G, obrysy, steny, krizenia = plast(M)
+    G, obrysy, steny, krizenia, napisy = plast(M)
     # minimum 0,55: zapečené zatienenie na veľkých sklenených tabuliach haly nerobí tmavé fľaky
     uloz(G, 'stanica', obrysy, STARA_HREBEN, vzorky=16, minimum=0.55, info={
-        'bezKoliziiObrysov': True, 'steny': steny,
+        'bezKoliziiObrysov': True, 'steny': steny, 'napisy': napisy,
         'popis': 'Hlavná stanica – plášť (tools/blender/stanica_blender.py). Kolízie: steny (js/mapa/stanica/modul.js).'})
     for ob in list(bpy.data.objects):
         bpy.data.objects.remove(ob)
