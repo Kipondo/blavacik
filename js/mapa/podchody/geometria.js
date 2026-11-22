@@ -195,17 +195,19 @@ export function vytvorPodchody(tuby, vyskaTerenu, kolizie = null) {
     // na povrchu: obruba okolo jamy, parapet so zábradlím, nad dolným koncom čelo (portál chodby)
     // (povrch = terén, pri schodoch z nástupišťa o t.nad vyššie)
     const ya = vyskaTerenu(t.ax, t.az) + (t.nad ?? 0), yb = vyskaTerenu(t.bx, t.bz) + (t.nad ?? 0);
+    // spodok obruby: na nástupišti siaha až po terén (inak by pod ňou bolo vidno vyrezanú jamu v teréne)
+    const dno = 0.05 + (t.nad ?? 0);
     for (const k of [1, -1]) {
       const ax = t.ax + nx * (t.h + 0.6) * k, az = t.az + nz * (t.h + 0.6) * k;
       const bx = t.bx + nx * (t.h + 0.6) * k + t.ex * 0.6, bz = t.bz + nz * (t.h + 0.6) * k + t.ez * 0.6;
-      beton.kvader(ax, az, bx, bz, 1.2, ya - 0.05, ya + 0.03, yb - 0.05, yb + 0.03, FARBA.obruba);       // obruba
+      beton.kvader(ax, az, bx, bz, 1.2, ya - dno, ya + 0.03, yb - dno, yb + 0.03, FARBA.obruba);       // obruba
       const px = t.ax + nx * (t.h + 0.15) * k, pz = t.az + nz * (t.h + 0.15) * k;
       const qx = t.bx + nx * (t.h + 0.15) * k, qz = t.bz + nz * (t.h + 0.15) * k;
       // parapet len tam, kde je jama hlbšia (pri hornom konci schodov je vstup)
       const zac = Math.min(0.9, 0.6 / Math.max(0.1, pad) * 1);
       const zx = px + (qx - px) * zac, zz = pz + (qz - pz) * zac;
       const yz = ya + (yb - ya) * zac;
-      beton.kvader(zx, zz, qx, qz, 0.3, yz - 0.05, yz + 0.45, yb - 0.05, yb + 0.45, FARBA.obruba);
+      beton.kvader(zx, zz, qx, qz, 0.3, yz - dno, yz + 0.45, yb - dno, yb + 0.45, FARBA.obruba);
       kov.kvader(zx, zz, qx, qz, 0.05, yz + 0.95, yz + 1.0, yb + 0.95, yb + 1.0, FARBA.stena);
       for (let s = 0; s <= 1.0001; s += 0.25) {
         const x = zx + (qx - zx) * s, z = zz + (qz - zz) * s, yy = yz + (yb - yz) * s;
@@ -217,7 +219,7 @@ export function vytvorPodchody(tuby, vyskaTerenu, kolizie = null) {
     {
       const cx = t.bx + t.ex * 0.15, cz = t.bz + t.ez * 0.15;
       const ax = cx + nx * (t.h + 0.3), az = cz + nz * (t.h + 0.3), bx = cx - nx * (t.h + 0.3), bz = cz - nz * (t.h + 0.3);
-      beton.kvader(ax, az, bx, bz, 0.3, yb - 0.05, yb + 0.45, yb - 0.05, yb + 0.45, FARBA.obruba);
+      beton.kvader(ax, az, bx, bz, 0.3, yb - dno, yb + 0.45, yb - dno, yb + 0.45, FARBA.obruba);
       kov.kvader(ax, az, bx, bz, 0.05, yb + 0.95, yb + 1.0, yb + 0.95, yb + 1.0, FARBA.stena);
       if (kolizie) kolizie.pridajPolygon(obdlznik(ax, az, bx, bz, 0.4), { typ: 'zabradlie' });
       const strop = t.yb + VYSKA;
@@ -233,7 +235,7 @@ export function vytvorPodchody(tuby, vyskaTerenu, kolizie = null) {
       [t.bx + t.ex * 0.6 - nx * D, t.bz + t.ez * 0.6 - nz * D], [t.ax - t.ex * 0.6 - nx * D, t.az - t.ez * 0.6 - nz * D],
     ]);
     // nástupná plocha nad horným koncom (zakryje okraj vyrezaného terénu)
-    beton.kvader(t.ax - t.ex * 0.6, t.az - t.ez * 0.6, t.ax, t.az, 2 * t.h + 2.4, ya - 0.05, ya + 0.02, ya - 0.05, ya + 0.02, FARBA.obruba);
+    beton.kvader(t.ax - t.ex * 0.6, t.az - t.ez * 0.6, t.ax, t.az, 2 * t.h + 2.4, ya - dno, ya + 0.02, ya - dno, ya + 0.02, FARBA.obruba);
   }
 
   const skupina = new THREE.Group();

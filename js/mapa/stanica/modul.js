@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { tabulaOdchodov, hodiny, napis, navigacia, pasPokladni, pokladnica, napisStrechy } from './tabule.js';
 import { freska } from './freska.js';
+import { obdlznik } from '../geometria.js';
 
 const SKUPINA = 'modul:stanica';
 const SUBORY = { plast: 'stanica', interier: 'stanica-interier', nastupistia: 'stanica-nastupistia' };
@@ -154,6 +155,22 @@ export default {
     // aj do stavu – modul trávy sa môže inicializovať až po stanici (udalosť by zmeškal)
     hra.stav.bezTravy = { ...(hra.stav.bezTravy ?? {}), stanica: polygony };
     hra.posli('bez-travy', { kluc: 'stanica', polygony });
+    // múry a pulty pre chodcov (js/chodec/chodci/) – chodník, ktorý by išiel cez ne, sa vynechá; dnu sa ide dverami
+    const steny = [];
+    for (const s of this.plast.steny ?? []) steny.push(pasUsecky(this.svet('plast', s.a), this.svet('plast', s.b), s.hrubka + 0.3));
+    for (const p of this.interier?.prvky ?? []) {
+      if (p.typ === 'stena') steny.push(pasUsecky(this.svet('interier', p.a), this.svet('interier', p.b), p.hrubka + 0.3));
+      else if (p.typ === 'obdlznik') { const [x, z] = this.svet('interier', p.p); steny.push(obdlznik(x, z, p.sirka + 0.4, p.hlbka + 0.4, p.uhol)); }
+    }
+    hra.stav.stenyChodcov = { ...(hra.stav.stenyChodcov ?? {}), stanica: steny };
+    hra.posli('steny-chodcov', { kluc: 'stanica', polygony: steny });
+    // chodci aj po nástupištiach: osi nástupíšť (pripoja sa k horným koncom schodov z podchodu)
+    const ciary = (this.nastupistia?.nastupistia ?? []).map((n) => ({
+      body: n.body.map((p) => this.svet('nastupistia', p)),
+      sirka: Math.max(1.6, Math.min(4, Math.min(...n.sirky) - 2)), typ: 'platform',
+    }));
+    hra.stav.ciaryChodcov = { ...(hra.stav.ciaryChodcov ?? {}), stanica: ciary };
+    hra.posli('ciary-chodcov', { kluc: 'stanica', ciary });
     this.postavTabule();
     this.postavNapisy(z0);
   },

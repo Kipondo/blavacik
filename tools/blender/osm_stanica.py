@@ -119,6 +119,27 @@ def schody_z_dlazdic():
     return out
 
 
+def chodniky_z_dlazdic(budovy):
+    """Pešie cesty z dlaždíc (rovnaké ako pre chodcov v hre) pri budovách stanice – kde krížia múr, budú dvere."""
+    x0 = min(p[0] for o in budovy for p in o) - 15
+    x1 = max(p[0] for o in budovy for p in o) + 15
+    z0 = min(p[1] for o in budovy for p in o) - 15
+    z1 = max(p[1] for o in budovy for p in o) + 15
+    out = []
+    for meno in ('-1_-4', '0_-4', '-1_-3', '0_-3'):
+        cesta = os.path.join(KOREN, 'data', 'mapa', 'mesto', 'd', f'{meno}.json')
+        if not os.path.exists(cesta):
+            continue
+        with open(cesta, encoding='utf8') as f:
+            d = json.load(f)
+        for c in d.get('chodniky', []):
+            if c.get('typ') not in ('footway', 'pedestrian', 'path', 'steps', 'platform') or len(c.get('body', [])) < 2:
+                continue
+            if any(x0 < p[0] < x1 and z0 < p[1] < z1 for p in c['body']):
+                out.append({'typ': c['typ'], 'body': c['body'], 'sirka': c.get('sirka', 2.5)})
+    return out
+
+
 def main():
     cache = os.path.join(TU, 'data', 'stanica-osm.json')
     if '--cache' in sys.argv and os.path.exists(cache):
@@ -170,6 +191,7 @@ def main():
         'pristresky': pristresky,
         'vchody': vchody,
         'schody': schody_z_dlazdic(),
+        'chodniky': chodniky_z_dlazdic([budovy[str(STARA_BUDOVA)], budovy[str(HALA)], budovy[str(VYCHODNE_KRIDLO)]]),
     }
     with open(os.path.join(TU, 'data', 'stanica.json'), 'w', encoding='utf8') as f:
         json.dump(data, f, ensure_ascii=False, indent=1)

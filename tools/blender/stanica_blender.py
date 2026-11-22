@@ -146,6 +146,113 @@ def jednoduchy(poly):
     return True
 
 
+# --- dvere podľa chodníkov: kde pešia cesta z OSM prechádza múrom, tam je vchod ---
+def chodniky_stanice():
+    """Pešie cesty pri stanici (Blender): [(typ, body, sirka)] bez uzavretých obrysov plôch (námestia)."""
+    out = []
+    for c in D.get('chodniky', []):
+        b = [B(p) for p in c['body']]
+        if len(b) > 2 and dlzka(b[0], b[-1]) < 0.05:
+            continue
+        out.append((c['typ'], b, c.get('sirka', 2.5)))
+    return out
+
+
+def prechody_chodnikov(poly, chod, min_sin=0.5):
+    """Priečne kríženia chodníkov s hranami polygónu: [(i, t, sirka, pred, za)] – pred/za = body 1,2 m pred
+    a za múrom po smere chodníka (podľa nich sa určí, či sa dá prejsť)."""
+    out = []
+    n = len(poly)
+    for _, body, sirka in chod:
+        for k in range(len(body) - 1):
+            p, q = body[k], body[k + 1]
+            Lpq = dlzka(p, q)
+            if Lpq < 0.05:
+                continue
+            fx, fy = (q[0] - p[0]) / Lpq, (q[1] - p[1]) / Lpq
+            for i in range(n):
+                a, b = poly[i], poly[(i + 1) % n]
+                L = dlzka(a, b)
+                if L < 0.3:
+                    continue
+                r = pretina(p, q, a, b)
+                if not r:
+                    continue
+                x = r[1]
+                hx, hy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+                if abs(fx * hy - fy * hx) < min_sin:
+                    continue          # chodník ide pozdĺž múru – nie je to vchod
+                out.append((i, dlzka(a, x), sirka, (x[0] - fx * 1.2, x[1] - fy * 1.2), (x[0] + fx * 1.2, x[1] + fy * 1.2)))
+    return out
+
+
+def orez_usecky(a, b, konvex):
+    """Časť úsečky a→b vo vnútri konvexného CCW polygónu → (t0, t1) v zlomkoch dĺžky, alebo None."""
+    t0, t1 = 0.0, 1.0
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = len(konvex)
+    for i in range(n):
+        p, q = konvex[i], konvex[(i + 1) % n]
+        ex, ey = q[0] - p[0], q[1] - p[1]
+        # vnútro je vľavo od hrany: ex*(y−py) − ey*(x−px) ≥ 0
+        f0 = ex * (a[1] - p[1]) - ey * (a[0] - p[0])
+        df = ex * dy - ey * dx
+        if abs(df) < 1e-12:
+            if f0 < 0:
+                return None
+            continue
+        t = -f0 / df
+        if df > 0:
+            t0 = max(t0, t)
+        else:
+            t1 = min(t1, t)
+        if t0 > t1:
+            return None
+    return (t0, t1)
+
+
+def priechod_obdlznik(predlz=4.0):
+    """Obdĺžnik bočného priechodu (celá šírka, s presahom predlz za oba konce) – CCW."""
+    pa, pb, sirka = priechod_os()
+    L = dlzka(pa, pb)
+    ux, uy = (pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L
+    vx, vy = -uy, ux
+    w = sirka / 2
+    qa, qb = (pa[0] - ux * predlz, pa[1] - uy * predlz), (pb[0] + ux * predlz, pb[1] + uy * predlz)
+    return ccw([(qa[0] - vx * w, qa[1] - vy * w), (qb[0] - vx * w, qb[1] - vy * w),
+                (qb[0] + vx * w, qb[1] + vy * w), (qa[0] + vx * w, qa[1] + vy * w)])
+
+
+def pochodzne_miesta():
+    """Funkcia p → dá sa tu chodiť? Vonku, v Skleníku, v historickej hale a v bočnom priechode áno; vo zvyšku
+    výpravnej budovy a vo východnom krídle nie (ich vnútro nie je modelované)."""
+    stara = obrys(D['budovy']['stara'])
+    hala = obrys(D['budovy']['hala'])
+    vychod = obrys(D['budovy']['vychod'])
+    hist, _ = historicka_hala(stara, vychod)
+    obdl_pr = priechod_obdlznik(predlz=0.5)
+
+    def f(p):
+        if vnutri(p, hala) or vnutri(p, hist) or vnutri(p, obdl_pr):
+            return True
+        return not (vnutri(p, stara) or vnutri(p, vychod))
+    return f
+
+
+def zluc_otvory(zoznam):
+    """Zlúči prekrývajúce sa otvory toho istého druhu na hrane (t0, t1, z0, z1, druh)."""
+    out = []
+    for o in sorted(zoznam):
+        if out and o[4] == out[-1][4] and o[0] <= out[-1][1] + 0.3:
+            p = out[-1]
+            out[-1] = (p[0], max(p[1], o[1]), min(p[2], o[2]), max(p[3], o[3]), p[4])
+        else:
+            out.append(o)
+    # dvere vo vnútri priechodu nemajú zmysel
+    pr = [o for o in out if o[4] == 'priechod']
+    return [o for o in out if o[4] == 'priechod' or not any(o[0] < q[1] and o[1] > q[0] for q in pr)]
+
+
 # --- materiály ---
 def materialy():
     return {
@@ -558,11 +665,36 @@ def plast(M):
     # s valbovými strechami (časti pozdĺž osi budovy – CASTI); každá časť má vlastné podlažia a strechu
     steny_kol = []
     casti = casti_budovy(stara, vychod)
+    obdl_pr = priechod_obdlznik()
+    chod = chodniky_stanice()
+    pochodzne = pochodzne_miesta()
+    vypis_dveri = []
     for c in casti:
-        otv, _ = otvory_priechodu(c['poly'])
-        otvory_historickej_haly(c['poly'], otv, stara, vychod)
-        dvere_z_osm(c['poly'], otv, STARA_PODLAHA)
-        murovana_fasada(G, c['poly'], c['poschodia'], M, otv)
+        otv = {}
+        poly = c['poly']
+        # priechod cez celú šírku: každý múr časti, ktorý zasahuje do obdĺžnika priechodu, má v ňom otvor
+        # (čelné múry aj vnútorné múry medzi časťami budovy, ktoré by inak priechod pozdĺžne delili)
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            L = dlzka(a, b)
+            r = orez_usecky(a, b, obdl_pr)
+            if r and (r[1] - r[0]) * L > 0.3:
+                otv.setdefault(i, []).append((r[0] * L, r[1] * L, -3.0, STARA_PODLAHA + PRIECHOD_VYSKA, 'priechod'))
+        otvory_historickej_haly(poly, otv, stara, vychod)
+        dvere_z_osm(poly, otv, STARA_PODLAHA)
+        # kde chodník z OSM prechádza múrom: priechodný otvor (z oboch strán sa dá chodiť – hala, historická hala,
+        # priechod, vonku), inak aspoň dvere na fasáde (vnútro budovy nie je modelované)
+        for (i, t, sirka, pred, za) in prechody_chodnikov(poly, chod):
+            if pochodzne(pred) and pochodzne(za):
+                w = max(3.0, min(4.0, sirka)) / 2
+                otv.setdefault(i, []).append((t - w, t + w, -3.0, STARA_PODLAHA + 3.2, 'priechod'))
+                vypis_dveri.append(('múr – priechodný', H(pred), H(za)))
+            elif pochodzne(pred) or pochodzne(za):
+                otv.setdefault(i, []).append((t - 1.0, t + 1.0, STARA_PODLAHA, STARA_PODLAHA + 3.0, 'dvere'))
+                vypis_dveri.append(('múr – dvere', H(pred), H(za)))
+        for i in otv:
+            otv[i] = zluc_otvory(otv[i])
+        murovana_fasada(G, poly, c['poschodia'], M, otv)
         stredna = c['hreben'] == STARA_HREBEN
         valbova_strecha(G, c['poly'], c['poschodia'][-1], None, 0.6, M, vyska=c['hreben'] - c['poschodia'][-1],
                         mat=M['strecha_stred'] if stredna else None)
@@ -607,6 +739,15 @@ def plast(M):
                 t = dlzka(a, p)
                 dvere_hala.setdefault(i, []).append((t - 2.0, t + 2.0))
                 break
+    # aj tam, kde chodník z OSM prechádza sklenenou stenou z námestia do haly (hlavné vstupy, východy k MHD)
+    for (i, t, sirka, pred, za) in prechody_chodnikov(hala, chod):
+        if i in spolocne or vnutri(pred, hala) == vnutri(za, hala) or not (pochodzne(pred) and pochodzne(za)):
+            continue
+        w = max(3.0, min(4.0, sirka)) / 2
+        dvere_hala.setdefault(i, []).append((t - w, t + w))
+        vypis_dveri.append(('hala – dvere', H(pred), H(za)))
+    for druh, a, b in vypis_dveri:
+        print(f'  {druh}: {a} → {b}')
     hala_steny = sklenena_hala(G, hala, spolocne, dvere_hala, M)
     # strecha haly: plochá s výrezom pre presklený svetlík, šikmý plechový pás po okraji, podhľad (strop) s výrezom
     strecha_sklenika(G, M, hala, spolocne)
@@ -949,9 +1090,18 @@ def interier(M, krizenia):
             G.valec(M['stlp_tmavy'], p, 0.27, 0.0, HALA_STROP - 1.0, seg=12, vrch=False)
             prvky.append({'typ': 'kruh', 'p': H(p), 'r': 0.4, 'vyska': HALA_STROP})
 
-    def volne(p, r):
+    # pešie cesty z OSM cez halu (po nich chodia chodci) – stánky, automaty a kartóny na ne nejdú
+    x0 = min(p[0] for p in hala) - 3; x1 = max(p[0] for p in hala) + 3
+    y0 = min(p[1] for p in hala) - 3; y1 = max(p[1] for p in hala) + 3
+    chod_hala = [(a, b, max(1.0, s / 2)) for _, body, s in chodniky_stanice() for a, b in zip(body, body[1:])
+                 if any(x0 < q[0] < x1 and y0 < q[1] < y1 for q in (a, b))]
+
+    def na_chodniku(p, r):
+        return any(vzd_usecka(p, a, b) < w + r for a, b, w in chod_hala)
+
+    def volne(p, r, chodnik=True):
         return vnutri(p, hala) and vzd_obrys(p, hala) > r and not pri_schodoch(p, r) and not v_priechode(p, r + 1) and \
-            vzd_obrys(p, hist) > r + 3.0 and \
+            vzd_obrys(p, hist) > r + 3.0 and not (chodnik and na_chodniku(p, r)) and \
             all(math.hypot(p[0] - q['p'][0], -p[1] - q['p'][1]) > r + 0.8 for q in prvky if q['typ'] == 'kruh') and \
             all(math.hypot(p[0] - q['p'][0], -p[1] - q['p'][1]) > r + 1.0 + max(q['sirka'], q['hlbka']) / 2 for q in prvky if q['typ'] == 'obdlznik')
 
@@ -960,36 +1110,66 @@ def interier(M, krizenia):
 
     # pokladne: rad 6 okienok pri západnej stene haly (pult, sklo, zadná stena)
     # hľadá sa v mriežke 1 m: čo najviac na západ (min u), celý rad musí byť voľný
-    def najdi(body_radu, r, kluc):
+    def najdi(body_radu, r, kluc, rez=None):
+        """Miesto pre rad prvkov. rez = None: celý rad mimo pešej cesty; inak len os chodníka nesmie byť bližšie
+        ako polovica šírky + rez (pre rady pri stene, popred ktoré chodci prechádzajú)."""
+        def ok(q):
+            if rez is None:
+                return volne(q, r)
+            return volne(q, r, chodnik=False) and not na_chodniku(q, rez)
         kand = [(u, v) for u in range(-40, 41) for v in range(-30, 31)
-                if all(volne(lokal(u + du, v + dv), r) for du, dv in body_radu)]
+                if all(ok(lokal(u + du, v + dv)) for du, dv in body_radu)]
         return min(kand, key=kluc) if kand else None
 
     # pokladne v Skleníku: dlhý rad 10 okienok – pult z béžového kameňa, sklo v bronzových rámoch, drevený obklad,
     # nad okienkami modrý pás s bielym textom (text kreslí js/mapa/stanica/tabule.js)
     OKIENOK, SIRKA_OK = 10, 1.8
     dlz = OKIENOK * SIRKA_OK
-    rad = [(du, dv) for du in (-2.2, 0.0, 0.8) for dv in (-dlz / 2, -dlz / 4, 0, dlz / 4, dlz / 2)]
-    pokladne = najdi(rad, 0.6, lambda q: (q[0], abs(q[1])))
+    pozdlz = [-dlz / 2 + k * 1.5 for k in range(int(dlz / 1.5) + 1)]
+
+    def najdi_rad(A, Dp, rez, stena):
+        """Stred radu pokladní v mriežke 1 m: A = smer radu, Dp = smer k cestujúcim. stena = za radom (do 2,4 m)
+        musí byť obvod haly po celej dĺžke; rez = os pešej cesty nesmie radom prechádzať (None = nekontroluje sa)."""
+        def bod(c, a, d):
+            return (c[0] + A[0] * a + Dp[0] * d, c[1] + A[1] * a + Dp[1] * d)
+        kand = []
+        for u in range(-40, 41):
+            for v in range(-30, 31):
+                c = lokal(u, v)
+                if not volne(c, 0.6, chodnik=False):
+                    continue
+                if stena and not all(any(not vnutri(q, hala) or vzd_obrys(q, hala) < 0.3 for q in (bod(c, a, d) for d in (-3.0, -3.8, -4.6)))
+                                     for a in (-dlz / 2 + 1, 0, dlz / 2 - 1)):
+                    continue
+                if all(volne(bod(c, a, d), 0.6, chodnik=False) and (rez is None or not na_chodniku(bod(c, a, d), rez))
+                       for a in pozdlz for d in (-2.2, 0.0, 0.8)):
+                    kand.append((u, v, c))
+        return (min(kand, key=lambda q: (q[0], abs(q[1])))[2], A, Dp) if kand else None
+    # rad stojí chrbtom k rovnej stene výpravnej budovy (sever = −v), pozdĺž osi haly; chodci idú popred pokladne,
+    # nie cez ne. Ak sa také miesto nenájde, rad naprieč halou ako predtým (najďalej na západ).
+    pokladne = None
+    for rez in (-0.4, -1.0, None):
+        for Dp in ((vx, vy), (-vx, -vy)):
+            pokladne = pokladne or najdi_rad((ux, uy), Dp, rez, True)
+    pokladne = pokladne or najdi_rad((vx, vy), (ux, uy), -1.0, False)
     miesta = {}
     if pokladne is not None:
-        u, v0 = pokladne
+        c, A, Dp = pokladne
 
-        def LP(u_, v_):   # rad pokladní je posunutý o v0
-            return lokal(u_, v_ + v0)
-        G.kvader(M['pult_kamen'], LP(u, 0), (vx, vy), dlz, 0.7, 0.0, 1.1)
-        G.kvader(M['pult_sklo'], LP(u - 0.25, 0), (vx, vy), dlz, 0.05, 1.1, 2.4, vrch=False)
-        G.kvader(M['drevo'], LP(u - 2.2, 0), (vx, vy), dlz, 0.25, 0.0, 3.0)
-        G.kvader(M['drevo'], LP(u - 1.1, 0), (vx, vy), dlz + 0.5, 2.6, 3.0, 3.05, spodok=True)
-        G.kvader(M['modry_pas'], LP(u - 0.2, 0), (vx, vy), dlz + 0.5, 0.12, 2.45, 3.05)
+        def LP(a, d):    # a pozdĺž radu, d k cestujúcim
+            return (c[0] + A[0] * a + Dp[0] * d, c[1] + A[1] * a + Dp[1] * d)
+        G.kvader(M['pult_kamen'], LP(0, 0), A, dlz, 0.7, 0.0, 1.1)
+        G.kvader(M['pult_sklo'], LP(0, -0.25), A, dlz, 0.05, 1.1, 2.4, vrch=False)
+        G.kvader(M['drevo'], LP(0, -2.2), A, dlz, 0.25, 0.0, 3.0)
+        G.kvader(M['drevo'], LP(0, -1.1), A, dlz + 0.5, 2.6, 3.0, 3.05, spodok=True)
+        G.kvader(M['modry_pas'], LP(0, -0.2), A, dlz + 0.5, 0.12, 2.45, 3.05)
         for k in range(OKIENOK + 1):
-            v = -dlz / 2 + SIRKA_OK * k
-            G.kvader(M['bronz'], LP(u - 0.25, v), (vx, vy), 0.1, 0.1, 1.1, 2.45, vrch=False)
-        G.kvader(M['bronz'], LP(u - 0.25, 0), (vx, vy), dlz, 0.1, 1.1, 1.16)
-        prvky.append({'typ': 'obdlznik', 'p': H(LP(u - 0.75, 0)), 'sirka': dlz, 'hlbka': 3.0, 'uhol': uhol_sirky((vx, vy)), 'vyska': 3.05})
-        miesta['pokladne'] = {'p': H(LP(u - 0.08, 0)), 'smer': H((ux, uy)), 'vyska': 2.75, 'sirka': dlz + 0.4}
-        miesta['pokladna'] = {'p': H(LP(u + 1.0, 0)), 'smer': H((-ux, -uy))}
-        miesta['okienka'] = [{'p': H(LP(u + 1.6, -dlz / 2 + SIRKA_OK * (k + 0.5))), 'smer': H((ux, uy)), 'vyska': 3.6}
+            G.kvader(M['bronz'], LP(-dlz / 2 + SIRKA_OK * k, -0.25), A, 0.1, 0.1, 1.1, 2.45, vrch=False)
+        G.kvader(M['bronz'], LP(0, -0.25), A, dlz, 0.1, 1.1, 1.16)
+        prvky.append({'typ': 'obdlznik', 'p': H(LP(0, -0.75)), 'sirka': dlz, 'hlbka': 3.0, 'uhol': uhol_sirky(A), 'vyska': 3.05})
+        miesta['pokladne'] = {'p': H(LP(0, -0.08)), 'smer': H(Dp), 'vyska': 2.75, 'sirka': dlz + 0.4}
+        miesta['pokladna'] = {'p': H(LP(0, 1.0)), 'smer': H((-Dp[0], -Dp[1]))}
+        miesta['okienka'] = [{'p': H(LP(-dlz / 2 + SIRKA_OK * (k + 0.5), 1.6)), 'smer': H(Dp), 'vyska': 3.6}
                              for k in (1, 4, 8)]
 
     # stánky (bez značiek): bagety, trafika, káva, sušené ovocie – pult, zadná stena, farebná strieška
@@ -1012,18 +1192,25 @@ def interier(M, krizenia):
     miesta['stanky'] = stanky
 
     # automaty na lístky: dva oranžové a jeden žlto-modrý (MHD) pri stene výpravnej budovy (sever = −v)
-    for u in (6, -6, 12, -12, 0):
-        for v in range(-30, 0):
-            p = lokal(u, v)
-            if volne(p, 1.4) and volne(lokal(u - 2.4, v), 1.4) and volne(lokal(u + 2.4, v), 1.4) and not volne(lokal(u, v - 2.0), 0.0):
-                for k, mat in enumerate((M['automat_o'], M['automat_o'], M['automat_z'])):
-                    q = lokal(u + (k - 1) * 1.2, v)
-                    G.kvader(mat, q, (ux, uy), 1.0, 0.85, 0.0, 1.95)
-                    G.kvader(M['displej'], lokal(u + (k - 1) * 1.2, v + 0.43), (ux, uy), 0.45, 0.02, 1.2, 1.7, vrch=False)
-                    if k == 2:
-                        G.kvader(M['modry_pas'], lokal(u + (k - 1) * 1.2, v + 0.43), (ux, uy), 1.0, 0.02, 1.75, 1.95, vrch=False)
-                prvky.append({'typ': 'obdlznik', 'p': H(p), 'sirka': 3.8, 'hlbka': 1.1, 'uhol': uhol_sirky((ux, uy)), 'vyska': 2.0})
-                miesta['automaty'] = {'p': H(lokal(u, v + 1.4))}
+    # (najprv pri stene výpravnej budovy – sever = −v, potom aj pri protiľahlej stene)
+    for sv in (1, -1):
+        for u in sorted(range(-30, 31, 3), key=lambda q: (abs(q - 6), q)):
+            for v in ([k * 0.5 for k in range(-60, 0)] if sv > 0 else [k * 0.5 for k in range(60, 0, -1)]):
+                p = lokal(u, v)
+                # automaty pri stene: stačí, že nestoja priamo v osi chodníka (sú plytké, chodci idú popri nich)
+                rad = (p, lokal(u - 2.4, v), lokal(u + 2.4, v))
+                if all(volne(q, 1.4, chodnik=False) and not na_chodniku(q, -0.6) for q in rad) and \
+                        any(not volne(lokal(u, v - d * sv), 0.0, chodnik=False) for d in (2.0, 2.5)):
+                    for k, mat in enumerate((M['automat_o'], M['automat_o'], M['automat_z'])):
+                        q = lokal(u + (k - 1) * 1.2, v)
+                        G.kvader(mat, q, (ux, uy), 1.0, 0.85, 0.0, 1.95)
+                        G.kvader(M['displej'], lokal(u + (k - 1) * 1.2, v + 0.43 * sv), (ux, uy), 0.45, 0.02, 1.2, 1.7, vrch=False)
+                        if k == 2:
+                            G.kvader(M['modry_pas'], lokal(u + (k - 1) * 1.2, v + 0.43 * sv), (ux, uy), 1.0, 0.02, 1.75, 1.95, vrch=False)
+                    prvky.append({'typ': 'obdlznik', 'p': H(p), 'sirka': 3.8, 'hlbka': 1.1, 'uhol': uhol_sirky((ux, uy)), 'vyska': 2.0})
+                    miesta['automaty'] = {'p': H(lokal(u, v + 1.4 * sv))}
+                    break
+            if 'automaty' in miesta:
                 break
         if 'automaty' in miesta:
             break
@@ -1059,7 +1246,7 @@ def interier(M, krizenia):
                 if not vnutri(p, hala):
                     break
                 dalej = lokal(bu + du * 1.6, bv + dv * 1.6)
-                if volne(p, 0.9) and not volne(dalej, 0.0) and all(math.hypot(p[0] - q['p'][0], -p[1] - q['p'][1]) > 8 for q in kartony):
+                if volne(p, 0.9) and not volne(dalej, 0.0, chodnik=False) and all(math.hypot(p[0] - q['p'][0], -p[1] - q['p'][1]) > 8 for q in kartony):
                     kartony.append({'p': H(p), 'smer': H((-(ux * du + vx * dv), -(uy * du + vy * dv)))})
                     prvky.append({'typ': 'kruh', 'p': H(p), 'r': 0.6, 'vyska': 1.0})
                     break
@@ -1072,6 +1259,8 @@ def interier(M, krizenia):
     VH = HIST_VYSKA
     # os ako pri pláši (na východ, sever vľavo) – uc je v tejto istej sústave
     (ux, uy), (vx, vy), *_ = os_budovy(stara, vychod)
+    pochodzne = pochodzne_miesta()
+    prech_hist = prechody_chodnikov(hist, chodniky_stanice())
     for i in range(n):
         a, b = hist[i], hist[(i + 1) % n]
         L = dlzka(a, b)
@@ -1088,7 +1277,18 @@ def interier(M, krizenia):
                 otv = [((uc + d - ua) / (ub - ua) * L, HIST_OTVOR_JUH[0], HIST_OTVOR_JUH[1] - 0.6) for d in HIST_OTVORY_JUH]
             elif strana > 0.7:
                 otv = [((uc - ua) / (ub - ua) * L, HIST_PRECHOD[0], 3.2)]
+        # kde chodník z OSM prechádza stenou haly do Skleníka alebo priechodu, je otvor (ak tam ešte nie je)
+        for (j, t, sirka, pred, za) in prech_hist:
+            if j == i and pochodzne(pred) and pochodzne(za) and not any(abs(t - t0) < w0 / 2 + 0.6 for t0, w0, _ in otv):
+                otv.append((t, max(3.0, min(4.0, sirka)), 3.6))
         otv = sorted((t - w / 2, t + w / 2, h) for t, w, h in otv if w / 2 < t < L - w / 2)
+        zl = []
+        for o in otv:
+            if zl and o[0] <= zl[-1][1]:
+                zl[-1] = (zl[-1][0], max(zl[-1][1], o[1]), max(zl[-1][2], o[2]))
+            else:
+                zl.append(o)
+        otv = zl
 
         def P(t, z, d=0.0):
             # d > 0 = od steny do haly (líce obkladu je v línii hist, hala je vľavo = −normála)

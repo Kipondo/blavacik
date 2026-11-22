@@ -63,6 +63,15 @@ Podrobný popis každej časti je nižšie v „Čo je hotové“.
   do podchodu (podchod stavia hra z OSM) a na ostatné nástupištia. Steny majú kolízie s medzerami vo dverách,
   nástupištia sú pochôdzne plochy 0,35 m nad terénom; **schody z podchodu končia vo výške nástupišťa** (chôdza hore
   aj dole bez schodíka na hrane, oba podchody vedú na nástupištia 1–5).
+- **Dvere podľa pešich ciest z OSM:** kde chodník prechádza múrom, je otvor – v sklenenej stene Skleníka dvere
+  (3–4 m), medzi Skleníkom, historickou halou a priechodom priechodné otvory, na fasáde do nemodelovaného vnútra
+  budovy zavreté dvere. Bočný priechod má otvor po celej šírke (aj vo vnútorných múroch medzi časťami budovy),
+  takže vonkajšie schody pri západnom konci Skleníka vedú do priechodu, nie do múru. Stánky, automaty a pokladne
+  stoja mimo pešich ciest (pokladne chrbtom k stene).
+- **Chodci na stanici:** nechodia cez múry (hrana chodníka cez múr stanice sa vynechá, dnu idú dverami),
+  chodia po schodoch do podchodu a chodbami pod zemou, po nástupištiach vo výške nástupišťa (osi nástupíšť sú
+  pešie cesty pripojené k schodom) a jamy schodísk obchádzajú bokom. Výška chodca sa počíta ako u hráča
+  (podchody, mosty a nástupištia, terén) – platí v celom meste, aj na lávkach a v ostatných podchodoch.
 - **Vnútro podľa fotiek** (prieskum verejných zdrojov a fotiek, len na porovnanie):
   - *historická hala* (stredný trakt) – hnedosivý kamenný obklad, mätová omietka, biele rímsy, biely strop s bodovkami,
     zelené „šupinové“ keramické panely, prechod na 1. nástupište a zostup do podchodu, dve LED tabule odchodov
