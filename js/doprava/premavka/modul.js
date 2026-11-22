@@ -12,7 +12,8 @@
 import * as THREE from 'three';
 import { KONFIG } from '../../config.js';
 import { SietCiest, jeKrizovatka } from './siet.js';
-import { geometrieNpc, TYPY_AUT, nahodnaFarba, typPodlaFarby } from './model.js';
+import { geometrieNpc, prislusenstvoNpc } from './model.js';
+import { nahodnyTyp, nahodnaFarba, nahodnaSluzba } from '../../auto/typy-aut.js';
 
 
 const R = 380;            // m – v tomto okruhu okolo hráča jazdia autá
@@ -28,11 +29,10 @@ const DOHLAD = 70;        // m – ako ďaleko dopredu vodič sleduje autá a kr
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(0, 0, 0, 'YXZ');
 const _p = new THREE.Vector3(), _j = new THREE.Vector3(1, 1, 1), _c = new THREE.Color();
 
-/** Farba, ktorej „hash“ dá požadovaný typ (aby po nastúpení vyzeralo auto rovnako). */
-function farbaPreTyp(typ) {
-  const f = parseInt(nahodnaFarba().slice(1), 16);
-  const ciel = typ === 'hatchback' ? 1 : typ === 'suv' ? 3 : (Math.random() < 0.5 ? 0 : 2);
-  return '#' + (((f & ~3) | ciel) >>> 0).toString(16).padStart(6, '0');
+/** Je v hre noc (viac taxíkov a kuriérov, menej dodávok)? */
+function jeNoc(hra) {
+  const h = hra.stav.datumCas?.getHours?.();
+  return h !== undefined && (h >= 21 || h < 5);
 }
 
 export default {
@@ -64,29 +64,46 @@ export default {
       hra.na('dlazdica-uvolnena', ({ kluc }) => this.siet.odoberDlazdicu(kluc));
     }
 
-    // siete pre každý typ auta
-    const matLak = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.35, envMapIntensity: 1.0 });
-    const matSklo = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.06, metalness: 0.5, envMapIntensity: 1.5 });
-    const matOst = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.1 });
-    const matSvetla = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+    // siete pre typy áut a príslušenstvo taxíkov/kuriérov – vytvárajú sa až pri prvom aute daného typu
+    this.mat = {
+      lak: new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.35, envMapIntensity: 1.0 }),
+      sklo: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.06, metalness: 0.5, envMapIntensity: 1.5 }),
+      ost: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.1 }),
+      svetla: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
+    };
     this.skupina = new THREE.Group();
     this.skupina.name = 'premavka';
     hra.scena.add(this.skupina);
     this.typy = {};
-    for (const typ of TYPY_AUT) {
-      const g = geometrieNpc(typ);
-      const siet = (geo, mat, tien) => {
-        const m = new THREE.InstancedMesh(geo, mat, MAX_AUT);
-        m.count = 0; m.frustumCulled = false; m.castShadow = tien; m.receiveShadow = tien;
-        m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-        this.skupina.add(m);
-        return m;
-      };
-      const lak = siet(g.lak, matLak, true);
-      lak.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_AUT * 3), 3);
-      lak.instanceColor.setUsage(THREE.DynamicDrawUsage);
-      this.typy[typ] = { casti: [lak, siet(g.sklo, matSklo, false), siet(g.ostatne, matOst, true), siet(g.svetla, matSvetla, false)], dlzka: g.dlzka, pocet: 0 };
-    }
+    this.sluzby = {};
+  },
+
+  _siet(geo, mat, tien) {
+    const m = new THREE.InstancedMesh(geo, mat, MAX_AUT);
+    m.count = 0; m.frustumCulled = false; m.castShadow = tien; m.receiveShadow = tien;
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.skupina.add(m);
+    return m;
+  },
+
+  /** Siete typu auta (lak, sklo, ostatné, svetlá). */
+  _typ(typ) {
+    if (this.typy[typ]) return this.typy[typ];
+    const g = geometrieNpc(typ);
+    const lak = this._siet(g.lak, this.mat.lak, true);
+    lak.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_AUT * 3), 3);
+    lak.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    this.typy[typ] = { casti: [lak, this._siet(g.sklo, this.mat.sklo, false), this._siet(g.ostatne, this.mat.ost, true), this._siet(g.svetla, this.mat.svetla, false)], dlzka: g.dlzka, pocet: 0 };
+    return this.typy[typ];
+  },
+
+  /** Svetlo na streche a pruhy taxíka / kuriéra (jedna sieť na variant). */
+  _sluzba(sl) {
+    const k = `${sl.druh}:${sl.id}`;
+    if (k in this.sluzby) return this.sluzby[k];
+    const p = prislusenstvoNpc(sl);
+    this.sluzby[k] = p ? { siet: this._siet(p.geo, p.mat, false), pocet: 0 } : null;
+    return this.sluzby[k];
   },
 
   // ---------- trasa ----------
@@ -161,12 +178,15 @@ export default {
       // voľné miesto v pruhu
       if (h.auta.some((o) => o.pruh === pruh && Math.abs(o.s - s) < 12)) continue;
       if (this.auta.some((o) => Math.abs(o.x - x) < 6 && Math.abs(o.z - z) < 6)) continue;
-      const r2 = Math.random();
-      const farba = farbaPreTyp(r2 < 0.45 ? 'sedan' : r2 < 0.8 ? 'hatchback' : 'suv');
+      // typ a farba podľa skutočného zastúpenia (data/doprava/vozidla.json), občas taxík alebo kuriér
+      const noc = jeNoc(hra);
+      const sluzba = nahodnaSluzba(noc);
+      const typ = sluzba?.typ ?? nahodnyTyp('premavka', noc);
+      const farba = sluzba?.farba ?? nahodnaFarba(typ);
       const a = {
         hrana: h, s, pruh, v: Math.min(h.max, 8) * Math.random(), trasa: [],
-        povaha: 0.85 + Math.random() * 0.25,     // ako rýchlo jazdí voči obmedzeniu
-        typ: typPodlaFarby(farba), farba, dlzka: this.typy[typPodlaFarby(farba)].dlzka,
+        povaha: (0.85 + Math.random() * 0.25) * (typ === 'sport' || typ === 'muscle' ? 1.12 : typ === 'dodavka' ? 0.94 : 1),
+        typ, farba, sluzba, dlzka: this._typ(typ).dlzka,
         x, z, y: hra.mapa.vyska(x, z), uhol: Math.atan2(h.ux, h.uz), sklon: 0,
         semafor: null, kontrolaSemaforu: Math.random() * 0.3, cakaDo: 0, drziUzol: null,
         objazd: 0, objazdDo: 0, bocny: 0,
@@ -378,7 +398,7 @@ export default {
     // NPC auto sa zmení na skutočné auto, do ktorého hráčov modul hneď nastúpi
     this._zrus(naj);
     this.auta = this.auta.filter((a) => a !== naj);
-    const auto = hra.pridajAuto({ x: naj.x, z: naj.z, uhol: naj.uhol, farba: naj.farba });
+    const auto = hra.pridajAuto({ x: naj.x, z: naj.z, uhol: naj.uhol, farba: naj.farba, typ: naj.typ, sluzba: naj.sluzba });
     hra.posli('npcAutoPrevzate', { auto });
   },
 
@@ -418,8 +438,9 @@ export default {
   _vykresli(hra) {
     const p = hra.stav.pozicia;
     for (const t of Object.values(this.typy)) t.pocet = 0;
+    for (const sl of Object.values(this.sluzby)) if (sl) sl.pocet = 0;
     for (const a of this.auta) {
-      const t = this.typy[a.typ];
+      const t = this._typ(a.typ);
       const d = Math.hypot(a.x - p.x, a.z - p.z);
       const y = hra.mapa.vyska(a.x, a.z);
       a.y = Math.abs(y - a.y) > 2 ? y : a.y + (y - a.y) * 0.3;
@@ -434,10 +455,19 @@ export default {
       const i = t.pocet++;
       for (const c of t.casti) c.setMatrixAt(i, _m);
       t.casti[0].setColorAt(i, _c.set(a.farba));
+      if (a.sluzba) {
+        const sl = this._sluzba(a.sluzba);
+        if (sl) sl.siet.setMatrixAt(sl.pocet++, _m);
+      }
     }
     for (const t of Object.values(this.typy)) {
       for (const c of t.casti) { c.count = t.pocet; c.instanceMatrix.needsUpdate = true; }
       t.casti[0].instanceColor.needsUpdate = true;
+    }
+    for (const sl of Object.values(this.sluzby)) {
+      if (!sl) continue;
+      sl.siet.count = sl.pocet;
+      sl.siet.instanceMatrix.needsUpdate = true;
     }
   },
 };
