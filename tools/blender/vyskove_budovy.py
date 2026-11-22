@@ -24,11 +24,15 @@ VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sk
           'cbc_1', 'vub', 'gloria', 'millennium_tower', 'aupark_tower', 'technopol', 'incheba', 'matadorka',
           'central', 'lakeside_park', 'manderla',
           # tretia dávka: prerobené staré modely a ďalšie významné budovy
-          'kamzik', 'rozhlas', 'nr_sr', 'nove_snd', 'nivy', 'sng', 'stadion_tehelne_pole', 'zimny_stadion', 'istropolis']
+          'kamzik', 'rozhlas', 'nr_sr', 'nove_snd', 'nivy', 'sng', 'stadion_tehelne_pole', 'zimny_stadion', 'istropolis',
+          # štvrtá dávka: Univerzita Komenského, Eurovea vajce s kupolou
+          'univerzita_komenskeho', 'eurovea_vajce']
 
 
 def main():
-    mena = sys.argv[1:] or VSETKY
+    # v Blenderi (blender -b -P vyskove_budovy.py -- meno …) sú mená za „--“
+    argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
+    mena = argv or VSETKY
     obrysy = nacitaj_obrysy()
     for meno in mena:
         bpy.ops.wm.read_factory_settings(use_empty=True)
