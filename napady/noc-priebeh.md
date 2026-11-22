@@ -34,11 +34,14 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
   palác (portikus), `nahlad-pamiatky.html`. Ostatné stavby zo zoznamu prezreté v náhľade – OK; SND a Reduta čakajú
   na podklady. Komentár v #59.
 
+- **#53/#64 doplnenie PR #103**: LOD2 aj na Nivách a v Petržalke (spolu 96 dlaždíc).
+- **#97 → PR #105** `feature/vozidla-typy`: typy áut, farby, taxíky Hladoš/Fičák, kuriéri, jazda podľa typu.
+
 ## Rozpracované
 - (nič)
 
 ## Ďalšie na rade
-- Fáza 3: #96 chôdza a chodci, #97 vozidlá (rozpracované v `/home/claude/vozidla2`, nie commitnuté).
+- Fáza 3: #96 chôdza, fyzika a rozmanitejší chodci.
 - Ráno: súhrn do #59, 3 issues s najväčšími problémami.
 
 ## Rozhodnutia a poznámky
