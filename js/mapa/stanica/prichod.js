@@ -69,7 +69,7 @@ export default {
     await hra.titulky?.prehraj('vlak-prichod', { blokuj: true });
     hra.vstup.blokovane = false;
     this.faza = 'k-filozofovi';
-    hra.ui?.pokyn?.('Choď do haly – pri priechode z nástupišťa stojí staničný filozof');
+    hra.ui?.pokyn?.('Choď do haly – v sklenenej hale pri vstupe do historickej haly s freskou stojí staničný filozof');
     // pokyn zmizne aj sám, keď hráč odíde inam
     setTimeout(() => { if (this.faza === 'k-filozofovi') { this.faza = null; hra.ui?.pokyn?.(null); } }, 180000);
   },

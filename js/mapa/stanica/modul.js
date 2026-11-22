@@ -9,7 +9,8 @@
 // Zverejní hra.stanica = { miesta, nastupiste(ref) → { x, z, y, smer } } pre spawn a postavy (A4).
 
 import * as THREE from 'three';
-import { tabulaOdchodov, hodiny, napis } from './tabule.js';
+import { tabulaOdchodov, hodiny, napis, navigacia, pasPokladni, pokladnica } from './tabule.js';
+import { freska } from './freska.js';
 
 const SKUPINA = 'modul:stanica';
 const SUBORY = { plast: 'stanica', interier: 'stanica-interier', nastupistia: 'stanica-nastupistia' };
@@ -120,6 +121,12 @@ export default {
     }
     // prvky interiéru (výšky nad terénom – interiér kopíruje terén)
     for (const p of this.interier?.prvky ?? []) {
+      if (p.typ === 'stena') {
+        // obklad historickej haly: stena so štrbinami v otvoroch (pre kameru „budova“)
+        const a = this.svet('interier', p.a), b = this.svet('interier', p.b), t = this.teren((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        kol.pridajPolygon(pasUsecky(a, b, p.hrubka), { typ: 'budova', vyska: [t - 2, t + p.vyska], vrch: t + p.vyska, zem: true, dlazdica: SKUPINA });
+        continue;
+      }
       const [x, z] = this.svet('interier', p.p), t = this.teren(x, z);
       const info = { typ: 'pamiatka', vyska: [t - 1, t + p.vyska], zem: true, dlazdica: SKUPINA };
       if (p.typ === 'kruh') kol.pridajKruh(x, z, p.r, info);
@@ -174,13 +181,23 @@ export default {
       this.skupina.add(obj);
       return obj;
     };
-    if (m.tabula) this.tabula = poloz(tabulaOdchodov(), m.tabula);
+    // tabule odchodov: v Skleníku pred historickou halou a dve nad prechodom na nástupište pod freskou
+    this.tabuleOdchodov = [];
+    for (const t of [m.tabula, ...(m.tabule_hist ?? [])].filter(Boolean)) this.tabuleOdchodov.push(poloz(tabulaOdchodov(), t));
     if (m.hodiny) this.hodiny = poloz(hodiny(), m.hodiny);
-    if (m.pokladne) poloz(napis('POKLADNE', '#f2f2f2', '#1d3d6b'), m.pokladne);
-    if (m.bufet) poloz(napis('BUFET', '#2a1a08', '#f0b24a'), m.bufet);
-    if (m.tabula) {
-      const k = { ...m.tabula, smer: m.tabula.smer };
-      poloz(napis('K VLAKOM  ↑  NÁSTUPIŠTIA 1 – 6', '#ffffff', '#1d3d6b', 6), k, (m.tabula.vyska ?? 3.4) + 1.65);
+    // pokladne: modrý pás s textom a zavesené boxy „POKLADNICA“
+    if (m.pokladne) poloz(pasPokladni(m.pokladne.sirka ?? 18), m.pokladne);
+    for (const o of m.okienka ?? []) poloz(pokladnica(), o);
+    for (const s of m.stanky ?? []) poloz(napis(s.nazov, '#ffffff', '#3a3a3a', 2.6), s);
+    // orientačné tabule (tmavomodré): k nástupištiam a k vlakom
+    if (m.k_nastupistiam) poloz(navigacia('K NÁSTUPIŠTIAM 2 – 5', '↓', 3.4), m.k_nastupistiam);
+    if (m.tabula) poloz(navigacia('NÁSTUPIŠTE 1, 6  ·  K NÁSTUPIŠTIAM 2 – 5', '↑', 6), m.tabula, (m.tabula.vyska ?? 4) + 1.6);
+    // freska Františka Gajdoša (voľne prekreslená) nad prechodom a tabuľka s menom autora
+    if (m.freska) {
+      const f = freska(m.freska.sirka, m.freska.do - m.freska.od);
+      poloz(f, m.freska, (m.freska.od + m.freska.do) / 2);
+      const tab = napis('Freska: František Gajdoš, 1960 · v hre voľne prekreslená', '#2b2b2b', '#e6e2da', 3.2);
+      poloz(tab, m.freska, m.freska.od - 0.55);
     }
     this.minuta = -1;
     this.prekresliTabule();
@@ -191,7 +208,7 @@ export default {
     const min = d.getHours() * 60 + d.getMinutes();
     if (min === this.minuta) return;
     this.minuta = min;
-    this.tabula?.userData.prekresli(d, this.hra.stav.stanicaOdchody ?? null);
+    for (const t of this.tabuleOdchodov ?? []) t.userData.prekresli(d, this.hra.stav.stanicaOdchody ?? null);
     this.hodiny?.userData.prekresli(d);
   },
 };

@@ -41,16 +41,20 @@ export default {
     const svet = hra.stanica.svet;
     const teren = (x, z) => (hra.mapa.vyskaTerenu ?? hra.mapa.vyska)(x, z);
     const zoznam = [];
-    if (m.priechod) {
+    if (m.vstup_hist) {
+      // v Skleníku pred vstupom do historickej haly s freskou, 2,5 m bokom (nezavadzia v otvore); pozerá do Skleníka
+      const [x, z] = svet(m.vstup_hist.p), [dx, dz] = m.vstup_hist.smer;
+      zoznam.push({ druh: 'filozof', profil: 'dochodca', x: x - dz * 2.5, z: z + dx * 2.5, smer: [-dx, -dz], poza: 'stoj' });
+    } else if (m.priechod) {
       const a = svet(m.priechod.a), b = svet(m.priechod.b);
       const L = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
       const dx = (a[0] - b[0]) / L, dz = (a[1] - b[1]) / L;
-      // 3,5 m pred priechodom v hale, 1,2 m bokom (nezavadzia v dverách); pozerá do haly
       zoznam.push({ druh: 'filozof', profil: 'dochodca', x: a[0] + dx * 3.5 + dz * 1.2, z: a[1] + dz * 3.5 - dx * 1.2, smer: [dx, dz], poza: 'stoj' });
     }
-    const lav = m.lavicky ?? [];
-    if (lav[0]) { const [x, z] = svet(lav[0].p); zoznam.push({ druh: 'spiaci', profil: 'dochodca', x, z, smer: lav[0].smer, os: m.os, poza: 'lezi' }); }
-    if (lav.at(-1) && lav.length > 1) { const [x, z] = svet(lav.at(-1).p); zoznam.push({ druh: 'sediaci', profil: 'dochodca', x, z, smer: lav.at(-1).smer, poza: 'sedi' }); }
+    // lavičky v halách nie sú (prieskum fotiek) – ľudia bez domova sú na kartóne pri stenách
+    const kar = m.kartony ?? [];
+    if (kar[0]) { const [x, z] = svet(kar[0].p); zoznam.push({ druh: 'spiaci', profil: 'dochodca', x, z, smer: kar[0].smer, os: [kar[0].smer[1], -kar[0].smer[0]], poza: 'lezi', zem: true }); }
+    if (kar[1]) { const [x, z] = svet(kar[1].p); zoznam.push({ druh: 'sediaci', profil: 'dochodca', x, z, smer: kar[1].smer, poza: 'zem' }); }
     if (m.automaty) { const [x, z] = svet(m.automaty.p); zoznam.push({ druh: 'pani', profil: 'dochodkyna', x: x + 2.6 * (m.os?.[0] ?? 1), z: z + 2.6 * (m.os?.[1] ?? 0), smer: [-(m.os?.[1] ?? 0), m.os?.[0] ?? 1], poza: 'zem' }); }
 
     for (const [i, p] of zoznam.entries()) {
@@ -83,15 +87,22 @@ export default {
     p.npc.animuj(0.016);
     if (p.poza === 'stoj') { k.position.set(p.x, p.y, p.z); return; }
     if (p.poza === 'lezi') {
-      // na boku pozdĺž lavičky, pod dekou
+      // na boku pozdĺž lavičky alebo na kartóne pri stene, pod dekou
       const os = Math.atan2(p.os?.[0] ?? 1, p.os?.[1] ?? 0);
+      const lozko = p.zem ? 0.06 : SEDADLO;
       k.quaternion.setFromAxisAngle(_os.set(0, 1, 0), os - Math.PI / 2).multiply(_q.setFromAxisAngle(_os.set(0, 0, 1), Math.PI / 2));
       _v.set(0, 0.9 * s, 0).applyQuaternion(k.quaternion);
-      k.position.set(p.x - _v.x, p.y + SEDADLO + 0.17, p.z - _v.z);
+      k.position.set(p.x - _v.x, p.y + lozko + 0.17, p.z - _v.z);
       const deka = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.32, 0.62), new THREE.MeshStandardMaterial({ color: '#4d5e3c', roughness: 0.95 }));
-      deka.position.set(p.x + (p.os?.[0] ?? 1) * 0.55, p.y + SEDADLO + 0.2, p.z + (p.os?.[1] ?? 0) * 0.55);
+      deka.position.set(p.x + (p.os?.[0] ?? 1) * 0.55, p.y + lozko + 0.2, p.z + (p.os?.[1] ?? 0) * 0.55);
       deka.rotation.y = os - Math.PI / 2;
       this.skupina.add(deka);
+      if (p.zem) {
+        const karton = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.05, 0.9), new THREE.MeshStandardMaterial({ color: '#a4824f', roughness: 1 }));
+        karton.position.set(p.x, p.y + 0.025, p.z);
+        karton.rotation.y = os - Math.PI / 2;
+        this.skupina.add(karton);
+      }
       return;
     }
     // sedí: na lavičke (panva vo výške sedadla) alebo na kartóne na zemi

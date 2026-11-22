@@ -24,37 +24,39 @@ export function tabulaOdchodov() {
   doska.position.z = 0.06;
   const ram = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.8, 0.1), new THREE.MeshStandardMaterial({ color: '#23272b', roughness: 0.5, metalness: 0.4 }));
   sk.add(ram, doska);
+  // LED tabuľa ako na stanici: čierne pozadie, biela hlavička, čas jantárovo, riadky zeleno / červeno / oranžovo
   sk.userData.prekresli = (d, odchody) => {
-    g.fillStyle = '#0b1830';
+    g.fillStyle = '#05070a';
     g.fillRect(0, 0, c.width, c.height);
-    g.fillStyle = '#ffffff';
-    g.font = 'bold 34px system-ui, sans-serif';
-    g.fillText('ODCHODY', 24, 44);
-    g.font = '24px system-ui, sans-serif';
-    g.fillStyle = '#9fb3d1';
-    g.fillText('Departures', 190, 44);
+    g.fillStyle = '#f4f4f4';
     g.font = 'bold 34px ui-monospace, monospace';
-    g.fillStyle = '#ffcc33';
+    g.fillText('ODCHODY', 24, 44);
+    g.font = '22px ui-monospace, monospace';
+    g.fillStyle = '#bdbdbd';
+    g.fillText('DEPARTURES', 200, 44);
+    g.font = 'bold 34px ui-monospace, monospace';
+    g.fillStyle = '#ffb627';
     g.fillText(`${dvojmiestne(d.getHours())}:${dvojmiestne(d.getMinutes())}`, c.width - 130, 44);
-    g.fillStyle = '#6d84a8';
-    g.font = '18px system-ui, sans-serif';
-    const hl = [['ČAS', 24], ['VLAK', 120], ['SMER', 330], ['NÁST.', 760], ['MEŠKANIE', 860]];
+    g.fillStyle = '#8a8a8a';
+    g.font = '18px ui-monospace, monospace';
+    const hl = [['ČAS', 24], ['VLAK', 120], ['SMER', 330], ['KOĽAJ', 760], ['MEŠKANIE', 860]];
     for (const [s, x] of hl) g.fillText(s, x, 78);
     g.font = '26px ui-monospace, monospace';
     if (!odchody?.length) {
-      g.fillStyle = '#ffcc33';
+      g.fillStyle = '#ffb627';
       g.fillText('Informácie o odchodoch sa pripravujú.', 24, 130);
     } else {
       odchody.slice(0, 7).forEach((o, i) => {
         const y = 112 + i * 30;
-        g.fillStyle = i % 2 ? '#0f2142' : '#0b1830';
-        g.fillRect(0, y - 22, c.width, 30);
-        g.fillStyle = '#ffffff';
+        g.fillStyle = '#3be06a';
         g.fillText(o.cas, 24, y);
+        g.fillStyle = '#ff5a6e';
         g.fillText(`${o.vlak}${o.nazov ? ' ' + o.nazov : ''}`.slice(0, 16), 120, y);
+        g.fillStyle = '#ffa640';
         g.fillText(String(o.smer).slice(0, 26), 330, y);
-        g.fillText(String(o.nastupiste ?? ''), 780, y);
-        if (o.meskanie > 0) { g.fillStyle = '#ff6a4d'; g.fillText(`+${o.meskanie} min`, 860, y); }
+        g.fillStyle = '#ffb627';
+        g.fillText(String(o.nastupiste ?? ''), 790, y);
+        if (o.meskanie > 0) { g.fillStyle = '#ff5a6e'; g.fillText(`+${o.meskanie} min`, 860, y); }
       });
     }
     t.needsUpdate = true;
@@ -96,6 +98,42 @@ export function hodiny() {
     g.setTransform(1, 0, 0, 1, 0, 0);
     t.needsUpdate = true;
   };
+  return sk;
+}
+
+/** Tmavomodrá orientačná tabuľa (#1E2C66) s bielym textom a šípkou – nový orientačný systém stanice. */
+export function navigacia(text, sipka = '', sirka = 3.2) {
+  const m = napis(`${sipka ? sipka + '  ' : ''}${text}`, '#ffffff', '#1e2c66', sirka);
+  return m;
+}
+
+/** Modrý pás nad pokladňami s bielym textom v troch jazykoch. */
+export function pasPokladni(sirka) {
+  const { c, g, t } = platno(2048, 64);
+  g.fillStyle = '#1e3a8a';
+  g.fillRect(0, 0, 2048, 64);
+  g.fillStyle = '#ffffff';
+  g.font = '600 30px system-ui, sans-serif';
+  g.textBaseline = 'middle';
+  g.fillText('Predaj vnútroštátnych a medzinárodných cestovných lístkov · Domestic and international tickets · Fahrkarten', 24, 34, 2000);
+  t.needsUpdate = true;
+  return new THREE.Mesh(new THREE.PlaneGeometry(sirka, 0.5), new THREE.MeshBasicMaterial({ map: t }));
+}
+
+/** Zavesený modrý box „POKLADNICA“ s bielym panelom (nad okienkami pokladní). */
+export function pokladnica() {
+  const sk = new THREE.Group();
+  const box = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.4, 0.14), new THREE.MeshStandardMaterial({ color: '#1e3a8a', roughness: 0.6 }));
+  sk.add(box);
+  for (const s of [1, -1]) {
+    const n = napis('POKLADNICA', '#1e3a8a', '#ffffff', 1.0);
+    n.position.z = 0.075 * s;
+    if (s < 0) n.rotation.y = Math.PI;
+    sk.add(n);
+  }
+  const lanko = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.8, 4), new THREE.MeshStandardMaterial({ color: '#333' }));
+  lanko.position.y = 0.6;
+  sk.add(lanko);
   return sk;
 }
 

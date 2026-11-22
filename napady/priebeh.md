@@ -26,14 +26,28 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 - Požiadavka majiteľa počas práce: po stanici znova Átriaky – prieskum fotiek, opraviť model budov
   (blikajúce textúry, diery v budovách) → spojené s D6 (#115).
 
-## Rozpracované
-- A1/A4: PR, meranie pred/po, snímky.
+## Rozpracované (22. 11. popoludní) – pracovné kópie vedľa repozitára
+| vetva | priečinok | stav |
+|---|---|---|
+| `feature/hlavna-stanica` | `blavacik` | stanica + pavilóny podľa pohľadov, sklo haly, bez trávy; **čaká:** interiér podľa fotiek a freska Františka Gajdoša v hale (prieskum), potom trasa po, PR |
+| `fix/atriaky-budovy` | `../blavacik-atriaky` | pushnutá; pavlače bez dier, izba 314 v meste, voľná ulička na terasu; **čaká:** trasa pred/po, PR |
+| `fix/titulka-zlata-linka` | `../blavacik-main` | PR #116 otvorený – zlúčenie zablokovali oprávnenia (treba majiteľa) |
+| `feature/vykon-tiene` | `../blavacik-vykon` | #110: tiene stromov cez zástupné koruny, malé objekty bez tieňa ďalej ako 45 m, vikiere bez tieňa, bez vetra (listy, tráva) – meranie |
 
-## Ďalšie na rade
-- D6 / #115 Átriaky (prieskum fotiek, diery, z-fighting, ovládanie v izbe ako vonku) – na želanie majiteľa hneď po stanici.
-- B (#110 výkon), A2 + A3 (vlaky, GTFS), C (pamiatky), zvyšok D.
+Lokálne servery: `scratchpad/server.py <port> <priečinok>` (veľká fronta spojení – `python -m http.server` na Windows
+odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky` (shapely) + `--python-use-system-env`.
+
+## Ďalšie na rade (poradie podľa majiteľa)
+1. Stanica: interiér a freska podľa fotiek → PR.
+2. Pamiatky (C) podľa prieskumu: **Univerzita Komenského** (Šafárikovo nám.), **Eurovea** + Eurovea Tower +
+   presklené „vajce“, **Sky Park** – čo najpresnejšie.
+3. Vozidlá – trochu kvalitnejšie modely, len ak to nespomalí hru.
+4. A2 + A3 (vlaky, GTFS), zvyšok D.
 
 ## Rozhodnutia
+- Majiteľ 22. 11.: bez vetra (kývanie listov a trávy), výkon zjednodušovať tak, aby sa grafika veľmi nezhoršila;
+  Google Maps/Earth sa ako podklad nepoužívajú (licencia) – OSM, laser, Commons, stránky architektov.
+- Freska v hale stanice: do hry ide vlastné prekreslenie (kompozícia, farby), nie fotka diela.
 - Nástupište je v hre 0,35 m nad terénom (skutočných 0,55 m nad koľajou): menší schod pri výstupe z podchodu.
 - Interiér výpravnej budovy (1905) nie je prístupný okrem priechodu z haly na 1. nástupište; hala (1988) celá.
 - Vlak pri spawne zatiaľ nie je (príde s A2) – scénka začína na nástupišti po príchode vlaku.
