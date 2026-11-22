@@ -527,6 +527,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Po nočnej práci 22. 11.: otvorené PR #102 – #108, #112, poradie zlučovania a konflikty sú v súhrne v #59,
+  priebeh a „ďalšie na rade“ v [napady/noc-priebeh.md](napady/noc-priebeh.md); nové issues #109 – #111.
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).

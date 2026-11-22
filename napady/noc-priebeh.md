@@ -54,11 +54,12 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
 - **#60 → PR #108** `feature/kontrola-trasa`: testovacia trasa mesta (`tools/kontrola/trasa.py`, 17 bodov, galéria
   a porovnanie behov), prvý beh `docs/kontrola/2026-11-22/`. Komentár v #60 so zoznamom nájdených chýb.
 - **#96 doplnok:** rozhliadanie pri státí (PR #106).
+- **#111 → PR #112** `fix/budovy-na-svahu` (06:15): prízemie domu na svahu v strede rozdielu výšok (najviac 0,75 m
+  pod najvyšším bodom) – Michalská 1,3 m → 0,65 m; snímky z testovacej trasy. Komentár v #111.
 - **Ráno:** issues #109 (laser na celé mesto), #110 (výkon detailných dlaždíc), #111 (domy na svahu); súhrn v #59.
 
 ## Rozpracované
-- `fix/budovy-na-svahu` (#111): prízemie domu na svahu v strede rozdielu výšok (najviac 0,75 m pod najvyšším
-  bodom) – snímky z trasy, PR ráno.
+- (nič – všetko je v PR)
 
 ## Ďalšie na rade
 - Doladiť body trasy (Hlavná stanica, Kamzík, Obchodná, Aupark) a pustiť trasu s `--gpu` po každom PR o meste.
