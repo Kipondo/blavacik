@@ -31,14 +31,20 @@ export default {
       this.posledna = null;
     };
     for (const [kluc, a] of hra.mapa?.dlazdice?.aktivne ?? []) if (a.uroven === 'detail') pridaj(kluc, a.objekt);
-    hra.na('dlazdica-nacitana', ({ kluc, uroven, objekt }) => { if (uroven === 'detail') pridaj(kluc, objekt); else this.dlazdice.delete(kluc); });
+    hra.na('dlazdica-nacitana', ({ kluc, uroven, objekt }) => {
+      this._budovy?.clear();   // pribudli kolízie budov dlaždice – pamäť „v budove“ neplatí
+      if (uroven === 'detail') pridaj(kluc, objekt); else this.dlazdice.delete(kluc);
+    });
     hra.na('dlazdica-uvolnena', ({ kluc, nahrada }) => { if (!nahrada) { this.dlazdice.delete(kluc); this.posledna = null; } });
     // plochy bez trávy (podlaha haly, nástupištia – js/mapa/stanica/): udalosť 'bez-travy' { kluc, polygony } (prázdne = zrušiť)
     this.bezTravy = new Map();
-    hra.na('bez-travy', ({ kluc, polygony }) => {
+    const nastav = (kluc, polygony) => {
       if (polygony?.length) this.bezTravy.set(kluc, polygony.map((b) => ({ b, ...ohranicenie(b) }))); else this.bezTravy.delete(kluc);
       this.posledna = null;
-    });
+    };
+    hra.na('bez-travy', ({ kluc, polygony }) => nastav(kluc, polygony));
+    // moduly, ktoré poslali plochy ešte pred týmto modulom, ich nechali aj v hra.stav.bezTravy
+    for (const [kluc, polygony] of Object.entries(hra.stav.bezTravy ?? {})) nastav(kluc, polygony);
 
     this.trsy = new THREE.InstancedMesh(geometriaTrsu(), materialTravy(), MAX);
     this.trsy.count = 0;
@@ -101,9 +107,32 @@ export default {
     this.prepocitaj(hra, k.x, k.z, dosah);
   },
 
+  /** Je bod v pôdoryse budovy alebo pamiatky? (kolízne polygóny; výsledok sa pamätá po štvorcoch 1 m) */
+  vBudove(hra, x, z, cache) {
+    const k = Math.floor(x) * 100003 + Math.floor(z);
+    let v = cache.get(k);
+    if (v === undefined) {
+      v = false;
+      const kol = hra.mapa.kolizie;
+      if (kol) {
+        for (const p of kol.vOkoli(x, z, 0.5)) {
+          const t = p.info?.typ;
+          if (p.typ !== 'polygon' || (t !== 'budova' && t !== 'pamiatka') || p.body.length < 4) continue;
+          if (x < p.minX || x > p.maxX || z < p.minZ || z > p.maxZ) continue;
+          if (bodVPolygone(Math.floor(x) + 0.5, Math.floor(z) + 0.5, p.body)) { v = true; break; }
+        }
+      }
+      cache.set(k, v);
+    }
+    return v;
+  },
+
   prepocitaj(hra, cx, cz, dosah) {
     const blizko = Math.min(12, dosah * 0.45);
     const vyska = hra.mapa.vyskaTerenu ?? hra.mapa.vyska, hladina = hra.mapa.hladina;
+    // tráva nerastie v pôdorysoch budov (nepresvitá cez podlahy a nekreslí sa zbytočne pod domami)
+    const budovy = this._budovy ??= new Map();
+    if (budovy.size > 200000) budovy.clear();
     let n = 0;
     // zblízka hustá mriežka, ďalej dvojnásobný krok, väčšie a redšie trsy (zvyšok dokreslí textúra trávnika)
     for (const [krok, od, po, mierka] of [[KROK, 0, blizko, 1], [KROK * 2, blizko, dosah, 1.3]]) {
@@ -117,6 +146,7 @@ export default {
           if (d > po || d <= od) continue;
           if (od > 0 && hash(gx, gz, 3) > 1 - (d - od) / (po - od) * 0.6) continue;
           if (!this.jeTrava(x, z)) continue;
+          if (this.vBudove(hra, x, z, budovy)) continue;
           // nie na strmom zreze ani múre (tam je kameň)
           const y = vyska(x, z);
           // nie pod hladinou (dno Dunaja a jazier môže mať v mape pokrývky zelenú farbu)

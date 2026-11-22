@@ -132,7 +132,7 @@ export function vytvorPodchody(tuby, vyskaTerenu, kolizie = null) {
       if (schody) {
         // stena jamy: od schodov po terén
         ya0 = va.y; yb0 = vb.y;
-        ya1 = Math.max(ya0, vyskaTerenu(a[0], a[1])); yb1 = Math.max(yb0, vyskaTerenu(b[0], b[1]));
+        ya1 = Math.max(ya0, vyskaTerenu(a[0], a[1]) + (t.nad ?? 0)); yb1 = Math.max(yb0, vyskaTerenu(b[0], b[1]) + (t.nad ?? 0));
         if (ya1 - ya0 < 0.05 && yb1 - yb0 < 0.05) continue;
       } else {
         ya0 = va.y; yb0 = vb.y; ya1 = ya0 + VYSKA; yb1 = yb0 + VYSKA;
@@ -193,7 +193,8 @@ export function vytvorPodchody(tuby, vyskaTerenu, kolizie = null) {
       kov.kvader(ax, az, bx, bz, 0.06, t.ya + 0.86, t.ya + 0.92, t.yb + 0.86, t.yb + 0.92, FARBA.stena);
     }
     // na povrchu: obruba okolo jamy, parapet so zábradlím, nad dolným koncom čelo (portál chodby)
-    const ya = vyskaTerenu(t.ax, t.az), yb = vyskaTerenu(t.bx, t.bz);
+    // (povrch = terén, pri schodoch z nástupišťa o t.nad vyššie)
+    const ya = vyskaTerenu(t.ax, t.az) + (t.nad ?? 0), yb = vyskaTerenu(t.bx, t.bz) + (t.nad ?? 0);
     for (const k of [1, -1]) {
       const ax = t.ax + nx * (t.h + 0.6) * k, az = t.az + nz * (t.h + 0.6) * k;
       const bx = t.bx + nx * (t.h + 0.6) * k + t.ex * 0.6, bz = t.bz + nz * (t.h + 0.6) * k + t.ez * 0.6;
