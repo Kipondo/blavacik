@@ -21,7 +21,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Beh / ručná brzda | Shift / Medzerník | ⚡ |
 | Skok | Medzerník | ⤒ |
 | Nastúpiť / vystúpiť | E | E |
-| Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
+| Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu → Nastavenia | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
 | Vypísať polohu (pre misie) | P | – |
@@ -78,6 +78,23 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Titulná obrazovka „Blaváčik“ a načítavanie s vlakom** (issue #101, `js/ui/menu.js`, `js/ui/nacitavanie/`,
+  `css/titulka.css`): podľa návrhu majiteľa (v2) – večerné pozadie so siedmimi pamiatkami
+  (`assets/ui/titulka/pozadie.webp`), Ďoďo máva (bez igelitky), erb, nápis BLAVÁČIK (biely s červeným tieňom) a ploché
+  tlačidlá **Hrať · Upraviť Ďoďa · Nastavenia · Ovládanie** na tmavomodrom paneli so zlatou linkou. Návrh má plochu
+  1600 × 900, v hre sa zmenší/zväčší podľa okna (pri 16 : 10 a 21 : 9 dopĺňa okraje rozmazané pozadie a panel).
+  Posuvníky (grafika, myš, zvuky, hlasy, hudba) sú na obrazovke **Nastavenia**, klávesy na **Ovládanie** (obe so
+  „Späť“, Esc ich zavrie). HUD za menu nie je vidieť a kým je menu otvorené, mesto sa nekreslí. Na displeji je názov
+  „Blaváčik“ (menu, `<title>`); repozitár a tento README sa nepremenúvali.
+  **Načítavanie:** hra sa načítava hneď po otvorení stránky; ak hráč klikne na Hrať skôr, ako je hotová, ukáže sa mapa
+  Slovenska s reliéfom a vlak (lokomotíva + 5 vozňov, bez loga dopravcu) ide z Košíc cez Poprad, Žilinu, Trenčín
+  a Trnavu do Bratislavy podľa skutočného priebehu (míľniky načítavania a počet postavených dlaždíc, plynulo,
+  nikdy necúva) – prejdená trať je zlatá, zvyšok bodkovaný, nad lokomotívou štítok s percentami, žiadna lišta.
+  Hra sa spustí, keď vlak zastane v Bratislave. Dole sa striedajú vtipné tipy (`js/ui/nacitavanie/tipy.js`).
+  Reliéf: `python3 tools/ui/relief_slovenska.py` – **Copernicus DEM GLO-90** (© DLR e.V. 2010–2014 a © Airbus
+  2017–2018, poskytnuté ESA v programe Copernicus), obrys Slovenska **Natural Earth** (public domain).
+  **Písma** Anton, Barlow Condensed a Bricolage Grotesque (**SIL Open Font License 1.1**, Fontsource / Google Fonts)
+  sú v `assets/fonts/` (`css/pisma.css`), žiadne CDN. Snímky: `docs/snimky/titulka/`.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.

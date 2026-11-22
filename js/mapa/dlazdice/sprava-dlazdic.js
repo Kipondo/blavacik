@@ -78,16 +78,19 @@ export class SpravaDlazdic {
   /** Na štarte: postaví všetko v okolí naraz (čaká sa na to pri načítavaní hry). */
   async nacitajOkolie(x, z, priebeh = () => {}) {
     this.stred = { x, z };
-    const ziadane = this.ziadane(x, z);
+    // zvyšok (vzdialené dlaždice LOD) dobehne za behu
+    const ziadane = this.ziadane(x, z).filter(({ t, uroven }) => uroven !== 'lod' || this.vzdialenost(t, x, z) <= POLOMER_DETAIL * 1.6);
     let n = 0;
     for (const { t, uroven } of ziadane) {
-      if (uroven === 'lod' && this.vzdialenost(t, x, z) > POLOMER_DETAIL * 1.6) continue; // zvyšok dobehne za behu
       const data = await this.nacitajData(t.kluc);
       const gen = postavDlazdicu(t.kluc, data, this.rect(t), uroven, this.kontext);
       let r = gen.next();
       while (!r.done) r = gen.next();
       this._pridaj(t.kluc, uroven, r.value, data);
-      if (++n % 4 === 0) priebeh(`Staviam mesto… ${n} dlaždíc`);
+      // „n/N“ číta obrazovka načítavania (js/ui/nacitavanie/priebeh.js) – podľa toho ide vlak
+      priebeh(`Staviam mesto… ${++n}/${ziadane.length} dlaždíc`);
+      // jeden snímok pre obrazovku načítavania (vlak sa hýbe plynulo); v skrytej karte stačí krátka pauza
+      await new Promise((r) => { requestAnimationFrame(r); setTimeout(r, 40); });
     }
   }
 

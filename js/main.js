@@ -91,7 +91,7 @@ async function start() {
     aktualizujStav();
     hra.mapa.update(hra.stav.cas);
     svet.update(hra.stav.pozicia, hra.kamera);
-    vykresli();
+    if (!menu.zakryva) vykresli();   // titulka zakrýva celé okno – mesto netreba kresliť
     hra.vstup.koniecSnimku();
   });
 }
