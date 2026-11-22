@@ -199,13 +199,14 @@ def postav():
     box(M['oblecenie2'], 1.75, 2.0, 0.05, 0.3, 0.46, 0.62)                    # tričko na stoličke
     box(M['taska'], 0.8, 1.35, 1.1, 1.5, 0.0, 0.32)                           # Ďoďova taška (rezne!)
     prekazky.append([0.8, 1.35, 1.1, 1.5, 0.32])
-    # sušiak s prádlom v strede izby
-    box(M['kov'], 3.2, 4.4, 0.75, 1.25, 0.95, 0.97, vrch=True)
-    for (x0, x1, mat) in ((3.3, 3.6, 'oblecenie'), (3.7, 3.95, 'plachta'), (4.05, 4.3, 'oblecenie2')):
-        box(M[mat], x0, x1, 0.95, 1.0, 0.55, 0.95)
-    for (px, pz) in ((3.22, 0.77), (4.38, 0.77), (3.22, 1.23), (4.38, 1.23)):
+    # sušiak s prádlom pri posteliach (úzky, aby ulička od dverí k balkónu ostala voľná – aspoň 0,8 m)
+    sx0, sx1, sz0, sz1 = 2.55, 3.55, 1.2, 1.55
+    box(M['kov'], sx0, sx1, sz0, sz1, 0.95, 0.97, vrch=True)
+    for (x0, x1, mat) in ((sx0 + 0.1, sx0 + 0.4, 'oblecenie'), (sx0 + 0.45, sx0 + 0.7, 'plachta'), (sx0 + 0.75, sx1 - 0.1, 'oblecenie2')):
+        box(M[mat], x0, x1, (sz0 + sz1) / 2 - 0.02, (sz0 + sz1) / 2 + 0.02, 0.55, 0.95)
+    for (px, pz) in ((sx0 + 0.02, sz0 + 0.02), (sx1 - 0.02, sz0 + 0.02), (sx0 + 0.02, sz1 - 0.02), (sx1 - 0.02, sz1 - 0.02)):
         box(M['kov'], px - 0.01, px + 0.01, pz - 0.01, pz + 0.01, 0.0, 0.95, vrch=False)
-    prekazky.append([3.2, 4.4, 0.75, 1.25, 1.0])
+    prekazky.append([sx0, sx1, sz0, sz1, 1.0])
     box(M['plagat'], 2.9, 3.6, -0.69, -0.68, 1.6, 2.3)                         # plagát nad stolíkmi
     for (sx, sz) in ((5.9, 0.6), (6.05, 0.72), (5.95, 1.05)):                  # topánky pri dverách
         box(M['dyha_tmava'], sx - 0.06, sx + 0.06, sz - 0.14, sz + 0.14, 0.0, 0.1)
