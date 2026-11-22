@@ -2,31 +2,23 @@
 // Po animácii státia sa ruky a nohy dotiahnu na riadidlá, dosku a pedále (IK dvoch kostí, ik.js).
 
 import * as THREE from 'three';
-import { ikDvochKosti, otocVoSvete } from '../chodec/postava/ik.js';
+import { ikDvochKosti, otocVoSvete, ZalohaPozy } from '../chodec/postava/ik.js';
 import { ROZMERY } from './model-kolobezky.js';
 import { ROZMERY_B } from './model-bicykla.js';
 
 const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _os = new THREE.Vector3();
 const KOSTI_IK = ['spine_01', 'upperarm_l', 'lowerarm_l', 'upperarm_r', 'lowerarm_r', 'thigh_l', 'calf_l', 'thigh_r', 'calf_r'];
 
-// Mixér zapíše kosť len vtedy, keď sa jej hodnota v animácii zmenila – úpravy IK by sa inak hromadili
-// (a po zosadnutí by ostali). Preto sa pred animáciou vráti póza spred IK a po zosadnutí sa vráti celá.
-function vratPozu(ud) {
-  for (const [kost, q] of ud._ikZaloha ?? []) kost.quaternion.copy(q);
-}
-function zalohujPozu(ud, K) {
-  ud._ikZaloha ??= new Map();
-  for (const m of KOSTI_IK) if (K[m]) {
-    if (!ud._ikZaloha.has(K[m])) ud._ikZaloha.set(K[m], new THREE.Quaternion());
-    ud._ikZaloha.get(K[m]).copy(K[m].quaternion);
-  }
+// póza spred IK (mixér zapisuje kosť len pri zmene hodnoty – úpravy by sa hromadili a po zosadnutí ostali)
+function zaloha(ud, K) {
+  ud._zalohaJazdca ??= new ZalohaPozy(KOSTI_IK.map((m) => K[m]));
+  return ud._zalohaJazdca;
 }
 
 /** Po zosadnutí: kosti späť do pózy z animácie (bez IK). */
 export function uvolniJazdca(hrac) {
   const ud = hrac.mesh.userData;
-  vratPozu(ud);
-  ud._ikZaloha = null;
+  ud._zalohaJazdca?.zrus();
 }
 
 /** Položí hráča na vozidlo a nastaví pózu. */
@@ -39,11 +31,11 @@ export function polozJazdca(dt, hrac, voz) {
   const koren = sedi ? [0, ROZMERY_B.sedlo[1] - 0.86, ROZMERY_B.sedlo[2] - 0.02] : [0, ROZMERY.doska, -0.06];
   hrac.mesh.position.copy(voz.mesh.localToWorld(_v.set(...koren)));
   hrac.mesh.quaternion.copy(voz.mesh.quaternion);
-  vratPozu(ud);
-  ud.animuj?.(dt, 0, false);
   const K = ud.instancia?.kosti;
+  if (K?.upperarm_l) zaloha(ud, K).vrat();
+  ud.animuj?.(dt, 0, false);
   if (!K?.upperarm_l || !K.thigh_l) return;
-  zalohujPozu(ud, K);
+  zaloha(ud, K).zaloz();
   hrac.mesh.updateMatrixWorld(true);
   const svet = (x, y, z) => voz.mesh.localToWorld(new THREE.Vector3(x, y, z));
   const smer = (x, y, z) => new THREE.Vector3(x, y, z).applyQuaternion(voz.mesh.quaternion);

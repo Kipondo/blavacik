@@ -43,3 +43,15 @@ export function ikDvochKosti(horna, dolna, koniec, ciel, pol) {
   a.subVectors(H, E).normalize(); b.subVectors(ciel, E).normalize();
   otocVoSvete(dolna, q.setFromUnitVectors(a, b));
 }
+
+/**
+ * Záloha pózy kostí pred úpravou (IK, natočenie hlavy). Mixér zapíše kosť len vtedy, keď sa jej hodnota
+ * v animácii zmenila – úpravy by sa inak hromadili, preto sa pred ďalšou animáciou póza vráti (vrat),
+ * po animácii sa zálohuje (zaloz) a až potom upraví.
+ */
+export class ZalohaPozy {
+  constructor(kosti) { this.kosti = kosti.filter(Boolean); this.q = this.kosti.map(() => new THREE.Quaternion()); this.platna = false; }
+  vrat() { if (this.platna) this.kosti.forEach((k, i) => k.quaternion.copy(this.q[i])); }
+  zaloz() { this.kosti.forEach((k, i) => this.q[i].copy(k.quaternion)); this.platna = true; }
+  zrus() { this.vrat(); this.platna = false; }
+}
