@@ -26,7 +26,8 @@ const MAX_CHODCOV = 450;
 const PLNY_DOSAH = 12, MAX_PLNYCH = 8;   // plný model (kostra)
 const L1_DOSAH = 40, MAX_L1 = 70;        // zlúčená sieť LOD1
 const KAP_L1 = 70, KAP_L2 = 500;          // kapacita InstancedMesh na variant
-const RYCHLOST_KLIPU = 1.45;              // m/s, pri ktorej chôdza v klipe nekĺže
+const RYCHLOST_KLIPU = 1.4;               // m/s, pri ktorej chôdza v klipe nekĺže (náhradná – inak zmeraná, krok.js)
+const MAX_ZRYCHLENIE = 1.6;               // rýchlejšie kroky by pôsobili ako cupitanie (ako animacie.js)
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
 const _y = new THREE.Vector3(0, 1, 0);
@@ -75,7 +76,7 @@ export default {
     this.spolocne = { cas: { value: 0 }, palety: null };
     this.palety = new Palety(2048);
     this.spolocne.palety = { value: this.palety.textura };
-    this.varianty = new Map(); // variant → { lod: [{ siet, pocet }…], trvanieChodze, trvanieStoja, sloty }
+    this.varianty = new Map(); // variant → { lod: [{ siet, pocet }…], trvanieChodze, trvanieStoja, vKroku, sloty }
     for (const [, m] of Object.entries(this.data.npc.modely)) {
       const zapecene = await zapecModel(m.subor);
       for (const [variant, z] of zapecene) {
@@ -98,7 +99,7 @@ export default {
           this.skupina.add(siet);
           return { siet, attr, pocet: 0, kap };
         });
-        this.varianty.set(variant, { lod, sloty: z.sloty, trvanieChodze: z.trvanieChodze, trvanieStoja: z.trvanieStoja });
+        this.varianty.set(variant, { lod, sloty: z.sloty, trvanieChodze: z.trvanieChodze, trvanieStoja: z.trvanieStoja, vKroku: z.vKroku });
       }
     }
     this.pripravene = true;
@@ -437,7 +438,9 @@ export default {
       }
       l.siet.setMatrixAt(i, _m);
       const stoji = c.rych < 0.15 || !!c.zrazeny;
-      const rych = stoji ? 1 / c.v.trvanieStoja : (c.rych / RYCHLOST_KLIPU) / c.v.trvanieChodze;
+      // krok podľa skutočnej rýchlosti a dĺžky kroku (vyšší chodec = dlhší krok), nohy nekĺžu
+      const pomer = Math.min(MAX_ZRYCHLENIE, Math.max(0.55, c.rych / ((c.v.vKroku ?? RYCHLOST_KLIPU) * m)));
+      const rych = stoji ? 1 / c.v.trvanieStoja : pomer / c.v.trvanieChodze;
       // fáza tak, aby sa pri zmene rýchlosti postava „neprepla“ v kroku
       if (c._rych !== rych) { c.faza = (c.faza + this.cas * ((c._rych ?? rych) - rych)) % 1; c._rych = rych; }
       l.attr.setXYZW(i, c.faza, rych, stoji ? 1 : 0, c.paleta);
