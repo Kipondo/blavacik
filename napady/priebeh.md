@@ -30,12 +30,15 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 #116 (zlatá linka na titulke), #117 (Átriaky), #118 (výkon – tiene, bez vetra), #119 (Hlavná stanica: plášť,
 interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste),
 #121 (kvalitnejšie autá, 17 sietí namiesto 27), #122 (Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park),
-#123 (workflow hlasov – sady viet stanice).
+#123 (workflow hlasov – sady viet stanice), #124 (vlaky na Hlavnej stanici podľa GTFS ŽSR, A2 + A3).
 
-## Rozpracované (22. 11. večer)
+## Rozpracované (22. 11. noc)
 | vetva | priečinok | stav |
 |---|---|---|
-| `feature/vlaky-poriadok` | `blavacik` | A2 + A3: GTFS ŽSR → `data/vlaky/poriadok.json`, trasy z OSM → `data/vlaky/trate.json`, modely `tools/blender/vlaky_blender.py`, modul `js/vlaky/`, koľaje 3D, tabule príchodov, hlásenia; **čaká:** PR |
+| `fix/poriadok-zlucovania` | `blavacik` | požiadavka majiteľa: prehľad stratených opráv (skript cez všetky zlúčenia), pravidlá „Zlučovanie“ v CLAUDE.md, regresné kontroly `tools/kontrola/regresie.py` + workflow; stromy na mostoch a vo vode opravené v kóde; **čaká:** PR |
+| (vlastná session) | – | B – výkon, LOD terénu a pamiatok (#110), presunuté do samostatnej session |
+
+- Pred zlúčením: `python3 tools/kontrola/regresie.py` (CLAUDE.md, „Zlučovanie“, bod 7).
 
 - GTFS ŽSR: odkaz `www.zsr.sk/files/…/gtfs.zip` vracia len stránku „GTFS info“ s odkazom do Národného katalógu
   otvorených dát (data.slovensko.sk, dataset ebeeedf1-…, distribúcia `download?id=556da5af-…`) – nástroj sťahuje odtiaľ.

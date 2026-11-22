@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Blavačík – regresné kontroly</title>
+  <!-- Spúšťa tools/kontrola/regresie.py (Playwright); dá sa otvoriť aj ručne: http://localhost:8000/tools/kontrola/regresie.html -->
+  <script type="importmap">
+    { "imports": { "three": "../../vendor/three/three.module.min.js", "three/addons/": "../../vendor/three/addons/" } }
+  </script>
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 16px; background: #fff; color: #111; }
+    td, th { padding: 4px 8px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+    .ok { color: #137333; } .zle { color: #b3261e; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Regresné kontroly</h1>
+  <p id="stav">Načítavam dáta…</p>
+  <table id="tab"></table>
+  <script type="module" src="regresie/beh.js"></script>
+</body>
+</html>
