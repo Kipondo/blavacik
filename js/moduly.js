@@ -34,6 +34,8 @@ import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
 import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
+import kolobezky from './mikromobilita/modul.js';
+import jazdciNpc from './mikromobilita/npc-jazdci.js';
 import atriaky from './mapa/atriaky/modul.js';
 import internat from './mapa/atriaky/internat.js';
 import kvalita from './grafika/kvalita.js';
@@ -76,6 +78,8 @@ export default [
   nadjazdy,
   trava,
   cyklopruhy,
+  kolobezky,
+  jazdciNpc,
   atriaky,
   internat,
   schody,

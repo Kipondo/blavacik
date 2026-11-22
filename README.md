@@ -26,6 +26,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Beh / ručná brzda | Shift / Medzerník | ⚡ |
 | Skok | Medzerník | ⤒ |
 | Nastúpiť / vystúpiť | E | E |
+| Kolobežka / bicykel: nasadnúť / zosadnúť | E pri nich (W jazda, S alebo Medzerník brzda, Shift šprint na bicykli) | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
@@ -81,6 +82,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
 - #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
+- #97 Zdieľané kolobežky Fičák a mestské bicykle na chodníkoch – dá sa na nich jazdiť (náklon v zákrute, šliapanie)
 - #96 Chôdza bez kĺzania nôh: plynulé miešanie stoj–chôdza–klus–beh, rozbeh, náklon do zákruty, reálne výšky chodcov
 
 ## Čo je hotové
@@ -589,6 +591,24 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   (mixér zapisuje kosť len pri zmene hodnoty – bez toho by sa hromadili). Cena ~0,08 ms na snímok.
   Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok, nohy na svahu). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
+- **Zdieľané kolobežky „Fičák“ a mestské bicykle** (issue #97, `js/mikromobilita/`, modul `kolobezky`): na chodníkoch
+  a v pešej zóne stoja odstavené elektrické kolobežky vymyslenej firmy Fičák (zelené, po 1–3 kusoch, šikmo na stojane)
+  a mestské bicykle rôznych farieb (po 1–2, s košom/nosičom, blatníkmi a stojanom). Stanovištia sa vyberú z chodníkov
+  detailných dlaždíc, vždy rovnako podľa polohy (v centre ~170 na km², tretina s bicyklami); každý typ sa kreslí jednou
+  InstancedMesh do 170 m. **E pri vozidle = nasadnúť**, W plyn/šliapanie, S alebo Medzerník brzda, A/D zatáčanie,
+  Shift šprint (bicykel), E = zosadnúť (do 14 km/h). Kolobežka: obmedzovač 25 km/h, rýchly rozbeh; bicykel 23 km/h,
+  šprint 35 km/h, do kopca citeľne pomalší. Oba sa nešmýkajú do boku, v zákrute sa nakláňajú (v·ω/g), od stien
+  a áut sa odrazia, chodca zrazia len tesne pred sebou. **Jazdec:** na kolobežke Ďoďo stojí na doske, na bicykli sedí
+  s predklonom a šliape – ruky na riadidlách a nohy na doske/pedáloch drží IK dvoch kostí (`js/chodec/postava/ik.js`,
+  `jazdec.js`); kľuky sa točia podľa rýchlosti (voľnobeh pri dobiehaní). Kamera je bližšie ako za autom. Vozidlo,
+  z ktorého hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Modely sú v kóde (kolobežka 432,
+  bicykel 1 676 trojuholníkov). Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je
+  nápoveda k autu). Zriedka (~5 % stanovíšť) leží na chodníku aj **hoverboard** (15 km/h, otáča sa na mieste) alebo
+  **onewheel** (28 km/h, Ďoďo stojí bokom, ľavá noha vpredu). **Ľudia na kolobežkách a bicykloch** (`js/mikromobilita/npc-jazdci.js`, modul `jazdci-npc`):
+  najviac 6 naraz jazdí po červených cyklopruhoch (pravý pruh v smere cesty, ľavý proti) a cyklochodníkoch 50–180 m
+  od hráča, 14–25 km/h, v zákrutách sa nakláňajú, pred hráčom zabrzdia. Jazdec je plný model NPC (študent, kuriér,
+  korporátnik…) s rovnakou pózou ako hráč; ďalej ako 25 m zlúčená sieť LOD1 (tá istá kostra, 1 volanie kreslenia) –
+  6 jazdcov pridá ~3 volania kreslenia a ~0,2 ms CPU. Snímky: `docs/snimky/kolobezky/`.
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
   Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),
@@ -647,6 +667,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
+- Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - Chôdza (#96): nové klipy chôdze a behu s dlhším krokom (behový klip má krok ~1 m, pri 6 m/s nohy mierne kĺžu),
   nohy na teréne aj pre najbližších chodcov, striedanie kľudových animácií,

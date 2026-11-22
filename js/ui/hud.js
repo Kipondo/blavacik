@@ -55,7 +55,8 @@ export default {
 
     const dotyk = hra.vstup.dotyk;
     if (auto) {
-      ui.napoveda(auto.rychlostKmh < 25 ? (dotyk ? 'E – vystúpiť' : 'E – vystúpiť · Medzerník – ručná brzda') : null);
+      // vozidlo môže mať vlastnú nápovedu (kolobežka)
+      ui.napoveda(auto.napoveda ?? (auto.rychlostKmh < 25 ? (dotyk ? 'E – vystúpiť' : 'E – vystúpiť · Medzerník – ručná brzda') : null));
     } else if (hra.hrac?.najblizsieAuto()) {
       ui.napoveda('E – nastúpiť do auta');
     } else {
