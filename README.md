@@ -40,6 +40,16 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
+- **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
+  strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
+- **Trolejbusy:** trasy denných liniek z `data/mhd/` (nočné „N“ nie – jazdia aj tam, kde vedenie nie je), dvojica
+  drôtov (+ a −) nad pravým pruhom v smere jazdy, stĺpy pri okraji vozovky vpravo s priečnikom nad drôtmi.
+  Trasy sa prichytia k osi najbližšej rovnobežnej cesty, rovnaké úseky viacerých liniek sa kreslia raz.
+- V úzkej ulici, kde by stĺp padol do domu, drôt drží lano z fasády. Stĺpy majú kolíziu (ako lampy).
+- Stavia sa s každou podrobnou dlaždicou (`js/mapa/trakcia/`), 1,6–5 ms na dlaždicu; v zábere +1 volanie kreslenia
+  a niekoľko tisíc trojuholníkov (drôty sú čiary, stĺpy jedna sieť na dlaždicu, bez vrhania tieňa).
+
 ### Átriaky – domy podľa fotiek a izba 314 priamo v meste (vetva `fix/atriaky-budovy`, #115)
 - **Prieskum** budov a izieb z verejných zdrojov: [napady/atriaky-izba.md](napady/atriaky-izba.md).
 - **Domy bez dier a blikania** (`tools/blender/atriaky/bloky.py`): na každom podlaží pavlač – panely vymývaného betónu
