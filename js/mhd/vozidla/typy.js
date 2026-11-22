@@ -6,16 +6,20 @@
 
 export const MEDZERA = 0.6;
 
+// nízkopodlažná päťčlánková električka (~32 m, obojsmerná): predný a zadný článok s kabínou a podvozkom,
+// dva krátke zavesené články a stredný s podvozkom a zberačom
 const ELEKTRICKA = {
   typ: 'elektricka',
-  sirka: 2.46, vyska: 3.45, podlaha: 0.28,
+  sirka: 2.46, vyska: 3.5, podlaha: 0.28,
   zrychlenie: 1.0,          // m/s²
   maxStanie: 22,            // s – najdlhšie státie na zastávke
   posunVpravo: 0,           // koľaje sú v dátach už pre každý smer zvlášť
   clanky: [
-    { varianta: 'el-predny', d: 10.4, dvere: [3.0, -3.3] },
-    { varianta: 'el-stredny', d: 9.6, dvere: [0] },
-    { varianta: 'el-zadny', d: 10.2, dvere: [2.8, -3.0] },
+    { varianta: 'el-predny', d: 8.0, dvere: [1.9] },
+    { varianta: 'el-kratky', d: 3.8, dvere: [0] },
+    { varianta: 'el-stredny', d: 6.0, dvere: [0] },
+    { varianta: 'el-kratky', d: 3.8, dvere: [0] },
+    { varianta: 'el-zadny', d: 8.0, dvere: [-1.9] },
   ],
 };
 

@@ -4,7 +4,10 @@
 //   kolizie.pridajPolygon(body)       – pôdorys [[x,z], ...]
 //   kolizie.pridajObdlznik(x,z,w,d,u) – otočený obdĺžnik
 //   kolizie.pridajKruh(x, z, r)
-//   kolizie.vytlac(x, z, r) → { x, z, nx, nz, zasah } – posunie kruh von z prekážok
+//   kolizie.vytlac(x, z, r, y) → { x, z, nx, nz, zasah } – posunie kruh von z prekážok
+// Prekážka môže mať výškový rozsah info.vyska = [od, do] (zábradlie lávky, dom s terasou): platí len pre toho,
+// kto je v tej výške (y = výška chodidiel, postava ~1,8 m) – tak sa dá prejsť pod lávkou a chodiť po terase.
+// Bez y (autá, NPC) platí len taká, ktorá siaha až po zem (info.zem = true), ostatné sa preskočia.
 
 import { bodVPolygone, najblizsiNaUsecke, ohranicenie, obdlznik } from './geometria.js';
 
@@ -95,12 +98,14 @@ export class Kolizie {
    * Vytlačí kruh (x, z, r) von z prekážok.
    * Vracia novú polohu, normálu posledného nárazu a či vôbec došlo k nárazu.
    */
-  vytlac(x, z, r) {
+  vytlac(x, z, r, y) {
     let zasah = false, nx = 0, nz = 0;
     for (let opakovanie = 0; opakovanie < 3; opakovanie++) {
       let posunute = false;
       for (const p of this.vOkoli(x, z, r)) {
         if (x + r < p.minX || x - r > p.maxX || z + r < p.minZ || z - r > p.maxZ) continue;
+        const v0 = p.info?.vyska;
+        if (v0 && (y === undefined ? !p.info.zem : y > v0[1] - 0.35 || y + 1.8 < v0[0])) continue;
         const v = p.typ === 'kruh' ? vytlacZKruhu(x, z, r, p) : vytlacZPolygonu(x, z, r, p.body);
         if (v) {
           x += v.x; z += v.z;
@@ -115,8 +120,8 @@ export class Kolizie {
   }
 
   /** Je miesto voľné? */
-  jeVolne(x, z, r) {
-    return !this.vytlac(x, z, r).zasah;
+  jeVolne(x, z, r, y) {
+    return !this.vytlac(x, z, r, y).zasah;
   }
 }
 

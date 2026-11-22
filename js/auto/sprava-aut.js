@@ -1,8 +1,9 @@
 // Modul: správa všetkých áut – vytvorenie z mapy, fyzika, zrážky áut medzi sebou.
-// Pridáva do hry: hra.pridajAuto({x, z, uhol, farba}) a hra.odstranAuto(auto).
+// Pridáva do hry: hra.pridajAuto({x, z, uhol, farba, typ, sluzba}) a hra.odstranAuto(auto) (typy: js/auto/typy-aut.js).
 
 import { Auto } from './auto.js';
 import { KONFIG } from '../config.js';
+import { nahodnyTyp, nahodnaFarba } from './typy-aut.js';
 
 export default {
   nazov: 'auta',
@@ -23,7 +24,11 @@ export default {
       const i = hra.auta.indexOf(auto);
       if (i >= 0) hra.auta.splice(i, 1);
     };
-    for (const a of hra.mapa.data.spawn?.auta ?? []) hra.pridajAuto(a);
+    // zaparkované autá: typ a farba podľa skutočného zastúpenia (data/doprava/vozidla.json), ak nie sú dané
+    for (const a of hra.mapa.data.spawn?.auta ?? []) {
+      const typ = a.typ ?? nahodnyTyp('zaparkovane');
+      hra.pridajAuto({ ...a, typ, farba: a.typ ? a.farba : nahodnaFarba(typ) });
+    }
   },
 
   update(dt, hra) {
