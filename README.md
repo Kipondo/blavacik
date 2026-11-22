@@ -78,6 +78,17 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Typy áut, farby, taxíky a kuriéri** (issue #97, 1. časť; `js/auto/typy-aut.js`, `data/doprava/vozidla.json`,
+  modul `js/doprava/vozidla-data.js`): 11 typov áut podľa jedného receptu (mestské, hatchback, sedan, kombi, SUV,
+  luxusné SUV, osobná dodávka, dodávka so skriňou, pickup s korbou, športové, muscle) – vlastný bočný profil,
+  rozmery a kolesá. V premávke aj zaparkované sa vyberajú **podľa váh** (najviac mestské, hatchbacky a kombi, športové
+  a muscle vzácne), **farby podľa skutočného zastúpenia** (sivá, čierna, biela, strieborná, tmavomodrá…), dodávky
+  prevažne biele. **Taxíky** (biele, čierne, strieborné, žlté, s lampou na streche) a vymyslené služby **Hladoš**
+  (svetlomodrá) a **Fičák** (zelená) – taxi s pruhom a nápisom na boku, **kuriéri** v autách vo farbách firmy; v noci
+  viac taxíkov a kuriérov, menej dodávok. Každý typ má vlastné **jazdné vlastnosti** (najvyššia rýchlosť, zrýchlenie,
+  zatáčanie, priľnavosť, hmotnosť) – platia aj pre auto, ktoré si hráč vezme z premávky alebo z parkoviska. Všetko sa
+  ladí v JSON bez zmeny kódu. Modely z balíkov CC0, kolobežky, bicykle a jazdci (#97 body 1–2) sú ďalšia časť.
+  Snímky: `docs/snimky/vozidla/`.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
