@@ -27,6 +27,7 @@ const MAX_V_POHYBE = 5;
 const DOSAH_HRACA = 3500;   // m od stanice – ďalej sa vlaky nekreslia ani nepočítajú
 const DOSAH_KRESLENIA = 1800;
 const POL_SIRKY = 1.7;      // m – polovica šírky vozňa + polomer hráča (kolízia)
+const MAX_SKLON = 0.045;    // rad
 
 /** Čas (s) na prejdenie vzdialenosti d z pokoja (alebo do zastavenia) so zrýchlením a a najvyššou rýchlosťou v. */
 function casNa(d, a, v) {
@@ -204,7 +205,8 @@ export default {
       // vozeň smeruje čelom (+z modelu) k bodu A, otočený vozeň k bodu B
       const [fx, fz, fy, rx, rz, ry] = v.otoc ? [B.x, B.z, yb, A.x, A.z, ya] : [A.x, A.z, ya, B.x, B.z, yb];
       const dl = Math.hypot(fx - rx, fz - rz) || 1;
-      this._e.set(-Math.atan2(fy - ry, dl), Math.atan2(fx - rx, fz - rz), 0);
+      // sklon najviac ~2,5° – pri portáli tunela terén (DEM) stúpa do svahu, trať nie
+      this._e.set(-Math.max(-MAX_SKLON, Math.min(MAX_SKLON, Math.atan2(fy - ry, dl))), Math.atan2(fx - rx, fz - rz), 0);
       this._q.setFromEuler(this._e);
       this._p.set(cx, (ya + yb) / 2 + TEMENO, cz);
       this._m.compose(this._p, this._q, this._s);
