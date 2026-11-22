@@ -3,7 +3,6 @@
 // vo vetre sa vlnia (spoločný čas s korunami stromov) a v diaľke sa plynulo zmenšia do textúry trávnika.
 
 import * as THREE from 'three';
-import { vietor } from './materialy-stromov.js';
 
 const STEBLA = 11;          // stebiel v trse
 const SEGMENTY = 3;
@@ -54,26 +53,10 @@ export function geometriaTrsu() {
   return geo;
 }
 
-/** Materiál stebiel: farba z vrcholov, vlnenie vo vetre (vlny prechádzajú trávnikom). */
+/** Materiál stebiel: farba z vrcholov; bez vlnenia vo vetre (rozhodnutie majiteľa 22. 11. 2026). */
 export function materialTravy() {
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, side: THREE.DoubleSide });
-  mat.onBeforeRender = () => { vietor.value = performance.now() / 1000; };
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uVietor = vietor;
-    sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uVietor;')
-      .replace('#include <begin_vertex>', `#include <begin_vertex>
-#ifdef USE_INSTANCING
-        {
-          vec3 iPoz = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
-          float vlna = sin(dot(iPoz.xz, vec2(0.31, 0.17)) - uVietor * 1.7) * 0.6 + sin(dot(iPoz.xz, vec2(-0.13, 0.41)) - uVietor * 2.3) * 0.4;
-          float naraz = 0.6 + 0.4 * sin(uVietor * 0.21) * sin(uVietor * 0.37 + 1.3);
-          float y2 = transformed.y * transformed.y * 9.0;
-          transformed.x += (vlna * 0.07 + 0.04) * naraz * y2;
-          transformed.z += vlna * 0.035 * naraz * y2;
-          transformed.y -= abs(vlna) * 0.02 * naraz * y2;
-        }
-#endif`);
     // obe strany stebla majú normálu nahor (inak by zadné strany boli čierne)
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''));

@@ -8,6 +8,7 @@
 // --- základ hry ---
 import prostredie from './grafika/prostredie.js';
 import efekty from './grafika/efekty/modul.js';
+import dosahTienov from './grafika/dosah-tienov.js';
 import denNoc from './grafika/den-noc.js';
 import hrac from './chodec/hrac.js';
 import chodci from './chodec/chodci/modul.js';
@@ -69,6 +70,7 @@ export default [
   mys,
   prostredie,
   efekty,
+  dosahTienov,
   denNoc,
   hrac,
   chodci,

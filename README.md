@@ -40,6 +40,16 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Výkon 1: tiene a stromy (vetva `feature/vykon-tiene`, #110)
+- **Tieňová mapa** bola ~40 % volaní kreslenia a ~38 % trojuholníkov. Teraz:
+  stromy vrhajú podrobný tieň (listy) do 35 m, ďalej len jednoduchú korunu, ktorá sa kreslí iba do tieňa
+  (vrstva tieňa – `js/grafika/dosah-tienov.js`, `js/mapa/zelen/stromy.js`); malé objekty (autá, chodci, sochy,
+  kolobežky…) vrhajú tieň do 45 m od hráča; vikiere tieň nevrhajú.
+- **Vzdialené koruny** v blízkom chunku sa kreslia len pre vzdialené stromy (skryté sa už nekreslia ako nulové inštancie).
+- **Bez vetra:** listy a tráva sa nekývu (rozhodnutie majiteľa) – menej výpočtov vo vertex shaderi.
+- Meranie (statické mesto bez áut a chodcov, kvalita vysoká, pevný záber): Šafárikovo nám. 742 → 664 volaní,
+  4,06 → 3,35 mil. △ (tieň 1,08 → 0,43 mil.); Hlavné nám. 634 → 582 volaní, 3,54 → 3,01 mil. △.
+
 ### Hlavná stanica – budova, hala, nástupištia a príchod (vetva `feature/hlavna-stanica`)
 - **Štart hry na 1. nástupišti** Hlavnej stanice: kamera obíde Ďoďa, gong a hlásenie rozhlasu, telefonát od mamy
   („Došiel si? A rezne si zjedol?“) v titulkoch – **počas hovoru sa už dá chodiť** – potom pokyn ísť do haly za
