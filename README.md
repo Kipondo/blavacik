@@ -40,6 +40,22 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Átriaky – domy podľa fotiek a izba 314 priamo v meste (vetva `fix/atriaky-budovy`, #115)
+- **Prieskum** budov a izieb z verejných zdrojov: [napady/atriaky-izba.md](napady/atriaky-izba.md).
+- **Domy bez dier a blikania** (`tools/blender/atriaky/bloky.py`): na každom podlaží pavlač – panely vymývaného betónu
+  so škárami, za nimi biela stena s oknami a dverami izieb, červenooranžové čelá a spodky dosiek; 4. podlažie
+  ustúpené a presklené, strecha s presahom a mozaikovým čelom, atika so zábradlím, na streche výstup schodiska.
+  Opravené: 1 m vysoká diera okolo domu pod strechou, diera medzi parapetom a zapusteným oknom, červený pás 2 cm
+  pred betónom (blikal) a spodky parapetov v rovine s dlažbou terasy.
+- **Izba 314 v meste** (`tools/blender/atriaky/izba.py`, `js/mapa/atriaky/internat.js`): trojlôžková izba
+  (3 váľandy, stolíky, skriňa, umývadlo so zrkadlom, chladnička, radiátor, závesy, sušiak, pizza, fľaše, Ďoďova taška)
+  a chodba s dverami susedných izieb, kuchynky, spŕch a WC. Izba je v ustúpenom podlaží bloku T – **ovládanie je
+  rovnaké ako vonku** (tá istá postava, myš, prvá/tretia osoba, kamera pod stropom); balkónovými dverami sa pešo
+  vyjde na terasu (ulička od dverí k balkónu je voľná), vchodom na prízemí sa príde na chodbu pri schodisku
+  (dole späť E pri dverách schodiska).
+- Kolízie: `kolizie.pridajVynimku` – v izbe sa ignoruje plný kolízny blok domu; kamera: háčik `hra.interier.kamera`.
+- Blender skripty bežia aj na Windows (`atriaky_blender.py` zapisuje do dočasného priečinka systému).
+
 ### Výkon 1: tiene a stromy (vetva `feature/vykon-tiene`, #110)
 - **Tieňová mapa** bola ~40 % volaní kreslenia a ~38 % trojuholníkov. Teraz:
   stromy vrhajú podrobný tieň (listy) do 35 m, ďalej len jednoduchú korunu, ktorá sa kreslí iba do tieňa

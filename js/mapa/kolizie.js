@@ -8,6 +8,7 @@
 // Prekážka môže mať výškový rozsah info.vyska = [od, do] (zábradlie lávky, dom s terasou): platí len pre toho,
 // kto je v tej výške (y = výška chodidiel, postava ~1,8 m) – tak sa dá prejsť pod lávkou a chodiť po terase.
 // Bez y (autá, NPC) platí len taká, ktorá siaha až po zem (info.zem = true), ostatné sa preskočia.
+// kolizie.pridajVynimku({ body, vyska, skupiny }) – oblasť, v ktorej sa ignorujú prekážky skupín (izba v bloku Átriakov).
 
 import { bodVPolygone, najblizsiNaUsecke, ohranicenie, obdlznik } from './geometria.js';
 
@@ -98,12 +99,33 @@ export class Kolizie {
    * Vytlačí kruh (x, z, r) von z prekážok.
    * Vracia novú polohu, normálu posledného nárazu a či vôbec došlo k nárazu.
    */
+  /**
+   * Výnimka: v oblasti { body (pôdorys), vyska: [od, do], skupiny: [info.dlazdica, …] } sa pre toho, kto v nej stojí
+   * (x, z, y), ignorujú prekážky uvedených skupín – napr. izba vnútri plného kolízneho bloku Átriakov.
+   */
+  pridajVynimku(v) {
+    (this.vynimky ??= []).push(v);
+    return v;
+  }
+
+  odstranVynimku(v) {
+    if (this.vynimky) this.vynimky = this.vynimky.filter((q) => q !== v);
+  }
+
+  _vynimky(x, z, y) {
+    if (!this.vynimky?.length || y === undefined) return null;
+    const v = this.vynimky.filter((q) => y >= q.vyska[0] && y <= q.vyska[1] && bodVPolygone(x, z, q.body));
+    return v.length ? new Set(v.flatMap((q) => q.skupiny)) : null;
+  }
+
   vytlac(x, z, r, y) {
     let zasah = false, nx = 0, nz = 0;
+    const vynechaj = this._vynimky(x, z, y);
     for (let opakovanie = 0; opakovanie < 3; opakovanie++) {
       let posunute = false;
       for (const p of this.vOkoli(x, z, r)) {
         if (x + r < p.minX || x - r > p.maxX || z + r < p.minZ || z - r > p.maxZ) continue;
+        if (vynechaj?.has(p.info?.dlazdica)) continue;
         const v0 = p.info?.vyska;
         if (v0 && (y === undefined ? !p.info.zem : y > v0[1] - 0.35 || y + 1.8 < v0[0])) continue;
         const v = p.typ === 'kruh' ? vytlacZKruhu(x, z, r, p) : vytlacZPolygonu(x, z, r, p.body);

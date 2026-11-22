@@ -1,0 +1,26 @@
+{
+ "nazov": "atriaky-po",
+ "commit": "49ea6eb",
+ "cas": "2026-11-22T14:36",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "mlynska-dolina",
+   "nazov": "Mlynská dolina – Átriaky",
+   "x": -2902,
+   "z": -1770,
+   "ms": 27114,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "mlynska-dolina-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "mlynska-dolina-zhora.jpg"
+    ]
+   ]
+  }
+ ]
+}

@@ -75,8 +75,9 @@ export default {
       this.ciel.z + Math.cos(u) * horiz,
     );
 
-    // kamera nesmie ísť pod terén (v podchode ju drží v chodbe pod stropom – js/mapa/podchody/)
-    if (!hra.podchody?.kamera(cielovaPoz, this.ciel, objekt.pozicia)) {
+    // kamera nesmie ísť pod terén (v podchode ju drží v chodbe pod stropom – js/mapa/podchody/,
+    // v izbe internátu pod stropom izby – js/mapa/atriaky/internat.js)
+    if (!hra.podchody?.kamera(cielovaPoz, this.ciel, objekt.pozicia) && !hra.interier?.kamera(cielovaPoz, this.ciel, objekt.pozicia)) {
       const zem = hra.mapa.vyska(cielovaPoz.x, cielovaPoz.z) + 1.2;
       if (cielovaPoz.y < zem) cielovaPoz.y = zem;
     }
