@@ -500,7 +500,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   nápoveda k autu). **Ľudia na kolobežkách a bicykloch** (`js/mikromobilita/npc-jazdci.js`, modul `jazdci-npc`):
   najviac 6 naraz jazdí po červených cyklopruhoch (pravý pruh v smere cesty, ľavý proti) a cyklochodníkoch 50–180 m
   od hráča, 14–25 km/h, v zákrutách sa nakláňajú, pred hráčom zabrzdia. Jazdec je plný model NPC (študent, kuriér,
-  korporátnik…) s rovnakou pózou ako hráč. Snímky: `docs/snimky/kolobezky/`.
+  korporátnik…) s rovnakou pózou ako hráč; ďalej ako 25 m zlúčená sieť LOD1 (tá istá kostra, 1 volanie kreslenia) –
+  6 jazdcov pridá ~3 volania kreslenia a ~0,2 ms CPU. Snímky: `docs/snimky/kolobezky/`.
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
   Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),

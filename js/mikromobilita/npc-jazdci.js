@@ -112,6 +112,8 @@ export default {
       voz.klopenie = 0;
       if (j.v > 0.3) voz.faza += (j.v * dt / 5.3) * Math.PI * 2;
       voz._aktualizujModel(dt);
+      // zblízka plný model, ďalej zlúčená sieť (1 volanie kreslenia, tá istá kostra – póza platí)
+      j.npc.nastavLod(Math.hypot(j.x - hra.kamera.position.x, j.z - hra.kamera.position.z) < 25 ? 0 : 1);
       polozJazdca(dt, j.postava, voz);
     }
   },
