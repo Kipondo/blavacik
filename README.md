@@ -21,7 +21,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Beh / ručná brzda | Shift / Medzerník | ⚡ |
 | Skok | Medzerník | ⤒ |
 | Nastúpiť / vystúpiť | E | E |
-| Kolobežka: nasadnúť / zosadnúť | E pri kolobežke (W jazda, S alebo Medzerník brzda) | E |
+| Kolobežka / bicykel: nasadnúť / zosadnúť | E pri nich (W jazda, S alebo Medzerník brzda, Shift šprint na bicykli) | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
@@ -77,7 +77,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
 - #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
-- #97 Zdieľané kolobežky Fičák na chodníkoch – dá sa na nich jazdiť (25 km/h, náklon v zákrute)
+- #97 Zdieľané kolobežky Fičák a mestské bicykle na chodníkoch – dá sa na nich jazdiť (náklon v zákrute, šliapanie)
 
 ## Čo je hotové
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
@@ -485,16 +485,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - **Pohyb Ďoďa:** prirodzená chôdza (dopad na pätu, odraz zo špičky), klus a beh podľa biomechaniky,
   rýchlosti 2 m/s chôdza a 6 m/s beh (Shift). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
-- **Zdieľané kolobežky „Fičák“** (issue #97, `js/mikromobilita/`, modul `kolobezky`): na chodníkoch a v pešej zóne
-  stoja odstavené elektrické kolobežky vymyslenej firmy Fičák (zelené, po 1–3 kusoch, šikmo pri okraji chodníka –
-  stanovištia sa vyberú z chodníkov detailných dlaždíc, vždy rovnako podľa polohy; v centre ~180 na km²). Kreslia sa
-  jednou InstancedMesh do 170 m. **E pri kolobežke = nasadnúť**, W plyn, S alebo Medzerník brzda, A/D zatáčanie,
-  E = zosadnúť (do 14 km/h). Max. 25 km/h (obmedzovač), rýchly rozbeh, do kopca pomalšia, nešmýka sa do boku,
-  v zákrute sa nakloní (do 24°), od stien a áut sa odrazí, chodca zrazí len tesne pred sebou. Ďoďo stojí na doske
-  a drží riadidlá (IK rúk a nôh, `js/mikromobilita/ik.js`), kamera je bližšie ako za autom. Kolobežka, z ktorej
-  hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Model je v kóde (432 trojuholníkov).
-  Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je nápoveda k autu).
-  Snímky: `docs/snimky/kolobezky/`.
+- **Zdieľané kolobežky „Fičák“ a mestské bicykle** (issue #97, `js/mikromobilita/`, modul `kolobezky`): na chodníkoch
+  a v pešej zóne stoja odstavené elektrické kolobežky vymyslenej firmy Fičák (zelené, po 1–3 kusoch, šikmo na stojane)
+  a mestské bicykle rôznych farieb (po 1–2, s košom/nosičom, blatníkmi a stojanom). Stanovištia sa vyberú z chodníkov
+  detailných dlaždíc, vždy rovnako podľa polohy (v centre ~170 na km², tretina s bicyklami); každý typ sa kreslí jednou
+  InstancedMesh do 170 m. **E pri vozidle = nasadnúť**, W plyn/šliapanie, S alebo Medzerník brzda, A/D zatáčanie,
+  Shift šprint (bicykel), E = zosadnúť (do 14 km/h). Kolobežka: obmedzovač 25 km/h, rýchly rozbeh; bicykel 23 km/h,
+  šprint 35 km/h, do kopca citeľne pomalší. Oba sa nešmýkajú do boku, v zákrute sa nakláňajú (v·ω/g), od stien
+  a áut sa odrazia, chodca zrazia len tesne pred sebou. **Jazdec:** na kolobežke Ďoďo stojí na doske, na bicykli sedí
+  s predklonom a šliape – ruky na riadidlách a nohy na doske/pedáloch drží IK dvoch kostí (`js/mikromobilita/ik.js`,
+  `jazdec.js`); kľuky sa točia podľa rýchlosti (voľnobeh pri dobiehaní). Kamera je bližšie ako za autom. Vozidlo,
+  z ktorého hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Modely sú v kóde (kolobežka 432,
+  bicykel 1 676 trojuholníkov). Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je
+  nápoveda k autu). Snímky: `docs/snimky/kolobezky/`.
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
   Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),
@@ -548,8 +551,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
-- Mikromobilita (#97): bicykel a elektrobicykel (šliapanie), hoverboard, onewheel, NPC na kolobežkách a bicykloch
-  po cyklopruhoch, cena jazdy na kolobežke (peniaze), zvuk elektromotora.
+- Mikromobilita (#97): elektrobicykel, hoverboard, onewheel, NPC na kolobežkách a bicykloch po cyklopruhoch,
+  cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.

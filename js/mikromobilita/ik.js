@@ -9,7 +9,7 @@ const a = new THREE.Vector3(), b = new THREE.Vector3();
 const q = new THREE.Quaternion(), qk = new THREE.Quaternion(), qr = new THREE.Quaternion();
 
 /** Otočí kosť vo svete o q (zachová rodiča). */
-function otocVoSvete(kost, rot) {
+export function otocVoSvete(kost, rot) {
   kost.getWorldQuaternion(qk);
   kost.parent.getWorldQuaternion(qr);
   qk.premultiply(rot);
