@@ -8,6 +8,7 @@
 
 import * as THREE from 'three';
 import { Jednostopove } from './vozidlo.js';
+import { TYPY } from './typy.js';
 import { polozJazdca } from './jazdec.js';
 import { nacitajNpcData, poskladajChodca } from '../chodec/npc/profily-npc.js';
 import { vytvorNpc } from '../chodec/npc/model-npc.js';
@@ -134,12 +135,13 @@ export default {
     const opacne = t.obojsmerna && Math.random() < 0.5;
     const s0 = kandidati[Math.floor(Math.random() * kandidati.length)];
     const s = opacne ? t.dlzka - s0 : s0;
-    const bicykel = Math.random() < 0.4;
-    const typ = bicykel ? 'bicykel' : 'kolobezka';
+    const n = Math.random();
+    const typ = n < 0.4 ? 'bicykel' : n < 0.45 ? 'hoverboard' : n < 0.52 ? 'onewheel' : 'kolobezka';
     const farby = ['#2f6db5', '#1f2326', '#e9e6df', '#8c1c22', '#3d6b45', '#b8b2a6'];
     const j = {
       t, s: Math.min(s, t.dlzka - 15), opacne, v: 0, x: 0, z: 0, uhol: 0, npc: null,
-      cielV: bicykel ? 4 + Math.random() * 2.2 : 4.8 + Math.random() * 2,   // 14–22 km/h, kolobežky 17–25 km/h
+      // bicykle 14–22 km/h, kolobežky 17–25 km/h, hoverboard ~11–15 km/h, onewheel 18–25 km/h
+      cielV: typ === 'bicykel' ? 4 + Math.random() * 2.2 : TYPY[typ].MAX_RYCHLOST * (0.72 + Math.random() * 0.26),
     };
     const q = naTrase(t, opacne ? t.dlzka - j.s : j.s, {});
     j.x = q.x; j.z = q.z; j.uhol = opacne ? q.uhol + Math.PI : q.uhol;

@@ -1,4 +1,4 @@
-// Modul: zdieľané kolobežky „Fičák“ a mestské bicykle (issue #97 – mikromobilita, 1. časť).
+// Modul: zdieľané kolobežky „Fičák“, mestské bicykle, hoverboardy a onewheely (issue #97 – mikromobilita).
 //
 // – Odstavené kolobežky a bicykle stoja na chodníkoch a v pešej zóne (miesta sa vyberú z chodníkov detailných
 //   dlaždíc, vždy rovnako podľa polohy), každý typ sa kreslí jednou InstancedMesh.
@@ -39,10 +39,11 @@ function najdiStanovistia(kluc, data, kolizie, mapa) {
       while (draha < dl) {
         const px = x0 + dx * draha, pz = z0 + dz * draha;
         if (hash(px, pz, 1) < PODIEL) {
-          // 1–3 kolobežky alebo 1–2 bicykle vedľa seba pri okraji chodníka
-          const typ = hash(px, pz, 7) < PODIEL_BICYKLOV ? 'bicykel' : 'kolobezka';
+          // 1–3 kolobežky alebo 1–2 bicykle vedľa seba pri okraji chodníka, zriedka hoverboard alebo onewheel
+          const hd = hash(px, pz, 9);
+          const typ = hash(px, pz, 7) < PODIEL_BICYKLOV ? 'bicykel' : hd < 0.05 ? 'hoverboard' : hd < 0.1 ? 'onewheel' : 'kolobezka';
           const bic = typ === 'bicykel';
-          const n = 1 + Math.floor(hash(px, pz, 2) * (bic ? 2 : 3));
+          const n = typ === 'hoverboard' || typ === 'onewheel' ? 1 : 1 + Math.floor(hash(px, pz, 2) * (bic ? 2 : 3));
           const strana = hash(px, pz, 4) < 0.5 ? 1 : -1;
           const okraj = Math.max(0.3, (ch.sirka ?? 2) / 2 - (bic ? 0.45 : 0.35)) * strana;
           for (let k = 0; k < n; k++) {
@@ -205,7 +206,13 @@ export default {
     h.mesh.visible = true;
     h.mesh.rotation.order = 'YXZ';
     this.nastavNapovedu(hra, null);
-    hra.ui.sprava(voz.typ === 'bicykel' ? 'Bicykel: W – šliapať, Shift – šprint, S – brzda, E – zosadnúť' : 'Kolobežka Fičák: W – jazda, S – brzda, E – zosadnúť', 2.8);
+    const spravy = {
+      bicykel: 'Bicykel: W – šliapať, Shift – šprint, S – brzda, E – zosadnúť',
+      kolobezka: 'Kolobežka Fičák: W – jazda, S – brzda, E – zosadnúť',
+      hoverboard: 'Hoverboard: W – jazda, A/D – otáčanie aj na mieste, E – zosadnúť',
+      onewheel: 'Onewheel: W – nakloniť sa a fičať, S – brzda, E – zosadnúť',
+    };
+    hra.ui.sprava(spravy[voz.typ] ?? 'E – zosadnúť', 2.8);
     hra.posli('nasadol', voz);
   },
 

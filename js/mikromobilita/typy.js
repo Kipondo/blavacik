@@ -2,6 +2,7 @@
 
 import { vytvorModelKolobezky, geometriaCela, materialKolobezky } from './model-kolobezky.js';
 import { vytvorModelBicykla, geometriaCelaB, materialBicykla } from './model-bicykla.js';
+import { vytvorModelHoverboardu, vytvorModelOnewheelu, geometriaHoverboardu, geometriaOnewheelu, materialDosky } from './model-dosky.js';
 
 export const TYPY = {
   kolobezka: {
@@ -47,6 +48,50 @@ export const TYPY = {
     model: (farba) => vytvorModelBicykla(farba),
     geometria: () => geometriaCelaB(),
     material: () => materialBicykla(),
+  },
+  hoverboard: {
+    nazov: 'hoverboarde',
+    MAX_RYCHLOST: 4.2,    // m/s (15 km/h)
+    SPRINT: 4.2,
+    ZRYCHLENIE: 1.6,
+    BRZDA: 4.0,
+    VALIVY_ODPOR: 0.6,
+    SVAH: 0.5,
+    RAZVOR: 0.35,         // otáča sa skoro na mieste
+    MAX_ZATOCENIE: 0.9,
+    POLOMER: 0.35,
+    MAX_NAKLON: 0.05,     // nenakláňa sa do strany
+    STOJAN: 0,
+    OSI: [0.1, -0.1],
+    kamera: { vzdialenost: 4.2, vyska: 2.2, ciel: 1.5 },
+    napoveda: 'E – zosadnúť · S alebo Medzerník – brzda',
+    polDlzka: 0.2, polSirka: 0.35,
+    jazdec: 'hoverboard',
+    model: () => vytvorModelHoverboardu(),
+    geometria: () => geometriaHoverboardu(),
+    material: () => materialDosky(),
+  },
+  onewheel: {
+    nazov: 'onewheeli',
+    MAX_RYCHLOST: 7.8,    // m/s (28 km/h)
+    SPRINT: 7.8,
+    ZRYCHLENIE: 2.2,
+    BRZDA: 4.5,
+    VALIVY_ODPOR: 0.4,
+    SVAH: 0.45,
+    RAZVOR: 0.7,
+    MAX_ZATOCENIE: 0.6,
+    POLOMER: 0.35,
+    MAX_NAKLON: 0.35,
+    STOJAN: 0.08,         // odložený leží šikmo na jednom nárazníku
+    OSI: [0.45, -0.45],
+    kamera: { vzdialenost: 4.4, vyska: 2.3, ciel: 1.5 },
+    napoveda: 'E – zosadnúť · S alebo Medzerník – brzda',
+    polDlzka: 0.5, polSirka: 0.25,
+    jazdec: 'bokom',
+    model: () => vytvorModelOnewheelu(),
+    geometria: () => geometriaOnewheelu(),
+    material: () => materialDosky(),
   },
 };
 

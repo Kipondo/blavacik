@@ -497,7 +497,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   `jazdec.js`); kľuky sa točia podľa rýchlosti (voľnobeh pri dobiehaní). Kamera je bližšie ako za autom. Vozidlo,
   z ktorého hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Modely sú v kóde (kolobežka 432,
   bicykel 1 676 trojuholníkov). Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je
-  nápoveda k autu). **Ľudia na kolobežkách a bicykloch** (`js/mikromobilita/npc-jazdci.js`, modul `jazdci-npc`):
+  nápoveda k autu). Zriedka (~5 % stanovíšť) leží na chodníku aj **hoverboard** (15 km/h, otáča sa na mieste) alebo
+  **onewheel** (28 km/h, Ďoďo stojí bokom, ľavá noha vpredu). **Ľudia na kolobežkách a bicykloch** (`js/mikromobilita/npc-jazdci.js`, modul `jazdci-npc`):
   najviac 6 naraz jazdí po červených cyklopruhoch (pravý pruh v smere cesty, ľavý proti) a cyklochodníkoch 50–180 m
   od hráča, 14–25 km/h, v zákrutách sa nakláňajú, pred hráčom zabrzdia. Jazdec je plný model NPC (študent, kuriér,
   korporátnik…) s rovnakou pózou ako hráč; ďalej ako 25 m zlúčená sieť LOD1 (tá istá kostra, 1 volanie kreslenia) –
@@ -555,8 +556,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
-- Mikromobilita (#97): elektrobicykel, hoverboard, onewheel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší
-  model), cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
+- Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.
