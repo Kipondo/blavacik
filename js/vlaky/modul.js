@@ -47,7 +47,6 @@ export default {
     this.hra = hra;
     this.pobyty = [];
     this.den = null;
-    this.rezervacie = [];
     this.minuta = -1;
     const [data, trate, modely] = await Promise.all([
       fetch('data/vlaky/poriadok.json').then((r) => r.json()).catch(() => null),
@@ -91,8 +90,7 @@ export default {
     const hra = this.hra, h = hra.hrac?.pozicia, s = hra.mapa?.data?.spawn?.hrac;
     if (!this.data || !h || !s || Math.hypot(h.x - s.x, h.z - s.z) > 30) return;
     const t = this.minutaDna();
-    this.scena = { od: t - 0.5, do: t + 5 };
-    this.rezervacie = [{ kolaj: '1', od: t - 6, do: t + 9 }];
+    this.scena = { den: (hra.stav.datumCas ?? new Date()).toDateString(), od: t - 0.5, do: t + 5 };
     this.den = null;
   },
 
@@ -106,11 +104,12 @@ export default {
     const kluc = d.toDateString();
     if (this.den === kluc) return;
     this.den = kluc;
-    this.pobyty = planDna(this.data, this.trate, d, this.rezervacie);
-    if (this.scena) {
+    const scena = this.scena?.den === kluc ? this.scena : null;     // len v deň štartu
+    this.pobyty = planDna(this.data, this.trate, d, scena ? [{ kolaj: '1', od: scena.od - 6, do: scena.do + 4 }] : []);
+    if (scena) {
       const suprava = { typ: '361', vozne: 7, dlzka: 17.2 + 7 * 26.4 };
       this.pobyty.push({ kolaj: '1', nastupiste: this.trate.kolaje['1']?.nastupiste ?? '1', prichod: null, odchod: null,
-        tPri: this.scena.od, tOdch: this.scena.do, zo: 'vychod', na: 'vychod', suprava, scena: true });
+        tPri: scena.od, tOdch: scena.do, zo: 'vychod', na: 'vychod', suprava, scena: true });
     }
     for (const p of this.pobyty) {
       p.vozne = vozneSupravy(p.suprava);

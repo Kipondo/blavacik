@@ -66,6 +66,8 @@ export function vytvorKolajnice(kolajnice, vyskopis) {
     if (k.typ === 'elektricka') {
       kolajnica(zjemni(k.body, 3), ROZCHOD, 0.24, 0.04);
     } else if (k.typ === 'zeleznica') {
+      // mosty: koľajnice na nadjazdoch kreslí js/mapa/mosty/nadjazdy.js; veľké mosty (Dunaj) by tu boli vo výške vody
+      if (k.most) continue;
       const body = zjemni(k.body, 5);
       kolajnica(body, ROZCHOD_ZELEZNICE, TEMENO_ZELEZNICE, 0.035);
       // pás pražcov
