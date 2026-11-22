@@ -22,6 +22,8 @@ export default {
     const hra = this.hra, h = hra.hrac?.pozicia;
     const s = hra.mapa?.data?.spawn?.hrac;
     if (!h || !s || Math.hypot(h.x - s.x, h.z - s.z) > 30) return;
+    // automatický test (testovacia trasa cez Playwright, ?meranie) ovláda kameru sám – scénku preskočíme
+    if (navigator.webdriver || new URLSearchParams(location.search).has('meranie')) return;
     this.faza = 'kamera';
     this.t = 0;
     hra.vstup.blokovane = true;

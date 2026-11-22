@@ -63,6 +63,12 @@ export default {
         this.dohladInterieru = this.interier?.viditelnost ?? 100;
         mi.userData.dohlad = { x: ri.x, z: ri.z, max: this.dohladInterieru, r: 40 };
       }
+      // interiér je pod strechou haly – tieň slnka nevrhá (ušetrí kreslenia v tieňovej mape), tiene len prijíma
+      if (!mi.userData.bezTiena) {
+        let hotovo = false;
+        mi.traverse((o) => { if (o.isMesh) { o.castShadow = false; hotovo = true; } });
+        if (hotovo) mi.userData.bezTiena = true;
+      }
       this.skupina.visible = mi.visible;
     }
     this.cas -= dt;

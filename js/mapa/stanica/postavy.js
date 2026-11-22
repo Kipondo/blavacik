@@ -57,7 +57,9 @@ export default {
       try {
         const spec = poskladajChodca(this.data, { profil: this.data.npc?.profily?.[p.profil] ? p.profil : null, semienko: 4242 + i * 17 });
         const npc = await vytvorNpc(spec, this.data);
-        npc.nastavLod(0);
+        // zlúčená sieť (LOD1) – jedno kreslenie na postavu; plný model len pri rozhovore zblízka (update)
+        npc.nastavLod(1);
+        p.lod = 1;
         const kosti = {};
         npc.koren.traverse((o) => { if (o.isBone && !kosti[o.name]) kosti[o.name] = o; });
         p.npc = npc; p.kosti = kosti; p.y = teren(p.x, p.z);
@@ -132,8 +134,13 @@ export default {
     if (!this.skupina.visible) return this.nastavNapovedu(null);
     // filozof dýcha (animácia státia), ostatní sú nehybní (sedia, spia)
     for (const p of this.postavy) if (p.poza === 'stoj') { p.npc.rychlost = 0; p.npc.animuj(dt); }
-    // E pri postave → veta / rozhovor
     const h = hra.hrac?.pozicia;
+    // plný model (tvár, oblečenie) len do 8 m od hráča
+    for (const p of this.postavy) {
+      const lod = h && Math.hypot(p.x - h.x, p.z - h.z) < 8 ? 0 : 1;
+      if (lod !== p.lod) { p.lod = lod; p.npc.nastavLod(lod); }
+    }
+    // E pri postave → veta / rozhovor
     if (!h || hra.stav.auto || hra.titulky?.bezi) return this.nastavNapovedu(null);
     const naj = this.postavy.find((p) => Math.hypot(p.x - h.x, p.z - h.z) < DOSAH_REC);
     if (!naj) return this.nastavNapovedu(null);
