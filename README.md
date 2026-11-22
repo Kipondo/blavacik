@@ -225,6 +225,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   zatáčanie, priľnavosť, hmotnosť) – platia aj pre auto, ktoré si hráč vezme z premávky alebo z parkoviska. Všetko sa
   ladí v JSON bez zmeny kódu. Modely z balíkov CC0, kolobežky, bicykle a jazdci (#97 body 1–2) sú ďalšia časť.
   Snímky: `docs/snimky/vozidla/`.
+- **Kvalitnejšie modely áut bez spomalenia** (`js/auto/model-auta.js`, `js/doprava/premavka/model.js`): okná sa
+  k streche zužujú, boky karosérie sú mierne vypuklé, čierne lemy blatníkov, škáry dverí, lišta pod oknami, kľučky,
+  pneumatiky so zaobleným bokom a disky s piatimi lúčmi (textúra). Nehybné časti sú zlúčené podľa materiálu, takže
+  auto hráča a zaparkované autá majú **17 sietí namiesto 27** (menej volaní kreslenia); auto v premávke má
+  ~2 100 trojuholníkov namiesto ~1 400 (stále jedna inštancia na typ). Poškodenie pri náraze funguje ako predtým.
 - **Presné pamiatky – 1. dávka** (noc 22. 11.; `tools/blender/presne/`, `python3 tools/blender/presne_blender.py`):
   **Slavín** – terasa so schodmi, pietna sieň s lizénami, bronzovými dverami a reliéfnymi poľami, zužujúci sa pylón
   so žliabkami a bronzová socha vojaka so zástavou (~39,5 m); **Modrý kostolík** – okrúhla veža s pásmi, okienkami,
