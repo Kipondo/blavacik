@@ -22,9 +22,11 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
 ## Hotové
 - (pred nocou) PR #100 Átriaky – úprava podľa spätnej väzby: bez vonkajších schodov, ochoz z izby 314,
   vchod so šípkou a značkou na minimape, kamera a terasy, kolízie (commit e9b3d18, komentár v #91).
+- **#101 → PR #102** `feature/titulka-v2`: titulka v2 + načítavanie s vlakom (reliéf `tools/ui/relief_slovenska.py`).
+  Komentár v #101. Testy: Playwright `/tmp/tit/test.py` (titulka, Nastavenia, Ovládanie, pauza), `/tmp/tit/nac.py`.
 
 ## Rozpracované
-- #101 titulka a načítavanie – vetva `feature/titulka-v2`.
+- (nič)
 
 ## Ďalšie na rade
 - Fáza 2a: #62 …
