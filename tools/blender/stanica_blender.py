@@ -333,8 +333,9 @@ def materialy():
         # vrch prístreškov podľa ortofota 2023: 4. a 5. nástupište takmer biele, 2. a 3. stredne sivé
         'pristresok_biely': material('pristresok-biely', '#cfdedc', drsnost=0.7, kov=0.15),
         'pristresok_sivy': material('pristresok-sivy', '#8c928f', drsnost=0.7, kov=0.15),
-        # tmavosivé panely podhľadu (v tieni prístrešku by tmavšia farba pôsobila ako čierna)
-        'podhlad_pristresku': material('podhlad-pristresku', '#5a5d62', drsnost=0.8),
+        # tmavosivé panely podhľadu; plochy otočené dole dostanú v hre málo svetla – slabé vlastné svetlo napodobní
+        # svetlo odrazené od nástupišťa (inak by podhľad pôsobil ako čierny)
+        'podhlad_pristresku': svetlo('podhlad-pristresku', '#5a5d62', sila=0.35),
         'hrana_pristresku': material('hrana-pristresku', '#c9ccc9', drsnost=0.6, kov=0.2),
         'plech_n1': material('plech-nastupiste1', '#7d8a7e', drsnost=0.6, kov=0.3),
         'svetlo_pristresku': svetlo('svetlo-pristresok', '#f4f1e6', sila=1.6),
@@ -1147,11 +1148,12 @@ def interier(M, krizenia):
         return (min(kand, key=lambda q: (q[0], abs(q[1])))[2], A, Dp) if kand else None
     # rad stojí chrbtom k rovnej stene výpravnej budovy (sever = −v), pozdĺž osi haly; chodci idú popred pokladne,
     # nie cez ne. Ak sa také miesto nenájde, rad naprieč halou ako predtým (najďalej na západ).
+    # (nie chrbtom k presklenej fasáde – z námestia by bolo vidieť len zadnú stenu pokladní)
     pokladne = None
     for rez in (-0.4, -1.0, None):
-        for Dp in ((vx, vy), (-vx, -vy)):
-            pokladne = pokladne or najdi_rad((ux, uy), Dp, rez, True)
-    pokladne = pokladne or najdi_rad((vx, vy), (ux, uy), -1.0, False)
+        pokladne = pokladne or najdi_rad((ux, uy), (vx, vy), rez, True)
+    # inak pôvodné miesto: naprieč halou najďalej na západ (chodci pult obídu – je to pre nich múr)
+    pokladne = pokladne or najdi_rad((vx, vy), (ux, uy), None, False)
     miesta = {}
     if pokladne is not None:
         c, A, Dp = pokladne
