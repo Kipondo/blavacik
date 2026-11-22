@@ -36,13 +36,18 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
 
 - **#53/#64 doplnenie PR #103**: LOD2 aj na Nivách a v Petržalke (spolu 96 dlaždíc).
 - **#97 → PR #105** `feature/vozidla-typy`: typy áut, farby, taxíky Hladoš/Fičák, kuriéri, jazda podľa typu.
+- **#96 → PR #106** `feature/chodza-plynula` (03:10): blend space stoj–chôdza–klus–beh so spoločnou fázou kroku,
+  krok zmeraný z klipu (`js/chodec/postava/krok.js`) – chôdza bez kĺzania nôh, rozbeh/brzdenie, otáčanie 540 °/s,
+  náklon do zákruty, kĺzanie popri stene, rezerva na skok; výšky chodcov z normálneho rozdelenia. GIF pred/po.
+  Komentár v #96. Nespravené: nové klipy (dlhší krok behu), foot IK, hlava za kamerou, oblečenie podľa počasia,
+  limit schodu 0,35 m (riziko zaseknutia na švoch terénu).
 
 ## Rozpracované
 - (nič)
 
 ## Ďalšie na rade
-- Fáza 3: #96 chôdza, fyzika a rozmanitejší chodci.
-- Ráno: súhrn do #59, 3 issues s najväčšími problémami.
+- Pamiatky – 2. dávka presných modelov (Staré Mesto / Mlynská dolina), ak budú podklady.
+- Ráno (~7:30): súhrn do #59, 3 issues s najväčšími problémami, PR s týmto súborom.
 
 ## Rozhodnutia a poznámky
 - Otvorené PR z predchádzajúcich dní (#98, #99, #100) ostávajú nezlúčené – majiteľ v noci zakázal merge.
