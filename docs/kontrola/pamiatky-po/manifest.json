@@ -1,0 +1,82 @@
+{
+ "nazov": "pamiatky-po",
+ "commit": "?",
+ "cas": "2026-11-22T19:04",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "safarikovo-namestie",
+   "nazov": "Šafárikovo námestie",
+   "x": 620,
+   "z": 215,
+   "ms": 14502,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "safarikovo-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "safarikovo-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "univerzita-komenskeho",
+   "nazov": "Univerzita Komenského – rotunda",
+   "x": 640,
+   "z": 245,
+   "ms": 145011,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "univerzita-komenskeho-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "eurovea-vajce",
+   "nazov": "Eurovea – presklené vajce",
+   "x": 900,
+   "z": 300,
+   "ms": 2916,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "eurovea-vajce-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "eurovea-tower",
+   "nazov": "Eurovea Tower",
+   "x": 1480,
+   "z": 470,
+   "ms": 182831,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "eurovea-tower-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "sky-park",
+   "nazov": "Sky Park",
+   "x": 1230,
+   "z": -60,
+   "ms": 182648,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "sky-park-ulica.jpg"
+    ]
+   ]
+  }
+ ]
+}
