@@ -50,13 +50,24 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
   Doplnok (03:40): mestské bicykle – sedí, šliape (IK na pedále), Shift šprint 35 km/h; spoločná fyzika `vozidlo.js`.
   Doplnok (04:00): ľudia na kolobežkách a bicykloch po cyklopruhoch (`npc-jazdci.js`, max. 6, LOD1 za 25 m).
 
+- **Hoverboard a onewheel** v PR #107 (05:55).
+- **#60 → PR #108** `feature/kontrola-trasa`: testovacia trasa mesta (`tools/kontrola/trasa.py`, 17 bodov, galéria
+  a porovnanie behov), prvý beh `docs/kontrola/2026-11-22/`. Komentár v #60 so zoznamom nájdených chýb.
+- **#96 doplnok:** rozhliadanie pri státí (PR #106).
+- **Ráno:** issues #109 (laser na celé mesto), #110 (výkon detailných dlaždíc), #111 (domy na svahu); súhrn v #59.
+
 ## Rozpracované
-- (nič)
+- `fix/budovy-na-svahu` (#111): prízemie domu na svahu v strede rozdielu výšok (najviac 0,75 m pod najvyšším
+  bodom) – snímky z trasy, PR ráno.
 
 ## Ďalšie na rade
-- Pamiatky – 2. dávka presných modelov (Staré Mesto / Mlynská dolina), ak budú podklady.
-- Prehliadka mesta (Šafárikovo nám., Eurovea, Petržalka, Mlynská dolina) na súhrn 3 najväčších problémov.
-- Ráno (~7:30): súhrn do #59, 3 issues s najväčšími problémami, PR s týmto súborom.
+- Doladiť body trasy (Hlavná stanica, Kamzík, Obchodná, Aupark) a pustiť trasu s `--gpu` po každom PR o meste.
+- #111 poriadne: prízemie podľa uličnej strany a schodovité prízemie dlhých domov.
+- #110 výkon: LOD zeme po štvorcoch, stromy bližšie, LOD pamiatok.
+- #109 laser na celé mesto – po rozhodnutí o veľkosti dát.
 
 ## Rozhodnutia a poznámky
 - Otvorené PR z predchádzajúcich dní (#98, #99, #100) ostávajú nezlúčené – majiteľ v noci zakázal merge.
+- Dvojice otvorených PR som skúsil zlúčiť: skutočný konflikt v kóde je len #99 × #102 (`css/style.css`,
+  `js/mapa/dlazdice/sprava-dlazdic.js`); `js/moduly.js` a `README.md` stačí spojiť (ponechať oba riadky).
+- V sandboxe sú len 2 jadrá a 7 GB RAM – dva prehliadače naraz spadnú (Target crashed), trasa beží ~5 min na bod.
