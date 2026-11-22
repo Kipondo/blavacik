@@ -41,12 +41,13 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
   náklon do zákruty, kĺzanie popri stene, rezerva na skok; výšky chodcov z normálneho rozdelenia. GIF pred/po.
   Komentár v #96. Nespravené: nové klipy (dlhší krok behu), foot IK, hlava za kamerou, oblečenie podľa počasia,
   limit schodu 0,35 m (riziko zaseknutia na švoch terénu).
+  Doplnok (03:50): nohy na teréne (IK, chodidlo so svahom) a hlava za kamerou – `telo-na-terene.js`.
 
 - **PR #100 doplnok** (commit 2ce6f7d): nápovedy pri dverách internátu neboli vidieť – HUD ich každý snímok skryl;
   teraz idú cez `hra.stav.napoveda`. Komentár v PR #100.
 - **#97 → PR #107** `feature/kolobezky` (03:35): zdieľané kolobežky Fičák na chodníkoch (InstancedMesh), jazda 25 km/h
   s náklonom, Ďoďo drží riadidlá (IK), E nasadnúť/zosadnúť. Komentár v #97.
-  Doplnok (04:05): mestské bicykle – sedí, šliape (IK na pedále), Shift šprint 35 km/h; spoločná fyzika `vozidlo.js`.
+  Doplnok (03:40): mestské bicykle – sedí, šliape (IK na pedále), Shift šprint 35 km/h; spoločná fyzika `vozidlo.js`.
 
 ## Rozpracované
 - (nič)
