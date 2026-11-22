@@ -36,19 +36,41 @@ window.__kontrola = {
     const k = hra.moduly.find((m) => m.nazov === 'kamera');
     if (k && !k.__zmrazena) { k.__zmrazena = true; k.update = () => {}; k.updateVzdy = () => {}; }
   },
+  plneRozlisenie() {
+    // automatické rozlíšenie (#61, #99) pri softvérovom kreslení zníži rozlíšenie plátna – snímky rôznych
+    // behov by mali rôznu veľkosť; na snímku plné rozlíšenie predvoľby (čakanie na dlaždice beží pri nižšom)
+    const r = hra.moduly.find((m) => m.nazov === 'rozlisenie');
+    if (!r) return;
+    r.podiel = 1; r._nastav?.(hra);
+  },
   nastavCas(hodina) {
     if (hodina === null || !hra.hodiny?.nastav) return;
     const d = new Date(hra.stav.datumCas ?? Date.now());
     d.setHours(Math.floor(hodina), Math.round((hodina % 1) * 60), 0, 0);
     hra.hodiny.nastav(d);
   },
-  async presun(x, z, limitMs, hodina) {
+  /** Pevná kamera na bode (y nad terénom). Moduly podľa polohy kamery (dohľad a pamiatky za hmlou #99,
+   *  drobnosti zblízka, 3D fasády, tráva, stromy) sa tak počas čakania pripravia na tento bod,
+   *  nie na pohľad z predošlého bodu (inak napr. chýbali Átriaky a lávky viseli vo vzduchu). */
+  kamera(kamera, ciel) {
+    this.zmrazKameru();
+    const T = hra.THREE, k = hra.kamera;
+    const v = (x, z) => hra.mapa.vyska(x, z);
+    k.position.set(kamera[0], v(kamera[0], kamera[2]) + kamera[1], kamera[2]);
+    k.lookAt(new T.Vector3(ciel[0], v(ciel[0], ciel[2]) + ciel[1], ciel[2]));
+    k.updateMatrixWorld();
+    hra.scena.getObjectByName('obloha')?.position.copy(k.position);
+    const d = hra.moduly.find((m) => m.nazov === 'dohlad');
+    if (d) { d.cas = 0; d.updateVzdy?.(0, hra); }   // viditeľnosť podľa novej polohy kamery hneď
+  },
+  async presun(x, z, limitMs, hodina, kamera, ciel) {
     this.nastavCas(hodina);   // svetlo a nálada sa prepočítajú počas čakania
     const h = hra.hrac;
     if (hra.stav.auto) hra.hrac.vystup?.();
     const y = hra.mapa.vyska(x, z);
     h.pozicia.set(x, y, z); h.vx = 0; h.vz = 0; h.vy = 0; h.rychlost = 0;
     hra.posli('teleport', { x, y, z });
+    if (kamera) this.kamera(kamera, ciel);
     const s = hra.mapa.dlazdice, t0 = performance.now();
     const cakaj = (ms) => new Promise((r) => setTimeout(r, ms));
     // hotovo, keď sú postavené detailné dlaždice do ~450 m (tie je na snímkach vidieť zblízka);
@@ -64,15 +86,10 @@ window.__kontrola = {
     return { ms: Math.round(performance.now() - t0), hotovo };
   },
   snimka(kamera, ciel) {
-    this.zmrazKameru();
-    const T = hra.THREE, k = hra.kamera;
-    const v = (x, z) => hra.mapa.vyska(x, z);
-    k.position.set(kamera[0], v(kamera[0], kamera[2]) + kamera[1], kamera[2]);
-    k.lookAt(new T.Vector3(ciel[0], v(ciel[0], ciel[2]) + ciel[1], ciel[2]));
-    k.updateMatrixWorld();
-    hra.scena.getObjectByName('obloha')?.position.copy(k.position);
+    this.kamera(kamera, ciel);
+    this.plneRozlisenie();
     // vykreslí a hneď prečíta plátno (v tej istej úlohe – netreba preserveDrawingBuffer, bez HUD a minimapy)
-    (hra.vykresli ?? (() => hra.renderer.render(hra.scena, k)))();
+    (hra.vykresli ?? (() => hra.renderer.render(hra.scena, hra.kamera)))();
     return hra.renderer.domElement.toDataURL('image/jpeg', 0.88);
   },
 };
@@ -169,12 +186,18 @@ async def hlavna(arg):
                     'hodina': arg.hodina, 'body': []}
         for b in body:
             print(f"{b['nazov']} ({b['x']}, {b['z']})…", flush=True)
-            r = await strana.evaluate(f"__kontrola.presun({b['x']}, {b['z']}, {arg.limit * 1000}, {arg.hodina})")
+            pohlady = pohlady_bodu(b)
+            _, k0, c0 = pohlady[0]
+            r = await strana.evaluate(f"__kontrola.presun({b['x']}, {b['z']}, {arg.limit * 1000}, {arg.hodina}, {json.dumps(k0)}, {json.dumps(c0)})")
             ms = r['ms']
             if not r['hotovo']:
                 print(f'  pozor: za {arg.limit} s sa nepostavili všetky dlaždice okolia – snímka môže mať prázdne miesta')
             snimky = []
-            for meno, kamera, ciel in pohlady_bodu(b):
+            for i, (meno, kamera, ciel) in enumerate(pohlady):
+                if i > 0:
+                    # ďalší pohľad (zhora): kamera vopred a pár snímok hry, nech sa moduly podľa kamery prepočítajú
+                    await strana.evaluate(f"__kontrola.kamera({json.dumps(kamera)}, {json.dumps(ciel)})")
+                    await strana.evaluate("new Promise((r) => { let n = 0; const f = () => (++n >= 4 ? setTimeout(r, 500) : requestAnimationFrame(f)); requestAnimationFrame(f); })")
                 await strana.evaluate("new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))")
                 url = await strana.evaluate(f"__kontrola.snimka({json.dumps(kamera)}, {json.dumps(ciel)})")
                 subor = f"{b['id']}-{meno}.jpg"
