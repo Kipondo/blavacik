@@ -90,6 +90,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Mosty, ktoré sa napájajú na iný most (rampy križovatiek), majú „voľný“ koniec bez kotvy na teréne. Po mostoch
   sa dá chodiť aj jazdiť (`hra.mosty.vyska(x, z, y)` – na mostovke, ak je hráč alebo auto v jej výške, pod mostom terén).
   Cesty, chodníky a koľaje na moste sa už nekreslia na zem. Snímky: `docs/snimky/nadjazdy/`.
+- **Domy na svahu** (`js/mapa/budovy/budovy.js`): prízemie fasády už nezačína v najvyššom bode terénu pod domom –
+  pri miernom svahu je v strede (na Michalskej boli dvere a výklady 1,3 m nad chodníkom, teraz najviac ~0,65 m),
+  pri strmom najviac 0,75 m pod najvyšším bodom (dolná strana má sokel ako suterén). Snímky: `docs/snimky/budovy-svah/`.
 - **Typy budov v celom meste** (`js/mapa/budovy/typ-budovy.js`): každá budova dostane typ – panelák, rodinný dom,
   meštiansky dom, bytovka, hala, garáž/kôlňa, obchod, kancelárie, historická – podľa OSM typu (prezradeného odhadnutou
   výškou, neskôr `typOsm`), tvaru pôdorysu (plocha, šírka, doska/bod), strechy a štvrte. Podľa typu sa vyberie fasáda,
