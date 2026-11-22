@@ -42,11 +42,17 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
   Komentár v #96. Nespravené: nové klipy (dlhší krok behu), foot IK, hlava za kamerou, oblečenie podľa počasia,
   limit schodu 0,35 m (riziko zaseknutia na švoch terénu).
 
+- **PR #100 doplnok** (commit 2ce6f7d): nápovedy pri dverách internátu neboli vidieť – HUD ich každý snímok skryl;
+  teraz idú cez `hra.stav.napoveda`. Komentár v PR #100.
+- **#97 → PR #107** `feature/kolobezky` (03:35): zdieľané kolobežky Fičák na chodníkoch (InstancedMesh), jazda 25 km/h
+  s náklonom, Ďoďo drží riadidlá (IK), E nasadnúť/zosadnúť. Komentár v #97.
+
 ## Rozpracované
 - (nič)
 
 ## Ďalšie na rade
 - Pamiatky – 2. dávka presných modelov (Staré Mesto / Mlynská dolina), ak budú podklady.
+- Prehliadka mesta (Šafárikovo nám., Eurovea, Petržalka, Mlynská dolina) na súhrn 3 najväčších problémov.
 - Ráno (~7:30): súhrn do #59, 3 issues s najväčšími problémami, PR s týmto súborom.
 
 ## Rozhodnutia a poznámky
