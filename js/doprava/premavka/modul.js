@@ -46,6 +46,14 @@ export default {
     this.cas = 0;
     this.dalsiSpawn = 0;
     this.prvyRaz = true;
+    // najviac áut naraz podľa kvality grafiky (js/grafika/predvolby.js); pri znížení zmiznú najvzdialenejšie
+    this.limit = Math.min(MAX_AUT, hra.stav.grafika?.aut ?? MAX_AUT);
+    hra.na('kvalita', (g) => {
+      this.limit = Math.min(MAX_AUT, g.aut ?? MAX_AUT);
+      const p = hra.stav.pozicia;
+      const zive = this.auta.filter((a) => !a.zruseny).sort((a, b) => Math.hypot(b.x - p.x, b.z - p.z) - Math.hypot(a.x - p.x, a.z - p.z));
+      for (let i = 0; i < zive.length - this.limit; i++) this._zrus(zive[i]);
+    });
     hra.doprava ??= {};
     hra.doprava.npcAuta = [];
 
@@ -130,7 +138,7 @@ export default {
     }
     let pocet = 0;
     for (const a of this.auta) if (Math.hypot(a.x - p.x, a.z - p.z) <= R) pocet++;
-    const chyba = Math.min(MAX_AUT - this.auta.length, Math.floor(ziadane - pocet));
+    const chyba = Math.min(this.limit - this.auta.length, Math.floor(ziadane - pocet));
     if (chyba <= 0 || !kandidati.length) return;
     const naraz = this.prvyRaz ? chyba : Math.min(chyba, 10);
     let pokusy = naraz * 4;

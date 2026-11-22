@@ -43,6 +43,14 @@ export default {
     this.cas = 0;
     this.dalsiSpawn = 0;
     this.prvyRaz = true;
+    // najviac chodcov naraz podľa kvality grafiky (js/grafika/predvolby.js); pri znížení zmiznú najvzdialenejší
+    this.limit = Math.min(MAX_CHODCOV, hra.stav.grafika?.chodcov ?? MAX_CHODCOV);
+    hra.na('kvalita', (g) => {
+      this.limit = Math.min(MAX_CHODCOV, g.chodcov ?? MAX_CHODCOV);
+      const p = hra.stav.pozicia;
+      const zivi = this.chodci.filter((c) => !c.zruseny).sort((a, b) => Math.hypot(b.x - p.x, b.z - p.z) - Math.hypot(a.x - p.x, a.z - p.z));
+      for (let i = 0; i < zivi.length - this.limit; i++) this._zrus(zivi[i]);
+    });
     this.plne = new Map();       // chodec → plný model (npc z vytvorNpc)
     this.frustum = new THREE.Frustum();
     hra.chodci = { zoznam: [] };
@@ -133,7 +141,7 @@ export default {
     }
     let pocet = 0;
     for (const c of this.chodci) if (Math.hypot(c.x - p.x, c.z - p.z) <= R_RIEDKE) pocet++;
-    let chyba = Math.min(MAX_CHODCOV - this.chodci.length, Math.floor(ziadane - pocet));
+    let chyba = Math.min(this.limit - this.chodci.length, Math.floor(ziadane - pocet));
     if (chyba <= 0 || !kandidati.length) return;
     if (!this.prvyRaz) chyba = Math.min(chyba, 12);
     let pokusy = chyba * 3;

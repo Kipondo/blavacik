@@ -1,31 +1,22 @@
 // Modul: grafické efekty a kvalita grafiky.
 //   – zatienenie kútov (AO), vzdušná perspektíva, farebné ladenie, vyhladzovanie hrán (vykreslovac.js),
 //   – ostrejšie a stabilné tiene slnka okolo hráča (veľkosť mapy a dosah podľa kvality, svet.js ich zarovnáva),
-//   – výber kvality v menu: nízka (bez efektov), stredná, vysoká.
+//   – úroveň efektov a tiene podľa kvality grafiky (hra.stav.grafika, js/grafika/kvalita.js): nízka bez efektov a tieňov.
 // Zverejňuje hra.vykresli() – main.js ním kreslí snímok (bez modulu kreslí priamo renderer).
 
 import * as THREE from 'three';
 import '../tiene.js';
 import { Vykreslovac } from './vykreslovac.js';
 import { NALADA } from '../nalada.js';
-import { nacitajKvalitu, vlozKvalituDoMenu } from '../../ui/nastavenia-grafiky.js';
 
-const KVALITA = {
-  nizka: { efekty: false, tiene: 2048, dosahTienov: 80 },
-  stredna: { efekty: true, msaa: 2, vzorkyAo: 8, ao: true, tiene: 2048, dosahTienov: 100 },
-  vysoka: { efekty: true, msaa: 4, vzorkyAo: 12, ao: true, tiene: 4096, dosahTienov: 120 },
+// úrovne obrazových efektov (hra.stav.grafika.efekty); tiene sú v predvoľbách (js/grafika/predvolby.js)
+const EFEKTY = {
+  nizka: { efekty: false },
+  stredna: { efekty: true, msaa: 2, vzorkyAo: 8, ao: true },
+  vysoka: { efekty: true, msaa: 4, vzorkyAo: 12, ao: true },
 };
-
-/** Integrovaná grafika (notebooky, kancelárske PC) začne na strednej kvalite, samostatná karta na vysokej. */
-function predvolenaKvalita(renderer) {
-  try {
-    const gl = renderer.getContext();
-    const info = gl.getExtension('WEBGL_debug_renderer_info');
-    const nazov = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
-    if (/intel|iris|uhd|radeon\(tm\) graphics|vega|mali|adreno|swiftshader|llvmpipe/i.test(nazov)) return 'stredna';
-  } catch { /* nevadí */ }
-  return 'vysoka';
-}
+// bez predvoľby kvality (napr. ručná mapa): ako vysoká
+const BEZ_PREDVOLBY = { efekty: 'vysoka', tiene: 4096, dosahTienov: 120 };
 
 export default {
   nazov: 'efekty',
@@ -33,16 +24,17 @@ export default {
 
   init(hra) {
     this.slnko = null;
-    hra.scena.traverse((o) => { if (!this.slnko && o.isDirectionalLight && o.castShadow) this.slnko = o; });
+    // slnko (svet.js) – podľa smeru, nie podľa tieňa: na nízkej kvalite tieň nevrhá
+    hra.scena.traverse((o) => { if (!this.slnko && o.isDirectionalLight && o.userData.smer && o.castShadow) this.slnko = o; });
+    this.maTiene = !!this.slnko;
     this.vykreslovac = new Vykreslovac(hra.renderer, hra.scena, hra.kamera);
     this._smer = new THREE.Vector3();
     this.nastavNaladu(hra, NALADA);
     // deň a noc (js/grafika/den-noc.js) posiela náladu podľa herného času
     hra.na('nalada', (n) => this.nastavNaladu(hra, n));
 
-    this.kvalita = nacitajKvalitu(predvolenaKvalita(hra.renderer));
-    vlozKvalituDoMenu(this.kvalita, (k) => this.nastavKvalitu(k));
-    this.nastavKvalitu(this.kvalita);
+    this.nastavKvalitu(hra.stav.grafika ?? BEZ_PREDVOLBY);
+    hra.na('kvalita', (g) => this.nastavKvalitu(g));
 
     hra.vykresli = () => {
       if (this.nastavenie.efekty) this.vykreslovac.render();
@@ -60,22 +52,23 @@ export default {
     u.saturacia.value = e.saturacia; u.kontrast.value = e.kontrast; u.vineta.value = e.vineta; u.silaAo.value = e.silaAo;
   },
 
-  nastavKvalitu(kvalita) {
-    this.kvalita = kvalita;
-    this.nastavenie = KVALITA[kvalita] ?? KVALITA.vysoka;
+  /** g = hra.stav.grafika (efekty, tiene, dosahTienov). Vypnutie/zapnutie tieňov raz preloží shadery (krátke zaseknutie). */
+  nastavKvalitu(g) {
+    this.nastavenie = EFEKTY[g.efekty] ?? EFEKTY.vysoka;
     const n = this.nastavenie;
     if (n.efekty) this.vykreslovac.nastav({ msaa: n.msaa, vzorkyAo: n.vzorkyAo, ao: n.ao });
     const s = this.slnko;
-    if (s) {
-      if (s.shadow.mapSize.x !== n.tiene) {
-        s.shadow.mapSize.set(n.tiene, n.tiene);
-        s.shadow.map?.dispose();
-        s.shadow.map = null;
-      }
-      const c = s.shadow.camera;
-      c.left = -n.dosahTienov; c.right = n.dosahTienov; c.top = n.dosahTienov; c.bottom = -n.dosahTienov;
-      c.updateProjectionMatrix();
+    if (!s) return;
+    s.castShadow = this.maTiene && g.tiene > 0;
+    if (!s.castShadow) return;
+    if (s.shadow.mapSize.x !== g.tiene) {
+      s.shadow.mapSize.set(g.tiene, g.tiene);
+      s.shadow.map?.dispose();
+      s.shadow.map = null;
     }
+    const c = s.shadow.camera;
+    c.left = -g.dosahTienov; c.right = g.dosahTienov; c.top = g.dosahTienov; c.bottom = -g.dosahTienov;
+    c.updateProjectionMatrix();
   },
 
   updateVzdy(dt, hra) {
