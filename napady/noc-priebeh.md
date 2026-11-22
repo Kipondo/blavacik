@@ -46,6 +46,7 @@ Tento súbor je na vetve `feature/noc-priebeh` (PR otvorený na konci noci). Pra
   teraz idú cez `hra.stav.napoveda`. Komentár v PR #100.
 - **#97 → PR #107** `feature/kolobezky` (03:35): zdieľané kolobežky Fičák na chodníkoch (InstancedMesh), jazda 25 km/h
   s náklonom, Ďoďo drží riadidlá (IK), E nasadnúť/zosadnúť. Komentár v #97.
+  Doplnok (04:05): mestské bicykle – sedí, šliape (IK na pedále), Shift šprint 35 km/h; spoločná fyzika `vozidlo.js`.
 
 ## Rozpracované
 - (nič)
