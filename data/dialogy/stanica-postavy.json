@@ -1,0 +1,23 @@
+{
+  "id": "stanica-postavy",
+  "popis": "Krátke vety ľudí bez domova v hale Hlavnej stanice (E pri postave). Humor s dôstojnosťou – nie sú terčom vtipu.",
+  "postavy": {
+    "spiaci": { "meno": "Pán na lavičke", "farba": "#9fb7c9" },
+    "sediaci": { "meno": "Pán s novinami", "farba": "#c9b79f" },
+    "pani": { "meno": "Pani pri automatoch", "farba": "#d6a0b5" }
+  },
+  "repliky": {
+    "spiaci": [
+      "Hm? Nie, nespím. Čakám na vlak, ktorý nikam nejde. Má aspoň presný odchod.",
+      "Zobuď ma, keď príde ten, čo nemešká. Ale nebuď ma zbytočne."
+    ],
+    "sediaci": [
+      "Noviny sú včerajšie, ale ceny sú tie isté. Takže sú vlastne aktuálne.",
+      "Tabuľa hovorí meškanie päť minút. Tabuľa je optimistka. Ja ju mám rád."
+    ],
+    "pani": [
+      "Automat mi zjedol dve eurá a nič. Tak sme si kvit, aj ja mu kedysi zjedla dve tyčinky.",
+      "Bratislava? Krásne mesto. Hlavne z lavičky, keď prší a ty sedíš pod strechou."
+    ]
+  }
+}

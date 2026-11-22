@@ -102,7 +102,12 @@ def spusti_server(port):
         def log_message(self, *a):
             pass
     obsluha = functools.partial(Tichy, directory=str(KOREN))
-    srv = http.server.ThreadingHTTPServer(('127.0.0.1', port), obsluha)
+
+    class Server(http.server.ThreadingHTTPServer):
+        # Windows dodržiava frontu spojení presne (predvolene 5) – hra naraz sťahuje desiatky dlaždíc a zvyšok by
+        # dostal „connection refused“ (v hre „Failed to fetch“ a prázdne miesta na snímkach)
+        request_queue_size = 256
+    srv = Server(('127.0.0.1', port), obsluha)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv
 

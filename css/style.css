@@ -130,3 +130,11 @@ html, body {
 /* prechod cez dvere internátu (js/mapa/atriaky/internat.js) */
 .internat-clona { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 7; transition: opacity 0.35s; }
 .internat-clona.zapnuta { opacity: 1; }
+
+/* titulky dialógov (js/ui/titulky.js) */
+.ui-titulky {
+  position: absolute; bottom: 74px; left: 50%; transform: translateX(-50%);
+  max-width: min(760px, 86vw); background: rgba(12, 16, 24, 0.78); padding: 10px 18px; border-radius: 10px;
+  font-size: 19px; line-height: 1.4; text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+.ui-titulky b { margin-right: 8px; }
