@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Náhľad pamiatky – Blaváčik</title>
+  <!-- Náhľad modelu pamiatky z Blendera bez celého mesta (na porovnanie s fotkami, snímky pred/po).
+       nahlad-pamiatky.html?m=sm-modry-kostolik&az=30&el=20&d=1.4  (m = súbor v assets/pamiatky/ bez .glb.gz,
+       az = smer pohľadu v stupňoch od juhu po smere hodín, el = výška kamery v stupňoch, d = vzdialenosť × veľkosť) -->
+  <style>html, body { margin: 0; height: 100%; background: #c9d6e2; overflow: hidden; } #info { position: fixed; left: 10px; top: 8px; font: 13px system-ui; color: #223; }</style>
+  <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }</script>
+</head>
+<body>
+<div id="info"></div>
+<script type="module">
+import * as THREE from 'three';
+import { nacitajModelPamiatky } from './js/mapa/pamiatky/model-glb.js';
+const q = new URLSearchParams(location.search);
+const meno = q.get('m') ?? 'sm-modry-kostolik';
+const az = THREE.MathUtils.degToRad(Number(q.get('az') ?? 30));
+const el = THREE.MathUtils.degToRad(Number(q.get('el') ?? 18));
+const d = Number(q.get('d') ?? 1.5);
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+const scena = new THREE.Scene();
+scena.background = new THREE.Color('#c9d6e2');
+scena.add(new THREE.HemisphereLight('#dfe9f5', '#6b6455', 1.4));
+const slnko = new THREE.DirectionalLight('#fff3df', 2.6);
+scena.add(slnko);
+const kamera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.5, 5000);
+const model = await nacitajModelPamiatky(meno, { ao: false, gz: true });
+if (!model) { document.getElementById('info').textContent = `Model ${meno} sa nenačítal.`; throw new Error('model'); }
+scena.add(model);
+const box = new THREE.Box3().setFromObject(model);
+const stred = box.getCenter(new THREE.Vector3()), vel = box.getSize(new THREE.Vector3());
+const r = Math.max(vel.x, vel.y, vel.z);
+const zem = new THREE.Mesh(new THREE.PlaneGeometry(r * 8, r * 8), new THREE.MeshStandardMaterial({ color: '#8f9a7c', roughness: 1 }));
+zem.rotation.x = -Math.PI / 2; zem.position.set(stred.x, box.min.y - 0.05, stred.z); zem.receiveShadow = true;
+scena.add(zem);
+slnko.position.set(stred.x - r, box.max.y + r * 1.5, stred.z + r * 0.8);
+slnko.target.position.copy(stred); scena.add(slnko.target);
+slnko.castShadow = true; slnko.shadow.mapSize.set(2048, 2048);
+Object.assign(slnko.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: r * 6 });
+const vzd = r * d;
+kamera.position.set(stred.x + Math.sin(az) * Math.cos(el) * vzd, stred.y + Math.sin(el) * vzd, stred.z + Math.cos(az) * Math.cos(el) * vzd);
+kamera.lookAt(stred);
+renderer.render(scena, kamera);
+document.getElementById('info').textContent = `${meno}: ${vel.x.toFixed(1)} × ${vel.z.toFixed(1)} m, výška ${vel.y.toFixed(1)} m`;
+window.hotovo = true;
+</script>
+</body>
+</html>

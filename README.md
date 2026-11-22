@@ -78,6 +78,14 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Presné pamiatky – 1. dávka** (noc 22. 11.; `tools/blender/presne/`, `python3 tools/blender/presne_blender.py`):
+  **Slavín** – terasa so schodmi, pietna sieň s lizénami, bronzovými dverami a reliéfnymi poľami, zužujúci sa pylón
+  so žliabkami a bronzová socha vojaka so zástavou (~39,5 m); **Modrý kostolík** – okrúhla veža s pásmi, okienkami,
+  modrou kupolou, lucernou a krížom, loď a krídla podľa častí z OSM so strechou z modrej majoliky, polkruhové okná
+  s bielymi rámami, portál so zlatou mozaikou a oblým štítom; **Grasalkovičov palác** – stredný rizalit so stĺpovým
+  portikom a tympanónom (`tools/blender/historicke/zoznam.py`). **Náhľad pamiatky bez mesta:**
+  `nahlad-pamiatky.html?m=sm-slavin&az=200&el=14&d=1.6` (m = súbor v `assets/pamiatky/`, az/el = smer a výška
+  kamery v stupňoch, d = vzdialenosť). Snímky: `docs/snimky/pamiatky-presne/`.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
