@@ -76,6 +76,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
 - #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
+- #96 Chôdza bez kĺzania nôh: plynulé miešanie stoj–chôdza–klus–beh, rozbeh, náklon do zákruty, reálne výšky chodcov
 
 ## Čo je hotové
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
@@ -481,7 +482,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
 - **Pohyb Ďoďa:** prirodzená chôdza (dopad na pätu, odraz zo špičky), klus a beh podľa biomechaniky,
-  rýchlosti 2 m/s chôdza a 6 m/s beh (Shift). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
+  rýchlosti 2 m/s chôdza a 6 m/s beh (Shift).
+  **Plynulá chôdza (issue #96, `js/chodec/postava/animacie.js`, `krok.js`):** klipy stoj, chôdza, klus a beh sa
+  nemenia natvrdo podľa prahov, ale miešajú sa podľa rýchlosti (blend space) a majú spoločnú fázu kroku – pri
+  zrýchľovaní z chôdze do behu ostane noha na zemi v tom istom okamihu kroku. Pri načítaní sa z klipu zmeria,
+  akou rýchlosťou sa oporné chodidlo posúva dozadu (chôdza 1,39 m/s, klus 1,88, beh 3,02 pri Ďoďovi; NPC majú
+  vlastné podľa kostry) a krok sa zrýchli presne tak, aby noha nekĺzala (pri behu najviac 1,3×, inak by nohy
+  „kmitali“). Hráč sa rozbieha ~0,25 s a brzdí ~0,2 s (obrátka ide cez zastavenie), otáča sa najviac 540 °/s,
+  v zákrute sa nakloní dovnútra (do 8°), pri rozbehu mierne dopredu (`js/chodec/pohyb-podla-kamery.js`). Pri
+  stene sa kĺže popri nej a animácia ide podľa skutočného posunu (nebeží na mieste); skok sa dá aj 0,15 s po
+  zídení z hrany. **Chodci** majú výšku z normálneho rozdelenia (muži 180 ± 7 cm v rozsahu 163–198, ženy
+  167 ± 6 cm v 152–184, dôchodcovia o 4 cm nižší; `vyska` v profiloch `data/postavy/npc.json`), mení sa mierka celého
+  modelu a vyšší chodí rýchlejšie dlhším krokom; dav (VAT) dostal rovnaké zladenie kroku s rýchlosťou.
+  Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
@@ -537,6 +550,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
+- Chôdza (#96): nové klipy chôdze a behu s dlhším krokom (behový klip má krok ~1 m, pri 6 m/s nohy mierne kĺžu),
+  nohy na teréne (foot IK) pre hráča a najbližších chodcov, natáčanie hlavy za kamerou, striedanie kľudových animácií,
+  oblečenie podľa ročného obdobia a počasia, vystúpenie na schod najviac ~0,35 m.
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.
 - Deň a noc (svietiace lampy a okná).

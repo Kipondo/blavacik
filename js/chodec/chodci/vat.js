@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { clone as klonujSKostrou } from 'three/addons/utils/SkeletonUtils.js';
 import { nacitajGlb } from '../postava/nacitaj-postavu.js';
 import { klipyPreModel, lodUdaje } from '../npc/model-npc.js';
+import { zmerajKrok } from '../postava/krok.js';
 
 export const KLIPY = [
   { meno: 'chodza', snimky: 24 },
@@ -19,7 +20,8 @@ const KOREN_WEBU = new URL('../../../', import.meta.url);
 
 /**
  * Zapečie všetky varianty jedného modelu (muz, zena, …).
- * Vráti Map(variant → { lod: [ {geometria, vat, sirka, riadkyNaSnimku}, … ], sloty, dlzkaChodze, rychlostChodze })
+ * Vráti Map(variant → { lod: [ {geometria, vat, sirka, riadkyNaSnimku}, … ], sloty, trvanieChodze, trvanieStoja, vKroku })
+ * vKroku = rýchlosť (m/s pri mierke 1), pri ktorej chodidlo v klipe chôdze nekĺže (krok.js).
  */
 export async function zapecModel(urlRel) {
   const url = new URL(urlRel, KOREN_WEBU).href;
@@ -43,7 +45,9 @@ export async function zapecModel(urlRel) {
   const akcie = KLIPY.map((k) => {
     const klip = klipy.find((c) => c.name === k.meno) ?? klipy.find((c) => c.name === 'stoj') ?? klipy[0];
     const a = mixer.clipAction(klip);
-    return { ...k, akcia: a, trvanie: klip.duration };
+    // slučka bez úvodnej „stojacej“ snímky pred prvým kľúčom (inak by sa chodec raz za krok zasekol)
+    const krok = zmerajKrok(mixer, a, kopia, Object.fromEntries(['foot_l', 'ball_l', 'foot_r', 'ball_r'].map((m) => [m, kopia.getObjectByName(m)])));
+    return { ...k, akcia: a, od: krok.od, trvanie: krok.perioda, vKroku: krok.v };
   });
 
   const out = new Map();
@@ -64,7 +68,7 @@ export async function zapecModel(urlRel) {
         for (const a of akcie) a.akcia.stop();
         k.akcia.play();
         for (let f = 0; f < k.snimky; f++) {
-          k.akcia.time = (f / k.snimky) * k.trvanie;
+          k.akcia.time = k.od + (f / k.snimky) * k.trvanie;
           mixer.update(0);
           kopia.updateMatrixWorld(true);
           siet.skeleton.update();
@@ -93,7 +97,7 @@ export async function zapecModel(urlRel) {
       lod.push({ geometria: g, vat, sirka, riadkyNaSnimku });
     }
     const chodza = akcie[0];
-    out.set(variant, { lod, sloty, trvanieChodze: chodza.trvanie, trvanieStoja: akcie[1].trvanie });
+    out.set(variant, { lod, sloty, trvanieChodze: chodza.trvanie, trvanieStoja: akcie[1].trvanie, vKroku: chodza.vKroku });
   }
   for (const a of akcie) a.akcia.stop();
   return out;
