@@ -17,7 +17,8 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
   a stlač Hrať – hráč sa postupne prenesie na 16 miest testovacej trasy, na každom sa zmerajú snímky/s, čas snímky,
   kreslenia, trojuholníky, čas procesora a čas načítania dlaždíc; na konci sa ukáže tabuľka (tlačidlo ju skopíruje).
   Kvalitu zvoľ v menu pred meraním. Automaticky bez okna: `python3 tools/kontrola/meranie-trasy.py http://localhost:8000 vysoka`
-  (Playwright + Chrome; bez grafickej karty sú snímky/s len na porovnanie pred/po).
+  (Playwright + Chrome; bez grafickej karty sú snímky/s len na porovnanie pred/po). Snímky mesta z bodov trasy
+  a porovnanie dvoch behov robí `tools/kontrola/trasa.py` – pozri „Kontrola mesta – testovacia trasa“ nižšie.
 
 ## Ovládanie
 | | Klávesnica | Mobil |
@@ -28,7 +29,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Nastúpiť / vystúpiť | E | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu → Nastavenia | ťahanie prstom |
 | Kolobežka / bicykel: nasadnúť / zosadnúť | E pri nich (W jazda, S alebo Medzerník brzda, Shift šprint na bicykli) | E |
-| Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
+| Dvere (internát v Átriakoch) | E pri dverách | E |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
 | Vypísať polohu (pre misie) | P | – |
@@ -36,9 +37,30 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
 | Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
-## Čo je v `main` (zlúčené PR, issue #51)
-Integračná vetva `integracia/vsetko` spája všetky otvorené PR k 21. 11. 2026 (konflikty a prepočítané dáta
-dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
+## Čo je v `main` (zlúčené PR)
+Podrobný popis každej časti je nižšie v „Čo je hotové“.
+
+### 22. 11. 2026 – nočná práca (issue #59)
+Zlúčené v poradí #98 → #99 → #100 → #103 → #104 → #105 → #106 → #107 → #112 → #108 → #102 → #113, potom
+opravy po zlúčení (vetva `fix/po-zluceni`):
+
+- #98 Električky a kĺbové autobusy ako v Bratislave (#93)
+- #99 Predvoľby kvality a dohľad: nízka / stredná / vysoká / ultra / auto, LOD podľa Taipei Rush, meranie `?meranie` (#58)
+- #100 Átriaky: lávky a terasy na chôdzu, okolie z fotiek, internátna izba 314 cez teleport (#91)
+- #103 LOD2 strechy, stromy a terén z lasera v centre, Mlynskej doline, na Nivách a v Petržalke – 96 dlaždíc (#53, #64)
+- #104 Presné pamiatky – 1. dávka: Slavín, Modrý kostolík, Grasalkovičov palác + náhľad pamiatky
+- #105 Typy áut, farby, taxíky Hladoš a Fičák, kuriéri a jazda podľa typu (#97, 1. časť)
+- #106 Chôdza bez kĺzania nôh, nohy na teréne, hlava za kamerou, reálne výšky chodcov (#96)
+- #107 Mikromobilita: kolobežky Fičák, bicykle, hoverboard a onewheel na jazdu, ľudia na cyklopruhoch (#97)
+- #112 Domy na svahu: prízemie a dvere bližšie k chodníku (#111, 1. krok)
+- #108 Testovacia trasa mesta: snímky zo 17 bodov jedným príkazom, galéria a porovnanie behov (#60)
+- #102 Titulka Blaváčik v2 a načítavanie s vlakom Košice → Bratislava (#101) – vlak dôjde do Bratislavy, až keď sú
+  postavené všetky detailné dlaždice okolia v okruhu zvolenej predvoľby kvality (#99)
+- #113 Priebeh nočnej práce ([napady/noc-priebeh.md](napady/noc-priebeh.md))
+
+### 21. 11. 2026 – integrácia (issue #51)
+Integračná vetva `integracia/vsetko` spojila všetky otvorené PR k 21. 11. 2026 (konflikty a prepočítané dáta
+dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 
 - #24 MHD etapa b: električky, trolejbusy a autobusy jazdia presne podľa cestovného poriadku
 - #25 Ďoďo: prirodzená chôdza a beh, plávanie vo vode, mladšia tvár
@@ -83,8 +105,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
 - #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
-- #97 Zdieľané kolobežky Fičák a mestské bicykle na chodníkoch – dá sa na nich jazdiť (náklon v zákrute, šliapanie)
-- #96 Chôdza bez kĺzania nôh: plynulé miešanie stoj–chôdza–klus–beh, rozbeh, náklon do zákruty, reálne výšky chodcov
+- #95 Oprava GitHub Pages: preč symbolický odkaz `node_modules`
 
 ## Čo je hotové
 - **Titulná obrazovka „Blaváčik“ a načítavanie s vlakom** (issue #101, `js/ui/menu.js`, `js/ui/nacitavanie/`,
@@ -676,32 +697,31 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
-- Po nočnej práci 22. 11.: otvorené PR #102 – #108, #112, poradie zlučovania a konflikty sú v súhrne v #59,
-  priebeh a „ďalšie na rade“ v [napady/noc-priebeh.md](napady/noc-priebeh.md); nové issues #109 – #111.
-- Átriaky (#91): schody vedľa lávok sú zatiaľ v hre (JS), zábradlie modelu lávky pri prestupe na schody ostáva
-  (prechádza sa cez neho); chodby a terasy všetkých 18 domov podľa fotiek, viac izieb a blokov s interiérom.
+- Všetky nočné PR z 22. 11. sú v `main` (zoznam hore); priebeh noci a „ďalšie na rade“ sú
+  v [napady/noc-priebeh.md](napady/noc-priebeh.md), súhrn v issue #59.
+- **Výkon** (#110): najdrahší je prechod tieňov (na vysokej v centre ~2,5 mil. trojuholníkov len do tieňovej mapy –
+  stromy, vikiere, sochy, LOD2 strechy) a ~2 000 volaní kreslenia; stromy a drobnosti do tieňa len zblízka,
+  zlučovanie sietí po dlaždiciach, menej kaskád tieňa na nižších predvoľbách.
+- **Laser na celé mesto** (#109, `--vsetko`): dnes 96 dlaždíc so strechami LOD2, stromami a terénom 2 m.
+- **Domy na svahu** (#111): po 1. kroku (prízemie bližšie k chodníku) ešte schodovité prízemie dlhých domov na svahu
+  a dvere len tam, kde je terén do ~0,3 m od prahu.
 - Kvalita (#58): plynulé prelínanie podrobnej a jednoduchej dlaždice (dnes sa vymení celá naraz, v opare), vzdialené
   stromy ako billboardy, na nízkej Lambert namiesto PBR a textúry v polovičnom rozlíšení; zmerať na integrovanej
   grafike a RTX 2060 cez `?meranie` a doladiť hodnoty predvolieb.
+- Átriaky (#91): chodby a terasy všetkých domov podľa fotiek, viac izieb a blokov s interiérom.
+- Presné pamiatky: ďalšie dávky (SND, Reduta a ďalšie podľa `tools/blender/presne/`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
-- Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
-- Cesty ako plochy podľa skutočného tvaru (OSM area:highway v Bratislave takmer chýba – zatiaľ len ostrovčeky), NPC autá po nadjazdoch.
-- MHD: etapa b) vozidlá jazdia podľa poriadku, c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr).
-- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky), mosty z lasera.
+- Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
+  takmer chýba – zatiaľ len ostrovčeky), mosty z lasera, NPC autá po nadjazdoch.
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
-- Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
-- Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
-- Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
+- Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy
+  na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
 - Chôdza (#96): nové klipy chôdze a behu s dlhším krokom (behový klip má krok ~1 m, pri 6 m/s nohy mierne kĺžu),
-  nohy na teréne aj pre najbližších chodcov, striedanie kľudových animácií,
-  oblečenie podľa ročného obdobia a počasia, vystúpenie na schod najviac ~0,35 m.
-- NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
+  nohy na teréne aj pre najbližších chodcov, striedanie kľudových animácií, oblečenie podľa ročného obdobia
+  a počasia, vystúpenie na schod najviac ~0,35 m.
 - Svetlomety áut v noci, dážď a hmla ako počasie.
-- Deň a noc (svietiace lampy a okná).
-- Engine misií a dialógov, polícia, minimapa.
-- Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia (značky na minimapu už idú cez udalosť `znacka-mapy`).
 
 ## Kontrola mesta – testovacia trasa (issue #60)
@@ -778,7 +798,6 @@ Návod je v [js/mapa/pamiatky/nacitaj-pamiatky.js](js/mapa/pamiatky/nacitaj-pami
 - **Výškopis a štart:** `data/mapa/zakladna.json` (kopce, svahy, štart hráča, ulice pre zaparkované autá).
 - **Záložná ručná mapa** (keď OSM chýba): `zakladna.json` + `budovy.json` (`node tools/generuj-mapu.mjs`).
 - **Údaje o obchodoch a type budov z OSM** do hotových dlaždíc: `cd tools/mesto && node --max-old-space-size=8000 osm-doplnky.mjs`.
-- **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`.
 - **Podchody z OSM** do hotových dlaždíc: `node --max-old-space-size=8000 podchody.mjs`.
 - **Vyvýšené časti budov z OSM** (veže nad podnožou, lávky) do hotových dlaždíc: `node --max-old-space-size=8000 casti-budov.mjs`,
   potom overenie úzkych častí laserom: `python3 tools/mesto/laser/casti.py` (potrebuje laser v `.cache/laser/`)
