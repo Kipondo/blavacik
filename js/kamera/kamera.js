@@ -60,14 +60,15 @@ export default {
       this.uhol += rozdiel * Math.min(1, dt * (vAute ? 4 : 3));
     }
 
-    const vzd = vAute ? K.AUTO_VZDIALENOST + Math.min(4, objekt.rychlostKmh / 30) : K.PESO_VZDIALENOST;
-    const vys = vAute ? K.AUTO_VYSKA : K.PESO_VYSKA;
+    // vozidlo môže mať vlastnú vzdialenosť a výšku kamery (kolobežka – js/mikromobilita/kolobezka.js)
+    const vzd = vAute ? (objekt.kamera?.vzdialenost ?? K.AUTO_VZDIALENOST) + Math.min(4, objekt.rychlostKmh / 30) : K.PESO_VZDIALENOST;
+    const vys = vAute ? objekt.kamera?.vyska ?? K.AUTO_VYSKA : K.PESO_VYSKA;
     const u = this.uhol + this.posunUhla;
     // smer, ktorým sa kamera pozerá (0 = na juh, rovnako ako hra.stav.uhol) – podľa neho chodí postava
     hra.stav.smerKamery = Math.atan2(Math.sin(u + Math.PI), Math.cos(u + Math.PI));
     const horiz = Math.cos(this.sklon) * vzd;
 
-    this.ciel.set(objekt.pozicia.x, objekt.pozicia.y + (vAute ? 1.4 : 1.6), objekt.pozicia.z);
+    this.ciel.set(objekt.pozicia.x, objekt.pozicia.y + (vAute ? objekt.kamera?.ciel ?? 1.4 : 1.6), objekt.pozicia.z);
     const cielovaPoz = new THREE.Vector3(
       this.ciel.x + Math.sin(u) * horiz,
       this.ciel.y + Math.sin(this.sklon) * vzd + vys - 1.5,

@@ -34,6 +34,7 @@ import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
 import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
+import kolobezky from './mikromobilita/modul.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -70,6 +71,7 @@ export default [
   nadjazdy,
   trava,
   cyklopruhy,
+  kolobezky,
   schody,
   povrch,
   hud,

@@ -22,7 +22,8 @@ export function zasiahnutyAutom(c, a) {
   if (Math.abs((c.y ?? a.pozicia.y) - a.pozicia.y) > 2) return false;   // napr. most nad cestou
   const fx = Math.sin(a.uhol), fz = Math.cos(a.uhol);
   const u = dx * fx + dz * fz, w = dx * fz - dz * fx;
-  return Math.abs(u) < POL_DLZKA + 0.35 && Math.abs(w) < POL_SIRKA + 0.3;
+  // menšie vozidlo (kolobežka) môže mať vlastné rozmery
+  return Math.abs(u) < (a.polDlzka ?? POL_DLZKA) + 0.35 && Math.abs(w) < (a.polSirka ?? POL_SIRKA) + 0.3;
 }
 
 /** Chodec odletí od auta. */
