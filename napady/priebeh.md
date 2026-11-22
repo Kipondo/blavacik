@@ -26,23 +26,24 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 - Požiadavka majiteľa počas práce: po stanici znova Átriaky – prieskum fotiek, opraviť model budov
   (blikajúce textúry, diery v budovách) → spojené s D6 (#115).
 
-## Rozpracované (22. 11. popoludní) – pracovné kópie vedľa repozitára
+## Zlúčené 22. 11.
+#116 (zlatá linka na titulke), #117 (Átriaky), #118 (výkon – tiene, bez vetra), #119 (Hlavná stanica: plášť,
+interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste).
+
+## Rozpracované (22. 11. večer) – otvorené PR
 | vetva | priečinok | stav |
 |---|---|---|
-| `feature/hlavna-stanica` | `blavacik` | interiér a freska podľa fotiek, schody z podchodu vo výške nástupišťa, chôdza počas hovoru s mamou, strechy podľa prieskumu (správa `reports/Strechy Hlavnej stanice Bratislava.md` – mimo gitu); **čaká:** trasa po, meranie, PR |
-| `fix/atriaky-budovy` | `../blavacik-atriaky` | pushnutá; pavlače bez dier, izba 314 v meste, voľná ulička na terasu; **čaká:** trasa pred/po, PR |
-| `fix/titulka-zlata-linka` | `../blavacik-main` | PR #116 otvorený – zlúčenie zablokovali oprávnenia (treba majiteľa) |
-| `feature/vykon-tiene` | `../blavacik-vykon` | #110: tiene stromov cez zástupné koruny, malé objekty bez tieňa ďalej ako 45 m, vikiere bez tieňa, bez vetra (listy, tráva) – meranie |
+| `feature/pamiatky-uk-vajce` | `../blavacik-pamiatky` | **PR #122** – Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park podľa fotiek; trasa `docs/kontrola/pamiatky-po/`; čaká na zlúčenie |
+| `feature/vozidla-kvalita` | `blavacik` | **PR #121** – autá: lemy, škáry, disky s lúčmi, zlúčené siete (17 namiesto 27 na auto); čaká na zlúčenie |
 
 Lokálne servery: `scratchpad/server.py <port> <priečinok>` (veľká fronta spojení – `python -m http.server` na Windows
 odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky` (shapely) + `--python-use-system-env`.
 
 ## Ďalšie na rade (poradie podľa majiteľa)
-1. Stanica: interiér a freska podľa fotiek → PR.
-2. Pamiatky (C) podľa prieskumu: **Univerzita Komenského** (Šafárikovo nám.), **Eurovea** + Eurovea Tower +
-   presklené „vajce“, **Sky Park** – čo najpresnejšie.
-3. Vozidlá – trochu kvalitnejšie modely, len ak to nespomalí hru.
-4. A2 + A3 (vlaky, GTFS), zvyšok D.
+1. ~~Stanica~~ (#119), ~~pamiatky UK / Eurovea / Sky Park~~ (#122), ~~vozidlá~~ (#121).
+2. A2 + A3 (vlaky na stanici, cestovný poriadok z GTFS).
+3. B – LOD terénu (cieľ „polovica času snímky“ zatiaľ nesplnený).
+4. Zvyšok D, súhrn do #59.
 
 ## Rozhodnutia
 - Majiteľ 22. 11.: bez vetra (kývanie listov a trávy), výkon zjednodušovať tak, aby sa grafika veľmi nezhoršila;
@@ -64,3 +65,7 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
   dvere sú tam, kde pešia cesta z OSM prechádza múrom; bočný priechod má otvor po celej šírke (vonkajšie schody pri
   Skleníku viedli do vnútorného múru medzi časťami budovy); chodci nechodia cez múry stanice (udalosť
   'steny-chodcov'), chodia podchodom a po nástupištiach (udalosť 'ciary-chodcov'), výšku majú ako hráč.
+- Pamiatky (22. 11.): bez nápisov značiek (Eurovea), nápisy univerzity áno (verejná inštitúcia); podklady len
+  slovami v `napady/pamiatky-podklady.md`, žiadne fotky v repozitári.
+- Autá (22. 11.): detaily lacnou cestou – disky textúrou, tvarovanie vrcholov raz pri stavbe typu; zlúčením
+  sietí je auto hráča/zaparkované lacnejšie na kreslenie, auto v premávke má +~700 trojuholníkov.
