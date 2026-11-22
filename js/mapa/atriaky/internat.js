@@ -140,8 +140,9 @@ export default {
 
   nastavNapovedu(hra, text) {
     if (text === this.napoveda) return;
-    // nápovedu iných modulov (nastúpiť do auta) neprepisujeme na null, ak sme ju nenastavili my
-    if (text !== null || this.napoveda !== null) hra.ui?.napoveda?.(text);
+    // nápoveda ide cez hra.stav.napoveda – HUD (js/ui/hud.js) ju kreslí každý snímok, keď nie je nápoveda k autu
+    // (priame hra.ui.napoveda by HUD hneď v ďalšom snímku skryl); cudziu nápovedu na null neprepisujeme
+    if (text !== null || this.napoveda !== null) hra.stav.napoveda = text;
     this.napoveda = text;
   },
 
