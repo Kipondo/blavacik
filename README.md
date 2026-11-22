@@ -469,7 +469,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **MHD – etapa b: vozidlá jazdia podľa poriadku** (`js/mhd/vozidla/`, modul `mhd-vozidla`): každý spoj z poriadku,
-  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (3 články, zberač),
+  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (5 článkov, zberač),
   trolejbus (kĺbový, tyče) alebo autobus (kĺbový / sólo). Poloha sa počíta priamo z poriadku: vozidlo sa rozbieha
   a brzdí, na zastávku príde o chvíľu skôr, otvorí dvere a **odíde presne v čase z cestovného poriadku**
   (aj po preskočení času). Články sa lámu v zákrutách, autobusy idú v pravom pruhu, vpredu, na boku a vzadu
@@ -478,6 +478,16 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Vozidlo nejde cez autá ani ľudí (`prekazky.js`): keď mu na trase do 30 m stojí auto, hráč alebo chodec, spomalí,
   zastaví, električka zazvoní a počká; potom pokračuje s meškaním (čas spoja sa posunie). Po 10 s čakania sa pohne,
   aby sa nezasekla s autom, ktoré čaká na ňu.
+- **Vzhľad vozidiel MHD ako v Bratislave** (issue #93, `js/mhd/vozidla/geometria.js`): **električka** má 5 článkov
+  (~32 m, obojsmerná – kabína na oboch koncoch), jasne červenú karosériu, **čierny pás okien** cez celú dĺžku,
+  sivé kryty kĺbov, zaoblené čelo so šikmým čelným sklom v čiernom ráme, hranaté svetlomety so striebornou lištou,
+  nízky spojler, malé biele číslo vozidla na nose (vymyslené), zrkadlá na tyči a zberač so žltou lištou.
+  **Kĺbový autobus a trolejbus** („harmonika“): červená karoséria, čierny pás veľkých okien až po strechu,
+  strieborné harmonikové mechy, veľké zaoblené čelné sklo, zahnuté spätné zrkadlá zhora, LED svetlá v čiernych
+  rámoch, vymyslená tabuľka s číslom, kryt klimatizácie. Dvere sú čierne presklené s červeným spodkom a žltým
+  tlačidlom; v noci svieti interiér cez okná modrobielo. **Displej s číslom linky a cieľom ostal bez zmeny.**
+  Žiadne logá výrobcov. Prehliadka modelov bez hry: `tools/kontrola/vozidla-mhd.html#elektricka`
+  (aj `#autobus`, `#bok`, `#zadok`, `#noc`; cez lokálny server).
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
 - **Pohyb Ďoďa:** prirodzená chôdza (dopad na pätu, odraz zo špičky), klus a beh podľa biomechaniky,
