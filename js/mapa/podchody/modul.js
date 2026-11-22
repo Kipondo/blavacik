@@ -8,6 +8,7 @@
 // Používa ich js/chodec/hrac.js a js/kamera/kamera.js (jeden riadok, bez modulu sa správajú ako predtým).
 
 import { pripravTuby, voTube, najdiTubu, VYSKA } from './tuby.js';
+import { vytvorPodchody } from './geometria.js';
 
 const POD_ZEMOU = 1.2;      // m pod terénom – odtiaľ je hráč „v podchode“
 
@@ -17,15 +18,30 @@ export default {
 
   init(hra) {
     this.dlazdice = new Map();        // kluc → tuby
+    this.data = new Map();            // kluc → dáta dlaždice (na prepočet pri zmene pochôdznych plôch)
     this.vsetky = [];
-    const pridaj = (kluc, data) => {
-      if (data?.podchody?.length) this.dlazdice.set(kluc, pripravTuby(data.podchody, hra.mapa.vyskaTerenu));
-      else this.dlazdice.delete(kluc);
+    // horný koniec schodov: na pochôdznej ploche tesne nad terénom (nástupište, js/mapa/stanica/) končia schody v jej
+    // výške – z podchodu sa na nástupište vyjde plynulo, bez schodíka na hrane
+    const vyskaVrchu = (x, z) => {
+      const t = hra.mapa.vyskaTerenu(x, z);
+      const m = hra.mosty?.vyska(x, z, t + 0.3);
+      return m !== null && m !== undefined && m > t && m - t < 0.9 ? m : t;
+    };
+    const pridaj = (kluc, data, objekt) => {
+      if (data?.podchody?.length) {
+        const tuby = pripravTuby(data.podchody, hra.mapa.vyskaTerenu, vyskaVrchu);
+        this.dlazdice.set(kluc, tuby);
+        this.data.set(kluc, data);
+        // dlaždica postavila schody po terén – ak niektoré vychádzajú na nástupište, prestavia sa ich geometria
+        if (tuby.some((t) => (t.nad ?? 0) > 0.02)) this.prestavGeometriu(hra, kluc, tuby, objekt);
+      } else { this.dlazdice.delete(kluc); this.data.delete(kluc); }
       this.vsetky = [...this.dlazdice.values()].flat();
     };
-    for (const [kluc, a] of hra.mapa?.dlazdice?.aktivne ?? []) if (a.uroven === 'detail') pridaj(kluc, a.data);
-    hra.na('dlazdica-nacitana', ({ kluc, uroven, data }) => { if (uroven === 'detail') pridaj(kluc, data); });
-    hra.na('dlazdica-uvolnena', ({ kluc, nahrada }) => { if (!nahrada) { this.dlazdice.delete(kluc); this.vsetky = [...this.dlazdice.values()].flat(); } });
+    for (const [kluc, a] of hra.mapa?.dlazdice?.aktivne ?? []) if (a.uroven === 'detail') pridaj(kluc, a.data, a.objekt);
+    hra.na('dlazdica-nacitana', ({ kluc, uroven, data, objekt }) => { if (uroven === 'detail') pridaj(kluc, data, objekt); });
+    hra.na('dlazdica-uvolnena', ({ kluc, nahrada }) => { if (!nahrada) { this.dlazdice.delete(kluc); this.data.delete(kluc); this.vsetky = [...this.dlazdice.values()].flat(); } });
+    // pribudli/zmenili sa pochôdzne plochy (nástupištia) – schody sa prepočítajú (nadjazdy-modul ich už má)
+    hra.na('pochodzne-plochy', () => setTimeout(() => { for (const [k, d] of this.data) pridaj(k, d); }, 0));
 
     const M = this;
     hra.podchody = {
@@ -34,6 +50,23 @@ export default {
       oprav: (sx, sz, x, z, y, r) => M.oprav(hra, sx, sz, x, z, y, r),
       kamera: (poz, ciel, hrac) => M.kamera(hra, poz, ciel, hrac),
     };
+  },
+
+  /** Nahradí skupinu 'podchody' v dlaždici novou geometriou z tub (zábradlie má kolízie už z prvej stavby). */
+  prestavGeometriu(hra, kluc, tuby, objekt) {
+    objekt ??= hra.mapa?.dlazdice?.aktivne?.get(kluc)?.objekt;
+    const stara = objekt?.getObjectByName('podchody');
+    if (!stara?.parent) return;
+    const nova = vytvorPodchody(tuby, hra.mapa.vyskaTerenu, null).skupina;
+    const vzor = stara.children[0];
+    nova.traverse((o) => {
+      if (!o.isMesh || !vzor) return;
+      o.castShadow = vzor.castShadow; o.receiveShadow = vzor.receiveShadow; o.layers.mask = vzor.layers.mask;
+    });
+    stara.parent.add(nova);
+    stara.parent.remove(stara);
+    // materiály sú spoločné (geometria.js) – uvoľní sa len geometria
+    stara.traverse((o) => o.geometry?.dispose());
   },
 
   /** Tuby v okolí (bez filtra – v dlaždici ich je málo). */

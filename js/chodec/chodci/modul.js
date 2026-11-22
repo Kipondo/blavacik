@@ -5,6 +5,8 @@
 // a prechodoch (siet-chodnikov.js) – nie po vozovke a nie cez domy. Držia sa vpravo, obchádzajú sa,
 // občas zastanú, na námestiach sa prechádzajú medzi náhodnými bodmi a pomalému autu uhnú.
 // Rýchle auto hráča chodca zrazí (zrazenie.js): odletí, spadne, chvíľu leží, vstane a vráti sa na chodník.
+// Výška ako u hráča: schody a chodby podchodov (hra.podchody), nástupištia a mosty (hra.mosty), inak terén;
+// cez múry modelov (stanica) nechodia – len dverami, jamy schodísk do podchodu obchádzajú.
 //
 // Kreslenie: najbližších 8 = plný model (model-npc.js, kostra, mimika), ostatní = InstancedMesh
 // s animáciou v textúre (vat.js, material-vat.js) – stovky chodcov za pár volaní kreslenia.
@@ -57,9 +59,15 @@ export default {
     hra.chodci = { zoznam: [] };
 
     this.siet.kolizie = hra.mapa.kolizie;
+    // múry modelov (stanica), cez ktoré nevedú chodníky – dnu sa chodí dverami (udalosť 'steny-chodcov' { kluc, polygony })
+    hra.na('steny-chodcov', ({ kluc, polygony }) => this.siet.nastavSteny(kluc, polygony));
+    for (const [kluc, polygony] of Object.entries(hra.stav.stenyChodcov ?? {})) this.siet.nastavSteny(kluc, polygony);
+    // pešie čiary modelov (osi nástupíšť stanice) – udalosť 'ciary-chodcov' { kluc, ciary: [{ body, sirka, typ }] }
+    hra.na('ciary-chodcov', ({ kluc, ciary }) => this.siet.nastavCiary(kluc, ciary));
+    for (const [kluc, ciary] of Object.entries(hra.stav.ciaryChodcov ?? {})) this.siet.nastavCiary(kluc, ciary);
     const sprava = hra.mapa.dlazdice;
     if (sprava) {
-      const pridaj = (kluc, data) => this.siet.pridajDlazdicu(kluc, data.chodniky, data.pokryvka, data.cesty);
+      const pridaj = (kluc, data) => this.siet.pridajDlazdicu(kluc, data.chodniky, data.pokryvka, data.cesty, data.podchody);
       for (const [kluc, a] of sprava.aktivne) if (a.uroven === 'detail') pridaj(kluc, a.data);
       hra.na('dlazdica-nacitana', ({ kluc, uroven, data }) => { if (uroven === 'detail') pridaj(kluc, data); });
       hra.na('dlazdica-uvolnena', ({ kluc }) => this.siet.odoberDlazdicu(kluc));
@@ -169,7 +177,8 @@ export default {
       const spec = poskladajChodca(this.data);
       const c = this._novyChodec(spec);
       if (!c) continue;
-      c.x = x; c.z = z; c.y = hra.mapa.vyska(x, z);
+      c.x = x; c.z = z;
+      c.y = this._vyskaVzniku(hra, h, x, z);
       if (h) {
         c.hrana = h; c.s = Math.hypot(x - h.a.x, z - h.a.z); c.smer = Math.random() < 0.5 ? 1 : -1;
         c.bocnyCiel = c.bocny = (Math.random() * 0.8 + 0.1) * Math.max(0, h.sirka / 2 - 0.4);
@@ -183,6 +192,26 @@ export default {
       n++;
     }
     this.prvyRaz = false;
+  },
+
+  /** Výška pod chodcom: schody a chodby podchodu, nástupištia a mosty (pochôdzne plochy), inak terén – ako hráč. */
+  _vyska(hra, c, x, z) {
+    const t = hra.mapa.vyska(x, z);
+    const y0 = Number.isFinite(c.y) ? c.y : t;
+    const h = c.hrana;
+    if (h?.podzem || h?.podchod) {
+      const y = hra.podchody?.vyska(x, z, h.podzem ? Math.min(y0, t - 2) : y0);
+      if (y !== null && y !== undefined) return y;
+    }
+    return hra.mosty?.vyska(x, z, y0) ?? t;
+  },
+
+  /** Výška pri vzniku (chodec ešte nemá predchádzajúcu výšku): pod zemou podlaha chodby, na moste mostovka. */
+  _vyskaVzniku(hra, h, x, z) {
+    const t = hra.mapa.vyska(x, z);
+    if (h?.podzem) return hra.podchody?.vyska(x, z, t - 3) ?? t;
+    if (h?.most) for (const dy of [0, 3, 6, 9, 12]) { const m = hra.mosty?.vyska(x, z, t + dy); if (m !== null && m !== undefined) return m; }
+    return hra.mosty?.vyska(x, z, t) ?? t;
   },
 
   _zrus(c) {
@@ -233,13 +262,19 @@ export default {
         c.s += prebytok * c.smer;
         if (Math.random() < 0.03) c.pauza = 1 + Math.random() * 5;
       }
-      c.bocny += (c.bocnyCiel - c.bocny) * Math.min(1, dt * 1.5);
+      // jama schodiska v ceste (os nástupišťa ide ponad schody do podchodu) – obíde ju bokom
+      let ciel = c.bocnyCiel, rychlo = 1.5;
+      c.obchadzka = 0;
+      for (const j of c.hrana.jamy ?? []) {
+        if (c.s > j.s0 && c.s < j.s1) { ciel = j.L * c.smer; rychlo = 3; c.obchadzka = Math.abs(j.L); }
+      }
+      c.bocny += (ciel - c.bocny) * Math.min(1, dt * rychlo);
       const h = c.hrana, ux = h.ux * c.smer, uz = h.uz * c.smer;
       // vpravo od smeru chôdze = (-uz, ux)
       let x = h.a.x + h.ux * c.s - uz * c.bocny, z = h.a.z + h.uz * c.s + ux * c.bocny;
       // bokom nie do domu ani na vozovku – späť k osi chodníka (kontrola 3× za sekundu stačí)
       c.kontrola = (c.kontrola ?? Math.random() * 0.33) - dt;
-      if (Math.abs(c.bocny) > 0.3 && c.kontrola <= 0) {
+      if (Math.abs(c.bocny) > 0.3 && c.kontrola <= 0 && !c.obchadzka) {
         c.kontrola = 0.33;
         if (!this.siet.jePesie(x, z)) {
           c.bocny *= 0.5; c.bocnyCiel *= 0.3;
@@ -347,7 +382,7 @@ export default {
       if (c.hrana) {
         const ux = c.hrana.ux * c.smer, uz = c.hrana.uz * c.smer;
         const vpravo = px * -uz + pz * ux;
-        const max = Math.max(0, c.hrana.sirka / 2 - 0.3) + (auto ? 0.6 : 0);
+        const max = Math.max(0, c.hrana.sirka / 2 - 0.3, (c.obchadzka ?? 0) + 0.3) + (auto ? 0.6 : 0);
         c.bocny = Math.max(-max, Math.min(max, c.bocny + vpravo * k));
         c.bocnyCiel = Math.max(-max, Math.min(max, c.bocnyCiel + vpravo * k * 0.3));
       } else {
@@ -389,7 +424,7 @@ export default {
 
     const viditelni = [];
     for (const c of this.chodci) {
-      const y = hra.mapa.vyska(c.x, c.z);
+      const y = this._vyska(hra, c, c.x, c.z);
       if (c.zrazeny) c.y = c.zrazeny.y;
       else c.y = Math.abs(y - c.y) > 1.5 ? y : c.y + (y - c.y) * Math.min(1, dt * 10);
       c.d = Math.hypot(c.x - kx, c.z - kz);

@@ -14,7 +14,9 @@ const VESTIBUL = 5;           // m – krytá chodba za schodmi do podzemného p
  * Tuby dlaždice: [{ typ, ax, az, bx, bz, h, ya, yb, dlzka, ex, ez, stena?: { … } }]
  *   ya, yb – výška podlahy na začiatku a konci (pri schodoch: a = hore, b = dole).
  */
-export function pripravTuby(podchody = [], vyskaTerenu) {
+/** vyskaVrchu (voliteľné) = výška horného konca schodov (napr. nástupište nad terénom – js/mapa/podchody/modul.js),
+ *  inak terén. */
+export function pripravTuby(podchody = [], vyskaTerenu, vyskaVrchu = vyskaTerenu) {
   // siete: chodby a schody, ktoré sa dotýkajú (spoločný bod do 1 m), majú jednu rovnú podlahu – pod najnižším
   // miestom terénu nad chodbami (strop tak nikde nevytŕča z terénu, schody nadväzujú na podlahu)
   const polozky = podchody.filter((p) => p.body?.length >= 2);
@@ -49,9 +51,11 @@ export function pripravTuby(podchody = [], vyskaTerenu) {
     const h = Math.max(1, (p.sirka ?? 4) / 2);
     if (p.typ === 'schody') {
       const hore = p.dole === 0 ? b.at(-1) : b[0], dole = p.dole === 0 ? b[0] : b.at(-1);
-      const ya = vyskaTerenu(hore[0], hore[1]);
+      const ya = vyskaVrchu(hore[0], hore[1]);
       const t = tuba('schody', hore, dole, h, ya, Math.min(yp, ya - 2.5));
       if (!t) continue;
+      // o koľko je horný koniec nad terénom (nástupište) – geometria.js zdvihne obrubu a zábradlie na povrchu
+      t.nad = Math.max(0, ya - vyskaTerenu(hore[0], hore[1]));
       tuby.push(t);
       if (p.vestibul) {
         // krytá chodba pokračujúca za schodmi (vstup do podzemného podlažia budovy, dvere na konci)

@@ -1,0 +1,54 @@
+{
+ "nazov": "stanica-pred",
+ "commit": "52c94ca",
+ "cas": "2026-11-22T13:44",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "hlavna-stanica",
+   "nazov": "Hlavná stanica",
+   "x": -97,
+   "z": -1640,
+   "ms": 11667,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "hlavna-stanica-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavna-stanica-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "stanica-hala",
+   "nazov": "Hlavná stanica – hala",
+   "x": -118,
+   "z": -1662,
+   "ms": 9501,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "stanica-hala-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "stanica-nastupiste",
+   "nazov": "Hlavná stanica – 1. nástupište",
+   "x": -140.4,
+   "z": -1727,
+   "ms": 2977,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "stanica-nastupiste-ulica.jpg"
+    ]
+   ]
+  }
+ ]
+}
