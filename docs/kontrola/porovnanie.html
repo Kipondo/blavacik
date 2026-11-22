@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Kontrola mesta – porovnanie behov</title>
+  <!-- Porovnanie dvoch behov testovacej trasy (tools/kontrola/trasa.py, issue #60).
+       Otvor cez lokálny server: http://localhost:8000/docs/kontrola/porovnanie.html?a=<beh>&b=<beh>
+       Behy sú v docs/kontrola/zoznam.json; každý beh má manifest.json so snímkami. -->
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 20px; background: #1b2430; color: #e8e8e8; }
+    select, label { font: inherit; margin-right: 12px; }
+    section { margin: 18px 0 26px; }
+    h2 { font-size: 16px; margin: 0 0 6px; }
+    small { color: #9aa; font-weight: normal; }
+    .par { display: flex; gap: 8px; flex-wrap: wrap; }
+    figure { margin: 0; }
+    img { width: min(48vw, 640px); display: block; border-radius: 4px; background: #000; }
+    figcaption { color: #9aa; font-size: 12px; margin-top: 2px; }
+    .chyba { color: #f99; }
+  </style>
+</head>
+<body>
+  <h1>Kontrola mesta – porovnanie behov</h1>
+  <p>
+    <label>Pred: <select id="a"></select></label>
+    <label>Po: <select id="b"></select></label>
+    <label><input type="checkbox" id="len-zmeny"> len body, ktoré sú v oboch behoch</label>
+  </p>
+  <div id="vysledok"></div>
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const hodnota = (meno) => new URLSearchParams(location.search).get(meno);
+
+async function nacitaj(cesta) {
+  const r = await fetch(cesta);
+  if (!r.ok) throw new Error(`${cesta}: ${r.status}`);
+  return r.json();
+}
+
+async function vykresli() {
+  const a = $('#a').value, b = $('#b').value;
+  history.replaceState(null, '', `?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
+  const out = $('#vysledok');
+  out.textContent = 'Načítavam…';
+  try {
+    const [ma, mb] = await Promise.all([nacitaj(`${a}/manifest.json`), nacitaj(`${b}/manifest.json`)]);
+    const podlaId = (m) => new Map(m.body.map((x) => [x.id, x]));
+    const A = podlaId(ma), B = podlaId(mb);
+    const idcka = [...new Set([...A.keys(), ...B.keys()])].filter((id) => !$('#len-zmeny').checked || (A.has(id) && B.has(id)));
+    out.innerHTML = `<p><small>pred: ${a} (commit ${ma.commit}) · po: ${b} (commit ${mb.commit})</small></p>`;
+    for (const id of idcka) {
+      const pa = A.get(id), pb = B.get(id), info = pa ?? pb;
+      const pohlady = [...new Set([...(pa?.snimky ?? []), ...(pb?.snimky ?? [])].map(([p]) => p))];
+      const sekcia = document.createElement('section');
+      sekcia.innerHTML = `<h2>${info.nazov} <small>${id}</small></h2>`;
+      for (const p of pohlady) {
+        const sa = pa?.snimky.find(([q]) => q === p), sb = pb?.snimky.find(([q]) => q === p);
+        const obr = (beh, s, popis) => s ? `<figure><img src="${beh}/${s[1]}" loading="lazy"><figcaption>${popis} – ${p}</figcaption></figure>` : `<figure><figcaption>${popis}: chýba</figcaption></figure>`;
+        const par = document.createElement('div');
+        par.className = 'par';
+        par.innerHTML = obr(a, sa, 'pred') + obr(b, sb, 'po');
+        sekcia.appendChild(par);
+      }
+      out.appendChild(sekcia);
+    }
+  } catch (e) {
+    out.innerHTML = `<p class="chyba">Nepodarilo sa načítať behy: ${e.message}</p>`;
+  }
+}
+
+const behy = await nacitaj('zoznam.json').catch(() => []);
+for (const id of ['a', 'b']) {
+  for (const beh of behy) $('#' + id).add(new Option(beh, beh));
+}
+$('#a').value = hodnota('a') ?? behy.at(-2) ?? behy[0] ?? '';
+$('#b').value = hodnota('b') ?? behy.at(-1) ?? '';
+for (const s of ['#a', '#b', '#len-zmeny']) $(s).addEventListener('change', vykresli);
+if (behy.length) vykresli(); else $('#vysledok').textContent = 'Zatiaľ žiadne behy – spusti python3 tools/kontrola/trasa.py';
+</script>
+</body>
+</html>

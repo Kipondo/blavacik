@@ -13,6 +13,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Lokálne:** v priečinku projektu spusti `python3 -m http.server 8000` a otvor `http://localhost:8000`
   (cez dvojklik na `index.html` to nepôjde – prehliadač nedovolí načítať moduly a JSON zo súboru).
 - **Editor postavy:** `editor-postavy.html` (odkaz je aj v menu hry) – vzhľad Ďoďa sa uloží a hra ho použije.
+- **Meranie výkonu (trasa #60):** otvor hru s `?meranie` na konci adresy (napr. `http://localhost:8000/?meranie`)
+  a stlač Hrať – hráč sa postupne prenesie na 16 miest testovacej trasy, na každom sa zmerajú snímky/s, čas snímky,
+  kreslenia, trojuholníky, čas procesora a čas načítania dlaždíc; na konci sa ukáže tabuľka (tlačidlo ju skopíruje).
+  Kvalitu zvoľ v menu pred meraním. Automaticky bez okna: `python3 tools/kontrola/meranie-trasy.py http://localhost:8000 vysoka`
+  (Playwright + Chrome; bez grafickej karty sú snímky/s len na porovnanie pred/po).
 
 ## Ovládanie
 | | Klávesnica | Mobil |
@@ -22,10 +27,12 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Skok | Medzerník | ⤒ |
 | Nastúpiť / vystúpiť | E | E |
 | Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu → Nastavenia | ťahanie prstom |
+| Kolobežka / bicykel: nasadnúť / zosadnúť | E pri nich (W jazda, S alebo Medzerník brzda, Shift šprint na bicykli) | E |
+| Kamera | klikni do hry a hýb myšou (kurzor sa zamkne); citlivosť a invertovaná os Y v menu | ťahanie prstom |
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
 | Vypísať polohu (pre misie) | P | – |
-| Ukazovateľ výkonu (snímky/s, čas snímky, rozlíšenie) | F3 | – |
+| Ukazovateľ výkonu (snímky/s, čas snímky, kreslenia, rozlíšenie, kvalita a dohľad) | F3 | – |
 | Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
 | Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
@@ -76,6 +83,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #88 Povrchy podľa satelitu: športoviská, bazény, záhrady v obytnej zástavbe
 - #89 Stanové strechy pre neobdĺžnikové rodinné domy (porovnanie so satelitom)
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
+- #97 Zdieľané kolobežky Fičák a mestské bicykle na chodníkoch – dá sa na nich jazdiť (náklon v zákrute, šliapanie)
+- #96 Chôdza bez kĺzania nôh: plynulé miešanie stoj–chôdza–klus–beh, rozbeh, náklon do zákruty, reálne výšky chodcov
 
 ## Čo je hotové
 - **Titulná obrazovka „Blaváčik“ a načítavanie s vlakom** (issue #101, `js/ui/menu.js`, `js/ui/nacitavanie/`,
@@ -95,6 +104,35 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   2017–2018, poskytnuté ESA v programe Copernicus), obrys Slovenska **Natural Earth** (public domain).
   **Písma** Anton, Barlow Condensed a Bricolage Grotesque (**SIL Open Font License 1.1**, Fontsource / Google Fonts)
   sú v `assets/fonts/` (`css/pisma.css`), žiadne CDN. Snímky: `docs/snimky/titulka/`.
+- **Testovacia trasa mesta** (`tools/kontrola/trasa.py`, issue #60): snímky z 17 pevných bodov jedným príkazom
+  a porovnanie dvoch behov (`docs/kontrola/porovnanie.html`) – návod nižšie v časti „Kontrola mesta“.
+- **Typy áut, farby, taxíky a kuriéri** (issue #97, 1. časť; `js/auto/typy-aut.js`, `data/doprava/vozidla.json`,
+  modul `js/doprava/vozidla-data.js`): 11 typov áut podľa jedného receptu (mestské, hatchback, sedan, kombi, SUV,
+  luxusné SUV, osobná dodávka, dodávka so skriňou, pickup s korbou, športové, muscle) – vlastný bočný profil,
+  rozmery a kolesá. V premávke aj zaparkované sa vyberajú **podľa váh** (najviac mestské, hatchbacky a kombi, športové
+  a muscle vzácne), **farby podľa skutočného zastúpenia** (sivá, čierna, biela, strieborná, tmavomodrá…), dodávky
+  prevažne biele. **Taxíky** (biele, čierne, strieborné, žlté, s lampou na streche) a vymyslené služby **Hladoš**
+  (svetlomodrá) a **Fičák** (zelená) – taxi s pruhom a nápisom na boku, **kuriéri** v autách vo farbách firmy; v noci
+  viac taxíkov a kuriérov, menej dodávok. Každý typ má vlastné **jazdné vlastnosti** (najvyššia rýchlosť, zrýchlenie,
+  zatáčanie, priľnavosť, hmotnosť) – platia aj pre auto, ktoré si hráč vezme z premávky alebo z parkoviska. Všetko sa
+  ladí v JSON bez zmeny kódu. Modely z balíkov CC0, kolobežky, bicykle a jazdci (#97 body 1–2) sú ďalšia časť.
+  Snímky: `docs/snimky/vozidla/`.
+- **Presné pamiatky – 1. dávka** (noc 22. 11.; `tools/blender/presne/`, `python3 tools/blender/presne_blender.py`):
+  **Slavín** – terasa so schodmi, pietna sieň s lizénami, bronzovými dverami a reliéfnymi poľami, zužujúci sa pylón
+  so žliabkami a bronzová socha vojaka so zástavou (~39,5 m); **Modrý kostolík** – okrúhla veža s pásmi, okienkami,
+  modrou kupolou, lucernou a krížom, loď a krídla podľa častí z OSM so strechou z modrej majoliky, polkruhové okná
+  s bielymi rámami, portál so zlatou mozaikou a oblým štítom; **Grasalkovičov palác** – stredný rizalit so stĺpovým
+  portikom a tympanónom (`tools/blender/historicke/zoznam.py`). **Náhľad pamiatky bez mesta:**
+  `nahlad-pamiatky.html?m=sm-slavin&az=200&el=14&d=1.6` (m = súbor v `assets/pamiatky/`, az/el = smer a výška
+  kamery v stupňoch, d = vzdialenosť). Snímky: `docs/snimky/pamiatky-presne/`.
+- **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
+  (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
+  od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
+  Trnavské mýto a stred Petržalky s Chorvátskym ramenom (`python3 tools/mesto/laser/… --sirsie-centrum`, postup
+  v `data/lidar/README.md`). Strechy podľa skutočnosti (sedlové, valbové, ploché, ustúpené podlažia s oknami, vikiere,
+  komíny, strojovne na panelákoch), výšky budov a dvory z lasera, stromy na skutočných miestach s výškou a šírkou
+  koruny, terén 2 m zarovnaný pod cestami. Časti budov nad priechodmi a vyvýšené časti ostávajú ako predtým.
+  Dáta: ≈ +14 MB (strechy 2 → 11 MB, terén +4 MB). Snímky: `docs/snimky/lod2-centrum/`.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
@@ -107,6 +145,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Mosty, ktoré sa napájajú na iný most (rampy križovatiek), majú „voľný“ koniec bez kotvy na teréne. Po mostoch
   sa dá chodiť aj jazdiť (`hra.mosty.vyska(x, z, y)` – na mostovke, ak je hráč alebo auto v jej výške, pod mostom terén).
   Cesty, chodníky a koľaje na moste sa už nekreslia na zem. Snímky: `docs/snimky/nadjazdy/`.
+- **Domy na svahu** (`js/mapa/budovy/budovy.js`): prízemie fasády už nezačína v najvyššom bode terénu pod domom –
+  pri miernom svahu je v strede (na Michalskej boli dvere a výklady 1,3 m nad chodníkom, teraz najviac ~0,65 m),
+  pri strmom najviac 0,75 m pod najvyšším bodom (dolná strana má sokel ako suterén). Snímky: `docs/snimky/budovy-svah/`.
 - **Typy budov v celom meste** (`js/mapa/budovy/typ-budovy.js`): každá budova dostane typ – panelák, rodinný dom,
   meštiansky dom, bytovka, hala, garáž/kôlňa, obchod, kancelárie, historická – podľa OSM typu (prezradeného odhadnutou
   výškou, neskôr `typOsm`), tvaru pôdorysu (plocha, šírka, doska/bod), strechy a štvrte. Podľa typu sa vyberie fasáda,
@@ -245,7 +286,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   aj sekundy), šum textúry je hotové plátno. Hotová dlaždica sa pred ukázaním pripraví pre grafickú kartu
   (`js/mapa/dlazdice/pripravit-dlazdicu.js`: shadery na pozadí cez `compileAsync`, veľké textúry zeme po jednej).
   3D fasády sa stavajú po podlažiach a do typovaných polí (menej odpadu v pamäti). **Automatické rozlíšenie**
-  (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na 55 %,
+  (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na minimum predvoľby kvality,
   pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **F3** ukáže snímky/s, priemerný
   a najhorší čas snímky, počet kreslení, trojuholníky a rozlíšenie (`js/ui/vykon.js`).
 - **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
@@ -253,10 +294,34 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   farebné ladenie, vyhladzovanie hrán (MSAA), jemná vineta; tiene slnka sú ostrejšie, stred tieňov je kúsok pred
   hráčom v smere pohľadu a je zarovnaný na texely (okraje neblikajú), na okraji tieňovej mapy sa tiene plynulo stratia.
   Strechy bez laserového modelu majú škridlu / štrk s normálovou mapou a drsnosťou (CC0, mapované zo svetových súradníc).
-  V menu sa dá zvoliť **Grafika: nízka / stredná / vysoká** (nízka = bez efektov, ako predtým; integrovaná grafika
-  začne na strednej). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
+  V menu sa dá zvoliť **Grafika: nízka / stredná / vysoká / ultra / auto** (od #58 – pozri *Predvoľby kvality a dohľad*). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
   hra drží 60 FPS. Snímky pred/po: `docs/snimky/grafika/`. Ladenie AO v konzole:
   `hra.moduly.find(m => m.nazov === 'efekty').vykreslovac.matVysledok.uniforms.ladenie.value = 1`.
+- **Predvoľby kvality a dohľad** (issue #58, podľa Taipei Rush; `js/grafika/predvolby.js`, `js/grafika/kvalita.js`):
+  zblízka ostáva grafika rovnaká, šetrí sa diaľka. **Hmla končí pri dohľade** a za ňou sa nič nestavia ani nekreslí
+  (predtým jednoduché bloky budov do 3,2 km a pamiatky po celom meste). Plne podrobné dlaždice sú len v okruhu
+  okolo hráča, ďalej po koniec hmly **stredný pás**: jednoduché bloky budov s oknami (shader, v noci časť okien
+  svieti, z diaľky bez mihotania). **Drobnosti** (lavičky, značky, tabule ulíc) sa kreslia len zblízka, lampy do
+  dvojnásobku (`js/mapa/vybavenie/dosah-drobnosti.js`); pamiatky a skupiny stromov za hmlou skryje `js/kamera/dohlad.js`.
+
+  | | nízka | stredná | vysoká | ultra |
+  |---|---|---|---|---|
+  | dohľad (koniec hmly) | 420 m | 650 m | 900 m | 1300 m |
+  | plný detail (okruh) | 250 m | 350 m | 450 m | 600 m |
+  | drobnosti | 70 m | 105 m | 150 m | 220 m |
+  | autá / chodci najviac | 40 / 120 | 90 / 250 | 200 / 450 | 200 / 450 |
+  | tiene (mapa, dosah) | nie | 2048, 100 m | 4096, 120 m | 4096, 150 m |
+  | efekty (AO, MSAA) | nie | stredné | plné | plné |
+  | pomer pixelov min / max | 0,7 / 1,0 | 0,75 / 1,25 | 0,8 / 1,5 | 0,9 / 2,0 |
+
+  **Auto** (predvolená voľba) začne podľa grafickej karty (integrovaná → stredná, samostatná → vysoká) a podľa
+  plynulosti prejde o stupeň nižšie alebo vyššie. Keď hra dlhšie nestíha ani pri najnižšom automatickom rozlíšení,
+  **dohľad sa skráti** o 15 % (najviac na 55 %), pri rezerve sa vráti. Aktuálny stav ukáže menu pod výberom a F3.
+  Tiene, efekty a NPC na vysokej sú ako pred #58 (tabuľka Taipei Rush má na vysokej menej – zblízka by to bolo vidieť).
+  **Meranie** na trase #60 (`docs/meranie/58-trasa-60.json`, bez grafickej karty, vysoká pred → po): kreslení o 24–44 %
+  menej (napr. Hlavné nám. 1211 → 805, Eurovea 991 → 552), trojuholníkov o 14–32 % menej, jednoduchých dlaždíc
+  ~130 → ~12, podrobných 16–21 → 4–10; okolie po presune sa dostavia o rád rýchlejšie (Eurovea 37 s → 7 s).
+  Nízka: ~430 kreslení a ~1,9 mil. trojuholníkov. Snímky pred/po: `docs/snimky/kvalita/` (zblízka bez zmeny, diaľka v opare).
 - **Realistickejší vzhľad – zlatá hodinka** (`js/grafika/nalada.js`): nízke teplé slnko (~12° nad obzorom), dlhé tiene,
   chladnejšie modrasté tiene, teplá žiara okolo slnka a nasvietené oblaky, teplý opar do diaľky; všetky farby
   osvetlenia sú na jednom mieste (neskôr sa podľa herného času dá prepínať deň/noc).
@@ -413,13 +478,35 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   laser `python3 tools/blender/laser_atriaky.py`, model `python3 tools/blender/atriaky_blender.py`).
   - **Domy**: 20 átriových domov AD-A … AD-U podľa pôdorysov z OSM, výšky a terén pod každým domom
     z laserového skenovania ÚGKK. Areál je na svahu s rozdielom 18 m, každý dom stojí na svojej výške.
-  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, zapustené pásy okien, presklené prízemie
-    na stĺpoch, vyložené horné podlažie a strecha so zábradlím.
+  - **Vzhľad**: pohľadový betón, mohutné vodorovné parapetné pásy, tehlovočervené pásy pod oknami, zapustené pásy
+    okien, presklené prízemie na stĺpoch, **ustúpené najvyššie podlažie s terasou** (biele zábradlie) a strecha.
   - **Átriá**: laser ukázal, že sú zastrešené, preto majú domy na streche svetlík. Otvorený dvor
     s prechodom má len AD-I.
   - **Vstup** podľa verejnej fotografie: tri celovýškové turnikety (poloha z OSM), sivá vrátnica
     s červeným pásom, dvojkrídlová brána so značkou zákazu státia, skriňa a betónový múr.
   - **Ploty a múry** okolo areálu sú z OSM a majú kolízie. Cez turnikety sa dá prejsť.
+  - **Lávky a terasy, po ktorých sa dá chodiť** (issue #91, `js/mapa/atriaky/modul.js`): úzke prepojenia v OSM
+    pôdorysoch sú lávky v dvoch podlažiach nad sebou (betónová doska, tehlovočervený pás, biele zábradlie), pod nimi
+    je voľný prechod (predtým tam bola plná stena). Dolná lávka je prvé podlažie aspoň 3,1 m nad zemou, horná je
+    zvyčajne v úrovni terasy – z nej sa prejde rovno na terasu. **Vonkajšie schody na lávky a terasy nie sú**
+    (na fotkách ich niet) – na ochoz (terasu) bloku T sa ide z izby 314. Biele zábradlia lávok a terás kreslí hra
+    a majú kolíziu s výškou (`js/mapa/kolizie.js`, `info.vyska`), takže sa nedá spadnúť a pod lávkou sa dá prejsť;
+    dom bráni len po úroveň terasy, ustúpené podlažie po strechu. Domy sú v kolíziách „budova“ s výškou strechy,
+    takže kamera na terase ani pri dome nevojde do steny. Pochôdzne plochy idú do modulu nadjazdov udalosťou
+    `'pochodzne-plochy'`. Kolízie modulu sa pri prestavbe (načítanie laserového terénu) naraz odstránia a postavia znova.
+  - **Okolie podľa fotiek majiteľa**: pri bloku T oranžová tabuľa „T“ so smerovkou „UKc →“, v dvore medzi R, O, S, T
+    nízke betónové múriky, hranaté kvetináče, sivý kôš a vysoká lampa s bielou pätkou.
+  - **Internát cez teleport** (`js/mapa/atriaky/internat.js`): nad vchodom do bloku T sa vznáša oranžová šípka
+    (zďaleka väčšia), na minimape je oranžová značka „Internát – blok T“ (mimo minimapy šípka na okraji). Vchod
+    je vo výklenku pod prvým poschodím (dom stojí na svahu, vchod je tam, kde je pod stropom aspoň 2,3 m).
+    Pri dverách „E – Otvoriť dvere (internát)“ – dvere sa otvoria, obraz stmavne a hráč je v chodbe (sprchy, WC,
+    kuchynka); vľavo na konci je trojlôžková izba 314 (postele, stolíky, stoličky, poličky, vešiaková skriňa,
+    umývadlo so zrkadlom, chladnička, okno s výhľadom). Z izby vedú **balkónové dvere na ochoz** („E – Vyjsť
+    na ochoz“) – hráč sa objaví na terase bloku T pred dverami v betónovom portáli a môže chodiť po terase
+    a lávkach v jej úrovni; tými istými dverami („E – Do izby 314“) sa vráti. Mesto sa vnútri nekreslí, hráč
+    v meste stojí. Vnútri WASD a myš, dvere na začiatku chodby vedú von pred vchod.
+  - **Verejné fotky a odkiaľ sú fotené**: `data/atriaky-fotky.json` (Wikimedia Commons s GPS + fotky majiteľa).
+    Snímky pred/po: `docs/snimky/atriaky/a91-*.jpg`.
 - **Kameň na modeloch pamiatok** (`js/mapa/pamiatky/kamen-material.js`, `js/grafika/kamen-glsl.js`): materiály
   z Blendera s „kamen“ alebo „skala“ v mene majú namiesto jednej farby procedurálny kameň vo svetových súradniciach –
   hradby Bratislavského hradu, Devín, Gerulata a mestské hradby z lomového kameňa, brány, portály a sokle z kvádrov,
@@ -486,7 +573,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   35 932 spojov, kalendár (pracovný deň, prázdniny, sobota, nedeľa a sviatky). Trasy idú po skutočných cestách
   a koľajach mapy. V hre: prístrešky s lavičkou, označníky s číslami liniek a tabule s najbližšími odchodmi.
 - **MHD – etapa b: vozidlá jazdia podľa poriadku** (`js/mhd/vozidla/`, modul `mhd-vozidla`): každý spoj z poriadku,
-  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (3 články, zberač),
+  ktorý je práve na ceste v okolí hráča (linky so zastávkou do 1,6 km), jazdí ako električka (5 článkov, zberač),
   trolejbus (kĺbový, tyče) alebo autobus (kĺbový / sólo). Poloha sa počíta priamo z poriadku: vozidlo sa rozbieha
   a brzdí, na zastávku príde o chvíľu skôr, otvorí dvere a **odíde presne v čase z cestovného poriadku**
   (aj po preskočení času). Články sa lámu v zákrutách, autobusy idú v pravom pruhu, vpredu, na boku a vzadu
@@ -495,11 +582,56 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Vozidlo nejde cez autá ani ľudí (`prekazky.js`): keď mu na trase do 30 m stojí auto, hráč alebo chodec, spomalí,
   zastaví, električka zazvoní a počká; potom pokračuje s meškaním (čas spoja sa posunie). Po 10 s čakania sa pohne,
   aby sa nezasekla s autom, ktoré čaká na ňu.
+- **Vzhľad vozidiel MHD ako v Bratislave** (issue #93, `js/mhd/vozidla/geometria.js`): **električka** má 5 článkov
+  (~32 m, obojsmerná – kabína na oboch koncoch), jasne červenú karosériu, **čierny pás okien** cez celú dĺžku,
+  sivé kryty kĺbov, zaoblené čelo so šikmým čelným sklom v čiernom ráme, hranaté svetlomety so striebornou lištou,
+  nízky spojler, malé biele číslo vozidla na nose (vymyslené), zrkadlá na tyči a zberač so žltou lištou.
+  **Kĺbový autobus a trolejbus** („harmonika“): červená karoséria, čierny pás veľkých okien až po strechu,
+  strieborné harmonikové mechy, veľké zaoblené čelné sklo, zahnuté spätné zrkadlá zhora, LED svetlá v čiernych
+  rámoch, vymyslená tabuľka s číslom, kryt klimatizácie. Dvere sú čierne presklené s červeným spodkom a žltým
+  tlačidlom; v noci svieti interiér cez okná modrobielo. **Displej s číslom linky a cieľom ostal bez zmeny.**
+  Žiadne logá výrobcov. Prehliadka modelov bez hry: `tools/kontrola/vozidla-mhd.html#elektricka`
+  (aj `#autobus`, `#bok`, `#zadok`, `#noc`; cez lokálny server).
 - **Dialógy úvodnej scény vo vlaku** (`data/dialogy/vlak-*.json`) + návrh volieb v dialógoch
   ([napady/navrh-rozsirenie-dialogov.md](napady/navrh-rozsirenie-dialogov.md)).
 - **Pohyb Ďoďa:** prirodzená chôdza (dopad na pätu, odraz zo špičky), klus a beh podľa biomechaniky,
-  rýchlosti 2 m/s chôdza a 6 m/s beh (Shift). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
+  rýchlosti 2 m/s chôdza a 6 m/s beh (Shift).
+  **Plynulá chôdza (issue #96, `js/chodec/postava/animacie.js`, `krok.js`):** klipy stoj, chôdza, klus a beh sa
+  nemenia natvrdo podľa prahov, ale miešajú sa podľa rýchlosti (blend space) a majú spoločnú fázu kroku – pri
+  zrýchľovaní z chôdze do behu ostane noha na zemi v tom istom okamihu kroku. Pri načítaní sa z klipu zmeria,
+  akou rýchlosťou sa oporné chodidlo posúva dozadu (chôdza 1,39 m/s, klus 1,88, beh 3,02 pri Ďoďovi; NPC majú
+  vlastné podľa kostry) a krok sa zrýchli presne tak, aby noha nekĺzala (pri behu najviac 1,3×, inak by nohy
+  „kmitali“). Hráč sa rozbieha ~0,25 s a brzdí ~0,2 s (obrátka ide cez zastavenie), otáča sa najviac 540 °/s,
+  v zákrute sa nakloní dovnútra (do 8°), pri rozbehu mierne dopredu (`js/chodec/pohyb-podla-kamery.js`). Pri
+  stene sa kĺže popri nej a animácia ide podľa skutočného posunu (nebeží na mieste); skok sa dá aj 0,15 s po
+  zídení z hrany. **Chodci** majú výšku z normálneho rozdelenia (muži 180 ± 7 cm v rozsahu 163–198, ženy
+  167 ± 6 cm v 152–184, dôchodcovia o 4 cm nižší; `vyska` v profiloch `data/postavy/npc.json`), mení sa mierka celého
+  modelu a vyšší chodí rýchlejšie dlhším krokom; dav (VAT) dostal rovnaké zladenie kroku s rýchlosťou.
+  **Nohy na teréne a hlava** (`js/chodec/postava/telo-na-terene.js`, IK dvoch kostí `ik.js`): položené chodidlo
+  hráča sa postaví na skutočnú výšku povrchu pod ním a natočí sa so svahom, telo sa zníži o nižšiu nohu (do 0,3 m) –
+  na svahu 27 % sú špičky do 7 mm od zeme (predtým jedna 12 cm vo vzduchu, druhá 12 cm v zemi). Hlava sa natáča tam,
+  kam sa pozerá kamera (do ~57°, nie za chrbát, pri behu menej); keď hráč 4 s stojí a nehýbe kamerou, pomaly sa rozhliada. Úpravy kostí sa pred ďalšou animáciou vrátia
+  (mixér zapisuje kosť len pri zmene hodnoty – bez toho by sa hromadili). Cena ~0,08 ms na snímok.
+  Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok, nohy na svahu). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
+- **Zdieľané kolobežky „Fičák“ a mestské bicykle** (issue #97, `js/mikromobilita/`, modul `kolobezky`): na chodníkoch
+  a v pešej zóne stoja odstavené elektrické kolobežky vymyslenej firmy Fičák (zelené, po 1–3 kusoch, šikmo na stojane)
+  a mestské bicykle rôznych farieb (po 1–2, s košom/nosičom, blatníkmi a stojanom). Stanovištia sa vyberú z chodníkov
+  detailných dlaždíc, vždy rovnako podľa polohy (v centre ~170 na km², tretina s bicyklami); každý typ sa kreslí jednou
+  InstancedMesh do 170 m. **E pri vozidle = nasadnúť**, W plyn/šliapanie, S alebo Medzerník brzda, A/D zatáčanie,
+  Shift šprint (bicykel), E = zosadnúť (do 14 km/h). Kolobežka: obmedzovač 25 km/h, rýchly rozbeh; bicykel 23 km/h,
+  šprint 35 km/h, do kopca citeľne pomalší. Oba sa nešmýkajú do boku, v zákrute sa nakláňajú (v·ω/g), od stien
+  a áut sa odrazia, chodca zrazia len tesne pred sebou. **Jazdec:** na kolobežke Ďoďo stojí na doske, na bicykli sedí
+  s predklonom a šliape – ruky na riadidlách a nohy na doske/pedáloch drží IK dvoch kostí (`js/chodec/postava/ik.js`,
+  `jazdec.js`); kľuky sa točia podľa rýchlosti (voľnobeh pri dobiehaní). Kamera je bližšie ako za autom. Vozidlo,
+  z ktorého hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Modely sú v kóde (kolobežka 432,
+  bicykel 1 676 trojuholníkov). Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je
+  nápoveda k autu). Zriedka (~5 % stanovíšť) leží na chodníku aj **hoverboard** (15 km/h, otáča sa na mieste) alebo
+  **onewheel** (28 km/h, Ďoďo stojí bokom, ľavá noha vpredu). **Ľudia na kolobežkách a bicykloch** (`js/mikromobilita/npc-jazdci.js`, modul `jazdci-npc`):
+  najviac 6 naraz jazdí po červených cyklopruhoch (pravý pruh v smere cesty, ľavý proti) a cyklochodníkoch 50–180 m
+  od hráča, 14–25 km/h, v zákrutách sa nakláňajú, pred hráčom zabrzdia. Jazdec je plný model NPC (študent, kuriér,
+  korporátnik…) s rovnakou pózou ako hráč; ďalej ako 25 m zlúčená sieť LOD1 (tá istá kostra, 1 volanie kreslenia) –
+  6 jazdcov pridá ~3 volania kreslenia a ~0,2 ms CPU. Snímky: `docs/snimky/kolobezky/`.
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
   Držia odstup (model inteligentného vodiča – IDM), spomaľujú pred zákrutami, stoja na červenú (`hra.doprava.semafor`),
@@ -544,6 +676,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Átriaky (#91): schody vedľa lávok sú zatiaľ v hre (JS), zábradlie modelu lávky pri prestupe na schody ostáva
+  (prechádza sa cez neho); chodby a terasy všetkých 18 domov podľa fotiek, viac izieb a blokov s interiérom.
+- Kvalita (#58): plynulé prelínanie podrobnej a jednoduchej dlaždice (dnes sa vymení celá naraz, v opare), vzdialené
+  stromy ako billboardy, na nízkej Lambert namiesto PBR a textúry v polovičnom rozlíšení; zmerať na integrovanej
+  grafike a RTX 2060 cez `?meranie` a doladiť hodnoty predvolieb.
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
@@ -553,13 +690,33 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Modul chodcov: vypustiť NPC z `js/chodec/npc/` na chodníky a námestia (pohyb po chodníkoch, vyhýbanie sa), `Dav` rieši LOD.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
+- Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
+- Chôdza (#96): nové klipy chôdze a behu s dlhším krokom (behový klip má krok ~1 m, pri 6 m/s nohy mierne kĺžu),
+  nohy na teréne aj pre najbližších chodcov, striedanie kľudových animácií,
+  oblečenie podľa ročného obdobia a počasia, vystúpenie na schod najviac ~0,35 m.
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.
 - Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia, minimapa.
 - Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia (značky na minimapu už idú cez udalosť `znacka-mapy`).
+
+## Kontrola mesta – testovacia trasa (issue #60)
+Skript odfotí mesto z pevných bodov (Hlavné nám., Michalská brána, Obchodná, Hodžovo a Šafárikovo nám., Most SNP
+z oboch strán, nábrežie pri Eurovei, Nivy, Hlavná stanica, Jungmannova, Romanova, Aupark, Trnavské mýto,
+Karlova Ves, Mlynská dolina, výhľad z Kamzíka) – vždy z rovnakých uhlov (z ulice a šikmo zhora) a o 13:00 herného
+času. Hru spustí v prehliadači bez okna, kreslí sa z plátna (bez HUD a minimapy), na každom bode počká, kým sú
+postavené všetky detailné dlaždice okolia.
+```
+pip install playwright && python3 -m playwright install chromium      # raz
+python3 tools/kontrola/trasa.py                                        # všetky body → docs/kontrola/<dátum>/
+python3 tools/kontrola/trasa.py --len hlavne-namestie,nivy --nazov po-pr-123
+python3 tools/kontrola/trasa.py --gpu                                  # s oknom a grafickou kartou (rýchlejšie)
+```
+Body a uhly sú v `tools/kontrola/body.json` (súradnice hry, azimut, vlastná kamera). Výsledok: `docs/kontrola/<beh>/index.html`
+(galéria) a **porovnanie dvoch behov** vedľa seba: `http://localhost:8000/docs/kontrola/porovnanie.html?a=<beh>&b=<beh>`.
+Softvérové kreslenie (bez `--gpu`) trvá ~5 minút na bod. Prvý beh (stav `main` 22. 11.) je v `docs/kontrola/2026-11-22/`.
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.

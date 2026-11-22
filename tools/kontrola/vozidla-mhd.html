@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Blavačík – prehliadka vozidiel MHD</title>
+  <!-- Pomôcka na kontrolu modelov MHD (js/mhd/vozidla/geometria.js) bez spustenia hry.
+       Otvor cez lokálny server: http://localhost:8000/tools/kontrola/vozidla-mhd.html#predok
+       Pohľady: #predok, #elektricka, #autobus, #bok, #zadok, #noc; ťahaním myši sa kamera otáča okolo vozidiel, koliesko približuje. -->
+  <style>html, body { margin: 0; height: 100%; overflow: hidden; background: #9fb4c6; } canvas { display: block; }</style>
+  <script type="importmap">
+    { "imports": { "three": "../../vendor/three/three.module.min.js", "three/addons/": "../../vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { VykreslenieVozidiel } from '../../js/mhd/vozidla/vykreslenie.js';
+import { Displeje } from '../../js/mhd/vozidla/displeje.js';
+import { VSETKY_TYPY, MEDZERA } from '../../js/mhd/vozidla/typy.js';
+import { NOC, SVIETIDLA } from '../../js/grafika/noc.js';
+
+const pohlad = location.hash.slice(1) || 'predok';
+const noc = pohlad === 'noc';
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scena = new THREE.Scene();
+scena.background = new THREE.Color(noc ? '#0c111d' : '#b9cbd9');
+scena.add(new THREE.HemisphereLight('#dfe9f2', '#5a5248', noc ? 0.08 : 1.2));
+const slnko = new THREE.DirectionalLight('#fff1dc', noc ? 0.05 : 2.4);
+slnko.position.set(30, 40, 25); slnko.castShadow = true;
+slnko.shadow.mapSize.set(2048, 2048);
+Object.assign(slnko.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40 });
+scena.add(slnko);
+const zem = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: '#7d7f80', roughness: 0.9 }));
+zem.rotation.x = -Math.PI / 2; zem.receiveShadow = true;
+scena.add(zem);
+NOC.value = noc ? 1 : 0;
+for (const [m, s] of SVIETIDLA) m.emissiveIntensity = s * NOC.value;
+
+const kresba = new VykreslenieVozidiel(scena);
+const displeje = new Displeje(kresba.skupina);
+kresba.zacni(); displeje.zacni();
+// vozidlá vedľa seba (os x), predkom k +z; električka vľavo
+const LINKY = { elektricka: ['4', 'Dúbravka', '#c8102e'], trolejbus: ['210', 'Nemocnica Kramáre', '#2a7a3a'], autobus: ['83', 'Petržalka', '#0b5fa5'] };
+VSETKY_TYPY.forEach((t, i) => {
+  const x = (i - 1.5) * 7;
+  const dlzka = t.clanky.reduce((s, c) => s + c.d, 0) + MEDZERA * (t.clanky.length - 1);
+  let z = dlzka / 2;
+  const matice = [];
+  for (const c of t.clanky) {
+    const m = new THREE.Matrix4().makeTranslation(x, 0, z - c.d / 2);
+    kresba.clanok(c.varianta, m);
+    matice.push(m);
+    // zatvorené krídla dverí (ako v hre, js/mhd/vozidla/modul.js)
+    for (const zd of c.dvere) for (const strana of [-1, 1]) {
+      kresba.kridlo(t.vyska - 0.5 - t.podlaha - 0.05, m.clone().multiply(new THREE.Matrix4().makeTranslation(-t.sirka / 2 - 0.03, t.podlaha + 0.05, zd + strana * 0.33)));
+    }
+    z -= c.d + MEDZERA;
+  }
+  const [linka, ciel, farba] = LINKY[t.typ];
+  const c0 = t.clanky[0], cN = t.clanky[t.clanky.length - 1];
+  displeje.pridaj(linka, ciel, farba, t, matice[0], c0.d, matice[matice.length - 1], cN.d);
+});
+kresba.dokonci(); displeje.dokonci();
+
+const kamera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 500);
+const POHLADY = {
+  predok: [[22, 5, 34], [-2, 1.6, 10]],             // všetky spredu
+  elektricka: [[-3.5, 3.0, 25.5], [-10.5, 1.6, 15]], // električka zblízka
+  autobus: [[10.5, 2.8, 17], [3.5, 1.6, 8]],         // kĺbový autobus zblízka
+  bok: [[-42, 3.2, 0], [-10.5, 1.6, 0]],             // električka z pravej strany (dvere)
+  zadok: [[-3.5, 3.0, -25.5], [-10.5, 1.6, -15]],
+  noc: [[-3.5, 3.0, 25.5], [-10.5, 1.6, 15]],
+};
+const [p, c] = POHLADY[pohlad] ?? POHLADY.predok;
+const ciel = new THREE.Vector3(...c);
+const od = new THREE.Vector3(...p).sub(ciel);
+let uhol = Math.atan2(od.x, od.z), vzd = Math.hypot(od.x, od.z), vyska = od.y;
+const nastavKameru = () => { kamera.position.set(ciel.x + Math.sin(uhol) * vzd, ciel.y + vyska, ciel.z + Math.cos(uhol) * vzd); kamera.lookAt(ciel); };
+nastavKameru();
+let tah = null;
+addEventListener('pointerdown', (e) => { tah = e.clientX; });
+addEventListener('pointerup', () => { tah = null; });
+addEventListener('pointermove', (e) => { if (tah === null) return; uhol -= (e.clientX - tah) * 0.006; tah = e.clientX; nastavKameru(); });
+addEventListener('wheel', (e) => { vzd = Math.max(6, Math.min(120, vzd * (e.deltaY > 0 ? 1.1 : 0.9))); nastavKameru(); });
+addEventListener('resize', () => { kamera.aspect = innerWidth / innerHeight; kamera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+renderer.setAnimationLoop(() => renderer.render(scena, kamera));
+window.hotovo = true;
+</script>
+</body>
+</html>

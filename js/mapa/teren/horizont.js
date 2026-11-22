@@ -44,5 +44,7 @@ export function vytvorHorizont(vyskopis, KONFIG, polomerDetailu) {
   mesh.name = 'horizont';
   mesh.receiveShadow = false;
   mesh.userData.nastavStred = (x, z) => stred.value.set(x, 0, z);
+  // okruh podrobných dlaždíc sa mení s kvalitou grafiky (js/grafika/kvalita.js)
+  mesh.userData.nastavPolomer = (r) => { polomer.value = r; };
   return mesh;
 }

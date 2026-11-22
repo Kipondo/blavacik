@@ -103,6 +103,8 @@ function poschodia(pasy, y1, y2, f, nobile) {
   pasy.push([y1, y1 + 1.2 * h, 1, 2], [y1 + 1.2 * h, y2, 2, 1 + f]);
 }
 
+const ZAKOPANIE_MAX = 0.75;   // m – o koľko najviac môže terén na hornej strane domu zakryť prízemie
+
 /** Pásy steny podľa výšky: sokel, prízemie, poschodia, atika → [y0, y1, v0, v1].
  *  podlazia – známy počet nadzemných podlaží (z OSM); výška sa medzi ne rozdelí v pomere prízemie : podlažie.
  *  nobile – historická budova: vyššie 1. poschodie (porovnanie so skutočnosťou). */
@@ -168,7 +170,11 @@ export function rozlozenieBudovy(b, vyskopis) {
   const nahodaFarby = 0.94 + 0.12 * (((Math.abs(Math.round(cx * 13 + cz * 7))) % 11) / 10);
   const farba = new THREE.Color(b.farba ?? '#d8d2c4').multiplyScalar(nahodaFarby);
   const vnutri = (x, z) => bodVPolygone(x, z, body) && !diery.some((d) => bodVPolygone(x, z, d));
-  const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : nad ? pasyVyvysenej(spodok, vrch, par) : pasyFasady(spodok, hMax, vrch, par, b.podlazia, typ === STYLY.stare);
+  // prízemie na svahu (issue: dvere a výklady nad chodníkom): nie v najvyššom bode terénu pod domom, ale nižšie –
+  // pri miernom svahu v strede (chyba ± polovica rozdielu na koncoch domu), pri strmom najviac 0,75 m pod
+  // najvyšším bodom (dolná strana má vysoký sokel ako suterén, horná nie je zakopaná)
+  const zaklad = hMax - Math.min((hMax - hMin) / 2, ZAKOPANIE_MAX);
+  const pasy = b.sklo ? [[spodok, vrch, 0, 0]] : nad ? pasyVyvysenej(spodok, vrch, par) : pasyFasady(spodok, zaklad, vrch, par, b.podlazia, typ === STYLY.stare);
   const slepa = b.typ === 'garaz';                    // garáže a kôlne bez okien
   // znaky pre shader fasád: 1 = okenice (len kde naozaj sú), 2 = obchod (výklady na prízemí), 4·(1 + farba okeníc)
   const znaky = (b.okenice ? 1 : 0) + (b.obchod ? 2 : 0) + (b.farbaOkenic !== undefined ? 4 * (1 + b.farbaOkenic) : 0);

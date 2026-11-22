@@ -3,7 +3,8 @@
 // Rozhranie hra.ui (vytvorí main.js cez vytvorUI):
 //   hra.ui.vrstva            – <div> nad hrou, sem môžu moduly pridávať vlastné prvky
 //   hra.ui.sprava(text, sek) – krátka správa v strede obrazovky
-//   hra.ui.napoveda(text)    – trvalá nápoveda dole (null = skryť)
+//   hra.ui.napoveda(text)    – trvalá nápoveda dole (null = skryť); moduly radšej nastavia hra.stav.napoveda
+//                              (HUD ju zobrazí, keď nie je nápoveda k autu)
 //   hra.ui.pokyn(text)       – pokyn hore (napr. cieľ misie; null = skryť)
 
 export function vytvorUI(koren) {
@@ -54,11 +55,13 @@ export default {
 
     const dotyk = hra.vstup.dotyk;
     if (auto) {
-      ui.napoveda(auto.rychlostKmh < 25 ? (dotyk ? 'E – vystúpiť' : 'E – vystúpiť · Medzerník – ručná brzda') : null);
+      // vozidlo môže mať vlastnú nápovedu (kolobežka)
+      ui.napoveda(auto.napoveda ?? (auto.rychlostKmh < 25 ? (dotyk ? 'E – vystúpiť' : 'E – vystúpiť · Medzerník – ručná brzda') : null));
     } else if (hra.hrac?.najblizsieAuto()) {
       ui.napoveda('E – nastúpiť do auta');
     } else {
-      ui.napoveda(null);
+      // nápoveda iných modulov (napr. dvere internátu, kolobežka) – nastavujú ju cez hra.stav.napoveda
+      ui.napoveda(hra.stav.napoveda ?? null);
     }
   },
 };

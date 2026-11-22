@@ -95,6 +95,8 @@ html, body {
 .ui-minimapa[hidden], .ui-velka-mapa[hidden], .ui-minimapa-ulica[hidden] { display: none; }
 
 /* Menu, titulka a načítavanie sú v css/titulka.css (issue #101). */
+/* stav pod výberom kvality grafiky (#58, #99) – zvyšok výberu je v css/titulka.css */
+.menu-grafika-stav { flex-basis: 100%; text-align: center; opacity: 0.7; font-size: 12px; min-height: 1em; }
 
 /* --- Dotykové ovládanie --- */
 .dotyk { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
@@ -124,3 +126,7 @@ html, body {
   .ui-minimapa { bottom: auto; top: 14px; left: 14px; width: 150px; }
   #hra .ui-minimapa canvas { width: 150px; height: 150px; }
 }
+
+/* prechod cez dvere internátu (js/mapa/atriaky/internat.js) */
+.internat-clona { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 7; transition: opacity 0.35s; }
+.internat-clona.zapnuta { opacity: 1; }

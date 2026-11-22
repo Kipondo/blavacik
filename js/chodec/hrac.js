@@ -7,6 +7,7 @@ import { nacitajUlozenyVzhlad } from './postava/ulozenie.js';
 import { zacniNastup, zacniVystup, aktualizujAkciu, zrusAkciu } from './nastupovanie.js';
 import { pohybPodlaKamery, zastavPohyb } from './pohyb-podla-kamery.js';
 import { maxRychlost, smiePrejst, aktualizujVodu } from './plavanie.js';
+import { predAnimaciou, poAnimacii, uvolniTelo } from './postava/telo-na-terene.js';
 
 const K = KONFIG.HRAC;
 
@@ -20,6 +21,8 @@ class Hrac {
     this.pliva = false; // vo vode (plavanie.js)
     // realistický Ďoďo z assets/postavy/dodo.glb (vzhľad a oblečenie z editora postavy)
     this.mesh = vytvorRealistickuPostavu(nacitajUlozenyVzhlad());
+    this.mesh.rotation.order = 'YXZ'; // natočenie, potom predklon a náklon do zákruty (pohyb-podla-kamery.js)
+    this.mimoZeme = 0;  // s od zídenia z hrany – skok sa dá ešte chvíľu po ňom („rezerva“)
   }
 }
 
@@ -85,7 +88,7 @@ export default {
     const h = hra.hrac;
 
     // prebieha nastupovanie / vystupovanie s animáciou (nastupovanie.js)
-    if (h.akcia) { zastavPohyb(h); aktualizujAkciu(dt, hra); return; }
+    if (h.akcia) { zastavPohyb(h); uvolniTelo(h); h.mesh.rotation.x = h.mesh.rotation.z = 0; aktualizujAkciu(dt, hra); return; }
 
     // E – nastúpiť / vystúpiť (s animáciou, ak sa dá; inak hneď)
     if (hra.vstup.stlacil('akcia')) {
@@ -104,6 +107,7 @@ export default {
       h.pozicia.copy(hra.stav.auto.pozicia);
       h.uhol = hra.stav.auto.uhol;
       zastavPohyb(h);
+      uvolniTelo(h);
       return;
     }
 
@@ -126,7 +130,7 @@ export default {
 
     // kolízie s budovami a autami (pod zemou v podchode len steny chodby – js/mapa/podchody/)
     const podZemou = hra.podchody?.jePodZemou(h.pozicia);
-    const r = podZemou ? hra.podchody.oprav(staraX, staraZ, h.pozicia.x, h.pozicia.z, h.pozicia.y, K.POLOMER) : hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER);
+    const r = podZemou ? hra.podchody.oprav(staraX, staraZ, h.pozicia.x, h.pozicia.z, h.pozicia.y, K.POLOMER) : hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER, h.pozicia.y);
     h.pozicia.x = r.x; h.pozicia.z = r.z;
     for (const a of hra.auta) {
       for (const k of a.kruhy()) {
@@ -142,15 +146,27 @@ export default {
     if (hra.mapa.jeMimo(h.pozicia.x, h.pozicia.z) || !smiePrejst(hra, h, h.pozicia.x, h.pozicia.z)) {
       h.pozicia.x = staraX; h.pozicia.z = staraZ;
     }
+    // skutočný pohyb po kolíziách: pri stene ostane len zložka pozdĺž nej (kĺzanie popri stene), do steny
+    // sa nebeží na mieste – rýchlosť aj animácia kroku idú podľa toho, o koľko sa postava naozaj posunula
+    if (dt > 0) {
+      const sx = (h.pozicia.x - staraX) / dt, sz = (h.pozicia.z - staraZ) / dt;
+      const skutocna = Math.hypot(sx, sz);
+      if (skutocna < h.rychlost - 0.05) {
+        h.vx = sx; h.vz = sz;
+        h.rychlost = skutocna;
+      }
+    }
 
     // skok a gravitácia (vo vode sa pláva – výšku rieši plavanie.js; podchody a mosty majú vlastnú výšku)
     const zem = hra.podchody?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mosty?.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y) ?? hra.mapa.vyska(h.pozicia.x, h.pozicia.z, h.pozicia.y);
     const pliva = aktualizujVodu(dt, hra, h);
     if (pliva) {
       // nič – postava drží pri hladine
-    } else if (h.naZemi && hra.vstup.drzi('skok')) {
+    } else if ((h.naZemi || (h.mimoZeme < 0.15 && h.vy <= 0 && !h.skocil)) && hra.vstup.drzi('skok')) {
+      // skok aj tesne po zídení z hrany (rezerva 0,15 s), nie však druhý skok vo vzduchu
       h.vy = K.SKOK;
       h.naZemi = false;
+      h.skocil = true;
       hra.posli('skok');
     }
     if (!pliva) {
@@ -163,16 +179,26 @@ export default {
       h.pozicia.y = zem;
       h.vy = 0;
       h.naZemi = true;
+      h.skocil = false;
     } else if (h.naZemi && h.pozicia.y - zem < 0.6) {
       h.pozicia.y = zem; // schádzanie zo svahu bez poskakovania
     } else {
       h.naZemi = false;
     }
 
+    h.mimoZeme = h.naZemi || pliva ? 0 : h.mimoZeme + dt;
+    if (pliva) h.skocil = false;
+
     h.mesh.position.copy(h.pozicia);
-    h.mesh.rotation.y = h.uhol;
+    h.mesh.rotation.set(pliva ? 0 : h.predklon ?? 0, h.uhol, pliva ? 0 : h.naklon ?? 0);
     h.mesh.userData.opity = !!hra.stav.opity;
     h.mesh.userData.voVode = h.pliva;
+    predAnimaciou(h);
     h.mesh.userData.animuj(dt, Math.abs(h.rychlost), !h.naZemi && !h.pliva);
+    // nohy na teréne (svah, schod, obrubník) a hlava za kamerou (js/chodec/postava/telo-na-terene.js)
+    poAnimacii(h, dt, {
+      vyska: (x, z, y) => hra.podchody?.vyska(x, z, y) ?? hra.mosty?.vyska(x, z, y) ?? hra.mapa.vyska(x, z, y),
+      kamera: hra.kamera, naZemi: h.naZemi, pliva: h.pliva,
+    });
   },
 };
