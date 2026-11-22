@@ -26,22 +26,17 @@ const kvader = (w, h, d, x, y, z, hex) => sFarbou(new THREE.BoxGeometry(w, h, d)
 /** { lak, sklo, ostatne, svetla } – BufferGeometry pre daný typ auta. */
 export function geometrieNpc(typ) {
   const g = geometrie(typ);
-  const T = TYPY[typ];
   const W = g.sirka, zp = g.predok, zz = g.zadok, ys = g.vyskaSvetiel, r = g.kolesa.r;
-  const lak = [sFarbou(g.telo, 0xffffff), sFarbou(g.strecha, 0xffffff)];
-  for (const x of [-1, 1]) lak.push(kvader(0.16, 0.1, 0.12, x * (W / 2 + 0.08), T.P + 0.08, g.zrkadloZ, 0xffffff));
-
+  // karoséria v laku (telo, strecha, zrkadlá, kľučky) a čierne diely (nárazníky, maska, lemy blatníkov, škáry,
+  // lišta, korba) sú už zlúčené v js/auto/model-auta.js – rovnaký vzhľad ako auto hráča
+  const lak = [sFarbou(g.karoseria, 0xffffff)];
   const sklo = [sFarbou(g.sklo, 0x1e2a35)];
-
-  const yn = Math.max(0.36, r + 0.06);
+  const yn = g.yn ?? Math.max(0.36, r + 0.06);
   const ost = [
-    kvader(W + 0.02, 0.18, 0.14, 0, yn, zp + 0.02, 0x1d1f21),
-    kvader(W + 0.02, 0.18, 0.14, 0, yn, zz - 0.02, 0x1d1f21),
-    kvader(0.62, 0.14, 0.04, 0, ys - 0.06, zp + 0.06, 0x1d1f21),
+    sFarbou(g.cierne, 0x1d1f21),
     kvader(0.52, 0.12, 0.02, 0, yn + 0.14, zz - 0.1, 0xf2f2f2),   // ŠPZ (bez textu)
     kvader(0.52, 0.12, 0.02, 0, yn + 0.1, zp + 0.1, 0xf2f2f2),
   ];
-  if (g.korba) ost.push(sFarbou(g.korba, 0x1d1f21));
   const pneu = new THREE.CylinderGeometry(r, r, 0.26, 12); pneu.rotateZ(Math.PI / 2);
   const disk = new THREE.CylinderGeometry(r * 0.64, r * 0.64, 0.28, 8); disk.rotateZ(Math.PI / 2);
   const xk = W / 2 - 0.06;
