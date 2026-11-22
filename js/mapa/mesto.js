@@ -10,8 +10,10 @@ import { vytvorVodu } from './voda/voda.js';
 import { vytvorNabrezneMury } from './voda/nabrezne-mury.js';
 import { vytvorMosty } from './mosty/mosty.js';
 import { nacitajPamiatky } from './pamiatky/nacitaj-pamiatky.js';
-import { SpravaDlazdic, POLOMER_DETAIL } from './dlazdice/sprava-dlazdic.js';
+import { SpravaDlazdic } from './dlazdice/sprava-dlazdic.js';
 import { rozmiestniAuta } from './spawn-aut.js';
+import { PREDVOLBY, urovenPreVolbu } from '../grafika/predvolby.js';
+import { nacitajKvalitu } from '../ui/nastavenia-grafiky.js';
 
 export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli = () => {}) {
   priebeh('Modelujem terén Bratislavy…');
@@ -19,14 +21,17 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   const kolizie = new Kolizie(40);
   const H = KONFIG.HRANICE;
 
-  // hmla na diaľku – kopce na obzore sa strácajú v opare
-  scena.fog = new THREE.FogExp2(scena.fog?.color ?? new THREE.Color('#cfe0ea'), 0.00026);
+  // okruhy dlaždíc a hmla podľa kvality grafiky (js/grafika/predvolby.js) – nastavia sa už pred stavbou okolia,
+  // aby sa na štarte nestavalo zbytočne veľa; za behu ich mení modul js/grafika/kvalita.js
+  const kvalita = PREDVOLBY[urovenPreVolbu(nacitajKvalitu())];
+  // hmla končí na hranici dohľadu – čo je za ňou, sa nestavia ani nekreslí (kopce na obzore ostanú ako obrys v opare)
+  scena.fog = new THREE.Fog(scena.fog?.color ?? new THREE.Color('#cfe0ea'), kvalita.dohlad * kvalita.hmlaOd, kvalita.dohlad);
 
   const svet = new THREE.Group();
   svet.name = 'mapa';
   scena.add(svet);
 
-  const horizont = vytvorHorizont(vyskopis, KONFIG, POLOMER_DETAIL * 0.65);
+  const horizont = vytvorHorizont(vyskopis, KONFIG, kvalita.detail * 0.65);
   svet.add(horizont);
   svet.add(vytvorVodu(data.voda, KONFIG, vyskopis));
   svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
@@ -39,6 +44,7 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   svet.add(pamiatky);
 
   const sprava = new SpravaDlazdic({ index: data.mestoIndex, scena: svet, vyskopis, kolizie, KONFIG, posli });
+  sprava.nastavPolomery(kvalita.detail, kvalita.dohlad);
   const start = data.spawn?.hrac ?? { x: 0, z: 0 };
   priebeh('Staviam mesto okolo teba…');
   await sprava.nacitajOkolie(start.x, start.z, priebeh);

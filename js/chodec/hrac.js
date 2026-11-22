@@ -126,7 +126,7 @@ export default {
 
     // kolízie s budovami a autami (pod zemou v podchode len steny chodby – js/mapa/podchody/)
     const podZemou = hra.podchody?.jePodZemou(h.pozicia);
-    const r = podZemou ? hra.podchody.oprav(staraX, staraZ, h.pozicia.x, h.pozicia.z, h.pozicia.y, K.POLOMER) : hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER);
+    const r = podZemou ? hra.podchody.oprav(staraX, staraZ, h.pozicia.x, h.pozicia.z, h.pozicia.y, K.POLOMER) : hra.mapa.kolizie.vytlac(h.pozicia.x, h.pozicia.z, K.POLOMER, h.pozicia.y);
     h.pozicia.x = r.x; h.pozicia.z = r.z;
     for (const a of hra.auta) {
       for (const k of a.kruhy()) {
