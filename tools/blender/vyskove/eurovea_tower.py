@@ -1,128 +1,135 @@
 # Eurovea Tower (2023, GFI): prvý slovenský mrakodrap, 168 m, 46 podlaží, byty.
-# Pôdorys je zaoblený trojuholník (OSM). Fasádu členia lodžie a zvislé biele pásy („elegantný
-# vertikalizmus“), od 38. podlažia sa hmota smerom hore zužuje a končí „tiarou“ vyvýšených
-# rebier fasády. Na prízemí nesú vežu masívne betónové stĺpy v tvare V.
+# Podľa fotiek (Wikimedia Commons, prieskum v napady/pamiatky-podklady.md a research_notes – len na pozretie):
+#   – pôdorys zaoblený trojuholník (OSM), každé podlažie má súvislý balkón okolo celej veže (prerušený len rebrami),
+#     čelá dosiek sú zaoblené kovové „nosy“ (~0,4 m, striebrosivé), pod nimi svetlé podhľady, sklenené zábradlie;
+#   – tmavé sklo na celú výšku podlažia s takmer čiernymi rámami;
+#   – 12 bielych rebier (4 na každej strane, ~7–8 m od seba, zaoblené rohy bez rebra), ~0,9 m široké a ~2,3 m hlboké,
+#     od zeme až po vrch koruny;
+#   – od ~37. podlažia sa hmota zužuje (navrchu ~0,88 šírky);
+#   – koruna je otvorená klietka: rebrá pokračujú rovno nahor, všetky do rovnakej výšky, spájajú ich 3 tmavé prstence;
+#   – prízemie: ustúpená presklená hala na ~2 podlažia a pohľadové betónové stĺpy tvaru V (hrot dole) v rohoch.
 
 import math
 
 from veze import (Geo, z_hry, hladka, urovne, odsad, smer_v_bode, stred_obrysu, zavesova_stena,
-                  strecha, strojovna, vystrazne_svetla, sklo, svetlo, dlzka, normala)
+                  strecha, strojovna, vystrazne_svetla, sklo, svetlo, dlzka)
 from spolocne import material
 
-RYTMUS = [1, 0, 0, 1, 0, 1, 0, 0]          # kde stojí zvislý biely pás (po paneloch)
+Z_LOBBY = 10.0
+PODLAZI = 45
+V_PODL = 3.22
+H = 168.0
+BALKON = 1.6            # hĺbka balkóna (sklo je za ním)
+ZUZENIE = 2.8           # m – o koľko je najvyššie podlažie ustúpené
+REBRA_NA_STRANU = 4
 
 
 def postav(obrysy):
     zdroj = obrysy['eurovea-tower']['hlavne'][0]['body']
     stred = stred_obrysu(zdroj)
-    zaklad = hladka(z_hry(zdroj, stred), 1.55)
+    zaklad = hladka(z_hry(zdroj, stred), 3.0)    # ~3 m panely (okná na celú výšku podlažia)
     n = len(zaklad)
 
-    sklo_m = sklo('sklo-svetle', '#9fb1bd', drsnost=0.04, kov=0.9)
-    sklo_t = sklo('sklo-tmavsie', '#8a9cab', drsnost=0.04, kov=0.9)
-    zabradlie = sklo('sklo-zabradlie', '#b9c8cf', drsnost=0.03, kov=0.6)
-    lobby = sklo('sklo-lobby', '#a9b8bd', drsnost=0.03, kov=0.75)
-    biela = material('biela-fasada', '#eceeec', drsnost=0.55)
-    ram = material('detail-ram', '#7d868c', drsnost=0.4, kov=0.7)
-    beton = material('beton', '#c4c2bb', drsnost=0.8)
+    sklo_m = sklo('sklo-tmave', '#3a4756', drsnost=0.04, kov=0.9)
+    sklo_m2 = sklo('sklo-tmave-2', '#33404d', drsnost=0.04, kov=0.9)
+    zabradlie = sklo('sklo-zabradlie', '#6f8090', drsnost=0.03, kov=0.6)
+    lobby = sklo('sklo-lobby', '#5d6c78', drsnost=0.03, kov=0.75)
+    rebro_m = material('rebra-biele', '#e6e7e4', drsnost=0.5)
+    nos = material('detail-nos-dosky', '#a7adb3', drsnost=0.35, kov=0.7)
+    podhlad = material('podhlad-balkona', '#d8dad8', drsnost=0.7)
+    ram = material('detail-ram-tmavy', '#1f2326', drsnost=0.4, kov=0.6)
+    beton = material('beton-pohladovy', '#c9c7c0', drsnost=0.8)
+    prstenec = material('prstence-koruny', '#34383c', drsnost=0.45, kov=0.6)
     strecha_m = material('strecha', '#8d8b86', drsnost=0.95)
     cervena = svetlo('svetlo-cervene', '#ff2a1a', 6.0)
 
     G = Geo()
-    Z_LOBBY = 8.5
-    kz = urovne(Z_LOBBY, (45, 3.3))           # 1. až 45. bytové podlažie
+    kz = urovne(Z_LOBBY, (PODLAZI, V_PODL))
     Z_STRECHA = kz[-1]
-    H = 168.0
 
     def ustup(k):
-        """O koľko je podlažie k (0 = prvé nad lobby) ustúpené – zužovanie od 38. podlažia."""
-        return 0.0 if k < 37 else 3.4 * ((k - 36) / 9) ** 1.4
+        """O koľko je podlažie k (0 = prvé nad halou) ustúpené – zužovanie od 37. podlažia."""
+        return 0.0 if k < 36 else ZUZENIE * ((k - 35) / (PODLAZI - 35)) ** 1.3
 
-    # lodžie: tri zvislé pásy lodží (v strede každej strany trojuholníka), každá 3 panely
+    # tri rohy zaobleného trojuholníka (najďalej od stredu) a rebrá: 4 na každej strane, rohy bez rebra
     vzdial = [math.hypot(*p) for p in zaklad]
-    rohy = sorted(range(n), key=lambda i: -vzdial[i])
-    vrcholy = []
-    for i in rohy:
-        if all(min(abs(i - j), n - abs(i - j)) > n // 6 for j in vrcholy):
-            vrcholy.append(i)
-        if len(vrcholy) == 3:
+    rohy = []
+    for i in sorted(range(n), key=lambda i: -vzdial[i]):
+        if all(min(abs(i - j), n - abs(i - j)) > n // 6 for j in rohy):
+            rohy.append(i)
+        if len(rohy) == 3:
             break
-    vrcholy.sort()
-    lodzie = set()
+    rohy.sort()
+    rebra = []
     for a in range(3):
-        i0, i1 = vrcholy[a], vrcholy[(a + 1) % 3]
+        i0, i1 = rohy[a], rohy[(a + 1) % 3]
         dlz = (i1 - i0) % n
-        for s in (0.3, 0.7):
-            m = (i0 + round(dlz * s)) % n
-            lodzie.update({(m - 1) % n, m, (m + 1) % n})
+        for s in range(REBRA_NA_STRANU):
+            f = 0.2 + 0.6 * s / (REBRA_NA_STRANU - 1)
+            rebra.append((i0 + round(dlz * f)) % n)
 
+    def linia_k(k):
+        u = ustup(min(k, PODLAZI - 1))
+        return odsad(zaklad, -u) if u > 0 else zaklad
+
+    # podlažia: sklo za balkónom, balkónová doska so zaobleným čelom, podhľad, sklenené zábradlie
     for k in range(len(kz) - 1):
         z0, z1 = kz[k], kz[k + 1]
-        linia = odsad(zaklad, -ustup(k)) if ustup(k) > 0 else zaklad
+        hrana = linia_k(k)
+        fasada = odsad(hrana, -BALKON)
 
         def vyber(i, kk, rnd, k=k):
-            if i in lodzie:
-                return None
-            return sklo_t if (i + k // 3) % 6 == 0 else sklo_m
-        zavesova_stena(G, linia, [z0, z1], sklo=vyber, ram=ram, vnor=0.18, stlpik=0.05, priecka=0.08,
-                       naklon=0.003, seed=k, stlpiky=True, priecky=False, stlpik_kazdy=2)
-        # čelo stropnej dosky – tenký biely pás
-        G.pas(biela, linia, z1 - 0.15, z1 + 0.15, von=0.05, dnu=0.18)
-        # lodžie: zadné sklo, bočné steny, podlaha/strop, sklenené zábradlie
-        hlb = 1.5
-        zadna = odsad(linia, -hlb)
-        for i in lodzie:
-            j = (i + 1) % n
-            G.panel(sklo_m, zadna[i], zadna[j], z0, z1 - 0.3)
-            G.vodorovna(biela, [linia[i], linia[j], zadna[j], zadna[i]], z0 + 0.02)
-            G.vodorovna(biela, [linia[i], linia[j], zadna[j], zadna[i]], z1 - 0.3, hore=False)
-            G.panel(zabradlie, linia[i], linia[j], z0, z0 + 1.1)
-            G.panel(zabradlie, linia[j], linia[i], z0, z0 + 1.1)
-            for a, b in ((i, (i - 1) % n), (j, (j + 1) % n)):
-                if b not in lodzie:
-                    if a == i:
-                        G.stena(biela, linia[a], zadna[a], z0, z1)
-                    else:
-                        G.stena(biela, zadna[a], linia[a], z0, z1)
-        # zvislé biele pásy (rebrá) – v rytme, na hranách lodží vždy
+            return sklo_m2 if (i + k) % 7 == 0 else sklo_m
+        zavesova_stena(G, fasada, [z0, z1 - 0.35], sklo=vyber, ram=ram, vnor=0.05, stlpik=0.06, priecka=0.06,
+                       naklon=0.002, seed=k, stlpiky=False, priecky=False)
+        # doska balkóna (vrch nad podlažím = podlaha balkóna vyššieho podlažia)
+        G.pas(nos, hrana, z1 - 0.35, z1 + 0.05, von=0.0, dnu=BALKON + 0.1, spodok=False)
+        G.pas(podhlad, hrana, z1 - 0.37, z1 - 0.35, von=-0.05, dnu=BALKON + 0.1, vrch=False)
+        # sklenené zábradlie na hrane balkóna
         for i in range(n):
-            if not (RYTMUS[i % len(RYTMUS)] or i in lodzie and (i - 1) % n not in lodzie):
+            j = (i + 1) % n
+            if i in rebra:
                 continue
-            t = smer_v_bode(linia, i)
+            G.panel(zabradlie, hrana[i], hrana[j], z0 + 0.05, z0 + 1.1)
+
+    # rebrá: biele plutvy od zeme po vrch koruny (po podlažiach sledujú zužovanie)
+    for i in rebra:
+        for k in range(-1, len(kz) - 1):
+            z0 = 0.0 if k < 0 else kz[k]
+            z1 = kz[k + 1] if k >= 0 else kz[0]
+            hrana = linia_k(max(0, k))
+            t = smer_v_bode(hrana, i)
             nx, ny = t[1], -t[0]
-            c = (linia[i][0] + nx * 0.22, linia[i][1] + ny * 0.22)
-            G.kvader(biela, c, t, 0.32, 0.62, z0, z1, vrch=False, spodok=False)
-
-    # tiara: rebrá nad strechou, najvyššie pri vrcholoch trojuholníka
-    horna = odsad(zaklad, -ustup(45))
-    r = [math.hypot(*p) for p in horna]
-    rmin, rmax = min(r), max(r)
-    for i in range(n):
-        if not RYTMUS[i % len(RYTMUS)] and i % 2:
-            continue
-        v = ((r[i] - rmin) / (rmax - rmin)) ** 2
-        h = Z_STRECHA + 2.2 + (H - Z_STRECHA - 2.6) * v
-        t = smer_v_bode(horna, i)
+            c = (hrana[i][0] + nx * 0.7 - nx * 1.15, hrana[i][1] + ny * 0.7 - ny * 1.15)
+            G.kvader(rebro_m, c, t, 0.9, 2.3, z0, z1, vrch=False, spodok=False)
+        # nad strechou rovno nahor až po vrchol (koruna)
+        hrana = linia_k(PODLAZI - 1)
+        t = smer_v_bode(hrana, i)
         nx, ny = t[1], -t[0]
-        c = (horna[i][0] + nx * 0.22, horna[i][1] + ny * 0.22)
-        G.kvader(biela, c, t, 0.32, 0.62, Z_STRECHA, h)
-        G.kvader(biela, (horna[i][0] - nx * 0.6, horna[i][1] - ny * 0.6), t, 0.2, 1.0, h - 0.6, h - 0.3)
-    strecha(G, odsad(horna, -0.18), Z_STRECHA, strecha_m, biela, atika=1.6)
-    strojovna(G, (0.0, 0.0), (1, 0), 12, 10, Z_STRECHA, 4.0, beton, ram, strecha_m)
+        c = (hrana[i][0] + nx * 0.7 - nx * 1.15, hrana[i][1] + ny * 0.7 - ny * 1.15)
+        G.kvader(rebro_m, c, t, 0.9, 2.3, Z_STRECHA, H)
 
-    # prízemie: ustúpená presklená hala a betónové stĺpy tvaru V
-    hala = odsad(zaklad, -2.6)
-    zavesova_stena(G, hala, [-1.5, 4.25, Z_LOBBY], sklo=lobby, ram=ram, vnor=0.1, stlpik=0.12,
+    # koruna: 3 tmavé prstence spájajúce rebrá (otvorená klietka), plochá strecha s technikou vnútri
+    horna = linia_k(PODLAZI - 1)
+    for z in (Z_STRECHA + 3.5, Z_STRECHA + 7.5, H - 0.6):
+        G.pas(prstenec, odsad(horna, 0.1), z - 0.35, z + 0.35, von=0.35, dnu=0.35)
+    strecha(G, odsad(horna, -BALKON), Z_STRECHA, strecha_m, nos, atika=1.2)
+    strojovna(G, (0.0, 0.0), (1, 0), 12, 10, Z_STRECHA, 4.5, beton, ram, strecha_m)
+
+    # prízemie: ustúpená presklená hala (~2 podlažia) a tri stĺpy tvaru V v rohoch (hrot dole)
+    hala = odsad(zaklad, -3.0)
+    zavesova_stena(G, hala, [-1.5, Z_LOBBY / 2, Z_LOBBY - 0.4], sklo=lobby, ram=ram, vnor=0.1, stlpik=0.12,
                    priecka=0.15, naklon=0.0, seed=99)
-    G.pas(beton, zaklad, Z_LOBBY - 1.2, Z_LOBBY, von=0.25, dnu=2.7)
-    for m in range(0, n, max(1, n // 15)):
-        p = zaklad[m]
-        t = smer_v_bode(zaklad, m)
+    G.pas(nos, zaklad, Z_LOBBY - 0.5, Z_LOBBY + 0.05, von=0.0, dnu=3.1)
+    G.vodorovna(podhlad, zaklad, Z_LOBBY - 0.5, hore=False)
+    for i in rohy:
+        p = zaklad[i]
+        t = smer_v_bode(zaklad, i)
         nx, ny = t[1], -t[0]
-        pata = (p[0] - nx * 0.5, p[1] - ny * 0.5, -1.0)
+        pata = (p[0] - nx * 1.2, p[1] - ny * 1.2, -1.0)
         for s in (-1, 1):
-            hore = (p[0] - nx * 0.5 + t[0] * s * 1.9, p[1] - ny * 0.5 + t[1] * s * 1.9, Z_LOBBY - 1.0)
-            G.tram(beton, pata, hore, 0.7)
+            hore = (p[0] - nx * 1.0 + t[0] * s * 3.0, p[1] - ny * 1.0 + t[1] * s * 3.0, Z_LOBBY - 0.5)
+            G.tram(beton, pata, hore, 0.8)
 
-    vystrazne_svetla(G, [horna[i] for i in vrcholy], H, cervena)
+    vystrazne_svetla(G, [horna[i] for i in rohy], H, cervena)
     return G, [zaklad], H, 'eurovea-tower', {'stred': [round(stred[0], 2), round(stred[1], 2)]}

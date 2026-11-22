@@ -40,6 +40,22 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Pamiatky: Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park (vetva `feature/pamiatky-uk-vajce`)
+Podľa prieskumu textov, OSM a fotiek (Wikimedia Commons, ortofoto ZBGIS; bez Google) – podklady
+v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md), modely v `tools/blender/vyskove/`.
+- **Univerzita Komenského** (Šafárikovo nám., nový model): rotunda s arkádou na schodoch, 6 okennými osami,
+  dvoma nápismi z bronzových písmen a atikou s podstavcami; „plecia“ s čelom bez okien, vyšší hlavný blok s dvoma
+  pylónmi s mriežkovou korunou, stredné krídla s presklenou strechou auly, západná prístavba s pásovými oknami.
+  Travertín na rotunde a prízemí, inde okrová omietka.
+- **Eurovea – presklené vajce** (nový model): zaoblené ako vajíčko, trojuholníkový diagrid, tmavšie prízemie
+  s obchodmi, plochá oválna strecha; vedľa sklenená kupola na bubne s trojuholníkovou sieťou bielej ocele.
+- **Eurovea Tower** (prerobená): súvislé balkóny na každom podlaží, 12 bielych rebier od zeme po vrch, tmavé sklo,
+  koruna ako otvorená klietka s tromi prstencami, hala s V-stĺpmi. Súbor 71 kB (predtým 200 kB).
+- **Sky Park** (prerobené): veže v tvare súdka, biele prstence redšie smerom dolu, rovné zvislice, bronzové panely
+  so sklom, lamely navrchu; Offices po posunutých blokoch s bielymi pásmi len na stykoch.
+- Testovacia trasa: nové body „Univerzita Komenského – rotunda“, „Eurovea – presklené vajce“, „Eurovea Tower“,
+  „Sky Park“.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
