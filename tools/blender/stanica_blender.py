@@ -2,8 +2,9 @@
 #
 # Spustenie (Blender 4+/5, alebo bpy z pip):
 #   python3 tools/blender/osm_stanica.py --cache       – podklady z OSM a dlaždíc → tools/blender/data/stanica.json
-#   blender -b -P tools/blender/stanica_blender.py      – modely do assets/pamiatky/
-#   (GLTFPACK=<cesta ku gltfpack> pre meshopt kompresiu; bez neho sa uloží nekomprimovaný .glb)
+#   blender -b --python-use-system-env -P tools/blender/stanica_blender.py   – modely do assets/pamiatky/
+#   (potrebuje shapely: PYTHONPATH na priečinok s balíkom, napr. pip install --target <priečinok> shapely bez numpy;
+#    GLTFPACK=<cesta ku gltfpack> pre meshopt kompresiu; bez neho sa uloží nekomprimovaný .glb)
 #
 # Výsledok (tri modely, záznamy v data/mapa/pamiatky.json, chôdzu a kolízie rieši js/mapa/stanica/modul.js):
 #   stanica            – plášť: výpravná budova (1905) s krídlami, odbavovacia hala (1988), východné krídlo,
@@ -161,7 +162,7 @@ def materialy():
         'nastupiste': material('nastupiste', '#8f8c86', drsnost=0.95),
         'okraj': material('okraj-nastupista', '#e6e3da', drsnost=0.8),
         'pas': material('detail-pas-zlty', '#dcc21f', drsnost=0.7),
-        'pristresok': material('pristresok', '#4b5753', drsnost=0.6, kov=0.3),
+        'pristresok': material('pristresok', '#7d8884', drsnost=0.7, kov=0.15),
         'oceľ': material('stlp-ocel', '#3c4744', drsnost=0.5, kov=0.6),
     }
 
@@ -250,9 +251,10 @@ def murovana_fasada(G, poly, poschodia, M, otvory_hran, os_okna=3.4, vnor=0.28, 
     G.pas(M['rimsa'], poly, zr - 0.25, zr, von=0.55)
 
 
-def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=7.5):
+def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=12.0, vyska=None):
     """Valbová strecha nad ľubovoľným obrysom: šikmé plochy od odkvapu po plochý vrch (odsadený obrys).
-    Odsadenie sa zmenšuje, kým je vrchný obrys jednoduchý polygón (úzke krídla)."""
+    Odsadenie sa zmenšuje, kým je vrchný obrys jednoduchý polygón (úzke krídla). vyska = výška strechy
+    od odkvapu po hrebeň (z pohľadov); inak sa ráta zo sklonu."""
     O = odsad(poly, presah)
     d = max_vnor
     while d > 0.8:
@@ -261,7 +263,7 @@ def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=7.5):
             break
         d *= 0.85
     I = odsad(poly, -d)
-    h = (d + presah) * math.tan(math.radians(sklon_deg))
+    h = vyska if vyska is not None else (d + presah) * math.tan(math.radians(sklon_deg))
     n = len(poly)
     for i in range(n):
         j = (i + 1) % n
@@ -270,6 +272,54 @@ def valbova_strecha(G, poly, z, sklon_deg, presah, M, max_vnor=7.5):
         G.plocha(M['podhlad'], [(poly[i][0], poly[i][1], z), (O[i][0], O[i][1], z), (O[j][0], O[j][1], z), (poly[j][0], poly[j][1], z)][::-1])
     G.vodorovna(M['strecha'], I, z + h)
     return z + h
+
+
+# Časti výpravnej budovy a východného krídla pozdĺž osi (0 = západný koniec, 1 = východný) podľa pohľadu južného
+# a severného: dvojpodlažné krídla (arkáda na prízemí, rímsa +9,48, nízka strecha po +10,3) a trojpodlažné
+# pavilóny s valbovými strechami. (od, do, poschodia, hrebeň)
+KRIDLO = [0.88, 5.18, 9.48]
+PAVILON = [0.88, 5.18, 9.48, 13.2]
+CASTI = [
+    (0.000, 0.080, PAVILON, 16.64),             # západný pavilón
+    (0.080, 0.250, KRIDLO, 10.32),
+    (0.250, 0.310, PAVILON, 17.41),             # pavilón s komínom
+    (0.310, 0.390, KRIDLO, 10.32),
+    (0.390, 0.550, STARA_POSCHODIA, STARA_HREBEN),   # stredná historická hala (+13,88 / +19,63)
+    (0.550, 0.635, KRIDLO, 10.32),
+    (0.635, 0.705, PAVILON, 16.74),
+    (0.705, 0.815, KRIDLO, 10.32),
+    (0.815, 1.000, STARA_POSCHODIA, 17.95),     # východný pavilón (pošta)
+]
+
+
+def casti_budovy(stara, vychod):
+    """Rozdelí pôdorysy výpravnej budovy a východného krídla na časti podľa CASTI (pásy kolmo na os budovy)."""
+    from shapely.geometry import Polygon as SP, MultiPolygon
+    from shapely.geometry.polygon import orient
+    hrany = [(dlzka(stara[i - 1], stara[i]), stara[i - 1], stara[i]) for i in range(len(stara))]
+    _, a, b = max(hrany)
+    ux, uy = (b[0] - a[0]) / dlzka(a, b), (b[1] - a[1]) / dlzka(a, b)
+    if ux < 0:                       # os smeruje na východ (+x)
+        ux, uy = -ux, -uy
+    vx, vy = -uy, ux
+    body = stara + vychod
+    us = [p[0] * ux + p[1] * uy for p in body]
+    vs = [p[0] * vx + p[1] * vy for p in body]
+    u0, u1, v0, v1 = min(us), max(us), min(vs) - 5, max(vs) + 5
+    out = []
+    for poly in (stara, vychod):
+        P = SP(poly).buffer(0)
+        for (f0, f1, poschodia, hreben) in CASTI:
+            a0, a1 = u0 + (u1 - u0) * f0, u0 + (u1 - u0) * f1
+            pas = SP([(ux * a0 + vx * v0, uy * a0 + vy * v0), (ux * a1 + vx * v0, uy * a1 + vy * v0),
+                      (ux * a1 + vx * v1, uy * a1 + vy * v1), (ux * a0 + vx * v1, uy * a0 + vy * v1)])
+            r = P.intersection(pas)
+            for g in (list(r.geoms) if hasattr(r, 'geoms') else [r]):
+                if g.is_empty or g.geom_type != 'Polygon' or g.area < 15:
+                    continue
+                g = orient(g.simplify(0.05), 1.0)
+                out.append({'poly': ccw([tuple(c) for c in list(g.exterior.coords)[:-1]]), 'poschodia': poschodia, 'hreben': hreben})
+    return out
 
 
 # --- plášť ---
@@ -284,30 +334,34 @@ def plast(M):
     ux, uy = (pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L
     qa, qb = (pa[0] - ux * 4, pa[1] - uy * 4), (pb[0] + ux * 4, pb[1] + uy * 4)
 
-    # otvory priechodu v múroch výpravnej budovy
-    otvory_stara, krizenia = {}, []
-    n = len(stara)
-    for i in range(n):
-        a, b = stara[i], stara[(i + 1) % n]
-        r = pretina(qa, qb, a, b)
-        if not r:
-            continue
-        t_osi, p = r
-        Lh = dlzka(a, b)
-        t = dlzka(a, p)
-        # šírka otvoru v smere hrany (priechod nemusí byť kolmý)
-        hx, hy = (b[0] - a[0]) / Lh, (b[1] - a[1]) / Lh
-        sin = abs(ux * hy - uy * hx) or 1
-        w = PRIECHOD_SIRKA / sin / 2
-        otvory_stara.setdefault(i, []).append((t - w, t + w, -3.0, STARA_PODLAHA + PRIECHOD_VYSKA, 'priechod'))
-        krizenia.append((t_osi, p))
-    krizenia.sort()
-    # ďalšie vchody z OSM na fasádach budov → dvere (okrem tých pri priechode)
-    for v in D['vchody']:
-        p = B(v['p'])
-        if min(dlzka(p, k[1]) for k in krizenia) < 4:
-            continue
-        for poly, otv, z0 in ((stara, otvory_stara, STARA_PODLAHA),):
+    def otvory_priechodu(poly):
+        """Otvory priechodu v múroch polygónu (aj vo vnútorných múroch medzi časťami budovy) + body kríženia s osou."""
+        otv, kriz = {}, []
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            r = pretina(qa, qb, a, b)
+            if not r:
+                continue
+            t_osi, p = r
+            Lh = dlzka(a, b)
+            # šírka otvoru v smere hrany (priechod nemusí byť kolmý)
+            hx, hy = (b[0] - a[0]) / Lh, (b[1] - a[1]) / Lh
+            sin = abs(ux * hy - uy * hx) or 1
+            w = PRIECHOD_SIRKA / sin / 2
+            t = dlzka(a, p)
+            otv.setdefault(i, []).append((t - w, t + w, -3.0, STARA_PODLAHA + PRIECHOD_VYSKA, 'priechod'))
+            kriz.append((t_osi, p))
+        return otv, sorted(kriz)
+
+    # priechod cez celú výpravnú budovu: krajné kríženia s jej obrysom
+    _, krizenia = otvory_priechodu(stara)
+
+    def dvere_z_osm(poly, otv, z0):
+        """Ďalšie vchody z OSM na fasáde → dvere (okrem tých pri priechode)."""
+        for v in D['vchody']:
+            p = B(v['p'])
+            if krizenia and min(dlzka(p, k[1]) for k in krizenia) < 4:
+                continue
             best = None
             for i in range(len(poly)):
                 dd = vzd_usecka(p, poly[i - 1], poly[i])
@@ -319,13 +373,19 @@ def plast(M):
                 t = dlzka(a, p)
                 otv.setdefault(i, []).append((t - 1.0, t + 1.0, z0, z0 + 3.0, 'dvere'))
 
-    murovana_fasada(G, stara, STARA_POSCHODIA, M, otvory_stara)
-    valbova_strecha(G, stara, STARA_RIMSA, 38, 0.6, M)
-    murovana_fasada(G, vychod, KRIDLO_POSCHODIA, M, {})
-    valbova_strecha(G, vychod, KRIDLO_RIMSA, 38, 0.6, M, max_vnor=5.5)
+    # výpravná budova a východné krídlo podľa pohľadov: dvojpodlažné krídla s arkádou a trojpodlažné pavilóny
+    # s valbovými strechami (časti pozdĺž osi budovy – CASTI); každá časť má vlastné podlažia a strechu
+    steny_kol = []
+    casti = casti_budovy(stara, vychod)
+    for c in casti:
+        otv, _ = otvory_priechodu(c['poly'])
+        dvere_z_osm(c['poly'], otv, STARA_PODLAHA)
+        murovana_fasada(G, c['poly'], c['poschodia'], M, otv)
+        valbova_strecha(G, c['poly'], c['poschodia'][-1], None, 0.6, M, vyska=c['hreben'] - c['poschodia'][-1])
+        c['otvory'] = otv
+    print('časti výpravnej budovy:', len(casti))
 
     # priechod: bočné steny, strop (podlahu kreslí interiér podľa terénu)
-    steny_kol = []
     if len(krizenia) >= 2:
         p0, p1 = krizenia[0][1], krizenia[-1][1]
         vx, vy = -uy, ux
@@ -370,7 +430,7 @@ def plast(M):
     # strop nad pásom pri výpravnej budove (hala je nižšia než budova – medzera po rímsu sa zakryje stenou budovy)
 
     # kolízie plášťa: múry výpravnej budovy a krídla po obvode s medzerami (priechod, otvory), steny haly
-    for poly, otv, vrch in ((stara, otvory_stara, STARA_RIMSA + 1), (vychod, {}, KRIDLO_RIMSA + 1)):
+    for poly, otv, vrch in ((c['poly'], c['otvory'], c['hreben']) for c in casti):
         for i in range(len(poly)):
             a, b = poly[i], poly[(i + 1) % len(poly)]
             Lh = dlzka(a, b)
@@ -692,7 +752,8 @@ def nastupistia(M):
 def main():
     M = materialy()
     G, obrysy, steny, krizenia = plast(M)
-    uloz(G, 'stanica', obrysy, STARA_HREBEN, vzorky=16, info={
+    # minimum 0,55: zapečené zatienenie na veľkých sklenených tabuliach haly nerobí tmavé fľaky
+    uloz(G, 'stanica', obrysy, STARA_HREBEN, vzorky=16, minimum=0.55, info={
         'bezKoliziiObrysov': True, 'steny': steny,
         'popis': 'Hlavná stanica – plášť (tools/blender/stanica_blender.py). Kolízie: steny (js/mapa/stanica/modul.js).'})
     for ob in list(bpy.data.objects):

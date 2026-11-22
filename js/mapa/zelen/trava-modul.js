@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { geometriaTrsu, materialTravy } from './trava.js';
 import { nacitajKvalitu } from '../../ui/nastavenia-grafiky.js';
+import { bodVPolygone, ohranicenie } from '../geometria.js';
 
 const KROK = 0.32;          // m – mriežka trsov zblízka (ďalej dvojnásobná)
 const MAX = 16000;
@@ -32,6 +33,12 @@ export default {
     for (const [kluc, a] of hra.mapa?.dlazdice?.aktivne ?? []) if (a.uroven === 'detail') pridaj(kluc, a.objekt);
     hra.na('dlazdica-nacitana', ({ kluc, uroven, objekt }) => { if (uroven === 'detail') pridaj(kluc, objekt); else this.dlazdice.delete(kluc); });
     hra.na('dlazdica-uvolnena', ({ kluc, nahrada }) => { if (!nahrada) { this.dlazdice.delete(kluc); this.posledna = null; } });
+    // plochy bez trávy (podlaha haly, nástupištia – js/mapa/stanica/): udalosť 'bez-travy' { kluc, polygony } (prázdne = zrušiť)
+    this.bezTravy = new Map();
+    hra.na('bez-travy', ({ kluc, polygony }) => {
+      if (polygony?.length) this.bezTravy.set(kluc, polygony.map((b) => ({ b, ...ohranicenie(b) }))); else this.bezTravy.delete(kluc);
+      this.posledna = null;
+    });
 
     this.trsy = new THREE.InstancedMesh(geometriaTrsu(), materialTravy(), MAX);
     this.trsy.count = 0;
@@ -66,6 +73,9 @@ export default {
   },
 
   jeTrava(x, z) {
+    for (const polygony of this.bezTravy.values()) {
+      for (const p of polygony) if (x >= p.minX && x <= p.maxX && z >= p.minZ && z <= p.maxZ && bodVPolygone(x, z, p.b)) return false;
+    }
     for (const d of this.dlazdice.values()) {
       const r = d.rect;
       if (x < r.minX || x >= r.maxX || z < r.minZ || z >= r.maxZ) continue;

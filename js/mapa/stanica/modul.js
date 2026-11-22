@@ -56,6 +56,7 @@ export default {
 
   updateVzdy(dt) {
     if (!this.plast) return;
+    this.skloHaly();
     // interiér len zblízka (rozpočet trojuholníkov a volaní kreslenia) – skrýva ho js/kamera/dohlad.js
     const ri = this.zaznamy.interier, mi = this.model('interier');
     if (ri && mi) {
@@ -76,6 +77,27 @@ export default {
     this.cas = 1;
     this.aktualizuj();
     this.prekresliTabule();
+  },
+
+  /** Sklo haly je priehľadné (zvonka vidno do haly, zvnútra na námestie) – raz po načítaní modelu. */
+  skloHaly() {
+    if (this.skloHotovo) return;
+    const m = this.model('plast');
+    let n = 0;
+    m?.traverse((o) => {
+      if (!o.isMesh) return;
+      for (const mat of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (mat.name !== 'sklo-hala') continue;
+        mat.transparent = true;
+        mat.opacity = 0.32;
+        mat.depthWrite = false;
+        mat.needsUpdate = true;
+        o.castShadow = false;
+        o.renderOrder = 2;
+        n++;
+      }
+    });
+    if (n) this.skloHotovo = true;
   },
 
   /** Keď sa zmení základňa plášťa (terén z lasera), postaví kolízie a plochy znova. */
@@ -115,6 +137,12 @@ export default {
       }
     }
     hra.posli('pochodzne-plochy', { kluc: 'stanica', profily });
+    // na podlahe haly, v budovách a na nástupištiach nerastie tráva (js/mapa/zelen/trava-modul.js)
+    const polygony = [
+      ...(this.plast.obrysy ?? []).map((o) => o.map((p) => this.svet('plast', p))),
+      ...(this.nastupistia?.nahradit ?? []).map((o) => o.map((p) => this.svet('nastupistia', p))),
+    ];
+    hra.posli('bez-travy', { kluc: 'stanica', polygony });
     this.postavTabule();
   },
 
