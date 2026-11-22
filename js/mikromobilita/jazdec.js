@@ -21,14 +21,18 @@ export function uvolniJazdca(hrac) {
   ud._zalohaJazdca?.zrus();
 }
 
-/** Položí hráča na vozidlo a nastaví pózu. */
+/**
+ * Položí jazdca na vozidlo a nastaví pózu. hrac = { mesh } – mesh.userData má animuj(dt, …) a instancia.kosti
+ * (hráč – realisticka-postava.js; NPC jazdci – npc-jazdci.js si ich doplnia).
+ */
 export function polozJazdca(dt, hrac, voz) {
   const ud = hrac.mesh.userData;
   voz.mesh.updateMatrixWorld(true);
   hrac.mesh.visible = true;
   const sedi = voz.K.jazdec === 'sedi';
   // koreň postavy: na doske kolobežky; na bicykli tak, aby panva sedela v sedle (panva ~0,9 m nad koreňom)
-  const koren = sedi ? [0, ROZMERY_B.sedlo[1] - 0.86, ROZMERY_B.sedlo[2] - 0.02] : [0, ROZMERY.doska, -0.06];
+  // (NPC sú rôzne vysokí – panva je o mierku vyššie/nižšie)
+  const koren = sedi ? [0, ROZMERY_B.sedlo[1] - 0.86 * hrac.mesh.scale.y, ROZMERY_B.sedlo[2] - 0.02] : [0, ROZMERY.doska, -0.06];
   hrac.mesh.position.copy(voz.mesh.localToWorld(_v.set(...koren)));
   hrac.mesh.quaternion.copy(voz.mesh.quaternion);
   const K = ud.instancia?.kosti;

@@ -35,6 +35,7 @@ import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
 import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
 import kolobezky from './mikromobilita/modul.js';
+import jazdciNpc from './mikromobilita/npc-jazdci.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -72,6 +73,7 @@ export default [
   trava,
   cyklopruhy,
   kolobezky,
+  jazdciNpc,
   schody,
   povrch,
   hud,
