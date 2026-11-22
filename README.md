@@ -322,6 +322,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   *Settings → Secrets and variables → Actions → New repository secret* ho uložiť ako `GEMINI_API_KEY`.
   **Pridať repliku = zmeniť JSON dialógu a pushnúť** – hlas sa dorobí sám. Hra prehrá hlas pri udalosti
   `hra.posli('dialog-replika', { dialog, index, variant })` (posiela ju zobrazovanie dialógov).
+  Súbory, kde `repliky` nie je pole, ale sada viet podľa postavy (napr. `stanica-postavy.json`), sa preskočia – sú bez hlasu.
 - **Výšky budov v celom meste z lasera** (issue #53, `python3 tools/mesto/laser/vysky.py`, laser v `.cache/laser/`):
   pre 63 221 z 88 574 budov je výška z laserového skenovania ÚGKK (DMP − DMR), pre šikmé strechy
   aj odkvap a hrebeň (podľa sklonu povrchu strechy).

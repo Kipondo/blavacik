@@ -36,7 +36,9 @@ for (const subor of readdirSync(DIALOGY).sort()) {
   if (!subor.endsWith('.json') || subor === 'hlasy.json') continue;
   const d = JSON.parse(readFileSync(join(DIALOGY, subor), 'utf8'));
   const id = d.id ?? subor.replace('.json', '');
-  (d.repliky ?? []).forEach((r, i) => {
+  // len dialógy (pole replík); sady náhodných viet podľa postavy (objekt, napr. stanica-postavy.json) sú bez hlasu
+  if (!Array.isArray(d.repliky)) continue;
+  d.repliky.forEach((r, i) => {
     const kto = nastavenia.aliasy?.[r.kto] ?? r.kto;
     const postava = nastavenia.postavy?.[kto];
     if (!postava || postava.bezHlasu) return;
