@@ -18,6 +18,10 @@ export default {
     this.casy = [];
     this.posledny = performance.now();
     this.cas = 0;
+    // s obrazovými efektmi sa kreslí viac prechodov za snímok – počítadlo nulujeme sami raz za snímok,
+    // inak by ukazovalo len posledný prechod (1 kreslenie)
+    hra.renderer.info.autoReset = false;
+    this.kreslenia = 0; this.trojuholniky = 0;
     window.addEventListener('keydown', (e) => {
       if (e.code !== 'F3') return;
       e.preventDefault();
@@ -26,6 +30,11 @@ export default {
   },
 
   updateVzdy(dt, hra) {
+    const info = hra.renderer.info;
+    if (!info.autoReset) {
+      this.kreslenia = info.render.calls; this.trojuholniky = info.render.triangles;
+      info.reset();
+    }
     const teraz = performance.now();
     this.casy.push(teraz - this.posledny);
     this.posledny = teraz;
@@ -34,10 +43,10 @@ export default {
     this.cas = 0;
     const c = this.casy.splice(0);
     const sucet = c.reduce((a, b) => a + b, 0), max = Math.max(...c);
-    const info = hra.renderer.info.render;
     const rozl = Math.round((hra.stav.rozlisenie ?? 1) * 100);
+    const kvalita = hra.stav.kvalita ? `\nkvalita ${hra.stav.kvalita}   dohľad ${hra.stav.dohlad} m` : '';
     this.el.textContent =
       `${Math.round((1000 * c.length) / sucet)} snímok/s   ${(sucet / c.length).toFixed(1)} ms (najhorší ${max.toFixed(0)} ms)\n` +
-      `kreslenia ${info.calls}   trojuholníky ${(info.triangles / 1e6).toFixed(2)} mil.   rozlíšenie ${rozl} %`;
+      `kreslenia ${this.kreslenia}   trojuholníky ${(this.trojuholniky / 1e6).toFixed(2)} mil.   rozlíšenie ${rozl} %${kvalita}`;
   },
 };

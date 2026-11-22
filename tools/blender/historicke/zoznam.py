@@ -14,8 +14,10 @@ SPEC = {
     'primacialny-palac': {'nazov': 'Primaciálny palác', 'farba': '#f0c9b8', 'detaily': '#fbf6ee', 'strecha': '#6f6b66',
                           'prizemie': 5.0, 'poschodie': 4.4,
                           'portikus': {'smer': (-0.625, -0.781), 'stlpy': 4, 'sirka': 14.0, 'klobuk': True}},
+    # stredný rizalit k Hodžovmu námestiu: stĺpový portikus s tympanónom (noc 22. 11., presné pamiatky)
     'grasalkovicov-palac': {'nazov': 'Grasalkovičov palác', 'farba': '#f5f0e4', 'detaily': '#e9dcc0', 'strecha': '#6e7377',
-                            'prizemie': 5.2, 'poschodie': 5.0},
+                            'prizemie': 5.2, 'poschodie': 5.0,
+                            'portikus': {'smer': ('bod', -2.5, -17.8), 'stlpy': 4, 'sirka': 11.0}},
     'letny-arcibiskupsky-palac': {'nazov': 'Letný arcibiskupský palác', 'farba': '#f3ede0', 'detaily': '#e2d5bb',
                                   'strecha': '#5f6468', 'prizemie': 5.0, 'poschodie': 4.6},
     'snd': {'nazov': 'Slovenské národné divadlo', 'zaznamy': ['34571529'], 'farba': '#efe3c8', 'detaily': '#fbf7ec',

@@ -5,17 +5,31 @@
 // Užitočné vlastnosti pre ostatné moduly:
 //   auto.pozicia (Vector3), auto.uhol (rad), auto.rychlostDopredu (m/s), auto.rychlostKmh
 //   auto.vodic – 'hrac' | 'ai' | null
-//   auto.farba, auto.mesh, auto.znicene (rezervované pre budúce poškodenie)
+//   auto.farba, auto.typ (js/auto/typy-aut.js), auto.sluzba (taxík/kuriér alebo null), auto.mesh, auto.znicene
+// Jazdné vlastnosti (najvyššia rýchlosť, zrýchlenie, zatáčanie, priľnavosť) sú podľa typu (data/doprava/vozidla.json).
 
 import * as THREE from 'three';
 import { vytvorModelAuta } from './model-auta.js';
+import { TYPY, fyzikaTypu, typPodlaFarby } from './typy-aut.js';
 
 let pocitadlo = 0;
 
 export class Auto {
-  constructor({ x = 0, z = 0, uhol = 0, farba = '#c8102e' } = {}, KONFIG) {
+  constructor({ x = 0, z = 0, uhol = 0, farba = '#c8102e', typ = null, sluzba = null } = {}, KONFIG) {
     this.id = ++pocitadlo;
-    this.K = KONFIG.AUTO;
+    this.typ = TYPY[typ] ? typ : typPodlaFarby(farba);
+    this.sluzba = sluzba;
+    // jazdné vlastnosti podľa typu: násobky základu z config.js, kolízne kruhy podľa dĺžky auta
+    const f = fyzikaTypu(this.typ), A = KONFIG.AUTO;
+    this.K = {
+      ...A,
+      MAX_RYCHLOST: f.maxKmh / 3.6,
+      ZRYCHLENIE: A.ZRYCHLENIE * f.zrychlenie,
+      MAX_ZATOCENIE: A.MAX_ZATOCENIE * f.zatacanie,
+      PRILNAVOST: A.PRILNAVOST * f.prilnavost,
+      POSUN_KRUHU: A.POSUN_KRUHU * (TYPY[this.typ].L / 4.6),
+      HMOTNOST: f.hmotnost,
+    };
     this.farba = farba;
     this.pozicia = new THREE.Vector3(x, 0, z);
     this.uhol = uhol;
@@ -27,7 +41,7 @@ export class Auto {
     this.znicene = false;
     this.naklonX = 0; // klopenie (dopredu/dozadu)
     this.naklonZ = 0; // náklon do strany
-    this.mesh = vytvorModelAuta(farba);
+    this.mesh = vytvorModelAuta(farba, this.typ, sluzba);
     this.mesh.userData.auto = this;
   }
 
@@ -147,7 +161,7 @@ export class Auto {
     // pruženie karosérie pri šmyku a brzdení
     telo.rotation.z = THREE.MathUtils.clamp(-vL * 0.015, -0.08, 0.08);
     telo.rotation.x = THREE.MathUtils.clamp(-this.ovladanie.plyn * 0.02 * Math.sign(vF || 1), -0.04, 0.04);
-    for (const k of kolesa) k.rotation.x += (vF * dt) / 0.36;
+    for (const k of kolesa) k.rotation.x += (vF * dt) / (m.userData.polomerKolesa ?? 0.36);
     for (const klb of predneKlby) klb.rotation.y = this.zatocenie;
   }
 }
