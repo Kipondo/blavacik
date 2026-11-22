@@ -494,7 +494,12 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   zídení z hrany. **Chodci** majú výšku z normálneho rozdelenia (muži 180 ± 7 cm v rozsahu 163–198, ženy
   167 ± 6 cm v 152–184, dôchodcovia o 4 cm nižší; `vyska` v profiloch `data/postavy/npc.json`), mení sa mierka celého
   modelu a vyšší chodí rýchlejšie dlhším krokom; dav (VAT) dostal rovnaké zladenie kroku s rýchlosťou.
-  Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
+  **Nohy na teréne a hlava** (`js/chodec/postava/telo-na-terene.js`, IK dvoch kostí `ik.js`): položené chodidlo
+  hráča sa postaví na skutočnú výšku povrchu pod ním a natočí sa so svahom, telo sa zníži o nižšiu nohu (do 0,3 m) –
+  na svahu 27 % sú špičky do 7 mm od zeme (predtým jedna 12 cm vo vzduchu, druhá 12 cm v zemi). Hlava sa natáča tam,
+  kam sa pozerá kamera (do ~57°, nie za chrbát, pri behu menej). Úpravy kostí sa pred ďalšou animáciou vrátia
+  (mixér zapisuje kosť len pri zmene hodnoty – bez toho by sa hromadili). Cena ~0,08 ms na snímok.
+  Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok, nohy na svahu). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
 - **Premávka áut** (`js/doprava/premavka/`, modul `premavka`): do ~380 m okolo hráča jazdia stovky áut (v centre ~200–250)
   po skutočných cestách z dlaždíc mesta, v pruhoch vpravo, hustota podľa typu cesty (hlavné cesty hustejšie), celkovo 3× redšia (`RIEDKOST`, najviac 200 áut).
@@ -551,7 +556,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
 - Rýchlosť chôdze v `config.js` je arkádová (4,2 m/s, postava pri nej beží) – pre realistický model navrhujeme 1,6 m/s (pozri PR #15).
 - Chôdza (#96): nové klipy chôdze a behu s dlhším krokom (behový klip má krok ~1 m, pri 6 m/s nohy mierne kĺžu),
-  nohy na teréne (foot IK) pre hráča a najbližších chodcov, natáčanie hlavy za kamerou, striedanie kľudových animácií,
+  nohy na teréne aj pre najbližších chodcov, striedanie kľudových animácií,
   oblečenie podľa ročného obdobia a počasia, vystúpenie na schod najviac ~0,35 m.
 - NPC doprava (dáta sú pripravené v `data/mapa/graf-ciest.json`).
 - Svetlomety áut v noci, dážď a hmla ako počasie.
