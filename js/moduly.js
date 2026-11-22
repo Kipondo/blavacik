@@ -55,6 +55,7 @@ import premavka from './doprava/premavka/modul.js';
 import vozidlaData from './doprava/vozidla-data.js';
 import mhd from './mhd/modul.js';
 import mhdVozidla from './mhd/vozidla/modul.js';
+import vlaky from './vlaky/modul.js';
 
 // --- doplnkové moduly (polícia, misie, doprava, …) ---
 // --- dočasné pomôcky na prezeranie mesta (lietanie 2× Medzerník, presun klikom na veľkú mapu) ---
@@ -115,6 +116,7 @@ export default [
   mhd,
   zvuk,
   mhdVozidla,
+  vlaky,
   letLadenie,
   teleport,
   // policia,

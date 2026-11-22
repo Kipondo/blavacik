@@ -29,12 +29,18 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 ## Zlúčené 22. 11.
 #116 (zlatá linka na titulke), #117 (Átriaky), #118 (výkon – tiene, bez vetra), #119 (Hlavná stanica: plášť,
 interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste),
-#121 (kvalitnejšie autá, 17 sietí namiesto 27), #122 (Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park).
+#121 (kvalitnejšie autá, 17 sietí namiesto 27), #122 (Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park),
+#123 (workflow hlasov – sady viet stanice).
 
-## Rozpracované (22. 11. večer) – otvorené PR
+## Rozpracované (22. 11. večer)
 | vetva | priečinok | stav |
 |---|---|---|
-| `fix/hlasy-sady-viet` | `blavacik` | **PR #123** – workflow hlasov padal od #119 na `stanica-postavy.json` (repliky ako objekt); check zelený |
+| `feature/vlaky-poriadok` | `blavacik` | A2 + A3: GTFS ŽSR → `data/vlaky/poriadok.json`, trasy z OSM → `data/vlaky/trate.json`, modely `tools/blender/vlaky_blender.py`, modul `js/vlaky/`, koľaje 3D, tabule príchodov, hlásenia; **čaká:** PR |
+
+- GTFS ŽSR: odkaz `www.zsr.sk/files/…/gtfs.zip` vracia len stránku „GTFS info“ s odkazom do Národného katalógu
+  otvorených dát (data.slovensko.sk, dataset ebeeedf1-…, distribúcia `download?id=556da5af-…`) – nástroj sťahuje odtiaľ.
+  Verzia 13. 11. 2026 platí do 12. 12. 2026 (nový poriadok od 13. 12. v nej ešte nie je).
+- Wikimedia API pri viacerých požiadavkách hneď vracia 429 – fotky na porovnanie cez prehliadač (stránka súboru).
 
 Lokálne servery: `scratchpad/server.py <port> <priečinok>` (veľká fronta spojení – `python -m http.server` na Windows
 odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky` (shapely) + `--python-use-system-env`.
@@ -67,5 +73,10 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
   'steny-chodcov'), chodia podchodom a po nástupištiach (udalosť 'ciary-chodcov'), výšku majú ako hráč.
 - Pamiatky (22. 11.): bez nápisov značiek (Eurovea), nápisy univerzity áno (verejná inštitúcia); podklady len
   slovami v `napady/pamiatky-podklady.md`, žiadne fotky v repozitári.
+- Vlaky (22. 11.): typy súprav podľa zadania (Považan = 671, Košice = 361 + vozne, ostatné = regionálna jednotka);
+  navyše aj ostatné diaľkové kategórie (Ex, IC, EC, EN, R, rj, RJ, LE) idú s lokomotívou a vozňami – trojvozňová
+  regionálna jednotka ako EuroCity by vyzerala zle. Kategórie (aj RJ, LE, rj) ostávajú presne podľa poriadku, názvy
+  produktov dopravcov (railjet, RegioJet…) sa vynechávajú ako značky. Nástupištia v GTFS nie sú – koľaje sa prideľujú
+  v hre (jedna súprava na koľaj). Odstavené súpravy idú do depa na východ. Kolízie vlak–hráč zatiaľ nie sú.
 - Autá (22. 11.): detaily lacnou cestou – disky textúrou, tvarovanie vrcholov raz pri stavbe typu; zlúčením
   sietí je auto hráča/zaparkované lacnejšie na kreslenie, auto v premávke má +~700 trojuholníkov.

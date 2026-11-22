@@ -40,6 +40,32 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Vlaky a cestovný poriadok na Hlavnej stanici (vetva `feature/vlaky-poriadok`, úlohy A2 a A3)
+- **Cestovný poriadok** z GTFS ŽSR (Národný katalóg otvorených dát, CC0): `python3 tools/vlaky/gtfs_vlaky.py`
+  stiahne najnovší GTFS a vyberie vlaky cez Bratislava hl. st. do `data/vlaky/poriadok.json` (~80 kB) – kategória,
+  číslo, názov (Považan, Tatran, Kriváň…; názvy produktov dopravcov ako značky vynechané), odkiaľ, kam, časy a dni
+  premávky. Poriadok sa mení v decembri – vtedy stačí nástroj spustiť znova; dovtedy sa dni mimo platnosti berú
+  ako rovnaký deň v týždni. Vlaky jazdia podľa **herného času**.
+- **Meškania** (`js/vlaky/poriadok.js`): ~75 % načas, 15 % 5–20 min, 7 % 20–60 min, 3 % 60–180 min, vlaky z/do Košíc
+  meškajú 2× častejšie; vlaky, ktoré v Bratislave začínajú, odchádzajú načas, ak im súprava nepríde neskoro –
+  **meškanie sa prenáša na spiatočný odchod súpravy** (obrat do 45 min čaká pri nástupišti, dlhší v depe).
+  Koľaj sa prideľuje tak, aby na nej naraz stála jedna súprava (diaľkové pri budove, regionálne ďalej).
+- **Tabule odchodov a príchodov** v hale (čas, vlak, smer, nástupište/koľaj, meškanie), prekresľujú sa raz za hernú minútu.
+- **Hlásenia rozhlasu** (len syntetizovaný gong a titulky, šablóny v `data/dialogy/stanica-hlasenia.json`): príchod,
+  odchod, meškanie a občas vtip („…Najmä rezne od mamy.“) – len keď je Ďoďo pri stanici.
+- **Vlaky na koľajach:** trasy z koľají OSM (`python3 tools/vlaky/trate_osm.py` → `data/vlaky/trate.json`) od tunela
+  na západe a od Vinohrad na východe (~2,6 km) k 11 koľajám pri 6 nástupištiach; vlak spomalí, zastaví stredom pri
+  nástupišti, postojí a odíde, v tuneli a za koncom úseku zmizne. Naraz sa hýbe najviac 5 vlakov; pri idúcom vlaku
+  blízko hráča herný čas nezrýchľuje.
+- **Modely** z Blendera (`tools/blender/vlaky_blender.py` → `assets/vlaky/vlaky.glb`, 100 kB): dvojpodlažná jednotka
+  podľa radu 671 (Považan), lokomotíva podľa radu 361 s červeno-bielymi vozňami (Košice a diaľkové vlaky), všeobecná
+  regionálna jednotka (ostatné); farby ako ZSSK, bez loga a nápisov. 1–1,7 tis. trojuholníkov na vozeň + zjednodušený
+  model do diaľky, každý typ vozňa je jedna inštancovaná sieť.
+- **Železničné koľaje v 3D** v celom meste (`js/mapa/cesty/kolajnice.js`): koľajnice 1 435 mm a pás pražcov na štrku.
+- **Štart (A4):** na 1. nástupišti stojí súprava z Košíc, z ktorej Ďoďo vystúpil; po pár minútach odíde do depa.
+- Cena pri stanici: vlaky +5 volaní kreslenia a ~45 tis. trojuholníkov (10 súprav v zábere), koľaje +4 volania
+  a ~25–40 tis. trojuholníkov.
+
 ### Pamiatky: Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park (vetva `feature/pamiatky-uk-vajce`)
 Podľa prieskumu textov, OSM a fotiek (Wikimedia Commons, ortofoto ZBGIS; bez Google) – podklady
 v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md), modely v `tools/blender/vyskove/`.
@@ -824,6 +850,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
   takmer chýba – zatiaľ len ostrovčeky), mosty z lasera, NPC autá po nadjazdoch.
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
+- Vlaky: kolízie s hráčom (dnes sa dá prejsť cez súpravu), nastupovanie do vlaku, tabuľky na nástupištiach,
+  nákladné vlaky; po decembrovej zmene poriadku spustiť `tools/vlaky/gtfs_vlaky.py`.
 - Chodci: prechádzanie cez cesty na priechodoch (autá im dajú prednosť), čakanie na zastávkach MHD.
 - Mikromobilita (#97): elektrobicykel, NPC jazdci aj po chodníkoch a ďalej od hráča (lacnejší model), cena jazdy
   na kolobežke (peniaze), zvuk elektromotora a zvonček bicykla.
@@ -863,6 +891,14 @@ Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSO
   Trasy po cestách a koľajach sú vypočítané z mapy (© prispievatelia OpenStreetMap, ODbL).
 - Obnovenie dát: `node tools/mhd/stiahni.mjs && node --max-old-space-size=4000 tools/mhd/spracuj.mjs` (bez npm balíkov).
 - Prehľad siete (2D, na kontrolu): `http://localhost:8000/tools/mhd/prehlad.html`.
+
+## Vlaky
+- Dáta: `data/vlaky/poriadok.json` (vlaky cez Bratislava hl. st.) a `data/vlaky/trate.json` (trasy ku koľajám),
+  kód hry: `js/vlaky/` (modul `vlaky`), modely `tools/blender/vlaky_blender.py`.
+- Zdroj poriadku: *Grafikon vlakovej dopravy vo formáte GTFS* – Železnice Slovenskej republiky
+  ([data.slovensko.sk](https://data.slovensko.sk/datasety/ebeeedf1-aca2-451a-bdc0-35d536714888)), licencia **CC0**.
+  Trasy z koľají OSM (© prispievatelia OpenStreetMap, ODbL).
+- Obnovenie (po zmene poriadku v decembri): `python3 tools/vlaky/gtfs_vlaky.py`; trasy: `python3 tools/vlaky/trate_osm.py`.
 - Pre ostatné moduly: `hra.mhd.data`, `hra.mhd.teraz()`, `hra.mhd.najblizsiaZastavka(x, z)`, `hra.mhd.odchody(id)`,
   `hra.mhd.typDna()` (popis v [js/mhd/modul.js](js/mhd/modul.js)). MHD sa riadi herným časom `hra.stav.datumCas`.
 

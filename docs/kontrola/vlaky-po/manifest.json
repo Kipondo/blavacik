@@ -1,0 +1,40 @@
+{
+ "nazov": "vlaky-po",
+ "commit": "?",
+ "cas": "2026-11-22T20:36",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "hlavna-stanica",
+   "nazov": "Hlavná stanica",
+   "x": -97,
+   "z": -1640,
+   "ms": 16710,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "hlavna-stanica-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavna-stanica-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "stanica-nastupiste",
+   "nazov": "Hlavná stanica – 1. nástupište",
+   "x": -140.4,
+   "z": -1727,
+   "ms": 4571,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "stanica-nastupiste-ulica.jpg"
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "stanica-hlasenia",
+  "popis": "Hlásenia staničného rozhlasu na Hlavnej stanici (js/vlaky/hlasenia.js). Len gong a titulky – žiadne nahraté hlasy. {vlak}, {z}, {do}, {nastupiste}, {kolaj}, {cas}, {meskanie} sa doplnia z cestovného poriadku. Vtipy sa pridajú náhodne k meškaniu.",
+  "postavy": {
+    "rozhlas": { "meno": "Staničný rozhlas", "farba": "#9fd3ff" }
+  },
+  "kategorie": {
+    "Os": "Osobný vlak",
+    "Zr": "Zrýchlený vlak",
+    "R": "Rýchlik",
+    "REX": "Regionálny expres",
+    "RR": "Regionálny rýchlik",
+    "RRR": "Regionálny rýchlik",
+    "Ex": "Expres",
+    "IC": "InterCity",
+    "EC": "EuroCity",
+    "EN": "EuroNight"
+  },
+  "sablony": {
+    "prichod": [
+      "{vlak} zo stanice {z} prichádza k {nastupiste}. nástupišťu, koľaj číslo {kolaj}.",
+      "Na {nastupiste}. nástupište, koľaj číslo {kolaj}, prichádza {vlak} zo stanice {z}. Vlak tu končí, prosíme cestujúcich, aby vystúpili."
+    ],
+    "odchod": [
+      "{vlak} do stanice {do} odchádza z {nastupiste}. nástupišťa, koľaj číslo {kolaj}. Prosíme, nastúpte, dvere sa zatvárajú.",
+      "Pri {nastupiste}. nástupišti, koľaj číslo {kolaj}, je pripravený na odchod {vlak} do stanice {do}."
+    ],
+    "meskanie": [
+      "{vlak} zo stanice {z}, pravidelný príchod {cas}, bude meškať približne {meskanie} minút. Meškanie sa môže zmeniť.",
+      "Vážení cestujúci, {vlak} do stanice {do}, pravidelný odchod {cas}, odíde s meškaním približne {meskanie} minút."
+    ],
+    "vtip": [
+      "Ďakujeme za trpezlivosť. Trpezlivosť je v cene cestovného lístka.",
+      "Prosíme cestujúcich, aby nenechávali batožinu bez dozoru. Najmä rezne od mamy.",
+      "Hodiny v hale idú presne. Vlaky sa ich iba snažia dobehnúť.",
+      "Bufet v hale je otvorený. Káva je horúca, meškanie ešte horúcejšie.",
+      "Meškanie nie je chyba, ale vlastnosť. Aspoň máte čas pozrieť si fresku v historickej hale.",
+      "Cestujúcich, ktorí vlak dobiehajú, prosíme, aby nebežali po koľajisku. Ani keď sa ponáhľajú na prednášku.",
+      "Ospravedlňujeme sa za meškanie. Rušňovodič sa zastavil pozdraviť tetu v Trnave."
+    ]
+  }
+}
