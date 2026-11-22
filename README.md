@@ -676,6 +676,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Po nočnej práci 22. 11.: otvorené PR #102 – #108, #112, poradie zlučovania a konflikty sú v súhrne v #59,
+  priebeh a „ďalšie na rade“ v [napady/noc-priebeh.md](napady/noc-priebeh.md); nové issues #109 – #111.
 - Átriaky (#91): schody vedľa lávok sú zatiaľ v hre (JS), zábradlie modelu lávky pri prestupe na schody ostáva
   (prechádza sa cez neho); chodby a terasy všetkých 18 domov podľa fotiek, viac izieb a blokov s interiérom.
 - Kvalita (#58): plynulé prelínanie podrobnej a jednoduchej dlaždice (dnes sa vymení celá naraz, v opare), vzdialené
