@@ -2,7 +2,7 @@
 // Po animácii státia sa ruky a nohy dotiahnu na riadidlá, dosku a pedále (IK dvoch kostí, ik.js).
 
 import * as THREE from 'three';
-import { ikDvochKosti, otocVoSvete } from './ik.js';
+import { ikDvochKosti, otocVoSvete } from '../chodec/postava/ik.js';
 import { ROZMERY } from './model-kolobezky.js';
 import { ROZMERY_B } from './model-bicykla.js';
 

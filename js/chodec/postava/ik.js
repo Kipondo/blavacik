@@ -1,4 +1,4 @@
-// Jednoduché IK dvoch kostí (rameno–predlaktie, stehno–lýtko) – jazdec drží riadidlá a stojí na doske.
+// Jednoduché IK dvoch kostí (rameno–predlaktie, stehno–lýtko): jazdec na kolobežke/bicykli, nohy na teréne.
 // Počíta sa vo svetových súradniciach po animácii (mixér), každý snímok znova.
 
 import * as THREE from 'three';

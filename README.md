@@ -493,7 +493,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Shift šprint (bicykel), E = zosadnúť (do 14 km/h). Kolobežka: obmedzovač 25 km/h, rýchly rozbeh; bicykel 23 km/h,
   šprint 35 km/h, do kopca citeľne pomalší. Oba sa nešmýkajú do boku, v zákrute sa nakláňajú (v·ω/g), od stien
   a áut sa odrazia, chodca zrazia len tesne pred sebou. **Jazdec:** na kolobežke Ďoďo stojí na doske, na bicykli sedí
-  s predklonom a šliape – ruky na riadidlách a nohy na doske/pedáloch drží IK dvoch kostí (`js/mikromobilita/ik.js`,
+  s predklonom a šliape – ruky na riadidlách a nohy na doske/pedáloch drží IK dvoch kostí (`js/chodec/postava/ik.js`,
   `jazdec.js`); kľuky sa točia podľa rýchlosti (voľnobeh pri dobiehaní). Kamera je bližšie ako za autom. Vozidlo,
   z ktorého hráč zosadol, ostane stáť (najviac 8, ďalej ako 400 m sa odpracú). Modely sú v kóde (kolobežka 432,
   bicykel 1 676 trojuholníkov). Nápovedy iných modulov idú cez `hra.stav.napoveda` (HUD ich zobrazí, keď nie je
