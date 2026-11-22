@@ -333,3 +333,40 @@ Výška sokla nie je overená.
   - finálna výška a počet podlaží Sky Park Tower,
   - výška parkovej plošiny.
 - **Fotky** som vizuálne overil iba pri jednej (východná fasáda UK).
+
+---
+
+## Doplnenie z fotiek (22. 11. 2026)
+Druhý prieskum: fotky z Wikimedia Commons, ortofoto ZBGIS (© ÚGKK SR) a stránky architektov – len na pozretie,
+bez Google. Podľa neho sú upravené modely (`tools/blender/vyskove/`).
+
+**Univerzita Komenského**
+- Hmoty od východu: rotunda (vrch atiky ≈ 20 m) → „plecia“ po jej stranách (čelo bez okien, rímsa ≈ 18 m,
+  ustúpené horné podlažie so slepými poľami do ≈ 21 m, na bokoch 2 malé okná na podlažie) → hlavný blok
+  (≈ 14 m hlboký, rímsa/atika ≈ 27–29 m, nízka valba zo šedozeleného plechu za atikou) → stredné krídla s aulou
+  → západná prístavba s pásovými oknami a nadstavbou na streche.
+- Rotunda: 6 okenných osí, v strednej osi pilaster; 7 pilierov arkády; dolný rad okien ≈ 2,6 × 2,8 m, horný
+  ≈ 2,6 × 5,4 m; nápisy „UNIVERZITA KOMENSKÉHO“ (horný vlys) a „UNIVERSITAS COMENIANA BRATISLAVENSIS“ (nad arkádou);
+  nízka atika s hranolovými podstavcami.
+- Pylóny: omietaný hranol ≈ 2,1 m, dve odstupňované dosky, hrdzavá mriežková koruna ≈ 1,8 × 1,5 m so zubatým
+  okrajom; vrch ≈ 31–32 m.
+- Farby: travertín #C8B894 (rotunda, prízemie), omietka #A89170, rámy rotundy #3A3129, ostatné rámy biele.
+- Aula: presklená sedlová/segmentová strecha ≈ 28 × 14–15 m, z ulice ju nevidno.
+
+**Eurovea – vajce a kupola**
+- Vajce nie je zvislé vytiahnutie: spodná tretina zvislá, potom sa zaobľuje dnu (navrchu ≈ 0,8), plochá oválna
+  strecha; 9 pásov trojuholníkových tabúľ (diagrid, priečle #A9AFB3), sklo #4F626A, výška ≈ 35–37 m.
+- Kupola: nízka segmentová (vznos 4–5 m) na sklenenom bubne ≈ 11 m, trojuholníková sieť bielej ocele, presah
+  okraja s dvoma bielymi stĺpmi pred vchodom.
+
+**Eurovea Tower**
+- Súvislý balkón okolo veže na každom podlaží (čelá dosiek striebrosivé #A7ADB3), tmavé sklo #3A4756,
+  12 bielych rebier (4 na stranu, rohy bez rebra) od zeme po vrch; koruna je otvorená klietka s rovnakou výškou
+  rebier a 3 tmavými prstencami; hala ≈ 2 podlažia a stĺpy tvaru V.
+
+**Sky Park**
+- Rezidencie: mierny súdok (+5 % v 35–50 % výšky, zaoblené „ramená“ navrchu), rovné biele prstence zhora po 1, 1,
+  1, 1, 2, 3, 4, 5, 6, ~7 podlaží, ~10 rovných zvislíc, bronzové panely (#7D7569) striedané so sklom (#44505A),
+  navrchu svetlosivé lamely a zvislice ohnuté dnu, prízemie ≈ 7 m presklené.
+- Offices (Vietzke & Borstelmann + GFI): bloky zhora ≈ 7, 6, 3, 4 podlažia posunuté o 1–2 m, biele pásy len na
+  stykoch blokov, tmavé zvislé lamely, biela rebrovaná clona techniky.
