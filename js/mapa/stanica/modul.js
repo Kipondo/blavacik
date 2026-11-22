@@ -224,7 +224,8 @@ export default {
     };
     // tabule odchodov: v Skleníku pred historickou halou a dve nad prechodom na nástupište pod freskou
     this.tabuleOdchodov = [];
-    for (const t of [m.tabula, ...(m.tabule_hist ?? [])].filter(Boolean)) this.tabuleOdchodov.push(poloz(tabulaOdchodov(), t));
+    // pod freskou: jedna tabuľa odchodov a jedna príchodov (vlaky – js/vlaky/modul.js)
+    [m.tabula, ...(m.tabule_hist ?? [])].filter(Boolean).forEach((t, i) => this.tabuleOdchodov.push(poloz(tabulaOdchodov(i === 2 ? 'prichody' : 'odchody'), t)));
     if (m.hodiny) this.hodiny = poloz(hodiny(), m.hodiny);
     // pokladne: modrý pás s textom a zavesené boxy „POKLADNICA“
     if (m.pokladne) poloz(pasPokladni(m.pokladne.sirka ?? 18), m.pokladne);
@@ -247,9 +248,11 @@ export default {
   prekresliTabule() {
     const d = new Date(this.hra.stav.datumCas ?? Date.now());
     const min = d.getHours() * 60 + d.getMinutes();
-    if (min === this.minuta) return;
+    const odchody = this.hra.stav.stanicaOdchody ?? null, prichody = this.hra.stav.stanicaPrichody ?? null;
+    if (min === this.minuta && odchody === this.odchodyKresl) return;
     this.minuta = min;
-    for (const t of this.tabuleOdchodov ?? []) t.userData.prekresli(d, this.hra.stav.stanicaOdchody ?? null);
+    this.odchodyKresl = odchody;
+    for (const t of this.tabuleOdchodov ?? []) t.userData.prekresli(d, t.userData.druh === 'prichody' ? prichody : odchody);
     this.hodiny?.userData.prekresli(d);
   },
 };

@@ -1,7 +1,7 @@
-// Tabuľa odchodov, staničné hodiny a nápisy Hlavnej stanice – kreslené na plátno (CanvasTexture).
-// Tabuľa číta zoznam odchodov z hra.stav.stanicaOdchody (cestovný poriadok, úloha A3):
-//   [{ cas: '14:05', vlak: 'R 611', nazov: 'Považan', smer: 'Žilina', nastupiste: '3', meskanie: 5 }, …]
-// Kým poriadok nie je, ukáže len hlavičku a hlásenie.
+// Tabule odchodov a príchodov, staničné hodiny a nápisy Hlavnej stanice – kreslené na plátno (CanvasTexture).
+// Tabule čítajú riadky z hra.stav.stanicaOdchody / hra.stav.stanicaPrichody (js/vlaky/modul.js, úloha A3):
+//   [{ cas: '14:05', vlak: 'R 611', nazov: 'Považan', smer: 'Žilina', nastupiste: '3', kolaj: '10', meskanie: 5 }, …]
+// (pri príchodoch je smer = odkiaľ vlak ide). Kým poriadok nie je, ukáže len hlavičku a hlásenie.
 
 import * as THREE from 'three';
 
@@ -16,47 +16,49 @@ function platno(w, h) {
 
 const dvojmiestne = (n) => String(n).padStart(2, '0');
 
-/** Veľká tabuľa odchodov (5 × 1,6 m), obojstranná doska s rámom. */
-export function tabulaOdchodov() {
+/** Veľká tabuľa odchodov alebo príchodov (5 × 1,6 m), obojstranná doska s rámom. druh = 'odchody' | 'prichody'. */
+export function tabulaOdchodov(druh = 'odchody') {
+  const prichody = druh === 'prichody';
   const { c, g, t } = platno(1024, 320);
   const sk = new THREE.Group();
   const doska = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.6), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
   doska.position.z = 0.06;
   const ram = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.8, 0.1), new THREE.MeshStandardMaterial({ color: '#23272b', roughness: 0.5, metalness: 0.4 }));
   sk.add(ram, doska);
+  sk.userData.druh = druh;
   // LED tabuľa ako na stanici: čierne pozadie, biela hlavička, čas jantárovo, riadky zeleno / červeno / oranžovo
-  sk.userData.prekresli = (d, odchody) => {
+  sk.userData.prekresli = (d, riadky) => {
     g.fillStyle = '#05070a';
     g.fillRect(0, 0, c.width, c.height);
     g.fillStyle = '#f4f4f4';
     g.font = 'bold 34px ui-monospace, monospace';
-    g.fillText('ODCHODY', 24, 44);
+    g.fillText(prichody ? 'PRÍCHODY' : 'ODCHODY', 24, 44);
     g.font = '22px ui-monospace, monospace';
     g.fillStyle = '#bdbdbd';
-    g.fillText('DEPARTURES', 200, 44);
+    g.fillText(prichody ? 'ARRIVALS' : 'DEPARTURES', 220, 44);
     g.font = 'bold 34px ui-monospace, monospace';
     g.fillStyle = '#ffb627';
     g.fillText(`${dvojmiestne(d.getHours())}:${dvojmiestne(d.getMinutes())}`, c.width - 130, 44);
     g.fillStyle = '#8a8a8a';
     g.font = '18px ui-monospace, monospace';
-    const hl = [['ČAS', 24], ['VLAK', 120], ['SMER', 330], ['KOĽAJ', 760], ['MEŠKANIE', 860]];
+    const hl = [['ČAS', 24], ['VLAK', 120], [prichody ? 'ZO SMERU' : 'SMER', 400], ['NÁST./K.', 730], ['MEŠKANIE', 870]];
     for (const [s, x] of hl) g.fillText(s, x, 78);
     g.font = '26px ui-monospace, monospace';
-    if (!odchody?.length) {
+    if (!riadky?.length) {
       g.fillStyle = '#ffb627';
-      g.fillText('Informácie o odchodoch sa pripravujú.', 24, 130);
+      g.fillText(prichody ? 'Informácie o príchodoch sa pripravujú.' : 'Informácie o odchodoch sa pripravujú.', 24, 130);
     } else {
-      odchody.slice(0, 7).forEach((o, i) => {
+      riadky.slice(0, 7).forEach((o, i) => {
         const y = 112 + i * 30;
         g.fillStyle = '#3be06a';
         g.fillText(o.cas, 24, y);
         g.fillStyle = '#ff5a6e';
-        g.fillText(`${o.vlak}${o.nazov ? ' ' + o.nazov : ''}`.slice(0, 16), 120, y);
+        g.fillText(`${o.vlak}${o.nazov ? ' ' + o.nazov : ''}`.slice(0, 19), 120, y);
         g.fillStyle = '#ffa640';
-        g.fillText(String(o.smer).slice(0, 26), 330, y);
+        g.fillText(String(o.smer).slice(0, 21), 400, y);
         g.fillStyle = '#ffb627';
-        g.fillText(String(o.nastupiste ?? ''), 790, y);
-        if (o.meskanie > 0) { g.fillStyle = '#ff5a6e'; g.fillText(`+${o.meskanie} min`, 860, y); }
+        g.fillText(`${o.nastupiste ?? ''}${o.kolaj ? '/' + o.kolaj : ''}`, 740, y);
+        if (o.meskanie > 0) { g.fillStyle = '#ff5a6e'; g.fillText(`+${o.meskanie} min`, 870, y); }
       });
     }
     t.needsUpdate = true;
