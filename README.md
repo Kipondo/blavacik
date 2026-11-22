@@ -738,7 +738,11 @@ python3 tools/kontrola/trasa.py --gpu                                  # s oknom
 ```
 Body a uhly sú v `tools/kontrola/body.json` (súradnice hry, azimut, vlastná kamera). Výsledok: `docs/kontrola/<beh>/index.html`
 (galéria) a **porovnanie dvoch behov** vedľa seba: `http://localhost:8000/docs/kontrola/porovnanie.html?a=<beh>&b=<beh>`.
-Softvérové kreslenie (bez `--gpu`) trvá ~5 minút na bod. Prvý beh (stav `main` 22. 11.) je v `docs/kontrola/2026-11-22/`.
+Softvérové kreslenie (bez `--gpu`) trvá ~5 minút na bod (s laserovými dátami v centre aj viac – `--limit 360`).
+Kamera sa na bod presunie hneď po presune hráča, takže moduly podľa polohy kamery (dohľad a pamiatky za hmlou,
+drobnosti zblízka, 3D fasády, tráva) sa pripravia na ten bod; snímky sú vždy v plnom rozlíšení predvoľby.
+Prvý beh (stav `main` 21. 11. večer) je v `docs/kontrola/2026-11-22/`, beh po zlúčení nočných PR (6 bodov)
+v `docs/kontrola/2026-11-22-po-zluceni/` – porovnanie: `porovnanie.html?a=2026-11-22&b=2026-11-22-po-zluceni`.
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.

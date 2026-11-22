@@ -1,0 +1,116 @@
+{
+ "nazov": "2026-11-22-po-zluceni",
+ "commit": "f27d907",
+ "cas": "2026-11-22T10:40",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "hlavne-namestie",
+   "nazov": "Hlavné námestie",
+   "x": 34,
+   "z": 58,
+   "ms": 62646,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "hlavne-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavne-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "michalska-brana",
+   "nazov": "Michalská brána",
+   "x": -78,
+   "z": -140,
+   "ms": 394015,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "michalska-brana-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "michalska-brana-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "safarikovo-namestie",
+   "nazov": "Šafárikovo námestie",
+   "x": 620,
+   "z": 215,
+   "ms": 394485,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "safarikovo-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "safarikovo-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "eurovea-nabrezie",
+   "nazov": "Nábrežie pri Eurovei",
+   "x": 1100,
+   "z": 430,
+   "ms": 388751,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "eurovea-nabrezie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "eurovea-nabrezie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "trnavske-myto",
+   "nazov": "Trnavské mýto",
+   "x": 1500,
+   "z": -1635,
+   "ms": 406555,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "trnavske-myto-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "trnavske-myto-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "mlynska-dolina",
+   "nazov": "Mlynská dolina – Átriaky",
+   "x": -2902,
+   "z": -1770,
+   "ms": 403441,
+   "hotovo": false,
+   "snimky": [
+    [
+     "ulica",
+     "mlynska-dolina-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "mlynska-dolina-zhora.jpg"
+    ]
+   ]
+  }
+ ]
+}
