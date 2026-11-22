@@ -34,9 +34,10 @@
 }
 .titulka-scena::after {   /* zlatá linka a panel v rámci návrhu (ak je okno užšie ako 16 : 9) */
   content: ''; position: absolute; left: 0; right: 0; top: 640px; height: 6px; background: var(--zlata-t);
+  z-index: 0;              /* pod Ďoďom, erbom a názvom (::after sa inak kreslí navrchu) */
 }
-.titulka-dodo { position: absolute; left: 70px; bottom: -12px; height: 500px; filter: drop-shadow(0 18px 22px rgba(5,10,25,.6)); }
-.titulka-stred { position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; }
+.titulka-dodo { position: absolute; left: 70px; bottom: -12px; height: 500px; filter: drop-shadow(0 18px 22px rgba(5,10,25,.6)); z-index: 1; }
+.titulka-stred { position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; z-index: 1; }
 .titulka-erb { width: 112px; height: auto; filter: drop-shadow(0 10px 16px rgba(5,10,25,.55)); }
 .titulka-nazov {
   position: relative; margin: -6px 0 0; font-family: 'Anton', Impact, sans-serif; font-weight: 400; font-size: 120px; line-height: 1;

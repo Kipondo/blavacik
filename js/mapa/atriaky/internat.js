@@ -1,34 +1,31 @@
-// Modul: internát v Átriakoch – vchod, izba 314 a ochoz bloku T cez teleport (issue #91, úloha 2).
-// Vchod do bloku T (hra.stav.atriakyVchod z js/mapa/atriaky/modul.js) má v meste dvere vo výklenku, nad nimi sa
-// vznáša oranžová šípka (zďaleka väčšia) a na minimape je značka „Internát“ (mimo minimapy šípka na okraji).
-// Pri dverách „E – Otvoriť dvere“: dvere sa otvoria, obraz stmavne a hráč je vnútri – hra prepne do malej
-// samostatnej scény (chodba a trojlôžková izba 314): kreslí sa len tá, mesto sa nekreslí a hráč v meste stojí
-// (vstup je pre mesto zablokovaný), dlaždice sa nemenia. Vnútri sa chodí z pohľadu postavy (WASD, myš).
-// Z izby vedú balkónové dvere na ochoz (terasu okolo ustúpeného podlažia, hra.stav.atriakyOchoz) – na ochoz sa
-// inak dostať nedá (vonkajšie schody na fotkách nie sú); z ochozu sa tými istými dverami ide späť do izby.
-// Dvere na začiatku chodby vedú von pred vchod.
-// Dispozícia podľa verejných zdrojov (mlyny.uniba.sk, Wikipédia): izby okolo jadra s hygienou a kuchynkou,
-// trojlôžková izba – posteľ, polička, stolík a stolička pre každého, vešiaková skriňa, umývadlo so zrkadlom,
-// spoločná chladnička; sprchy a WC spoločné na poschodí.
-// Pre ostatné moduly: hra.stav.vInterieri = true, kým je hráč vnútri; udalosti 'interier-vstup' / 'interier-von'.
+// Modul: internát v Átriakoch – vchod do bloku T, izba 314 a chodba priamo v meste (issue #91, #115).
+// Izba a chodba sú model z Blendera (tools/blender/atriaky/izba.py → assets/pamiatky/atriaky-izba.glb.gz) položený
+// do ustúpeného (4.) podlažia bloku T za balkónové dvere – tie sú skutočný otvor v plášti domu
+// (hra.stav.atriakyOchoz z js/mapa/atriaky/modul.js). Vnútri sa chodí ako vonku: tá istá postava, kamera, myš,
+// prvá/tretia osoba (kamera ostáva pod stropom – hra.interier.kamera, js/kamera/kamera.js), kolízie so stenami
+// a nábytkom, pochôdzna podlaha (udalosť 'pochodzne-plochy'). Plný kolízny blok domu sa v izbe ignoruje
+// (kolizie.pridajVynimku). Z izby sa pešo vyjde balkónovými dverami na ochoz (terasu).
+// Vchod na prízemí (dvere vo výklenku, nad nimi oranžová šípka, značka „Internát“ na minimape): E → dvere sa otvoria,
+// obraz stmavne a hráč stojí na chodbe pri schodisku na 4. podlaží (schodisko sa nemodeluje); pri dverách schodiska
+// E → späť pred vchod.
+// Dispozícia podľa prieskumu (napady/atriaky-izba.md): trojlôžková izba ~3,2 × 6 m, okno a dvere na pavlač/terasu,
+// skriňa a umývadlo pri dverách na chodbu, chodba s dverami susedných izieb a jadra (kuchynka, sprchy, WC).
+// Pre ostatné moduly: hra.stav.vInterieri = true, kým je hráč v izbe alebo na chodbe; udalosti 'interier-vstup' /
+// 'interier-von'.
 
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { NOC } from '../../grafika/noc.js';
+import { nacitajModelPamiatky, rozbalModel } from '../pamiatky/model-glb.js';
+import { bodVPolygone } from '../geometria.js';
 
 const DOSAH = 2.2;            // m – ako blízko vchodu sa dá vojsť
-const DOSAH_OCHOZ = 1.6;      // m – ako blízko balkónových dverí na ochoze
-const RYCHLOST = 2.4;          // m/s pri chôdzi vnútri
-const VYSKA_OCI = 1.62;
-const POLOMER = 0.3;
-const OTVARANIE = 0.55;        // s – otvorenie dverí pred prechodom dnu
-const STMIEVANIE = 0.35;       // s – stmavnutie obrazu (rovnako v css .internat-clona)
+const DOSAH_SCHODISKO = 1.3;  // m – ako blízko dverí schodiska na chodbe
+const OTVARANIE = 0.55;       // s – otvorenie dverí pred prechodom dnu
+const STMIEVANIE = 0.35;      // s – stmavnutie obrazu (rovnako v css .internat-clona)
 const FARBA_ZNACKY = '#ffa31a';
-// miesta vnútri: [x, z, yaw] – yaw 0 = pohľad do −z
-const DNU = {
-  chodba: [0, 0.9, 0],                 // pri vchodových dverách, pohľad do chodby
-  izba: [-4.9, -10.75, -Math.PI / 2],    // pri balkónových dverách, pohľad do izby
-};
+const SUBOR = 'atriaky-izba';
+const SKUPINA = 'modul:internat';
+const DOSAH_KRESLENIA = 45;   // m – izbu a svetlá kreslíme len zblízka (inak ju zakrýva plášť domu)
 
 export default {
   nazov: 'internat',
@@ -37,64 +34,183 @@ export default {
   init(hra) {
     this.hra = hra;
     this.vnutri = false;
-    this.scena = null;
     this.napoveda = null;
-    this.prechod = null;          // { smer: 'dnu' | 'von', kam: 'vchod' | 'ochoz', t } – otváranie dverí a stmievanie
-    this.dvere = {};              // 'vchod' | 'ochoz' → { skupina, kridlo, u (0 zatvorené … 1 otvorené), zatvaraj }
+    this.prechod = null;          // { smer: 'dnu' | 'von', t } – otváranie dverí a stmievanie
+    this.dvere = {};              // 'vchod' → { skupina, kridlo, u (0 zatvorené … 1 otvorené), zatvaraj }
     this.cas = 0;
-    // čierna clona na prechod dnu a von
     this.clona = document.createElement('div');
     this.clona.className = 'internat-clona';
     document.body.appendChild(this.clona);
+    fetch(`assets/pamiatky/${SUBOR}.json`).then((r) => (r.ok ? r.json() : null)).then((d) => { this.info = d; }).catch(() => {});
+    hra.interier = { kamera: (poz, ciel, hrac) => this.kamera(poz, ciel, hrac) };
   },
 
   updateVzdy(dt, hra) {
     this.cas += dt;
     if (hra.stav.atriakyVchod && hra.stav.atriakyVchod !== this.vchod) this.postavVchod(hra);
+    if (hra.stav.atriakyOchoz && this.info && hra.stav.atriakyOchoz !== this.ochoz) this.postavIzbu(hra);
     this.animujDvere(dt, hra);
     if (this.prechod) { this.krokPrechodu(dt, hra); return; }
-    if (this.vnutri) { this.pohyb(dt, hra); return; }
-    if (!hra.stav.atriakyVchod || hra.stav.auto || hra.stav.pauza) { this.nastavNapovedu(hra, null); return; }
     const p = hra.hrac?.pozicia;
-    const pri = (m, r, dy) => p && m && Math.hypot(p.x - m.x, p.z - m.z) < r && Math.abs(p.y - m.y) < dy;
-    const kam = pri(hra.stav.atriakyVchod, DOSAH, 2.5) ? 'vchod' : pri(hra.stav.atriakyOchoz, DOSAH_OCHOZ, 1) ? 'ochoz' : null;
-    this.nastavNapovedu(hra, kam === 'vchod' ? 'E – Otvoriť dvere (internát)' : kam === 'ochoz' ? 'E – Do izby 314' : null);
+    // je hráč v izbe/na chodbe? (podľa pôdorysu a výšky podlahy)
+    const dnu = !!(p && this.zona && !hra.stav.auto && Math.abs(p.y - this.podlaha) < 1.5 && bodVPolygone(p.x, p.z, this.zona));
+    if (dnu !== this.vnutri) {
+      this.vnutri = dnu;
+      hra.stav.vInterieri = dnu;
+      hra.posli(dnu ? 'interier-vstup' : 'interier-von', { blok: 'T', miesto: 'izba-314' });
+      if (dnu) hra.ui?.sprava?.('Átriaky, blok T – izba 314. Von na terasu balkónovými dverami, dole po schodisku na konci chodby', 5);
+    }
+    this.svetla(hra);
+    if (!p || hra.stav.auto || hra.stav.pauza) { this.nastavNapovedu(hra, null); return; }
+    const v = hra.stav.atriakyVchod;
+    const kam = v && Math.hypot(p.x - v.x, p.z - v.z) < DOSAH && Math.abs(p.y - v.y) < 2.5 ? 'dnu'
+      : this.schodisko && Math.hypot(p.x - this.schodisko[0], p.z - this.schodisko[1]) < DOSAH_SCHODISKO && Math.abs(p.y - this.podlaha) < 1 ? 'von' : null;
+    this.nastavNapovedu(hra, kam === 'dnu' ? 'E – Otvoriť dvere (internát)' : kam === 'von' ? 'E – Dole po schodisku (von)' : null);
     if (kam && hra.vstup.caka('akcia')) {
       hra.vstup.stlacil('akcia');
       this.nastavNapovedu(hra, null);
+      if (kam === 'dnu' && !this.schodisko) { hra.ui?.sprava?.('Izba sa ešte načítava…', 2); return; }
       hra.vstup.blokovane = true;
-      if (hra.hrac) hra.hrac.uhol = (kam === 'vchod' ? hra.stav.atriakyVchod : hra.stav.atriakyOchoz).uhol;   // tvárou k dverám
-      this.prechod = { smer: 'dnu', kam, t: 0 };
+      if (kam === 'dnu' && hra.hrac) hra.hrac.uhol = v.uhol;   // tvárou k dverám
+      this.prechod = { smer: kam, t: 0 };
     }
   },
 
-  /** Prechod: dnu = dvere sa otvoria → stmavne → vnútri; von = stmavne → pred dverami → dvere sa zavrú. */
+  /** Prechod medzi vchodom na prízemí a chodbou na 4. podlaží: otvorenie dverí, stmavnutie, presun, rozjasnenie. */
   krokPrechodu(dt, hra) {
-    const pr = this.prechod, d = this.dvere[pr.kam];
+    const pr = this.prechod, d = this.dvere.vchod;
     pr.t += dt;
-    if (pr.smer === 'dnu') {
-      if (d) d.u = Math.min(1, pr.t / OTVARANIE);
-      if (pr.t >= OTVARANIE && !pr.tma) { pr.tma = true; this.clona.classList.add('zapnuta'); }
-      if (pr.t >= OTVARANIE + STMIEVANIE) {
-        this.prechod = null;
-        this.vojdi(hra, pr.kam === 'vchod' ? 'chodba' : 'izba');
+    if (pr.smer === 'dnu' && d) d.u = Math.min(1, pr.t / OTVARANIE);
+    const zaciatok = pr.smer === 'dnu' ? OTVARANIE : 0;
+    if (pr.t >= zaciatok && !pr.tma) { pr.tma = true; this.clona.classList.add('zapnuta'); }
+    if (pr.t >= zaciatok + STMIEVANIE) {
+      this.prechod = null;
+      if (pr.smer === 'dnu') {
+        this.presun(hra, this.schodisko[0], this.podlaha, this.schodisko[1], this.uholChodby);
         if (d) d.u = 0;
-        this.clona.classList.remove('zapnuta');
-      }
-    } else {
-      if (!pr.tma) { pr.tma = true; this.clona.classList.add('zapnuta'); }
-      if (pr.t >= STMIEVANIE) {
-        this.prechod = null;
-        this.vyjdi(hra, pr.kam);
+      } else {
+        const v = hra.stav.atriakyVchod;
+        // pred dvere, otočený od nich; dvere sa za ním zavrú
+        this.presun(hra, v.x - Math.sin(v.uhol) * 0.8, v.y, v.z - Math.cos(v.uhol) * 0.8, v.uhol + Math.PI);
         if (d) { d.u = 1; d.zatvaraj = true; }
-        this.clona.classList.remove('zapnuta');
       }
+      hra.vstup.blokovane = false;
+      this.clona.classList.remove('zapnuta');
     }
   },
 
-  /** Dvere vchodu (so šípkou a značkou na minimape) a balkónové dvere na ochoze – pri zmene polohy nanovo. */
+  presun(hra, x, y, z, uhol) {
+    const h = hra.hrac;
+    if (!h) return;
+    h.pozicia.set(x, y, z);
+    h.vx = 0; h.vz = 0; h.vy = 0; h.rychlost = 0;
+    h.uhol = uhol;
+    hra.posli('teleport', { x, y, z });
+  },
+
+  /** Izba a chodba v meste: model, kolízie, pochôdzna podlaha, výnimka z kolízie domu, svetlá, tabuľky, výhľad. */
+  postavIzbu(hra) {
+    const o = hra.stav.atriakyOchoz, info = this.info;
+    this.ochoz = o;
+    if (!o?.otvor || !o.n) return;
+    const kol = hra.mapa.kolizie;
+    kol.odstranDlazdicu(SKUPINA);
+    if (this.vynimka) kol.odstranVynimku(this.vynimka);
+    if (this.skupina) { hra.scena.remove(this.skupina); this.skupina.traverse((q) => { q.geometry?.dispose(); q.material?.map?.dispose(); }); }
+    // lokálne (x dnu od líca, z pozdĺž fasády) → svet: os x = −n, os z = (nz, −nx); rotácia skupiny u = atan2(nz, −nx)
+    const [nx, nz] = o.n, [ox, oz] = o.dvere;
+    const u = Math.atan2(nz, -nx);
+    const svet = (x, z) => [ox - nx * x + nz * z, oz - nz * x - nx * z];
+    const y0 = o.y;
+    this.podlaha = y0;
+    this.uholChodby = Math.atan2(nz, -nx);   // pohľad pozdĺž chodby (lokálne +z)
+    const sk = new THREE.Group();
+    sk.name = 'internat-izba';
+    sk.position.set(ox, y0, oz);
+    sk.rotation.y = u;
+    hra.scena.add(sk);
+    this.skupina = sk;
+    nacitajModelPamiatky(SUBOR, { ao: false, gz: true }).then((m) => {
+      if (!m || this.skupina !== sk) return;
+      const siete = rozbalModel(m);
+      siete.traverse((q) => { if (q.isMesh) { q.castShadow = false; q.receiveShadow = true; } });
+      sk.add(siete);
+    }).catch((e) => console.warn('Izba 314 sa nenačítala:', e));
+
+    const obdlznik = ([x0, x1, z0, z1]) => [svet(x0, z0), svet(x1, z0), svet(x1, z1), svet(x0, z1)];
+    const V = info.vyskaStropu ?? 2.7;
+    // steny: prekážka „budova“ (kamera sa pred nimi zastaví), nábytok len pre chôdzu
+    for (const s of info.steny ?? []) kol.pridajPolygon(obdlznik(s), { typ: 'budova', vyska: [y0 - 0.3, y0 + V], vrch: y0 + V, dlazdica: SKUPINA });
+    for (const p of info.prekazky ?? []) kol.pridajPolygon(obdlznik(p), { typ: 'nabytok', vyska: [y0 - 0.3, y0 + p[4]], dlazdica: SKUPINA });
+    // ostenie balkónových dverí z terasy (aby sa v otvore nedalo vojsť do steny domu)
+    const [d0, d1] = info.dvereVon;
+    for (const [z0, z1] of [[d0 - 0.4, d0], [d1, d1 + 0.4]]) kol.pridajPolygon(obdlznik([-0.35, 0.3, z0, z1]), { typ: 'budova', vyska: [y0 - 0.3, y0 + V], vrch: y0 + V, dlazdica: SKUPINA });
+    // podlaha izby, chodby a prahu: pochôdzne plochy vo výške podlahy
+    const profily = (info.plochy ?? []).map(([x0, x1, z0, z1]) => {
+      const pozdlzX = x1 - x0 >= z1 - z0;
+      const a = pozdlzX ? svet(x0, (z0 + z1) / 2) : svet((x0 + x1) / 2, z0);
+      const b = pozdlzX ? svet(x1, (z0 + z1) / 2) : svet((x0 + x1) / 2, z1);
+      return { body: [{ x: a[0], z: a[1], h: y0 }, { x: b[0], z: b[1], h: y0 }], sirka: pozdlzX ? z1 - z0 : x1 - x0 };
+    });
+    hra.posli('pochodzne-plochy', { kluc: 'internat', profily });
+    // v izbe, na chodbe a v otvore dverí sa ignoruje plný kolízny blok domu (js/mapa/atriaky/modul.js)
+    const [ix0, ix1, iz0, iz1] = info.izba, [cx0, cx1, cz0, cz1] = info.chodba;
+    this.zona = [svet(-0.6, d0), svet(ix0, d0), svet(ix0, iz0), svet(ix1, iz0), svet(ix1, cz0), svet(cx1, cz0),
+      svet(cx1, cz1), svet(ix1, cz1), svet(ix1, iz1), svet(ix0, iz1), svet(ix0, d1), svet(-0.6, d1)];
+    this.vynimka = kol.pridajVynimku({ body: this.zona, vyska: [y0 - 0.6, y0 + 2.4], skupiny: ['modul:atriaky'] });
+    this.strop = y0 + V;
+    this.schodisko = svet(...info.schodisko);
+    // svetlá (zapnú sa len zblízka – updateVzdy)
+    this.svetloIzba = new THREE.PointLight('#fff1d6', 7, 9, 1.4);
+    this.svetloIzba.position.set(2.6, V - 0.25, 0.9);
+    this.svetloChodba = new THREE.PointLight('#f2f6ff', 5, 14, 1.4);
+    this.svetloChodba.position.set((cx0 + cx1) / 2, V - 0.25, 0);
+    sk.add(this.svetloIzba, this.svetloChodba);
+    // výhľad z okna (obrázok za sklom) a tabuľky
+    this.okno = vyhlad();
+    const [oz0, oz1, oy0, oy1] = info.okno;
+    this.okno.scale.set(oz1 - oz0, oy1 - oy0, 1);
+    this.okno.position.set(ix0 - 0.13, (oy0 + oy1) / 2, (oz0 + oz1) / 2);
+    this.okno.rotation.y = Math.PI / 2;
+    sk.add(this.okno);
+    const tab = (text, x, z, rotY, w = 0.42, y = 1.95) => { const t = tabulka(text, w); t.position.set(x, y, z); t.rotation.y = rotY; sk.add(t); };
+    const [, dz1] = info.dvereChodba;
+    // čísla izieb na stene chodby vedľa dverí (líce steny je x = začiatok chodby), názvy na dverách jadra
+    tab('314', cx0 + 0.02, dz1 + 0.3, Math.PI / 2, 0.3);
+    (info.izbyCisla ?? []).forEach(([, z], i) => tab(String(301 + i + (i >= 6 ? 1 : 0)), cx0 + 0.02, z - 0.65, Math.PI / 2, 0.3));
+    const NAZVY = { kuchynka: 'Kuchynka', sprchy: 'Sprchy – muži', wc: 'WC – muži', upratovanie: 'Upratovanie' };
+    for (const [x, z, meno] of info.jadro ?? []) tab(NAZVY[meno] ?? meno, x - 0.01, z, -Math.PI / 2);
+    tab('Schodisko ↓', info.schodisko[0], cz0 + 0.03, 0, 0.5, 2.3);
+    this.skupina.visible = false;
+  },
+
+  /** Svetlá a viditeľnosť izby len zblízka; výhľad z okna podľa dňa a noci. */
+  svetla(hra) {
+    if (!this.skupina) return;
+    const k = hra.kamera.position;
+    const vid = Math.hypot(k.x - this.skupina.position.x, k.z - this.skupina.position.z) < DOSAH_KRESLENIA && Math.abs(k.y - this.podlaha) < 20;
+    if (this.skupina.visible !== vid) this.skupina.visible = vid;
+    if (vid && this.okno) this.okno.material.color.setScalar(1 - NOC.value * 0.85);
+  },
+
+  /** Kamera v izbe/na chodbe: ostáva pod stropom a nad podlahou (vonku nerobí nič). */
+  kamera(poz, ciel, hrac) {
+    if (!this.vnutri) return false;
+    poz.y = Math.min(poz.y, this.strop - 0.25);
+    poz.y = Math.max(poz.y, this.podlaha + 1.0);
+    return true;
+  },
+
+  nastavNapovedu(hra, text) {
+    if (text === this.napoveda) return;
+    // nápoveda ide cez hra.stav.napoveda – HUD ju kreslí každý snímok; cudziu nápovedu na null neprepisujeme
+    if (text !== null || this.napoveda !== null) hra.stav.napoveda = text;
+    this.napoveda = text;
+  },
+
+  /** Dvere vchodu (so šípkou a značkou na minimape) – pri zmene polohy nanovo. */
   postavVchod(hra) {
-    const v = hra.stav.atriakyVchod, o = hra.stav.atriakyOchoz;
+    const v = hra.stav.atriakyVchod;
     this.vchod = v;
     for (const d of Object.values(this.dvere)) { hra.scena.remove(d.skupina); d.skupina.traverse((q) => q.geometry?.dispose()); }
     this.dvere = {};
@@ -102,14 +218,11 @@ export default {
     const teren = hra.mapa.vyskaTerenu ?? hra.mapa.vyska;
     const x = v.x + Math.sin(v.uhol) * 0.92, z = v.z + Math.cos(v.uhol) * 0.92;   // líce domu
     const y = teren(x, z);
-    const pridaj = (kluc, skupina, px, py, pz, uhol) => {
-      skupina.position.set(px, py, pz);
-      skupina.rotation.y = uhol + Math.PI;                   // lokálne +z = von z domu
-      hra.scena.add(skupina);
-      this.dvere[kluc] = { skupina, kridlo: skupina.getObjectByName('kridlo'), u: 0, zatvaraj: false };
-    };
-    pridaj('vchod', postavDvere((v.strop ?? y + 2.8) - y), x, y, z, v.uhol);
-    if (o) pridaj('ochoz', postavBalkonoveDvere(), o.dvere[0], o.y, o.dvere[1], o.uhol);
+    const skupina = postavDvere((v.strop ?? y + 2.8) - y);
+    skupina.position.set(x, y, z);
+    skupina.rotation.y = v.uhol + Math.PI;                   // lokálne +z = von z domu
+    hra.scena.add(skupina);
+    this.dvere.vchod = { skupina, kridlo: skupina.getObjectByName('kridlo'), u: 0, zatvaraj: false };
     this.sipka = postavSipku();
     this.sipka.position.set(v.x, v.y, v.z);
     hra.scena.add(this.sipka);
@@ -137,263 +250,38 @@ export default {
     hlava.rotation.y = this.cas * 1.6;
     kruh.material.opacity = d < 40 ? 0.35 + 0.25 * Math.sin(this.cas * 3) : 0;
   },
-
-  nastavNapovedu(hra, text) {
-    if (text === this.napoveda) return;
-    // nápoveda ide cez hra.stav.napoveda – HUD (js/ui/hud.js) ju kreslí každý snímok, keď nie je nápoveda k autu
-    // (priame hra.ui.napoveda by HUD hneď v ďalšom snímku skryl); cudziu nápovedu na null neprepisujeme
-    if (text !== null || this.napoveda !== null) hra.stav.napoveda = text;
-    this.napoveda = text;
-  },
-
-  /** Vstup do interiéru: miesto 'chodba' (od vchodu) alebo 'izba' (z ochozu). */
-  vojdi(hra, miesto) {
-    if (!this.scena) this.postavInterier();
-    this.vnutri = true;
-    hra.stav.vInterieri = true;
-    hra.vstup.blokovane = true;   // hráč v meste stojí, kamera mesta sa nehýbe
-    this.povodneVykresli = hra.vykresli;
-    hra.vykresli = () => {
-      hra.renderer.setRenderTarget(null);
-      hra.renderer.render(this.scena, this.kamera);
-    };
-    this.kamera.aspect = innerWidth / innerHeight;
-    this.kamera.updateProjectionMatrix();
-    const [x, z, yaw] = DNU[miesto];
-    this.poz = new THREE.Vector3(x, 0, z);
-    this.yaw = yaw; this.pitch = 0;
-    this.svetloStrop.intensity = 9;
-    hra.ui?.sprava?.(miesto === 'chodba'
-      ? 'Átriaky, blok T – izba 314 je vľavo na konci chodby, z nej sa ide na ochoz'
-      : 'Izba 314 – na chodbu dverami oproti, na ochoz balkónovými dverami za tebou', 5);
-    hra.posli('interier-vstup', { blok: 'T', miesto });
-  },
-
-  /** Von z interiéru: 'vchod' = pred vchod na zemi, 'ochoz' = na terasu pred balkónové dvere. */
-  vyjdi(hra, kam) {
-    this.vnutri = false;
-    hra.stav.vInterieri = false;
-    hra.vstup.blokovane = false;
-    hra.vykresli = this.povodneVykresli;
-    const v = kam === 'ochoz' ? hra.stav.atriakyOchoz : hra.stav.atriakyVchod;
-    if (v && hra.hrac) {
-      // pred dvere, otočený od nich
-      const k = kam === 'ochoz' ? 0 : 0.8;
-      hra.hrac.pozicia.set(v.x - Math.sin(v.uhol) * k, v.y, v.z - Math.cos(v.uhol) * k);
-      hra.hrac.vy = 0;
-      hra.hrac.uhol = v.uhol + Math.PI;
-      hra.posli('teleport', { x: hra.hrac.pozicia.x, y: v.y, z: hra.hrac.pozicia.z });
-    }
-    this.nastavNapovedu(hra, null);
-    hra.posli('interier-von', { blok: 'T', kam });
-  },
-
-  /** Chôdza vnútri: surový vstup (mesto má vstup zablokovaný), kolízie so stenami (obdĺžniky). */
-  pohyb(dt, hra) {
-    const vs = hra.vstup;
-    vs.blokovane = true;
-    const dx = vs.kamera.dx, dy = vs.kamera.dy;
-    vs.kamera.dx = 0; vs.kamera.dy = 0;
-    this.yaw -= dx * 0.0032;
-    this.pitch = Math.max(-1.2, Math.min(1.2, this.pitch - dy * 0.0032));
-    const m = vs.surovyPohyb();
-    const sx = Math.sin(this.yaw), cz = Math.cos(this.yaw);
-    // dopredu = −z kamery (yaw 0 → pozerá do −z)
-    let nx = this.poz.x + (-sx * m.y + cz * m.x) * RYCHLOST * dt;
-    let nz = this.poz.z + (-cz * m.y - sx * m.x) * RYCHLOST * dt;
-    [nx, nz] = this.vytlac(nx, nz);
-    this.poz.x = nx; this.poz.z = nz;
-    this.kamera.position.set(this.poz.x, VYSKA_OCI, this.poz.z);
-    this.kamera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
-    // svetlo v izbe a výhľad podľa dňa a noci
-    for (const o of this.okna) o.material.color.setScalar(1 - NOC.value * 0.85);
-    // dvere von (na začiatku chodby) a balkónové dvere z izby na ochoz
-    const kam = Math.hypot(this.poz.x, this.poz.z - 1.6) < 1.3 ? 'vchod'
-      : Math.hypot(this.poz.x + 5.6, this.poz.z + 10.75) < 1.6 && hra.stav.atriakyOchoz ? 'ochoz' : null;
-    this.nastavNapovedu(hra, kam === 'vchod' ? 'E – Otvoriť dvere (von)' : kam === 'ochoz' ? 'E – Vyjsť na ochoz' : null);
-    if (vs.stlacene.has('akcia')) {
-      vs.stlacene.delete('akcia');
-      if (kam) { this.nastavNapovedu(hra, null); this.prechod = { smer: 'von', kam, t: 0 }; }
-    }
-  },
-
-  vytlac(x, z) {
-    // povolené obdĺžniky (chodba, dvere do izby, izba); mimo nich sa bod vráti dnu
-    const zony = this.zony;
-    const vnutri = (q) => zony.some((r) => x >= r[0] + q && x <= r[1] - q && z >= r[2] + q && z <= r[3] - q);
-    if (vnutri(POLOMER)) {
-      // nábytok (prekážky)
-      for (const r of this.prekazky) {
-        if (x > r[0] - POLOMER && x < r[1] + POLOMER && z > r[2] - POLOMER && z < r[3] + POLOMER) {
-          const vl = x - (r[0] - POLOMER), vp = r[1] + POLOMER - x, vh = z - (r[2] - POLOMER), vd = r[3] + POLOMER - z;
-          const mn = Math.min(vl, vp, vh, vd);
-          if (mn === vl) x = r[0] - POLOMER; else if (mn === vp) x = r[1] + POLOMER; else if (mn === vh) z = r[2] - POLOMER; else z = r[3] + POLOMER;
-        }
-      }
-      return [x, z];
-    }
-    // najbližší bod v niektorej zóne
-    let naj = null;
-    for (const r of zony) {
-      const cx = Math.max(r[0] + POLOMER, Math.min(r[1] - POLOMER, x)), cz = Math.max(r[2] + POLOMER, Math.min(r[3] - POLOMER, z));
-      const d = Math.hypot(cx - x, cz - z);
-      if (!naj || d < naj[2]) naj = [cx, cz, d];
-    }
-    return [naj[0], naj[1]];
-  },
-
-  /** Chodba (x −1,1 · z 2 … −14) a izba 314 vľavo na konci (x −5,6 … −1,2 · z −14 … −9,4), výška 2,7 m;
-   *  vo vonkajšej stene izby okno a balkónové dvere na ochoz. */
-  postavInterier() {
-    const scena = new THREE.Scene();
-    scena.background = new THREE.Color('#1b1d20');
-    const kusy = [];
-    const farba = new THREE.Color();
-    const box = (x0, x1, y0, y1, z0, z1, hex, ao = true) => {
-      const g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0).toNonIndexed();
-      g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
-      const pos = g.getAttribute('position');
-      const c = new Float32Array(pos.count * 3);
-      farba.set(hex);
-      for (let i = 0; i < pos.count; i++) {
-        // jednoduché „zapečené“ zatienenie: dole a v kútoch tmavšie
-        const y = pos.getY(i);
-        const k = ao ? 0.62 + 0.38 * Math.min(1, y / 1.4) : 1;
-        c[i * 3] = farba.r * k; c[i * 3 + 1] = farba.g * k; c[i * 3 + 2] = farba.b * k;
-      }
-      g.setAttribute('color', new THREE.BufferAttribute(c, 3));
-      g.deleteAttribute('uv');
-      kusy.push(g);
-    };
-    const H = 2.7, STENA = '#e9e4d8', PODLAHA = '#8a7a64', STROP = '#f2f0ea', CHODBA_PODLAHA = '#6f6a63';
-    // --- chodba ---
-    box(-1.1, 1.1, -0.05, 0, -14.2, 2.1, CHODBA_PODLAHA, false);
-    box(-1.1, 1.1, H, H + 0.05, -14.2, 2.1, STROP, false);
-    box(-1.2, -1.1, 0, H, -12.4, 2.1, STENA);                    // ľavá stena (pred dverami izby)
-    box(-1.2, -1.1, 0, H, -14.2, -13.4, STENA);                  // ľavá stena za dverami izby
-    box(-1.2, -1.1, 2.1, H, -13.4, -12.4, STENA);                // nadpražie dverí izby
-    box(-1.19, -1.17, 0, 2.08, -12.45, -12.4, '#7b5b3c', false); // zárubňa
-    box(1.1, 1.2, 0, H, -14.2, 2.1, STENA);                      // pravá stena
-    box(-1.2, 1.2, 0, H, 2.1, 2.2, '#c9c2b4');                   // čelo pri vchode
-    box(-0.55, 0.55, 0, 2.1, 2.05, 2.12, '#3f3a35', false);      // vchodové dvere
-    box(-1.2, 1.2, 0, H, -14.3, -14.2, STENA);                   // koniec chodby
-    // dvere iných izieb a priestorov (zatvorené)
-    for (const z of [-2.5, -6.5]) box(-1.12, -1.08, 0, 2.05, z - 0.45, z + 0.45, '#7b5b3c', false);
-    for (const z of [-1.5, -5.0, -8.5, -12.0]) box(1.08, 1.12, 0, 2.05, z - 0.45, z + 0.45, '#7b5b3c', false);
-    // kuchynka v jadre: linka s drezom a varičom (výklenok vpravo)
-    box(0.5, 1.08, 0, 0.9, -11.2, -9.6, '#d8d2c4');
-    box(0.5, 1.08, 0.9, 0.94, -11.2, -9.6, '#5d5f61', false);
-    box(0.75, 1.08, 1.5, 2.1, -11.2, -9.6, '#d8d2c4');
-    // --- izba 314 (trojlôžková) ---
-    box(-5.6, -1.1, -0.05, 0, -14.2, -9.4, PODLAHA, false);
-    box(-5.6, -1.1, H, H + 0.05, -14.2, -9.4, STROP, false);
-    box(-5.7, -5.6, 0, H, -14.2, -9.4, STENA);                   // stena s oknom (vonkajšia)
-    box(-5.7, -1.1, 0, H, -9.4, -9.3, STENA);
-    box(-5.7, -1.1, 0, H, -14.3, -14.2, STENA);
-    // okno: parapet, rám, výhľad (obrázok) za sklom
-    box(-5.62, -5.35, 0.95, 1.0, -13.05, -11.3, '#cfcac0', false);
-    box(-5.6, -5.55, 1.0, 2.3, -13.1, -13.0, '#5a5e60', false);
-    box(-5.6, -5.55, 1.0, 2.3, -11.35, -11.25, '#5a5e60', false);
-    box(-5.6, -5.55, 1.62, 1.68, -13.05, -11.3, '#5a5e60', false);
-    box(-5.6, -5.55, 2.28, 2.34, -13.1, -11.25, '#5a5e60', false);
-    // balkónové dvere na ochoz: rám, priečka, kľučka (sklo s výhľadom je obrázok nižšie)
-    box(-5.6, -5.54, 0, 2.2, -11.2, -11.12, '#5a5e60', false);
-    box(-5.6, -5.54, 0, 2.2, -10.38, -10.3, '#5a5e60', false);
-    box(-5.6, -5.54, 2.14, 2.22, -11.2, -10.3, '#5a5e60', false);
-    box(-5.6, -5.54, 0, 0.12, -11.2, -10.3, '#5a5e60', false);
-    box(-5.6, -5.54, 1.0, 1.05, -11.15, -10.35, '#5a5e60', false);
-    box(-5.54, -5.46, 1.0, 1.04, -10.5, -10.42, '#c8c8c8', false);
-    // 3 postele, stolíky, stoličky, poličky
-    // postele: pri severnej stene, pri južnej stene a pod oknom (pri dverách na chodbu aj na ochoz ostane voľno)
-    const postele = [[-5.45, -3.45, -14.1, -13.2, 'x'], [-5.45, -3.45, -10.3, -9.5, 'x'], [-5.45, -4.55, -13.15, -11.2, 'z']];
-    for (const [x0, x1, z0, z1, os] of postele) {
-      box(x0, x1, 0, 0.42, z0, z1, '#6b5a48');
-      box(x0 + 0.03, x1 - 0.03, 0.42, 0.55, z0 + 0.03, z1 - 0.03, '#d9dde4', false);   // matrac s plachtou
-      if (os === 'x') {
-        box(x0 + 0.1, x0 + 0.5, 0.55, 0.64, z0 + 0.08, z1 - 0.08, '#f0f0ec', false);   // vankúš pri stene s oknom
-        box(x0 + 0.8, x1 - 0.05, 0.55, 0.6, z0 + 0.05, z1 - 0.05, '#4f6d8f', false);   // deka
-      } else {
-        box(x0 + 0.08, x1 - 0.08, 0.55, 0.64, z0 + 0.1, z0 + 0.5, '#f0f0ec', false);
-        box(x0 + 0.05, x1 - 0.05, 0.55, 0.6, z0 + 0.8, z1 - 0.05, '#4f6d8f', false);
-      }
-    }
-    const stoly = [[-3.2, -2.1, -14.15, -13.55], [-3.2, -2.2, -9.95, -9.35], [-2.1, -1.2, -9.95, -9.35]];
-    for (const [x0, x1, z0, z1] of stoly) {
-      box(x0, x1, 0.72, 0.76, z0, z1, '#b89a74', false);
-      for (const [px, pz] of [[x0 + 0.04, z0 + 0.04], [x1 - 0.04, z0 + 0.04], [x0 + 0.04, z1 - 0.04], [x1 - 0.04, z1 - 0.04]]) box(px - 0.02, px + 0.02, 0, 0.72, pz - 0.02, pz + 0.02, '#4a4a4a', false);
-      const cx = (x0 + x1) / 2, cz = z0 < -12 ? z1 + 0.35 : z0 - 0.35;
-      box(cx - 0.21, cx + 0.21, 0.42, 0.46, cz - 0.2, cz + 0.2, '#2f4f6f', false);
-      box(cx - 0.21, cx + 0.21, 0.46, 0.9, z0 < -12 ? cz + 0.17 : cz - 0.21, z0 < -12 ? cz + 0.21 : cz - 0.17, '#2f4f6f', false);
-      box(x0, x1, 1.45, 1.48, z0 < -12 ? -14.2 : -9.65, z0 < -12 ? -13.95 : -9.4, '#b89a74', false);   // polička nad stolíkom
-    }
-    // vešiaková skriňa s policami, umývadlo so zrkadlom a poličkou, chladnička
-    box(-2.3, -1.15, 0, 2.05, -12.0, -11.2, '#a88b66');
-    box(-1.75, -1.73, 0.1, 1.95, -12.02, -11.18, '#6e5a43', false);
-    box(-1.75, -1.15, 0.78, 0.9, -10.9, -10.4, '#f2f2f0', false);
-    box(-1.2, -1.15, 1.2, 1.8, -10.9, -10.4, '#9fb4c2', false);
-    box(-1.32, -1.15, 1.08, 1.1, -10.9, -10.4, '#d8d2c4', false);
-    box(-1.75, -1.25, 0, 0.85, -14.1, -13.7, '#e9e9e6');      // chladnička
-    const geo = mergeGeometries(kusy, false);
-    kusy.forEach((g) => g.dispose());
-    const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }));
-    scena.add(mesh);
-    // výhľad z okna: susedný dom s lávkou (obrázok)
-    const c = document.createElement('canvas'); c.width = 256; c.height = 160;
-    const g = c.getContext('2d');
-    const nebo = g.createLinearGradient(0, 0, 0, 160); nebo.addColorStop(0, '#9fc2e2'); nebo.addColorStop(1, '#dce8ef');
-    g.fillStyle = nebo; g.fillRect(0, 0, 256, 160);
-    g.fillStyle = '#b4afa5'; g.fillRect(20, 40, 216, 120);
-    for (let r = 0; r < 4; r++) {
-      g.fillStyle = '#3b464d'; g.fillRect(20, 52 + r * 28, 216, 12);
-      g.fillStyle = '#9b3f30'; g.fillRect(20, 64 + r * 28, 216, 4);
-    }
-    g.fillStyle = '#9b3f30'; g.fillRect(0, 96, 256, 8);
-    g.fillStyle = '#e6e6e1'; for (let x = 0; x < 256; x += 12) g.fillRect(x, 84, 2, 12);
-    g.fillRect(0, 84, 256, 2); g.fillRect(0, 90, 256, 2);
-    g.fillStyle = '#4d7a3c'; g.beginPath(); g.arc(200, 150, 40, 0, Math.PI * 2); g.fill();
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-    const okno = new THREE.Mesh(new THREE.PlaneGeometry(1.75, 1.3), new THREE.MeshBasicMaterial({ map: tex }));
-    okno.position.set(-5.595, 1.65, -12.18);   // tesne pred stenou, za rámom okna
-    okno.rotation.y = Math.PI / 2;
-    scena.add(okno);
-    // sklo balkónových dverí: ten istý výhľad (dolná časť obrázka je ochoz so zábradlím)
-    const balkon = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 2.08), new THREE.MeshBasicMaterial({ map: tex }));
-    balkon.position.set(-5.595, 1.1, -10.75);
-    balkon.rotation.y = Math.PI / 2;
-    scena.add(balkon);
-    this.okna = [okno, balkon];
-    // menovka izby a tabuľky v chodbe
-    const tabula = (text, x, z, rotY, w = 0.42) => {
-      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96;
-      const q = cv.getContext('2d'); q.fillStyle = '#f3f1ea'; q.fillRect(0, 0, 256, 96);
-      q.fillStyle = '#20242a'; q.font = 'bold 40px system-ui, sans-serif'; q.textAlign = 'center'; q.textBaseline = 'middle';
-      q.fillText(text, 128, 50, 240);
-      const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.375), new THREE.MeshLambertMaterial({ map: t }));
-      m.position.set(x, 2.25, z); m.rotation.y = rotY;
-      scena.add(m);
-    };
-    tabula('314', -1.07, -12.9, Math.PI / 2, 0.3);
-    tabula('Sprchy – muži', 1.07, -1.5, -Math.PI / 2);
-    tabula('WC', 1.07, -5.0, -Math.PI / 2, 0.3);
-    tabula('Kuchynka', 1.07, -10.4, -Math.PI / 2);
-    tabula('Východ', 0, 2.08, Math.PI, 0.4);
-    // svetlo: jedno na strope izby + slabé v chodbe a rozptýlené
-    scena.add(new THREE.HemisphereLight('#fff7e8', '#6a5f52', 1.1));
-    this.svetloStrop = new THREE.PointLight('#fff1d6', 9, 9, 1.4);
-    this.svetloStrop.position.set(-3.3, 2.55, -11.8);
-    scena.add(this.svetloStrop);
-    const chodba = new THREE.PointLight('#f2f6ff', 5, 12, 1.4);
-    chodba.position.set(0, 2.55, -5);
-    scena.add(chodba);
-    this.scena = scena;
-    this.kamera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 50);
-    // pochôdzne zóny [x0, x1, z0, z1] a nábytok
-    this.zony = [[-1.1, 1.1, -14.2, 2.1], [-1.8, -0.2, -13.5, -12.3], [-5.6, -1.1, -14.2, -9.4]];
-    this.prekazky = [...postele.map(([x0, x1, z0, z1]) => [x0, x1, z0, z1]), ...stoly.map(([x0, x1, z0, z1]) => [x0, x1, z0, z1]),
-      [-2.3, -1.15, -12.0, -11.2], [-1.75, -1.15, -10.9, -10.4], [-1.75, -1.25, -14.1, -13.7], [0.5, 1.1, -11.2, -9.6]];
-  },
 };
+
+// ---------- výhľad, tabuľky ----------
+
+/** Výhľad z okna izby: obloha a susedný dom s pavlačami (obrázok za sklom, jas podľa dňa a noci). */
+function vyhlad() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 160;
+  const g = c.getContext('2d');
+  const nebo = g.createLinearGradient(0, 0, 0, 160); nebo.addColorStop(0, '#9fc2e2'); nebo.addColorStop(1, '#dce8ef');
+  g.fillStyle = nebo; g.fillRect(0, 0, 256, 160);
+  g.fillStyle = '#b9b5ac'; g.fillRect(20, 46, 216, 114);
+  for (let r = 0; r < 3; r++) {
+    const y = 52 + r * 36;
+    g.fillStyle = '#c0472b'; g.fillRect(20, y, 216, 5);
+    g.fillStyle = '#b9b5ac'; g.fillRect(20, y + 5, 216, 13);
+    g.fillStyle = '#e4e3df'; g.fillRect(20, y + 18, 216, 18);
+    g.fillStyle = '#2f3a40'; for (let x = 26; x < 230; x += 30) g.fillRect(x, y + 21, 20, 13);
+  }
+  g.fillStyle = '#4d7a3c'; g.beginPath(); g.arc(200, 150, 40, 0, Math.PI * 2); g.fill();
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: tex }));
+}
+
+/** Tabuľka s textom na dverách (číslo izby, kuchynka, sprchy…). */
+function tabulka(text, w) {
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96;
+  const q = cv.getContext('2d'); q.fillStyle = '#f3f1ea'; q.fillRect(0, 0, 256, 96);
+  q.fillStyle = '#20242a'; q.font = 'bold 40px system-ui, sans-serif'; q.textAlign = 'center'; q.textBaseline = 'middle';
+  q.fillText(text, 128, 50, 240);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.375), new THREE.MeshLambertMaterial({ map: t }));
+}
 
 // ---------- vchod v meste ----------
 
@@ -445,50 +333,6 @@ function postavDvere(vyska) {
   g.add(tab);
   // svetlo pod stropom výklenku
   box(0.3, 0.06, 0.16, 0, H + 0.1, 0.18, new THREE.MeshStandardMaterial({ color: '#fff4d8', emissive: '#ffe2a8', emissiveIntensity: 1.2 }));
-  return g;
-}
-
-/** Balkónové dvere z ochozu do izby 314 v betónovom portáli: hliníkový rám, presklené krídlo (meno 'kridlo',
- *  pánt vľavo), tmavá izba za nimi a tabuľka s číslom. Lokálne: stred prahu v (0, 0, 0), +z von na terasu. */
-function postavBalkonoveDvere() {
-  const g = new THREE.Group();
-  g.name = 'internat-balkon';
-  const ram = new THREE.MeshStandardMaterial({ color: '#5a5e60', roughness: 0.4, metalness: 0.6 });
-  const box = (sx, sy, sz, x, y, z, m, rodic = g) => {
-    const b = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), m);
-    b.position.set(x, y, z);
-    b.castShadow = b.receiveShadow = true;
-    rodic.add(b);
-    return b;
-  };
-  // betónový portál pred parapetom ustúpeného podlažia
-  const beton = new THREE.MeshStandardMaterial({ color: '#bdb8ae', roughness: 0.9 });
-  for (const s of [-1, 1]) box(0.26, 2.55, 0.76, s * 0.66, 1.275, -0.31, beton);
-  box(1.58, 0.3, 0.76, 0, 2.4, -0.31, beton);
-  for (const s of [-1, 1]) box(0.07, 2.25, 0.12, s * 0.49, 1.12, 0, ram);
-  box(1.05, 0.07, 0.12, 0, 2.22, 0, ram);
-  box(0.92, 2.18, 0.03, 0, 1.09, -0.6, new THREE.MeshStandardMaterial({ color: '#1a1c1f', roughness: 1 }));   // izba za sklom
-  box(1.06, 0.04, 0.66, 0, 0.0, -0.3, beton);                                                                // prah
-  const kridlo = new THREE.Group();
-  kridlo.name = 'kridlo';
-  kridlo.position.set(-0.45, 0, 0.02);
-  g.add(kridlo);
-  for (const s of [0, 1]) box(0.05, 2.15, 0.05, 0.03 + s * 0.84, 1.08, 0, ram, kridlo);
-  for (const y of [0.05, 1.02, 2.12]) box(0.9, 0.06, 0.05, 0.45, y, 0, ram, kridlo);
-  const sklo = new THREE.MeshStandardMaterial({ color: '#9fb6c4', roughness: 0.08, metalness: 0.5, transparent: true, opacity: 0.55 });
-  box(0.8, 0.93, 0.015, 0.45, 0.55, 0, sklo, kridlo);
-  box(0.8, 1.05, 0.015, 0.45, 1.57, 0, sklo, kridlo);
-  box(0.03, 0.03, 0.18, 0.8, 1.04, 0.05, new THREE.MeshStandardMaterial({ color: '#c8c8c8', metalness: 0.8, roughness: 0.3 }), kridlo);
-  // tabuľka „314“ vedľa dverí
-  const c = document.createElement('canvas'); c.width = 128; c.height = 64;
-  const q = c.getContext('2d');
-  q.fillStyle = '#f3f1ea'; q.fillRect(0, 0, 128, 64);
-  q.fillStyle = '#20242a'; q.font = 'bold 40px system-ui, sans-serif'; q.textAlign = 'center'; q.textBaseline = 'middle';
-  q.fillText('314', 64, 34);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.13), new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }));
-  tab.position.set(0.66, 1.6, 0.075);
-  g.add(tab);
   return g;
 }
 

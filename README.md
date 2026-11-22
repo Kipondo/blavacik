@@ -40,6 +40,93 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
+- **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
+  strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
+- **Trolejbusy:** trasy denných liniek z `data/mhd/` (nočné „N“ nie – jazdia aj tam, kde vedenie nie je), dvojica
+  drôtov (+ a −) nad pravým pruhom v smere jazdy, stĺpy pri okraji vozovky vpravo s priečnikom nad drôtmi.
+  Trasy sa prichytia k osi najbližšej rovnobežnej cesty, rovnaké úseky viacerých liniek sa kreslia raz.
+- V úzkej ulici, kde by stĺp padol do domu, drôt drží lano z fasády. Stĺpy majú kolíziu (ako lampy).
+- Stavia sa s každou podrobnou dlaždicou (`js/mapa/trakcia/`), 1,6–5 ms na dlaždicu; v zábere +1 volanie kreslenia
+  a niekoľko tisíc trojuholníkov (drôty sú čiary, stĺpy jedna sieť na dlaždicu, bez vrhania tieňa).
+
+### Átriaky – domy podľa fotiek a izba 314 priamo v meste (vetva `fix/atriaky-budovy`, #115)
+- **Prieskum** budov a izieb z verejných zdrojov: [napady/atriaky-izba.md](napady/atriaky-izba.md).
+- **Domy bez dier a blikania** (`tools/blender/atriaky/bloky.py`): na každom podlaží pavlač – panely vymývaného betónu
+  so škárami, za nimi biela stena s oknami a dverami izieb, červenooranžové čelá a spodky dosiek; 4. podlažie
+  ustúpené a presklené, strecha s presahom a mozaikovým čelom, atika so zábradlím, na streche výstup schodiska.
+  Opravené: 1 m vysoká diera okolo domu pod strechou, diera medzi parapetom a zapusteným oknom, červený pás 2 cm
+  pred betónom (blikal) a spodky parapetov v rovine s dlažbou terasy.
+- **Izba 314 v meste** (`tools/blender/atriaky/izba.py`, `js/mapa/atriaky/internat.js`): trojlôžková izba
+  (3 váľandy, stolíky, skriňa, umývadlo so zrkadlom, chladnička, radiátor, závesy, sušiak, pizza, fľaše, Ďoďova taška)
+  a chodba s dverami susedných izieb, kuchynky, spŕch a WC. Izba je v ustúpenom podlaží bloku T – **ovládanie je
+  rovnaké ako vonku** (tá istá postava, myš, prvá/tretia osoba, kamera pod stropom); balkónovými dverami sa pešo
+  vyjde na terasu (ulička od dverí k balkónu je voľná), vchodom na prízemí sa príde na chodbu pri schodisku
+  (dole späť E pri dverách schodiska).
+- Kolízie: `kolizie.pridajVynimku` – v izbe sa ignoruje plný kolízny blok domu; kamera: háčik `hra.interier.kamera`.
+- Blender skripty bežia aj na Windows (`atriaky_blender.py` zapisuje do dočasného priečinka systému).
+
+### Výkon 1: tiene a stromy (vetva `feature/vykon-tiene`, #110)
+- **Tieňová mapa** bola ~40 % volaní kreslenia a ~38 % trojuholníkov. Teraz:
+  stromy vrhajú podrobný tieň (listy) do 35 m, ďalej len jednoduchú korunu, ktorá sa kreslí iba do tieňa
+  (vrstva tieňa – `js/grafika/dosah-tienov.js`, `js/mapa/zelen/stromy.js`); malé objekty (autá, chodci, sochy,
+  kolobežky…) vrhajú tieň do 45 m od hráča; vikiere tieň nevrhajú.
+- **Vzdialené koruny** v blízkom chunku sa kreslia len pre vzdialené stromy (skryté sa už nekreslia ako nulové inštancie).
+- **Bez vetra:** listy a tráva sa nekývu (rozhodnutie majiteľa) – menej výpočtov vo vertex shaderi.
+- Meranie (statické mesto bez áut a chodcov, kvalita vysoká, pevný záber): Šafárikovo nám. 742 → 664 volaní,
+  4,06 → 3,35 mil. △ (tieň 1,08 → 0,43 mil.); Hlavné nám. 634 → 582 volaní, 3,54 → 3,01 mil. △.
+
+### Hlavná stanica – budova, hala, nástupištia a príchod (vetva `feature/hlavna-stanica`)
+- **Štart hry na 1. nástupišti** Hlavnej stanice: kamera obíde Ďoďa, gong a hlásenie rozhlasu, telefonát od mamy
+  („Došiel si? A rezne si zjedol?“) v titulkoch – **počas hovoru sa už dá chodiť** – potom pokyn ísť do haly za
+  **staničným filozofom** – ten dá prvú radu o Bratislave. Titulky (`js/ui/titulky.js`) prehrávajú dialógy
+  z `data/dialogy/*.json`; Enter preskočí repliku. `?bezScenok` v adrese scénku vynechá (ručné testovanie).
+- **Model stanice z Blendera** (`tools/blender/stanica_blender.py`, podklady `tools/blender/osm_stanica.py`): výpravná budova
+  s krídlami a valbovými strechami, okná s ostením (bez dier a blikania), odbavovacia hala zo skla s galériou,
+  východné krídlo, 6 nástupíšť s bielym okrajom a žltým pásom, prístrešky na stĺpoch. Pôdorysy z OSM, výšky z rezov
+  a pohľadov (hala +10,32 m, rímsa +13,88 m, hrebeň +19,63 m). Spolu ~37 tis. trojuholníkov (rozpočet 150 tis.).
+- **Strechy podľa prieskumu fotiek a leteckej snímky** (Wikimedia Commons, OSM, ortofoto a 3D vrstva budov ZBGIS
+  © ÚGKK SR; bez Google Maps/Earth – licencia):
+  - výpravná budova – valbové strechy s drobnou tmavou hnedosivou krytinou, stredný blok s takmer ihlanovou
+    tmavosivou strechou, svetlé oplechovanie nároží, žľaby so zelenkavou patinou, komíny (tehlový s oceľovou
+    vložkou a omietané), bez vikierov; na atike stredného bloku nad námestím **okrídlené koleso na guli** (od 1939);
+  - Skleník – plochá strecha s tmavou fóliou, okraj zo **šikmého pásu svetlého rebrovaného plechu** (aj nižší pás nad
+    prízemím) so svetelným nápisom „BRATISLAVA HLAVNÁ STANICA“, tmavé pásové okno poschodia a **presklený svetlík**
+    pred historickou fasádou (dvojsklon so zaobleným koncom, OSM way 1523818057) s vejárom tmavých oceľových rebier;
+  - prístrešky nástupíšť 2–5 – **„motýlia“ strecha do V** na jednom rade modrých stĺpov s priečnikmi do strán,
+    tmavý podhľad, svetlá hrana, pásové svietidlá; prístrešok 1. nástupišťa pri budove so šikmým zelenosivým plechom.
+- **Dnu sa chodí bez teleportu:** dverami z Predstaničného námestia do haly, priechodom na 1. nástupište, schodmi
+  do podchodu (podchod stavia hra z OSM) a na ostatné nástupištia. Steny majú kolízie s medzerami vo dverách,
+  nástupištia sú pochôdzne plochy 0,35 m nad terénom; **schody z podchodu končia vo výške nástupišťa** (chôdza hore
+  aj dole bez schodíka na hrane, oba podchody vedú na nástupištia 1–5).
+- **Dvere podľa pešich ciest z OSM:** kde chodník prechádza múrom, je otvor – v sklenenej stene Skleníka dvere
+  (3–4 m), medzi Skleníkom, historickou halou a priechodom priechodné otvory, na fasáde do nemodelovaného vnútra
+  budovy zavreté dvere. Bočný priechod má otvor po celej šírke (aj vo vnútorných múroch medzi časťami budovy),
+  takže vonkajšie schody pri západnom konci Skleníka vedú do priechodu, nie do múru. Stánky, automaty a pokladne
+  stoja mimo pešich ciest (pokladne chrbtom k stene).
+- **Chodci na stanici:** nechodia cez múry (hrana chodníka cez múr stanice sa vynechá, dnu idú dverami),
+  chodia po schodoch do podchodu a chodbami pod zemou, po nástupištiach vo výške nástupišťa (osi nástupíšť sú
+  pešie cesty pripojené k schodom) a jamy schodísk obchádzajú bokom. Výška chodca sa počíta ako u hráča
+  (podchody, mosty a nástupištia, terén) – platí v celom meste, aj na lávkach a v ostatných podchodoch.
+- **Vnútro podľa fotiek** (prieskum verejných zdrojov a fotiek, len na porovnanie):
+  - *historická hala* (stredný trakt) – hnedosivý kamenný obklad, mätová omietka, biele rímsy, biely strop s bodovkami,
+    zelené „šupinové“ keramické panely, prechod na 1. nástupište a zostup do podchodu, dve LED tabule odchodov
+    a nad prechodom **freska Františka Gajdoša (1960)** – v hre **voľne prekreslená** (`js/mapa/stanica/freska.js`:
+    kompozícia a paleta podľa popisu, nie kópia fotky ani diela; pod ňou tabuľka s menom autora);
+  - *Skleník* (hala z rokov 1988–89) – presklený svetlík s tmavými oceľovými rebrami, krémová rebrovaná galéria, valcové stĺpy,
+    svetlosivá žula s farebnými navigačnými čiarami, rad 10 pokladní s modrým pásom a boxmi „POKLADNICA“, stánky
+    (bagety, trafika, káva, sušené ovocie), automaty na lístky; lavičky a hodiny v halách nie sú (ako v skutočnosti).
+  - LED tabule odchodov (čierne, farebné písmo) čítajú `hra.stav.stanicaOdchody` – naplní ich cestovný poriadok (A3).
+    Interiér sa kreslí len do 100 m.
+- **Nástupištia:** modré oceľové stĺpy prístreškov, tmavý podhľad, lavičky a koše.
+- **Ľudia bez domova** (humor s dôstojnosťou): pán spí na kartóne pod dekou, pán s novinami, pani pri automatoch –
+  E pri postave = krátka veta (`data/dialogy/stanica-postavy.json`); staničný filozof stojí pri vstupe do historickej haly.
+- Výpravná budova podľa pohľadov: dvojpodlažné krídla s arkádou a trojpodlažné pavilóny s valbovými strechami,
+  sklo Skleníka je priehľadné; v stanici, na nástupištiach ani v pôdorysoch iných budov nerastie tráva
+  (nepresvitá cez podlahy).
+- Oprava: pamiatky, ktoré kopírujú terén, sa ďaleko od stredu mapy nekreslili (chybný stred pre dohľad).
+- Testovacia trasa a `?meranie`: nové body „Hlavná stanica – hala“ a „Hlavná stanica – 1. nástupište“.
+
 ### 22. 11. 2026 – nočná práca (issue #59)
 Zlúčené v poradí #98 → #99 → #100 → #103 → #104 → #105 → #106 → #107 → #112 → #108 → #102 → #113, potom
 opravy po zlúčení (vetva `fix/po-zluceni`):

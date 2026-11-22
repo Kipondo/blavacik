@@ -32,21 +32,8 @@ export function materialKory(druh) {
   return mat;
 }
 
-// Vietor: spoločný čas pre všetky koruny (nastaví sa pri kreslení listov). Kmeň stojí, koruna sa mierne
-// kolíše (viac hore), listy sa trasú; nárazy vetra sa striedajú s bezvetrím.
-export const vietor = { value: 0 };
-const VIETOR_GLSL = `
-  {
-    vec3 iPoz = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
-    float faza = dot(iPoz.xz, vec2(0.071, 0.113));
-    float naraz = 0.55 + 0.45 * sin(uVietor * 0.21 + faza * 0.2) * sin(uVietor * 0.37 + 1.3);
-    float vys = max(transformed.y - 1.5, 0.0);
-    float kyv = (sin(uVietor * 1.1 + faza) * 0.65 + sin(uVietor * 1.9 + faza * 1.7) * 0.35) * naraz;
-    transformed.x += kyv * 0.010 * vys;
-    transformed.z += kyv * 0.006 * vys;
-    vec3 tras = vec3(sin(uVietor * 6.3 + position.x * 2.7 + faza), sin(uVietor * 7.7 + position.z * 3.1), cos(uVietor * 5.9 + position.y * 2.3 + faza));
-    transformed += tras * 0.035 * naraz * min(vys, 3.0) / 3.0;
-  }`;
+// Bez vetra: koruny a listy stoja (kývanie a trasenie listov vo vetre majiteľ nechce – rozhodnutie 22. 11. 2026;
+// ušetrí to aj výpočet vo vertex shaderi listov a tieňa).
 
 const listy = {};
 /** Karty s listami (typ 'listy') alebo vetvičkami smreka ('ihlice'). */
@@ -60,12 +47,7 @@ export function materialListov(typ = 'listy') {
     map: t, alphaTest: 0.42, alphaToCoverage: true, side: THREE.DoubleSide, vertexColors: true, roughness: 0.78,
   });
   const presvit = typ === 'ihlice' ? '0.35' : '1.0';
-  mat.onBeforeRender = () => { vietor.value = performance.now() / 1000; };
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uVietor = vietor;
-    sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uVietor;')
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n#ifdef USE_INSTANCING${VIETOR_GLSL}\n#endif`);
     // obe strany karty majú normálu „von z koruny“ (inak by zadné strany kariet boli čierne);
     // listy trochu do modrozelena, aby v teplom svetle nežltli
     sh.fragmentShader = sh.fragmentShader

@@ -17,7 +17,7 @@
   "repliky": [
     {
       "kto": "rozhlas",
-      "text": "Vlak z Košíc práve prišiel na tretiu koľaj. S meškaním. Ako vždy."
+      "text": "Vlak z Košíc práve prišiel k prvému nástupišťu. S meškaním. Ako vždy."
     },
     {
       "kto": "dodo",
@@ -29,7 +29,15 @@
     },
     {
       "kto": "mama",
-      "text": "Jožko! Si tam? Prečo nevoláš? Ja už tri hodiny sedím pri telefóne!"
+      "text": "Jožko! Došiel si? A rezne si zjedol?"
+    },
+    {
+      "kto": "dodo",
+      "text": "Došiel, mamo. Rezne... dva. Tretí si nechám na intrak."
+    },
+    {
+      "kto": "mama",
+      "text": "Prečo nevoláš? Ja už tri hodiny sedím pri telefóne!"
     },
     {
       "kto": "dodo",

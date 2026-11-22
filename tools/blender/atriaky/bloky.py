@@ -30,22 +30,28 @@ def data():
 
 
 def materialy():
+    # farby podľa prieskumu fotiek (#115, napady/atriaky-izba.md): vymývaný betón panelov, biela omietka za
+    # pavlačou, červenooranžové čelá a spodky dosiek, tmavé rámy okien, mozaika na čele strechy 4. podlažia
     return {
-        'beton': material('beton-pohladovy', '#b4afa5', drsnost=0.9),
+        'beton': material('beton-vymyvany', '#b9b5ac', drsnost=0.95),
         'beton_tmavy': material('beton-tmavy', '#8f8a80', drsnost=0.9),
-        'sklo': sklo('sklo-atriaky', '#3b464d', drsnost=0.06, kov=0.7),
-        'ram': material('detail-ram-atriaky', '#5a5e60', drsnost=0.5, kov=0.5),
-        'strecha': material('strecha-atriaky', '#7d7f7d', drsnost=0.95),
+        'omietka': material('omietka-atriaky', '#e4e3df', drsnost=0.9),
+        'sklo': sklo('sklo-atriaky', '#2f3a40', drsnost=0.08, kov=0.6),
+        'ram': material('detail-ram-atriaky', '#2b2b2b', drsnost=0.5, kov=0.4),
+        'strecha': material('strecha-atriaky', '#8e8e8a', drsnost=0.95),
         'svetlik': sklo('sklo-svetlik', '#7f97a3', drsnost=0.05, kov=0.6),
-        'zabradlie': material('detail-zabradlie-atriaky', '#6a6e70', drsnost=0.5, kov=0.6),
+        'zabradlie': material('detail-zabradlie-atriaky', '#7a6a5e', drsnost=0.6, kov=0.5),
         'dvere': material('dvere-atriaky', '#3f3a35', drsnost=0.6),
-        'cervena': material('tehlova-atriaky', '#9b3f30', drsnost=0.8),
-        'biele': material('detail-zabradlie-biele', '#e6e6e1', drsnost=0.4, kov=0.5),
+        'cervena': material('cervena-atriaky', '#c0472b', drsnost=0.8),
+        'mozaika': material('mozaika-atriaky', '#9a4a38', drsnost=0.7),
+        'biele': material('detail-zabradlie-biele', '#ededed', drsnost=0.4, kov=0.5),
         'dlazba': material('dlazba-terasy', '#a8a49a', drsnost=0.9),
         'podhlad': material('podhlad-atriaky', '#57544f', drsnost=0.95),
+        'skara': material('detail-skara-atriaky', '#7e7a72', drsnost=0.95),
     }
 
 TERASA = 2.4   # m – o koľko je najvyššie podlažie ustúpené (terasa okolo neho)
+FOTO_VCHODU_T = (-2902, -1795)   # bod fotky vchodu do bloku T (svet hry, #91) – rovnaký ako v js/mapa/atriaky/modul.js
 
 
 def zabradlie(G, M, a, b, z, stlpiky=True):
@@ -75,29 +81,96 @@ def rozdel(o):
     return j, pasy
 
 
-def blok(G, M, obrys, H, rnd, dvor=None):
-    """Jeden átriový dom: zapustené prízemie na stĺpoch, betónové parapetné pásy, pásy okien, strecha."""
+PAVLAC = 1.5      # m – hĺbka pavlače (vonkajší ochoz na každom podlaží, prieskum #115: 1,2–2 m)
+DOSKA = 0.3       # m – hrúbka stropnej dosky (čelo a spodok červenooranžové)
+PARAPET = 1.05    # m – betónové panely zábradlia pavlače
+
+
+def zadna_stena(G, M, a, b, z0, z1, okno_od, dvere=None, otvor=None):
+    """Biela stena za pavlačou na úsečke a→b (líce von): v každom poli ~3,2 m presklené dvere na pavlač a okno
+    (ako izby: okno + dvere na pavlač), okolo otvorov ostenie 0,12 m. dvere/otvor = (t0, t1) – voľný otvor
+    bez výplne (balkónové dvere izby 314 v bloku T), ktorý nahradí výplň v tom mieste."""
+    L = dlzka(a, b)
+    if L < 0.2:
+        return
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, ny = normala(a, b)
+    hl = 0.12
+
+    def P(t, z, d=0.0):
+        return (a[0] + ux * t - nx * d, a[1] + uy * t - ny * d, z)
+    vrch = min(z1 - 0.05, z0 + 2.35)
+    otv = []
+    k = max(1, round(L / 3.2))
+    for j in range(k):
+        t0 = L * j / k
+        w = L / k
+        if w > 2.6:
+            otv.append((t0 + 0.3, t0 + 1.2, z0, vrch, 'dvere'))
+            otv.append((t0 + 1.4, t0 + w - 0.25, z0 + okno_od, vrch, 'okno'))
+        elif w > 1.0:
+            otv.append((t0 + 0.2, t0 + w - 0.2, z0 + okno_od, vrch, 'okno'))
+    if otvor:
+        otv = [o for o in otv if o[1] < otvor[0] - 0.15 or o[0] > otvor[1] + 0.15]
+        otv.append((otvor[0], otvor[1], z0, z0 + 2.2, 'otvor'))
+        otv.sort()
+    x = 0.0
+    for (t0, t1, oz0, oz1, druh) in otv:
+        if t0 > x + 0.001:
+            G.plocha(M['omietka'], [P(x, z0), P(t0, z0), P(t0, z1), P(x, z1)])
+        if oz0 > z0 + 0.001:
+            G.plocha(M['omietka'], [P(t0, z0), P(t1, z0), P(t1, oz0), P(t0, oz0)])
+        if oz1 < z1 - 0.001:
+            G.plocha(M['omietka'], [P(t0, oz1), P(t1, oz1), P(t1, z1), P(t0, z1)])
+        h = 0.3 if druh == 'otvor' else hl
+        G.plocha(M['omietka'], [P(t0, oz0), P(t0, oz0, h), P(t0, oz1, h), P(t0, oz1)])
+        G.plocha(M['omietka'], [P(t1, oz1), P(t1, oz1, h), P(t1, oz0, h), P(t1, oz0)])
+        G.plocha(M['omietka'], [P(t0, oz1), P(t0, oz1, h), P(t1, oz1, h), P(t1, oz1)])
+        if druh == 'okno':
+            G.plocha(M['omietka'], [P(t1, oz0), P(t1, oz0, h), P(t0, oz0, h), P(t0, oz0)])
+        if druh != 'otvor':
+            G.plocha(M['sklo'], [P(t0, oz0, h), P(t1, oz0, h), P(t1, oz1, h), P(t0, oz1, h)])
+            # tmavé rámy: obvod a priečky (vo farbe rámov, 3 cm pred sklom)
+            for tt in [t0 + 0.03, t1 - 0.03] + ([(t0 + t1) / 2] if t1 - t0 > 1.2 else []):
+                G.plocha(M['ram'], [P(tt - 0.03, oz0, h - 0.03), P(tt + 0.03, oz0, h - 0.03), P(tt + 0.03, oz1, h - 0.03), P(tt - 0.03, oz1, h - 0.03)])
+            for zz in (oz1 - 0.03, oz0 + 0.03) if druh == 'okno' else (oz1 - 0.03,):
+                G.plocha(M['ram'], [P(t0, zz - 0.03, h - 0.03), P(t1, zz - 0.03, h - 0.03), P(t1, zz + 0.03, h - 0.03), P(t0, zz + 0.03, h - 0.03)])
+        x = t1
+    if x < L - 0.001:
+        G.plocha(M['omietka'], [P(x, z0), P(L, z0), P(L, z1), P(x, z1)])
+
+
+def blok(G, M, obrys, H, rnd, dvor=None, otvor_ochoz=None):
+    """Jeden átriový dom podľa prieskumu fotiek (#115, napady/atriaky-izba.md):
+      – prízemie zapustené o 1,4 m, presklené so stĺpikmi, na stĺpoch;
+      – na každom podlaží obvodová pavlač: červenooranžová doska (čelo a spodok), betónové panely zábradlia
+        so škárami po 1,2 m, za pavlačou biela stena s oknami a dverami izieb;
+      – 4. podlažie ustúpené o TERASA (terasa okolo neho – chodí sa po nej, zábradlie kreslí hra), takmer celé
+        presklené, nad ním strecha s presahom a mozaikovým čelom, atika a zábradlie na streche.
+    Všetky plochy sa stretávajú na hranách (bez dier) a žiadne dve sa neprekrývajú v jednej rovine (bez blikania).
+    otvor_ochoz = (index hrany, t0, t1) – v ustúpenom podlaží voľný otvor na balkónové dvere izby 314 (blok T)."""
     pocet = max(2, round((H - 1.0) / 3.3))
     hp = (H - 1.0) / pocet
-    # prízemie zapustené o 1,4 m, presklené so stĺpikmi a dverami
-    vnutro = odsad(obrys, -1.4)
     n = len(obrys)
+    ustup = pocet >= 3 and not dvor
+    # --- prízemie: zapustené o 1,4 m, presklené, stĺpy pod obvodom, spodok prvej dosky červený ---
+    vnutro = odsad(obrys, -1.4)
+    z_pod = hp - DOSKA
     for i in range(n):
         a, b = vnutro[i], vnutro[(i + 1) % n]
         L = dlzka(a, b)
         if L < 0.3:
             continue
-        G.stena(M['sklo'], a, b, 0.0, hp)
+        G.stena(M['sklo'], a, b, -1.0, z_pod)
         ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+        nx, ny = normala(a, b)
         k = max(1, round(L / 1.8))
         for j in range(k + 1):
-            p = (a[0] + ux * L * j / k, a[1] + uy * L * j / k)
-            G.kvader(M['ram'], p, (ux, uy), 0.08, 0.12, 0.0, hp)
+            p = (a[0] + ux * L * j / k + nx * 0.06, a[1] + uy * L * j / k + ny * 0.06)
+            G.kvader(M['ram'], p, (ux, uy), 0.08, 0.12, -1.0, z_pod)
         if L > 8:
             m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-            nx, ny = normala(a, b)
-            G.kvader(M['dvere'], (m[0] + nx * 0.03, m[1] + ny * 0.03), (ux, uy), 1.8, 0.06, 0.0, 2.3)
-    # stĺpy pod obvodom
+            G.kvader(M['dvere'], (m[0] + nx * 0.06, m[1] + ny * 0.06), (ux, uy), 1.8, 0.06, 0.0, 2.3)
     for i in range(n):
         a, b = obrys[i], obrys[(i + 1) % n]
         L = dlzka(a, b)
@@ -108,53 +181,77 @@ def blok(G, M, obrys, H, rnd, dvor=None):
         k = max(1, round(L / 6.0))
         for j in range(k + 1):
             p = (a[0] + ux * L * j / k - nx * 0.7, a[1] + uy * L * j / k - ny * 0.7)
-            G.kvader(M['beton'], p, (ux, uy), 0.5, 0.5, 0.0, hp)
-    G.vodorovna(M['beton_tmavy'], obrys, hp, hore=False)
-    # poschodia: mohutný parapetný pás na líci, za ním zapustený pás okien; najvyššie podlažie ustúpené
-    # o TERASA – okolo neho pochôdzna terasa s tehlovočerveným pásom a bielym zábradlím (fotky #91)
-    ustup = pocet >= 3 and not dvor
-    for k in range(1, pocet):
-        z0 = k * hp
-        z1 = (k + 1) * hp
-        horne = ustup and k == pocet - 1
-        lice = odsad(obrys, -TERASA) if horne else obrys
-        G.pas(M['beton'], lice, z0, z0 + 1.15, 0.15, dnu=0.15)
-        # tehlovočervený pás pod oknami
-        G.pas(M['cervena'], lice, z0 + 0.92, z0 + 1.15, 0.17, dnu=0.0, vrch=False, spodok=False)
-        okna = odsad(lice, -0.6)
-        for i in range(len(okna)):
-            a, b = okna[i], okna[(i + 1) % len(okna)]
-            G.stena(M['sklo'], a, b, z0 + 1.15, z1)
-            L = dlzka(a, b)
-            if L < 1:
-                continue
-            ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-            for j in range(1, max(2, round(L / 1.5))):
-                t = j / max(2, round(L / 1.5))
-                G.kvader(M['ram'], (a[0] + ux * L * t, a[1] + uy * L * t), (ux, uy), 0.07, 0.1, z0 + 1.15, z1)
-        if horne:
-            # terasa: dlažba medzi lícom domu a ustúpeným podlažím, na okraji červený pás a zábradlie
-            G.pas(M['dlazba'], obrys, z0 - 0.06, z0, 0.15, dnu=TERASA + 0.2, spodok=False)
-            G.pas(M['cervena'], obrys, z0 - 0.45, z0 + 0.3, 0.18, dnu=0.0, spodok=False)
-            # biele zábradlie terasy kreslí hra (js/mapa/atriaky/) – s medzerami pri lávkach
-        # stropná doska medzi pásom okien a vyšším parapetom
-        G.pas(M['beton_tmavy'], okna, z1 - 0.05, z1, 0.6, dnu=0.0, vrch=False)
-    # strecha, atika so zábradlím (nad ustúpeným podlažím)
-    lice = odsad(obrys, -TERASA) if ustup else obrys
-    G.pas(M['beton'], lice, H, H + 0.9, 0.15, dnu=0.25)
-    G.vodorovna(M['strecha'], odsad(lice, -0.25), H + 0.05)
-    G.pas(M['zabradlie'], odsad(lice, -0.1), H + 1.4, H + 1.46, 0.03, dnu=0.03)
+            G.kvader(M['beton'], p, (ux, uy), 0.5, 0.5, -1.0, z_pod, vrch=False)
+    G.vodorovna(M['cervena'], obrys, z_pod, hore=False)
+
+    # --- podlažia s pavlačou ---
+    posledne_pavlac = pocet - 2 if ustup else pocet - 1
+    for k in range(1, posledne_pavlac + 1):
+        z0, z1 = k * hp, (k + 1) * hp
+        # doska: čelo a spodok červenooranžové (spodok prvej dosky kryje plocha nad prízemím)
+        G.pas(M['cervena'], obrys, z0 - DOSKA, z0 - 0.02, 0.0, dnu=PAVLAC, vrch=False, spodok=k > 1)
+        # podlaha pavlače (za panelmi zábradlia)
+        G.pas(M['dlazba'], obrys, z0 - 0.02, z0, -0.15, dnu=PAVLAC, spodok=False)
+        # betónové panely zábradlia (líce v rovine čela dosky), navrchu biela rúrka, škáry po 1,2 m
+        G.pas(M['beton'], obrys, z0 - 0.02, z0 + PARAPET, 0.0, dnu=0.15, spodok=False)
+        G.pas(M['biele'], obrys, z0 + PARAPET + 0.04, z0 + PARAPET + 0.1, 0.0, dnu=0.12)
+        skary(G, M, obrys, z0, z0 + PARAPET)
+        # zadná stena s oknami a dverami (nad ňou spodok vyššej dosky)
+        Z = odsad(obrys, -PAVLAC)
+        for i in range(n):
+            zadna_stena(G, M, Z[i], Z[(i + 1) % n], z0 - 0.02, z1 - DOSKA, okno_od=0.85)
+
+    # --- 4. podlažie ustúpené, terasa okolo neho ---
+    if ustup:
+        k = pocet - 1
+        z0, z1 = k * hp, (k + 1) * hp
+        lice = odsad(obrys, -TERASA)
+        G.pas(M['cervena'], obrys, z0 - DOSKA, z0 - 0.02, 0.0, dnu=TERASA, vrch=False, spodok=True)
+        G.pas(M['dlazba'], obrys, z0 - 0.02, z0, -0.15, dnu=TERASA, spodok=False)
+        # nízky betónový sokel na okraji terasy (biele zábradlie s kolíziou nad ním kreslí hra – js/mapa/atriaky/)
+        G.pas(M['beton'], obrys, z0 - 0.02, z0 + 0.25, 0.0, dnu=0.15, spodok=False)
+        for i in range(n):
+            otvor = None
+            if otvor_ochoz and otvor_ochoz[0] == i:
+                otvor = otvor_ochoz[1:]
+            zadna_stena(G, M, lice[i], lice[(i + 1) % n], z0 - 0.02, z1 - DOSKA, okno_od=0.3, otvor=otvor)
+        horne_lice, presah = lice, 0.4
+    else:
+        horne_lice, presah = obrys, 0.0
+
+    # --- strecha: doska s mozaikovým čelom (nad ustúpeným podlažím s presahom), atika, zábradlie, technika ---
+    zs = pocet * hp
+    dnu_dosky = (PAVLAC if not ustup else 0.0) + presah
+    G.pas(M['mozaika'], horne_lice, zs - DOSKA, zs + 0.2, presah, dnu=dnu_dosky, vrch=False, spodok=True)
+    okraj = odsad(horne_lice, presah) if presah else horne_lice
+    G.pas(M['beton'], okraj, zs + 0.2, zs + 0.75, 0.0, dnu=0.25)
+    G.vodorovna(M['strecha'], odsad(okraj, -0.25), zs + 0.25)
+    G.pas(M['zabradlie'], odsad(okraj, -0.12), zs + 1.25, zs + 1.31, 0.03, dnu=0.03)
     if dvor:
         return
-    # svetlík nad zastrešeným átriom (sklenený ihlan)
-    P = Polygon(obrys)
+    # výstup zo schodiska (kocka ~2,5 m) a dva vetracie boxy jadra (výkaz výmer bloku C)
+    P = Polygon(horne_lice)
     c = P.centroid
-    s = math.sqrt(P.area) * 0.2
-    st = [(c.x - s, c.y - s), (c.x + s, c.y - s), (c.x + s, c.y + s), (c.x - s, c.y + s)]
-    G.hranol(M['beton'], st, H, H + 0.6)
-    for i in range(4):
-        a, b = st[i], st[(i + 1) % 4]
-        G.plocha(M['svetlik'], [(a[0], a[1], H + 0.6), (b[0], b[1], H + 0.6), (c.x, c.y, H + 0.6 + s * 0.3)])
+    G.kvader(M['beton'], (c.x, c.y), (1, 0), 2.6, 2.6, zs + 0.25, zs + 2.75)
+    for dx in (-4.0, 4.0):
+        G.kvader(M['zabradlie'], (c.x + dx, c.y + 2.5), (1, 0), 0.9, 0.9, zs + 0.25, zs + 1.1)
+
+
+def skary(G, M, obrys, z0, z1, krok=1.2):
+    """Zvislé škáry medzi panelmi zábradlia: tmavé pásiky 2 cm, 3 cm pred lícom (materiál „detail“ – zďaleka sa nekreslí)."""
+    n = len(obrys)
+    for i in range(n):
+        a, b = obrys[i], obrys[(i + 1) % n]
+        L = dlzka(a, b)
+        if L < krok:
+            continue
+        ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+        nx, ny = normala(a, b)
+        for j in range(1, int(L / krok)):
+            t = L * j / int(L / krok)
+            p = (a[0] + ux * t + nx * 0.03, a[1] + uy * t + ny * 0.03)
+            G.plocha(M['skara'], [(p[0] - ux * 0.01, p[1] - uy * 0.01, z0 + 0.05), (p[0] + ux * 0.01, p[1] + uy * 0.01, z0 + 0.05),
+                                  (p[0] + ux * 0.01, p[1] + uy * 0.01, z1 - 0.02), (p[0] - ux * 0.01, p[1] - uy * 0.01, z1 - 0.02)])
 
 
 def postav():
@@ -197,7 +294,10 @@ def postav():
             # pre chôdzu (js/mapa/atriaky/): výšky v m nad základňou modelu (zem najnižšieho domu)
             'terasa': TERASA,
             'domy': [{'meno': d['meno'], 'jadro': hra(d['jadro']), 'zem': round(d['dz'], 2), 'podlazie': round(d['hp'], 3),
-                      'pocet': d['pocet'], 'vyska': round(d['H'], 2), 'terasa': d['ustup']} for d in domy],
+                      'pocet': d['pocet'], 'vyska': round(d['H'], 2), 'terasa': d['ustup'],
+                      # balkónové dvere izby 314 (stred otvoru v líci ustúpeného podlažia, normála von, šírka)
+                      **({'ochoz': {'p': hra([d['ochoz']['p']])[0], 'n': [round(d['ochoz']['n'][0], 4), round(-d['ochoz']['n'][1], 4)],
+                                    'sirka': d['ochoz']['sirka']}} if d.get('ochoz') else {})} for d in domy],
             'lavky': lavky}
     print(len(domy), 'domov,', len(lavky), 'lávok')
     return G, obrysy, 18.0, 'atriaky', info
@@ -295,8 +395,19 @@ def postav_blok(G, M, b, LZ, stred, rnd, obrysy, kolizie, nahradit):
         nahradit.append(o)
         return None
     jadro, pasy = rozdel(o) if b['meno'] != 'AD-U' else (o, [])
-    blok(G, M, jadro, H, rnd)
-    obrysy.append(jadro)
     pocet = max(2, round((H - 1.0) / 3.3))
+    ochoz = None
+    if b['meno'] == 'AD-T' and pocet >= 3:
+        # balkónové dvere izby 314 na terasu: v ustúpenom podlaží na strane najbližšej k fotke vchodu (#91),
+        # v strede steny – v tom mieste je v stene voľný otvor, za ním izba (tools/blender/atriaky/izba.py)
+        foto = (FOTO_VCHODU_T[0] - stred[0], -(FOTO_VCHODU_T[1] - stred[1]))
+        lice = odsad(jadro, -TERASA)
+        i = min(range(len(jadro)), key=lambda k: dlzka(foto, ((jadro[k][0] + jadro[(k + 1) % len(jadro)][0]) / 2,
+                                                                (jadro[k][1] + jadro[(k + 1) % len(jadro)][1]) / 2)))
+        a, c = lice[i], lice[(i + 1) % len(lice)]
+        L = dlzka(a, c)
+        ochoz = {'hrana': i, 'p': ((a[0] + c[0]) / 2, (a[1] + c[1]) / 2), 'n': normala(a, c), 'sirka': 1.0}
+    blok(G, M, jadro, H, rnd, otvor_ochoz=(ochoz['hrana'], L / 2 - 0.5, L / 2 + 0.5) if ochoz else None)
+    obrysy.append(jadro)
     return {'meno': b['meno'], 'jadro': jadro, 'pasy': pasy, 'H': H, 'pocet': pocet, 'hp': (H - 1.0) / pocet,
-            'ustup': pocet >= 3}
+            'ustup': pocet >= 3, 'ochoz': ochoz}
