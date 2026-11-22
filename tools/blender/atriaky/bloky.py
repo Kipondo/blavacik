@@ -7,7 +7,7 @@
 #   Issue #91 (fotky v data/atriaky-fotky.json): najvyššie podlažie je ustúpené – okolo neho pochôdzna terasa
 #   s tehlovočerveným pásom a bielym zábradlím. Pôdorysy z OSM obsahujú aj úzke prepojenia so susedným domom –
 #   tie sú lávky v 2. a 3. podlaží (pod nimi voľný prechod), nie plná stena. Údaje pre chôdzu (lávky, terasy,
-#   kolízie s výškou) idú do assets/pamiatky/atriaky.json, schody a kolízie stavia hra (js/mapa/atriaky/).
+#   kolízie s výškou) idú do assets/pamiatky/atriaky.json, zábradlia a kolízie stavia hra (js/mapa/atriaky/).
 
 import json
 import math
@@ -136,8 +136,7 @@ def blok(G, M, obrys, H, rnd, dvor=None):
             # terasa: dlažba medzi lícom domu a ustúpeným podlažím, na okraji červený pás a zábradlie
             G.pas(M['dlazba'], obrys, z0 - 0.06, z0, 0.15, dnu=TERASA + 0.2, spodok=False)
             G.pas(M['cervena'], obrys, z0 - 0.45, z0 + 0.3, 0.18, dnu=0.0, spodok=False)
-            for i in range(len(obrys)):
-                zabradlie(G, M, odsad(obrys, 0.08)[i], odsad(obrys, 0.08)[(i + 1) % len(obrys)], z0 + 0.3)
+            # biele zábradlie terasy kreslí hra (js/mapa/atriaky/) – s medzerami pri lávkach
         # stropná doska medzi pásom okien a vyšším parapetom
         G.pas(M['beton_tmavy'], okna, z1 - 0.05, z1, 0.6, dnu=0.0, vrch=False)
     # strecha, atika so zábradlím (nad ustúpeným podlažím)
@@ -261,15 +260,7 @@ def lavka(G, M, dom, P, domy):
             pas = [bod(p, zp - 0.5), bod(q, zq - 0.5), bod(q, zq + 0.3), bod(p, zp + 0.3)]
             G.plocha(M['cervena'], pas)
             G.plocha(M['cervena'], list(reversed(pas)))
-            # zábradlie nad červeným pásom (šikmé, keď sú konce v inej výške)
-            L = dlzka(p, q)
-            for v in (0.55, 0.8, 1.05):
-                G.tram(M['biele'], (p[0], p[1], zp + v), (q[0], q[1], zq + v), 0.05)
-            n = max(1, round(L / 1.6))
-            for j in range(n + 1):
-                t = j / n
-                x, y, z = p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t, zp + (zq - zp) * t
-                G.kvader(M['biele'], (x, y), (ux, uy), 0.05, 0.05, z + 0.3, z + 1.05)
+            # biele zábradlie lávky kreslí hra (js/mapa/atriaky/) – s kolíziou
     if not podlahy:
         return None
     hra = lambda p: [round(p[0], 2), round(-p[1], 2)]

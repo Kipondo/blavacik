@@ -168,3 +168,7 @@ html, body {
   .ui-minimapa { bottom: auto; top: 14px; left: 14px; width: 150px; }
   #hra .ui-minimapa canvas { width: 150px; height: 150px; }
 }
+
+/* prechod cez dvere internátu (js/mapa/atriaky/internat.js) */
+.internat-clona { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 7; transition: opacity 0.35s; }
+.internat-clona.zapnuta { opacity: 1; }
