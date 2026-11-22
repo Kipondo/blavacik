@@ -497,7 +497,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   **Nohy na teréne a hlava** (`js/chodec/postava/telo-na-terene.js`, IK dvoch kostí `ik.js`): položené chodidlo
   hráča sa postaví na skutočnú výšku povrchu pod ním a natočí sa so svahom, telo sa zníži o nižšiu nohu (do 0,3 m) –
   na svahu 27 % sú špičky do 7 mm od zeme (predtým jedna 12 cm vo vzduchu, druhá 12 cm v zemi). Hlava sa natáča tam,
-  kam sa pozerá kamera (do ~57°, nie za chrbát, pri behu menej). Úpravy kostí sa pred ďalšou animáciou vrátia
+  kam sa pozerá kamera (do ~57°, nie za chrbát, pri behu menej); keď hráč 4 s stojí a nehýbe kamerou, pomaly sa rozhliada. Úpravy kostí sa pred ďalšou animáciou vrátia
   (mixér zapisuje kosť len pri zmene hodnoty – bez toho by sa hromadili). Cena ~0,08 ms na snímok.
   Snímky pred/po: `docs/snimky/chodza/` (GIF chôdza–beh–zastavenie–úkrok, nohy na svahu). **Plávanie:** z nábrežia sa dá spadnúť do Dunaja, Ďoďo pláva prsia
   alebo šliape vodu, vyliezť sa dá len na nízky breh (`js/chodec/plavanie.js`). Ďoďo je mladší (~19 rokov, prvák).
