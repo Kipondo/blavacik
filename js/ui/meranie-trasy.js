@@ -12,7 +12,8 @@
 export const TRASA = [
   ['Hlavné námestie', 34, 11], ['Michalská brána', -70, -181], ['Obchodná', 134, -278], ['Hodžovo nám.', -59, -445],
   ['Šafárikovo nám.', 579, 133], ['Most SNP – sever', -240, 340], ['Most SNP – juh', -280, 800], ['Eurovea', 1114, 377],
-  ['Nivy', 1693, -333], ['Hlavná stanica', -89, -1667], ['Petržalka – Jungmannova', -52, 2723],
+  ['Nivy', 1693, -333], ['Hlavná stanica', -89, -1667], ['Hlavná stanica – hala', -118, -1662],
+  ['Hlavná stanica – 1. nástupište', -140, -1727], ['Petržalka – Jungmannova', -52, 2723],
   ['Petržalka – Romanova', 134, 3445], ['Aupark', -155, 1049], ['Trnavské mýto', 1582, -1667],
   ['Karlova Ves', -3468, -1056], ['Kamzík', -965, -4479],
 ];

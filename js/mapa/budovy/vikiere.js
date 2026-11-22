@@ -180,7 +180,8 @@ export function vytvorVikiere(budovy = [], strechy, vyskopis) {
   if (!matice.length) return null;
   const im = new THREE.InstancedMesh(geometriaVikiera(), ziskajMaterial(), matice.length);
   matice.forEach((mm, i) => im.setMatrixAt(i, mm));
-  im.castShadow = true;
+  // vikiere tieň nevrhajú: na strechu by padol len malý tieň, v tieňovej mape boli ~0,15 mil. △ (#110)
+  im.castShadow = false;
   im.receiveShadow = true;
   im.computeBoundingSphere();
   im.name = 'vikiere';
