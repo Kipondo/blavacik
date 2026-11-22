@@ -51,15 +51,17 @@ window.__kontrola = {
     hra.posli('teleport', { x, y, z });
     const s = hra.mapa.dlazdice, t0 = performance.now();
     const cakaj = (ms) => new Promise((r) => setTimeout(r, ms));
-    // hotovo, keď sú všetky detailné dlaždice okolia postavené a nič sa nestavia
+    // hotovo, keď sú postavené detailné dlaždice do ~450 m (tie je na snímkach vidieť zblízka);
+    // vzdialenejšie (do 900 m) sa môžu ešte stavať – softvérové kreslenie ich nestíha
+    let hotovo = false;
     while (performance.now() - t0 < limitMs) {
       await cakaj(400);
-      if (!s) break;
-      const ok = !s.uloha && s.ziadane(x, z).filter((w) => w.uroven === 'detail').every((w) => s.aktivne.get(w.t.kluc)?.uroven === 'detail');
-      if (ok) break;
+      if (!s) { hotovo = true; break; }
+      hotovo = s.ziadane(x, z).filter((w) => w.uroven === 'detail' && w.d < 450).every((w) => s.aktivne.get(w.t.kluc)?.uroven === 'detail');
+      if (hotovo) break;
     }
     await cakaj(2500);   // doplnky podľa vzdialenosti (3D fasády, stromy zblízka, chodci)
-    return Math.round(performance.now() - t0);
+    return { ms: Math.round(performance.now() - t0), hotovo };
   },
   snimka(kamera, ciel) {
     this.zmrazKameru();
@@ -110,7 +112,8 @@ def zapis_galeriu(priecinok, manifest):
     riadky = []
     for b in manifest['body']:
         obr = ''.join(f'<figure><img src="{s}" loading="lazy"><figcaption>{p}</figcaption></figure>' for p, s in b['snimky'])
-        riadky.append(f'<section><h2>{b["nazov"]} <small>{b["id"]} · x {b["x"]}, z {b["z"]} · {b["ms"] / 1000:.0f} s</small></h2>{obr}</section>')
+        pozor = '' if b.get('hotovo', True) else ' · <b>nie všetky dlaždice boli postavené</b>'
+        riadky.append(f'<section><h2>{b["nazov"]} <small>{b["id"]} · x {b["x"]}, z {b["z"]} · {b["ms"] / 1000:.0f} s{pozor}</small></h2>{obr}</section>')
     html = f"""<!doctype html><html lang="sk"><meta charset="utf-8"><title>Kontrola mesta – {manifest['nazov']}</title>
 <style>body{{font:14px system-ui;margin:20px;background:#1b2430;color:#e8e8e8}}figure{{display:inline-block;margin:0 8px 8px 0}}
 img{{width:560px;display:block;border-radius:4px}}small{{color:#9aa}}a{{color:#9cf}}</style>
@@ -166,7 +169,10 @@ async def hlavna(arg):
                     'hodina': arg.hodina, 'body': []}
         for b in body:
             print(f"{b['nazov']} ({b['x']}, {b['z']})…", flush=True)
-            ms = await strana.evaluate(f"__kontrola.presun({b['x']}, {b['z']}, {arg.limit * 1000}, {arg.hodina})")
+            r = await strana.evaluate(f"__kontrola.presun({b['x']}, {b['z']}, {arg.limit * 1000}, {arg.hodina})")
+            ms = r['ms']
+            if not r['hotovo']:
+                print(f'  pozor: za {arg.limit} s sa nepostavili všetky dlaždice okolia – snímka môže mať prázdne miesta')
             snimky = []
             for meno, kamera, ciel in pohlady_bodu(b):
                 await strana.evaluate("new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))")
@@ -175,7 +181,7 @@ async def hlavna(arg):
                 (priecinok / subor).write_bytes(base64.b64decode(url.split(',', 1)[1]))
                 snimky.append((meno, subor))
                 print(f'  {subor}')
-            manifest['body'].append({'id': b['id'], 'nazov': b['nazov'], 'x': b['x'], 'z': b['z'], 'ms': ms, 'snimky': snimky})
+            manifest['body'].append({'id': b['id'], 'nazov': b['nazov'], 'x': b['x'], 'z': b['z'], 'ms': ms, 'hotovo': r['hotovo'], 'snimky': snimky})
         await prehliadac.close()
     srv.shutdown()
 
