@@ -40,6 +40,24 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Hlavná stanica – budova, hala, nástupištia a príchod (vetva `feature/hlavna-stanica`)
+- **Štart hry na 1. nástupišti** Hlavnej stanice: kamera obíde Ďoďa, gong a hlásenie rozhlasu, telefonát od mamy
+  („Došiel si? A rezne si zjedol?“) v titulkoch, potom pokyn ísť do haly za **staničným filozofom** – ten dá prvú radu
+  o Bratislave. Titulky (`js/ui/titulky.js`) prehrávajú dialógy z `data/dialogy/*.json`; Enter / medzerník preskočí repliku.
+- **Model stanice z Blendera** (`tools/blender/stanica_blender.py`, podklady `tools/blender/osm_stanica.py`): výpravná budova
+  s krídlami a valbovými strechami, okná s ostením (bez dier a blikania), odbavovacia hala zo skla s galériou,
+  východné krídlo, 6 nástupíšť s bielym okrajom a žltým pásom, prístrešky na stĺpoch. Pôdorysy z OSM, výšky z rezov
+  a pohľadov (hala +10,32 m, rímsa +13,88 m, hrebeň +19,63 m). Spolu ~19 tis. trojuholníkov.
+- **Dnu sa chodí bez teleportu:** dverami z Predstaničného námestia do haly, priechodom na 1. nástupište, schodmi
+  do podchodu (podchod stavia hra z OSM) a na ostatné nástupištia. Steny majú kolízie s medzerami vo dverách,
+  nástupištia sú pochôdzne plochy 0,35 m nad terénom.
+- **Hala:** pokladne, bufet, automaty, lavičky, stĺpy, svetlá v strope, tabuľa odchodov a staničné hodiny podľa herného
+  času (tabuľa číta `hra.stav.stanicaOdchody` – naplní ju cestovný poriadok, úloha A3). Interiér sa kreslí len do 100 m.
+- **Ľudia bez domova** (humor s dôstojnosťou): pán spí na lavičke pod dekou, pán s novinami, pani na kartóne
+  pri automatoch – E pri postave = krátka veta (`data/dialogy/stanica-postavy.json`).
+- Oprava: pamiatky, ktoré kopírujú terén, sa ďaleko od stredu mapy nekreslili (chybný stred pre dohľad).
+- Testovacia trasa a `?meranie`: nové body „Hlavná stanica – hala“ a „Hlavná stanica – 1. nástupište“.
+
 ### 22. 11. 2026 – nočná práca (issue #59)
 Zlúčené v poradí #98 → #99 → #100 → #103 → #104 → #105 → #106 → #107 → #112 → #108 → #102 → #113, potom
 opravy po zlúčení (vetva `fix/po-zluceni`):

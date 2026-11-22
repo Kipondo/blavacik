@@ -1,0 +1,23 @@
+{
+  "id": "stanica-filozof",
+  "popis": "Staničný filozof v hale Hlavnej stanice – prvá rada Ďoďovi o Bratislave (úvodná scénka A4, js/mapa/stanica/postavy.js).",
+  "postavy": {
+    "filozof": {
+      "meno": "Staničný filozof",
+      "farba": "#b8a7e8"
+    },
+    "dodo": {
+      "meno": "Ďoďo",
+      "farba": "#e8a33d"
+    }
+  },
+  "repliky": [
+    { "kto": "filozof", "text": "Mladý pán z východu. Poznám to podľa tej tašky. Takú nosí len ten, komu mama balila jedlo na tri dni." },
+    { "kto": "dodo", "text": "Ta... na štyri. Ale dva rezne už ňeni." },
+    { "kto": "filozof", "text": "Tak počúvaj. Prvá rada o Bratislave zadarmo, druhá stojí desať centov." },
+    { "kto": "filozof", "text": "V Bratislave sa nikto neponáhľa, kým nestojí na električku. Vtedy beží celé mesto." },
+    { "kto": "filozof", "text": "A keď ti niekto povie, že je to „kúsok pešo“, zober si vodu. Tu je všetko kúsok. Do kopca." },
+    { "kto": "dodo", "text": "A vy tu... bývate?" },
+    { "kto": "filozof", "text": "Ja tu premýšľam. Bývať sa dá hocikde, premýšľať len tam, kde chodia vlaky. Mlynská dolina je električkou, nie pešo. Choď, nech ti neujde." }
+  ]
+}

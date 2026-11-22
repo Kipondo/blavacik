@@ -24,6 +24,7 @@ import schody from './mapa/cesty/schody-modul.js';
 import povrch from './mapa/cesty/povrch-modul.js';
 import hud from './ui/hud.js';
 import lokality from './ui/lokality.js';
+import titulky from './ui/titulky.js';
 import poloha from './ui/poloha.js';
 import hodiny from './cas/modul.js';
 import mys from './vstup/mys.js';
@@ -38,6 +39,9 @@ import kolobezky from './mikromobilita/modul.js';
 import jazdciNpc from './mikromobilita/npc-jazdci.js';
 import atriaky from './mapa/atriaky/modul.js';
 import internat from './mapa/atriaky/internat.js';
+import stanica from './mapa/stanica/modul.js';
+import stanicaPostavy from './mapa/stanica/postavy.js';
+import stanicaPrichod from './mapa/stanica/prichod.js';
 import kvalita from './grafika/kvalita.js';
 import drobnosti from './mapa/vybavenie/dosah-drobnosti.js';
 import meranie from './ui/meranie-trasy.js';
@@ -81,11 +85,15 @@ export default [
   kolobezky,
   jazdciNpc,
   atriaky,
+  stanica,
+  stanicaPostavy,
+  stanicaPrichod,
   internat,
   schody,
   povrch,
   hud,
   lokality,
+  titulky,
   poloha,
   minimapa,
   sochy,
