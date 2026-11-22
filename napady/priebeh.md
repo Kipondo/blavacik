@@ -28,13 +28,13 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 
 ## Zlúčené 22. 11.
 #116 (zlatá linka na titulke), #117 (Átriaky), #118 (výkon – tiene, bez vetra), #119 (Hlavná stanica: plášť,
-interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste).
+interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste),
+#121 (kvalitnejšie autá, 17 sietí namiesto 27), #122 (Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park).
 
 ## Rozpracované (22. 11. večer) – otvorené PR
 | vetva | priečinok | stav |
 |---|---|---|
-| `feature/pamiatky-uk-vajce` | `../blavacik-pamiatky` | **PR #122** – Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park podľa fotiek; trasa `docs/kontrola/pamiatky-po/`; čaká na zlúčenie |
-| `feature/vozidla-kvalita` | `blavacik` | **PR #121** – autá: lemy, škáry, disky s lúčmi, zlúčené siete (17 namiesto 27 na auto); čaká na zlúčenie |
+| `fix/hlasy-sady-viet` | `blavacik` | **PR #123** – workflow hlasov padal od #119 na `stanica-postavy.json` (repliky ako objekt); check zelený |
 
 Lokálne servery: `scratchpad/server.py <port> <priečinok>` (veľká fronta spojení – `python -m http.server` na Windows
 odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky` (shapely) + `--python-use-system-env`.
