@@ -1,10 +1,11 @@
 // Modul: príchod na Hlavnú stanicu – krátka úvodná scénka po načítaní (A4), bez systému cutscén.
 // Po štarte hry (udalosť 'start') stojí Ďoďo na 1. nástupišti (data/mapa/zakladna.json → spawn.hrac):
 //   1. kamera pomaly obíde Ďoďa od koľají k budove stanice (~5 s), zaznie gong a hlásenie rozhlasu,
-//   2. zazvoní mobil – mama (data/dialogy/vlak-prichod.json), hráč počas toho stojí,
+//   2. zazvoní mobil – mama (data/dialogy/vlak-prichod.json), hráč sa počas hovoru už môže hýbať,
 //   3. pokyn „Choď do haly…“ – pri staničnom filozofovi sa jeho rada spustí sama (js/mapa/stanica/postavy.js),
-//   potom voľná hra. Scénka sa nespustí, ak hráč nie je pri stanici (napr. teleport na štarte).
-// Enter / medzerník preskočí repliku titulkov.
+//   potom voľná hra. Scénka sa nespustí, ak hráč nie je pri stanici (napr. teleport na štarte),
+//   pri automatickom teste a s parametrom ?bezScenok v adrese.
+// Enter preskočí repliku titulkov.
 
 const TRVANIE_KAMERY = 5.5;    // s
 
@@ -22,8 +23,10 @@ export default {
     const hra = this.hra, h = hra.hrac?.pozicia;
     const s = hra.mapa?.data?.spawn?.hrac;
     if (!h || !s || Math.hypot(h.x - s.x, h.z - s.z) > 30) return;
-    // automatický test (testovacia trasa cez Playwright, ?meranie) ovláda kameru sám – scénku preskočíme
-    if (navigator.webdriver || new URLSearchParams(location.search).has('meranie')) return;
+    // automatický test (testovacia trasa cez Playwright, ?meranie) ovláda kameru sám – scénku preskočíme;
+    // ?bezScenok = ručné testovanie bez úvodnej scénky
+    const q = new URLSearchParams(location.search);
+    if (navigator.webdriver || q.has('meranie') || q.has('bezScenok')) return;
     this.faza = 'kamera';
     this.t = 0;
     hra.vstup.blokovane = true;
@@ -66,8 +69,9 @@ export default {
     this.faza = 'telefon';
     if (this.kamera && this.povodne) Object.assign(this.kamera, this.povodne);
     hra.posli('zvuk', { meno: 'zvoncek', sila: 0.6 });
-    await hra.titulky?.prehraj('vlak-prichod', { blokuj: true });
+    // počas hovoru s mamou sa dá chodiť (hovor beží v titulkoch, ovládanie sa uvoľní hneď po oblúku kamery)
     hra.vstup.blokovane = false;
+    await hra.titulky?.prehraj('vlak-prichod');
     this.faza = 'k-filozofovi';
     hra.ui?.pokyn?.('Choď do haly – v sklenenej hale pri vstupe do historickej haly s freskou stojí staničný filozof');
     // pokyn zmizne aj sám, keď hráč odíde inam

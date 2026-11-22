@@ -5,7 +5,7 @@
 //       dialog = id súboru ('vlak-prichod') alebo objekt { postavy, repliky: [{ kto, text }] }
 //       blokuj = true → hráč počas dialógu stojí (hra.vstup.blokovane)
 //   hra.titulky.bezi                          → práve beží dialóg
-// Replika ostane podľa dĺžky textu (2,2–7 s); Enter alebo medzerník preskočí na ďalšiu.
+// Replika ostane podľa dĺžky textu (2,2–7 s); Enter preskočí na ďalšiu (pri blokujúcom dialógu aj medzerník).
 // Formát dialógov: data/dialogy/*.json (postavy { id: { meno, farba } }, repliky [{ kto, text }]).
 
 const cache = new Map();
@@ -28,7 +28,8 @@ export default {
     (hra.ui?.vrstva ?? document.body).appendChild(this.el);
     this.dalsi = null;
     addEventListener('keydown', (e) => {
-      if (!this.bezi || (e.code !== 'Enter' && e.code !== 'Space')) return;
+      // medzerník preskočí len pri blokujúcom dialógu – inak je to skok a hráč počas titulkov chodí
+      if (!this.bezi || (e.code !== 'Enter' && !(e.code === 'Space' && this.blokuje))) return;
       e.preventDefault();
       this.dalsi?.();
     });
@@ -45,6 +46,7 @@ export default {
     // dialógy idú po sebe (napr. hlásenie rozhlasu počas telefonátu počká)
     while (this.bezi) await new Promise((r) => setTimeout(r, 200));
     this.bezi = true;
+    this.blokuje = blokuj;
     const vstup = this.hra.vstup;
     if (blokuj && vstup) vstup.blokovane = true;
     try {
