@@ -212,7 +212,7 @@ export default {
     const { x, z } = hra.stav.pozicia;
     for (const st of this.stvorce.values()) {
       const d = Math.hypot(st.cx - x, st.cz - z);
-      if (d < DOHLAD + STVOREC * 0.7) {
+      if (d < Math.min(DOHLAD, hra.stav.dohlad ?? DOHLAD) + STVOREC * 0.7) {
         if (!st.skupina) this.postavStvorec(st);
         st.skupina.visible = true;
         // terén sa mohol spresniť (laser) – ak sa výška zmenila, štvorec sa postaví znova

@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { postavGeometrie, geometriaKridla } from './geometria.js';
 import { VSETKY_TYPY } from './typy.js';
+import { svietidlo } from '../../grafika/noc.js';
 
 const MAX_CLANKOV = 160;   // na variant
 const MAX_KRIDIEL = 1200;
@@ -15,7 +16,10 @@ export class VykreslenieVozidiel {
     scena.add(this.skupina);
 
     this.matKaroseria = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.15, envMapIntensity: 0.9 });
-    this.matSklo = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.08, metalness: 0.3, envMapIntensity: 1.8 });
+    // v noci svieti interiér modrobielo cez okná (silu podľa noci nastavuje js/grafika/den-noc.js)
+    this.matSklo = svietidlo(new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.08, metalness: 0.3, envMapIntensity: 1.8, emissive: '#a9c4e6',
+    }), 0.15);
     this.matSvetla = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
 
     this.varianty = new Map();
