@@ -42,8 +42,9 @@ Bez prepínača sa detail robí len pre **výrez Starého Mesta s Hradným kopco
 v `tools/mesto/laser/spolocne.py`), na ktorom sa postup ladí. `--vsetko` spracuje celé mesto.
 `teren.py` je potrebné spustiť po každom `npm run dlazdice` (prepíše index.json) – stačí `--len-detail`.
 
-**Širšie centrum a Mlynská dolina** (`--sirsie-centrum`, 64 dlaždíc: Staré Mesto od Palisád po Landererovu a od Hlavnej
-stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba) – detailný terén, cesty na teréne, LOD2 strechy a stromy:
+**Širšie centrum, Mlynská dolina, Nivy a Petržalka** (`--sirsie-centrum`, 96 dlaždíc: Staré Mesto od Palisád po
+Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy – Trnavské mýto,
+stred Petržalky s Chorvátskym ramenom) – detailný terén, cesty na teréne, LOD2 strechy a stromy:
 
 ```bash
 python3 tools/mesto/laser/teren.py --sirsie-centrum

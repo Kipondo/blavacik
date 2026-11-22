@@ -20,9 +20,11 @@ VYREZ = [(-2, -1), (-1, -1), (0, -1), (-2, 0), (-1, 0), (0, 0)]
 # Mlynská dolina (miesto príbehu, issue #73): internáty Mlyny, Átriaky, Družba, fakulty
 MLYNSKA_DOLINA = [(-7, -4), (-6, -4), (-6, -3), (-6, -5), (-5, -4)]
 # širšie centrum a okolie Mlynskej doliny (noc 22. 11., #53 / #64): Staré Mesto od Palisád po Landererovu
-# a od Hlavnej stanice po Dunaj (i −3…2, j −4…1) a Karlova Ves – Mlynská dolina – Družba (i −8…−4, j −6…−1)
+# a od Hlavnej stanice po Dunaj (i −3…2, j −4…1), Karlova Ves – Mlynská dolina – Družba (i −8…−4, j −6…−1),
+# Mlynské nivy – Nivy – Trnavské mýto (i 3…4, j −4…1) a stred Petržalky s Chorvátskym ramenom (i −1…2, j 2…6)
 SIRSIE_CENTRUM = ([(i, j) for i in range(-3, 3) for j in range(-3, 2)] + [(i, -4) for i in range(-2, 2)]
-                  + [(i, j) for i in range(-8, -3) for j in range(-6, 0)])
+                  + [(i, j) for i in range(-8, -3) for j in range(-6, 0)]
+                  + [(i, j) for i in range(3, 5) for j in range(-4, 2)] + [(i, j) for i in range(-1, 3) for j in range(2, 7)])
 
 
 def vyber_dlazdic(index):
