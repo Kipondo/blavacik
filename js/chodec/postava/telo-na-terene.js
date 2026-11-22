@@ -1,7 +1,8 @@
 // Doladenie pózy hráča po animácii (issue #96):
 //   – nohy na teréne: chodidlo, ktoré je práve na zemi, sa položí na skutočnú výšku povrchu pod ním (svah, schod,
 //     obrubník); keď je zem pod jednou nohou nižšie, celé telo sa o to zníži (IK dvoch kostí – ik.js),
-//   – hlava sa mierne natáča tam, kam sa pozerá kamera (pri státí a pomalej chôdzi, nie za chrbát).
+//   – hlava sa mierne natáča tam, kam sa pozerá kamera (pri státí a pomalej chôdzi, nie za chrbát),
+//   – keď hráč chvíľu stojí a nehýbe kamerou, rozhliada sa (pomaly vľavo, vpravo, občas hore).
 // Volá js/chodec/hrac.js: predAnimaciou(h) pred animuj(), poAnimacii(h, …) po ňom.
 
 import * as THREE from 'three';
@@ -12,6 +13,7 @@ const ZEM_DO = 0.13;        // m – chodidlo nižšie ako toto nad zemou sa pov
 const MAX_POKLES = 0.3;     // m – o koľko najviac sa telo zníži (dlhší schod už nohy nedočiahnu)
 const MAX_HLAVA = 1.0;      // rad – hlava sa otočí najviac o ~57°
 const HORE = new THREE.Vector3(0, 1, 0);
+const ROZHLIADANIE_PO = 4;  // s státia bez pohybu kamery, potom sa postava rozhliada
 
 const _p = new THREE.Vector3(), _c = new THREE.Vector3(), _d = new THREE.Vector3(), _os = new THREE.Vector3();
 const _q = new THREE.Quaternion(), _qc = new THREE.Quaternion(), _qr = new THREE.Quaternion();
@@ -105,10 +107,25 @@ export function poAnimacii(h, dt, { vyska, kamera, naZemi, pliva }) {
     // za chrbát sa hlava neotočí; pri behu sa pozerá skôr dopredu
     const tlm = THREE.MathUtils.clamp(1 - (Math.abs(h.rychlost ?? 0) - 1.5) / 3, 0.25, 1);
     if (Math.abs(d) < 2.0) cielYaw = THREE.MathUtils.clamp(d, -MAX_HLAVA, MAX_HLAVA) * tlm;
-    // kamera za hráčom sa bežne pozerá mierne dole (~-0,15) – hlava sa nakloní len o rozdiel
-    cielPitch = THREE.MathUtils.clamp((-_d.y - 0.15) * 0.7, -0.3, 0.35) * tlm;
+    // kamera za hráčom sa bežne pozerá dole na postavu (smer y ≈ −0,35) – hlava sa nakloní len o rozdiel
+    cielPitch = THREE.MathUtils.clamp((-_d.y - 0.35) * 0.7, -0.3, 0.35) * tlm;
+    // rozhliadanie pri státí: kamera aj postava sa chvíľu nehýbu → nový náhodný cieľ pohľadu každé 2–5 s
+    const smerKam = Math.atan2(_d.x, _d.z);
+    const stoji = Math.abs(h.rychlost ?? 0) < 0.1 && naZemi && Math.abs(uhol(smerKam - (ud._smerKam ?? smerKam))) < 0.002;
+    ud._smerKam = smerKam;
+    ud._statie = stoji ? (ud._statie ?? 0) + dt : 0;
+    if (ud._statie > ROZHLIADANIE_PO) {
+      ud._pohladCas = (ud._pohladCas ?? 0) - dt;
+      if (ud._pohladCas <= 0) {
+        ud._pohladCas = 2 + Math.random() * 3;
+        ud._pohlad = Math.random() < 0.3 ? [0, 0] : [(Math.random() * 2 - 1) * 0.9, (Math.random() - 0.65) * 0.35];
+      }
+      cielYaw += ud._pohlad[0]; cielPitch += ud._pohlad[1];
+      cielYaw = THREE.MathUtils.clamp(cielYaw, -MAX_HLAVA, MAX_HLAVA);
+    } else ud._pohladCas = 0;
   }
-  const kh = Math.min(1, dt * 6);
+  // pri rozhliadaní pomalší pohyb hlavy (ako keď si človek prezerá okolie)
+  const kh = Math.min(1, dt * (ud._statie > ROZHLIADANIE_PO ? 1.6 : 6));
   ud._hlavaYaw = (ud._hlavaYaw ?? 0) + (cielYaw - (ud._hlavaYaw ?? 0)) * kh;
   ud._hlavaPitch = (ud._hlavaPitch ?? 0) + (cielPitch - (ud._hlavaPitch ?? 0)) * kh;
   if (Math.abs(ud._hlavaYaw) > 0.01 || Math.abs(ud._hlavaPitch) > 0.01) {
