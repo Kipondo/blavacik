@@ -83,6 +83,14 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Presné pamiatky – 1. dávka** (noc 22. 11.; `tools/blender/presne/`, `python3 tools/blender/presne_blender.py`):
+  **Slavín** – terasa so schodmi, pietna sieň s lizénami, bronzovými dverami a reliéfnymi poľami, zužujúci sa pylón
+  so žliabkami a bronzová socha vojaka so zástavou (~39,5 m); **Modrý kostolík** – okrúhla veža s pásmi, okienkami,
+  modrou kupolou, lucernou a krížom, loď a krídla podľa častí z OSM so strechou z modrej majoliky, polkruhové okná
+  s bielymi rámami, portál so zlatou mozaikou a oblým štítom; **Grasalkovičov palác** – stredný rizalit so stĺpovým
+  portikom a tympanónom (`tools/blender/historicke/zoznam.py`). **Náhľad pamiatky bez mesta:**
+  `nahlad-pamiatky.html?m=sm-slavin&az=200&el=14&d=1.6` (m = súbor v `assets/pamiatky/`, az/el = smer a výška
+  kamery v stupňoch, d = vzdialenosť). Snímky: `docs/snimky/pamiatky-presne/`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
