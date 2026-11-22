@@ -19,15 +19,23 @@ DLAZDICA = 500
 VYREZ = [(-2, -1), (-1, -1), (0, -1), (-2, 0), (-1, 0), (0, 0)]
 # Mlynská dolina (miesto príbehu, issue #73): internáty Mlyny, Átriaky, Družba, fakulty
 MLYNSKA_DOLINA = [(-7, -4), (-6, -4), (-6, -3), (-6, -5), (-5, -4)]
+# širšie centrum a okolie Mlynskej doliny (noc 22. 11., #53 / #64): Staré Mesto od Palisád po Landererovu
+# a od Hlavnej stanice po Dunaj (i −3…2, j −4…1) a Karlova Ves – Mlynská dolina – Družba (i −8…−4, j −6…−1)
+SIRSIE_CENTRUM = ([(i, j) for i in range(-3, 3) for j in range(-3, 2)] + [(i, -4) for i in range(-2, 2)]
+                  + [(i, j) for i in range(-8, -3) for j in range(-6, 0)])
 
 
 def vyber_dlazdic(index):
-    """Dlaždice na spracovanie podľa argumentov: --vsetko | --dlazdice i_j,i_j… | --mlynska-dolina | výrez Starého Mesta."""
+    """Dlaždice na spracovanie podľa argumentov: --vsetko | --dlazdice i_j,i_j… | --mlynska-dolina | --sirsie-centrum |
+    výrez Starého Mesta."""
     import sys
     if '--vsetko' in sys.argv:
         return [(d[0], d[1]) for d in index['dlazdice']]
     if '--mlynska-dolina' in sys.argv:
         return MLYNSKA_DOLINA
+    if '--sirsie-centrum' in sys.argv:
+        mame = {(d[0], d[1]) for d in index['dlazdice']}
+        return [t for t in SIRSIE_CENTRUM if t in mame]
     if '--dlazdice' in sys.argv:
         zoz = sys.argv[sys.argv.index('--dlazdice') + 1]
         return [tuple(int(v) for v in k.split('_')) for k in zoz.split(',')]

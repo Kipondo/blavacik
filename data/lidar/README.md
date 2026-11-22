@@ -42,6 +42,21 @@ Bez prepínača sa detail robí len pre **výrez Starého Mesta s Hradným kopco
 v `tools/mesto/laser/spolocne.py`), na ktorom sa postup ladí. `--vsetko` spracuje celé mesto.
 `teren.py` je potrebné spustiť po každom `npm run dlazdice` (prepíše index.json) – stačí `--len-detail`.
 
+**Širšie centrum a Mlynská dolina** (`--sirsie-centrum`, 64 dlaždíc: Staré Mesto od Palisád po Landererovu a od Hlavnej
+stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba) – detailný terén, cesty na teréne, LOD2 strechy a stromy:
+
+```bash
+python3 tools/mesto/laser/teren.py --sirsie-centrum
+python3 tools/mesto/laser/cesty_teren.py $(python3 -c "import sys; sys.path.insert(0,'tools/mesto/laser'); from spolocne import SIRSIE_CENTRUM as S; print(' '.join(f'{i}_{j}' for i, j in S))")
+# budovy.py a stromy.py po jednej dlaždici – laser sa číta pre obálku všetkých vybraných dlaždíc naraz
+for t in $(python3 -c "import sys; sys.path.insert(0,'tools/mesto/laser'); from spolocne import SIRSIE_CENTRUM as S; print(' '.join(f'{i}_{j}' for i, j in S))"); do
+  python3 tools/mesto/laser/budovy.py --dlazdice $t && python3 tools/mesto/laser/stromy.py --dlazdice $t
+done
+```
+Na dlaždiciach, ktoré už prešli `priechody.py` a `casti-budov.mjs`, `budovy.py` nemení časti nad priechodmi
+(`priechod`, `minVyska`) ani vyvýšené časti (`cast`) – laser nad nimi vidí celú budovu, prízemné kúsky by narástli
+do výšky domu a horná časť by „visela“. Takéto budovy ostávajú bez LOD2 strechy (ako predtým).
+
 ## Čo vznikne
 
 - `data/mapa/mesto/teren.bin` + `teren.json` – terén celého mesta (Int16, decimetre nad 139 m n. m., 20 m).

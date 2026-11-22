@@ -78,6 +78,13 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **LOD2 strechy, stromy a detailný terén z lasera v širšom centre a v Mlynskej doline** (#53, #64; noc 22. 11.):
+  predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **64** – Staré Mesto od Palisád po Landererovu
+  a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba (`python3 tools/mesto/laser/… --sirsie-centrum`,
+  postup v `data/lidar/README.md`). Strechy podľa skutočnosti (sedlové, valbové, ploché, ustúpené podlažia s oknami,
+  vikiere, komíny), výšky budov a dvory z lasera, stromy na skutočných miestach s výškou a šírkou koruny, terén 2 m
+  zarovnaný pod cestami. Časti budov nad priechodmi a vyvýšené časti ostávajú ako predtým. Dáta: +8 MB (strechy 2 → 8,6 MB,
+  terén +3 MB). Snímky: `docs/snimky/lod2-centrum/`.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
