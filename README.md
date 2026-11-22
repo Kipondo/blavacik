@@ -49,7 +49,8 @@ Podrobný popis každej časti je nižšie v „Čo je hotové“.
   s krídlami a valbovými strechami, okná s ostením (bez dier a blikania), odbavovacia hala zo skla s galériou,
   východné krídlo, 6 nástupíšť s bielym okrajom a žltým pásom, prístrešky na stĺpoch. Pôdorysy z OSM, výšky z rezov
   a pohľadov (hala +10,32 m, rímsa +13,88 m, hrebeň +19,63 m). Spolu ~37 tis. trojuholníkov (rozpočet 150 tis.).
-- **Strechy podľa prieskumu fotiek a leteckej snímky** (Wikimedia Commons, OSM; bez Google Maps/Earth – licencia):
+- **Strechy podľa prieskumu fotiek a leteckej snímky** (Wikimedia Commons, OSM, ortofoto a 3D vrstva budov ZBGIS
+  © ÚGKK SR; bez Google Maps/Earth – licencia):
   - výpravná budova – valbové strechy s drobnou tmavou hnedosivou krytinou, stredný blok s takmer ihlanovou
     tmavosivou strechou, svetlé oplechovanie nároží, žľaby so zelenkavou patinou, komíny (tehlový s oceľovou
     vložkou a omietané), bez vikierov; na atike stredného bloku nad námestím **okrídlené koleso na guli** (od 1939);

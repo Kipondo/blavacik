@@ -1,0 +1,54 @@
+{
+ "nazov": "stanica-po",
+ "commit": "?",
+ "cas": "2026-11-22T16:28",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "hlavna-stanica",
+   "nazov": "Hlavná stanica",
+   "x": -97,
+   "z": -1640,
+   "ms": 12500,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "hlavna-stanica-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavna-stanica-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "stanica-hala",
+   "nazov": "Hlavná stanica – historická hala s freskou",
+   "x": -110.5,
+   "z": -1684.6,
+   "ms": 3380,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "stanica-hala-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "stanica-nastupiste",
+   "nazov": "Hlavná stanica – 1. nástupište",
+   "x": -140.4,
+   "z": -1727,
+   "ms": 12658,
+   "hotovo": true,
+   "snimky": [
+    [
+     "ulica",
+     "stanica-nastupiste-ulica.jpg"
+    ]
+   ]
+  }
+ ]
+}

@@ -226,7 +226,8 @@ def materialy():
         # vrch prístreškov podľa ortofota 2023: 4. a 5. nástupište takmer biele, 2. a 3. stredne sivé
         'pristresok_biely': material('pristresok-biely', '#cfdedc', drsnost=0.7, kov=0.15),
         'pristresok_sivy': material('pristresok-sivy', '#8c928f', drsnost=0.7, kov=0.15),
-        'podhlad_pristresku': material('podhlad-pristresku', '#303236', drsnost=0.8),
+        # tmavosivé panely podhľadu (v tieni prístrešku by tmavšia farba pôsobila ako čierna)
+        'podhlad_pristresku': material('podhlad-pristresku', '#5a5d62', drsnost=0.8),
         'hrana_pristresku': material('hrana-pristresku', '#c9ccc9', drsnost=0.6, kov=0.2),
         'plech_n1': material('plech-nastupiste1', '#7d8a7e', drsnost=0.6, kov=0.3),
         'svetlo_pristresku': svetlo('svetlo-pristresok', '#f4f1e6', sila=1.6),
