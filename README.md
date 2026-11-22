@@ -78,6 +78,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - #92 Cesty: autá a chodci na povrchu, terén nepresvitá, zákruty bez prekrútenia
 
 ## Čo je hotové
+- **Testovacia trasa mesta** (`tools/kontrola/trasa.py`, issue #60): snímky z 17 pevných bodov jedným príkazom
+  a porovnanie dvoch behov (`docs/kontrola/porovnanie.html`) – návod nižšie v časti „Kontrola mesta“.
 - **Dočasné pomôcky na prezeranie mesta** (`js/ladenie/`): lietanie pešo (2× Medzerník, rýchlosť rastie s výškou,
   bez kolízií, pri pristátí sa vypne) a presun klikom na veľkú mapu (udalosť `mapa-klik` z minimapy, PR #32).
   Pred vydaním hry ich stačí odobrať z `js/moduly.js`.
@@ -543,6 +545,22 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
 - Engine misií a dialógov, polícia, minimapa.
 - Deň a noc (svietiace lampy a okná).
 - Engine misií a dialógov, polícia (značky na minimapu už idú cez udalosť `znacka-mapy`).
+
+## Kontrola mesta – testovacia trasa (issue #60)
+Skript odfotí mesto z pevných bodov (Hlavné nám., Michalská brána, Obchodná, Hodžovo a Šafárikovo nám., Most SNP
+z oboch strán, nábrežie pri Eurovei, Nivy, Hlavná stanica, Jungmannova, Romanova, Aupark, Trnavské mýto,
+Karlova Ves, Mlynská dolina, výhľad z Kamzíka) – vždy z rovnakých uhlov (z ulice a šikmo zhora) a o 13:00 herného
+času. Hru spustí v prehliadači bez okna, kreslí sa z plátna (bez HUD a minimapy), na každom bode počká, kým sú
+postavené všetky detailné dlaždice okolia.
+```
+pip install playwright && python3 -m playwright install chromium      # raz
+python3 tools/kontrola/trasa.py                                        # všetky body → docs/kontrola/<dátum>/
+python3 tools/kontrola/trasa.py --len hlavne-namestie,nivy --nazov po-pr-123
+python3 tools/kontrola/trasa.py --gpu                                  # s oknom a grafickou kartou (rýchlejšie)
+```
+Body a uhly sú v `tools/kontrola/body.json` (súradnice hry, azimut, vlastná kamera). Výsledok: `docs/kontrola/<beh>/index.html`
+(galéria) a **porovnanie dvoch behov** vedľa seba: `http://localhost:8000/docs/kontrola/porovnanie.html?a=<beh>&b=<beh>`.
+Softvérové kreslenie (bez `--gpu`) trvá ~5 minút na bod. Prvý beh (stav `main` 22. 11.) je v `docs/kontrola/2026-11-22/`.
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.

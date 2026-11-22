@@ -1,0 +1,25 @@
+{
+  "_popis": "Body testovacej trasy (issue #60). x, z = súradnice hry v metroch (x na východ, z na juh; kláves P v hre ich ukáže). azimut = smer pohľadu v stupňoch (0 = sever, 90 = východ). pohlady: 'ulica' = z výšky očí, 'zhora' = šikmo zhora (vyska, vzdialenost); 'kamera' = vlastná kamera [x, y nad terénom, z] a 'ciel' [x, y nad terénom, z].",
+  "body": [
+    { "id": "hlavne-namestie", "nazov": "Hlavné námestie", "x": 34, "z": 58, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "michalska-brana", "nazov": "Michalská brána", "x": -78, "z": -140, "azimut": 340, "pohlady": ["ulica", "zhora"] },
+    { "id": "obchodna", "nazov": "Obchodná", "x": 250, "z": -370, "azimut": 320, "pohlady": ["ulica", "zhora"] },
+    { "id": "hodzovo-namestie", "nazov": "Hodžovo námestie", "x": 100, "z": -560, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "safarikovo-namestie", "nazov": "Šafárikovo námestie", "x": 620, "z": 215, "azimut": 140, "pohlady": ["ulica", "zhora"] },
+    { "id": "most-snp-sever", "nazov": "Most SNP z nábrežia", "x": -90, "z": 420, "azimut": 210, "pohlady": ["ulica"],
+      "kamera": [-120, 18, 445], "ciel": [-231, 30, 700] },
+    { "id": "most-snp-juh", "nazov": "Most SNP z Petržalky", "x": -260, "z": 900, "azimut": 0, "pohlady": ["ulica"],
+      "kamera": [-300, 30, 1000], "ciel": [-220, 20, 500] },
+    { "id": "eurovea-nabrezie", "nazov": "Nábrežie pri Eurovei", "x": 1100, "z": 430, "azimut": 90, "pohlady": ["ulica", "zhora"] },
+    { "id": "nivy", "nazov": "Nivy", "x": 1556, "z": -330, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "hlavna-stanica", "nazov": "Hlavná stanica", "x": -97, "z": -1640, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "jungmannova", "nazov": "Petržalka – Jungmannova", "x": 450, "z": 2110, "azimut": 45, "pohlady": ["ulica", "zhora"] },
+    { "id": "romanova", "nazov": "Petržalka – Romanova", "x": 270, "z": 3150, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "aupark", "nazov": "Aupark", "x": -155, "z": 1000, "azimut": 180, "pohlady": ["ulica", "zhora"] },
+    { "id": "trnavske-myto", "nazov": "Trnavské mýto", "x": 1500, "z": -1635, "azimut": 90, "pohlady": ["ulica", "zhora"] },
+    { "id": "karlova-ves", "nazov": "Karlova Ves – Karloveská", "x": -4520, "z": -2580, "azimut": 90, "pohlady": ["ulica", "zhora"] },
+    { "id": "mlynska-dolina", "nazov": "Mlynská dolina – Átriaky", "x": -2902, "z": -1770, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "kamzik", "nazov": "Výhľad z Kamzíka", "x": -943, "z": -4345, "azimut": 150, "pohlady": ["ulica"],
+      "kamera": [-900, 60, -4250], "ciel": [0, 0, 0] }
+  ]
+}
