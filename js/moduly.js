@@ -34,11 +34,19 @@ import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
 import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
+import kolobezky from './mikromobilita/modul.js';
+import jazdciNpc from './mikromobilita/npc-jazdci.js';
+import atriaky from './mapa/atriaky/modul.js';
+import internat from './mapa/atriaky/internat.js';
+import kvalita from './grafika/kvalita.js';
+import drobnosti from './mapa/vybavenie/dosah-drobnosti.js';
+import meranie from './ui/meranie-trasy.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
 import semafory from './doprava/semafory.js';
 import premavka from './doprava/premavka/modul.js';
+import vozidlaData from './doprava/vozidla-data.js';
 import mhd from './mhd/modul.js';
 import mhdVozidla from './mhd/vozidla/modul.js';
 
@@ -70,6 +78,10 @@ export default [
   nadjazdy,
   trava,
   cyklopruhy,
+  kolobezky,
+  jazdciNpc,
+  atriaky,
+  internat,
   schody,
   povrch,
   hud,
@@ -81,9 +93,13 @@ export default [
   poskodenieAut,
   rozlisenie,
   vykon,
+  kvalita,
+  drobnosti,
+  meranie,
   grafCiest,
   semafory,
   premavka,
+  vozidlaData,
   mhd,
   zvuk,
   mhdVozidla,

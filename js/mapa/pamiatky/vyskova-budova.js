@@ -9,6 +9,7 @@
 // Model sa načíta na pozadí – hra nečaká na stiahnutie geometrie, kolízie platia hneď.
 // "podlaTerenu": true v <subor>.json = model kopíruje terén (hradby, živé ploty): y vrcholu = terén + lokálna výška.
 // "nahradit": [[[x, z], …]] v <subor>.json = pôdorysy bez kolízie, z ktorých sa len vyhodia budovy a stromy dlaždíc.
+// "bezKoliziiObrysov": true = z obrysov sa nerobia kolízie (stavbu s terasami a lávkami rieši vlastný modul s výškami).
 // Keď sa pod stavbou načíta alebo uvoľní podrobný terén z lasera, výšky sa prepočítajú.
 
 import * as THREE from 'three';
@@ -83,12 +84,18 @@ export default async function postav(p, { vyskopis, kolizie }) {
   const obrysy = info.obrysy.map(svet);
   for (const w of obrysy) {
     nahradBudovy(w, 1.5);
-    kolizie.pridajPolygon(w, { typ: 'pamiatka', nazov: p.nazov });
+    // bezKoliziiObrysov: kolízie s výškou rieši vlastný modul stavby (napr. Átriaky – terasy, lávky)
+    if (!info.bezKoliziiObrysov) kolizie.pridajPolygon(w, { typ: 'pamiatka', nazov: p.nazov });
   }
   // pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc (napr. blok na stĺpoch – pod ním sa dá prejsť)
   for (const w of info.nahradit ?? []) nahradBudovy(svet(w), 0.5);
-  // ďalšie kolízie bez nahrádzania budov (hradby, múry)
-  for (const k of info.kolizie ?? []) kolizie.pridajPolygon(svet(k), { typ: 'pamiatka', nazov: p.nazov });
+  // ďalšie kolízie bez nahrádzania budov (hradby, múry). Model podľa terénu (ploty, živé ploty) je nízky:
+  // kolízia dostane vrch (terén + výška modelu), aby nad ním kamera prešla (js/kamera/kolizia-kamery.js)
+  for (const k of info.kolizie ?? []) {
+    const w = svet(k);
+    const vrch = info.podlaTerenu ? Math.max(...w.map(([x, z]) => vyskopis.vyskaTerenu(x, z))) + (info.vyska ?? 3) + 0.5 : undefined;
+    kolizie.pridajPolygon(w, vrch === undefined ? { typ: 'pamiatka', nazov: p.nazov } : { typ: 'pamiatka', nazov: p.nazov, vrch });
+  }
   const ohr = obrysy.length ? obrysy.flat().reduce((o, [x, z]) => ({
     minX: Math.min(o.minX, x), maxX: Math.max(o.maxX, x), minZ: Math.min(o.minZ, z), maxZ: Math.max(o.maxZ, z),
   }), { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity }) : null;

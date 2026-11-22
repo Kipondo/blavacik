@@ -1,0 +1,54 @@
+{
+  "popis": "Vozidlá v premávke a na jazdenie (issue #97). Typy áut sú v js/auto/typy-aut.js (tvar podľa jedného receptu). Tu sa ladia bez zmeny kódu: zastúpenie typov v premávke (váhy), farby podľa skutočného zastúpenia, taxíky a kuriéri a jazdné vlastnosti každého typu. Farby: Axalta 2025 a JATO 2025 (Európa), strieborná zvýšená – v uliciach jazdí veľa starších áut. Firmy Hladoš a Fičák sú vymyslené paródie.",
+  "premavka": {
+    "popis": "váhy typov v bežnej premávke (súčet nemusí byť 100); exotiky a služby tu nie sú",
+    "vahy": { "hatchback": 18, "sedan": 13, "kombi": 14, "mestske": 18, "suv": 9, "suvlux": 1, "mpv": 4, "dodavka": 4, "pickup": 3, "sport": 2, "muscle": 1 },
+    "taxi": 0.05,
+    "kurier": 0.04,
+    "noc": { "taxi": 0.11, "kurier": 0.07, "sport": 2.0, "dodavka": 0.4 }
+  },
+  "zaparkovane": {
+    "popis": "zaparkované autá na štarte (dajú sa ukradnúť)",
+    "vahy": { "hatchback": 20, "sedan": 14, "kombi": 14, "mestske": 18, "suv": 10, "suvlux": 2, "mpv": 5, "pickup": 3, "sport": 3, "muscle": 2 }
+  },
+  "farby": [
+    { "meno": "sivá", "podiel": 23, "odtiene": ["#6B7075", "#4D5257", "#8A8F93"] },
+    { "meno": "biela", "podiel": 22, "odtiene": ["#EDEFEF", "#E2E4E1"] },
+    { "meno": "čierna", "podiel": 20, "odtiene": ["#17191C", "#22252A"] },
+    { "meno": "strieborná", "podiel": 12, "odtiene": ["#B7BCC1", "#A4AAB0"] },
+    { "meno": "modrá", "podiel": 10, "odtiene": ["#1F3B6E", "#35609A", "#14233F"] },
+    { "meno": "červená", "podiel": 7, "odtiene": ["#A11B20", "#7A1A22"] },
+    { "meno": "zelená", "podiel": 2, "odtiene": ["#2F5640", "#5E7A4E"] },
+    { "meno": "hnedá a béžová", "podiel": 2, "odtiene": ["#6B5542", "#B8A685"] },
+    { "meno": "žltá a oranžová", "podiel": 1, "odtiene": ["#E0A21B", "#D9631E"] },
+    { "meno": "iná", "podiel": 1, "odtiene": ["#5A1B2C", "#4B3762"] }
+  ],
+  "dodavkyBiele": 0.6,
+  "taxiky": [
+    { "id": "biely", "typ": "sedan", "farba": "#EDEFEF", "lampa": "#F5C400", "pismo": "#111111", "text": "TAXI", "vaha": 30 },
+    { "id": "cierne-kombi", "typ": "kombi", "farba": "#17191C", "lampa": "#F5C400", "pismo": "#111111", "text": "TAXI", "vaha": 18 },
+    { "id": "strieborne-kombi", "typ": "kombi", "farba": "#B7BCC1", "lampa": "#FFFFFF", "pismo": "#C01818", "text": "TAXI", "vaha": 12 },
+    { "id": "cierny-van", "typ": "mpv", "farba": "#17191C", "lampa": "#F5C400", "pismo": "#111111", "text": "TAXI", "vaha": 8 },
+    { "id": "zlty", "typ": "sedan", "farba": "#F5C400", "lampa": "#F5C400", "pismo": "#111111", "text": "TAXI", "vaha": 4 },
+    { "id": "hlados", "typ": "hatchback", "farba": "#EDEFEF", "lampa": "#009DE0", "pismo": "#FFFFFF", "text": "HLADOŠ", "pruh": "#009DE0", "pruhText": "HLADOŠ – zavezieme ťa aj hladného", "vaha": 14 },
+    { "id": "ficak", "typ": "kombi", "farba": "#EDEFEF", "lampa": "#2DBE6C", "pismo": "#FFFFFF", "text": "FIČÁK", "pruh": "#2DBE6C", "pruhText": "FIČÁK – fičíme po Blave", "vaha": 14 }
+  ],
+  "kurieri": [
+    { "id": "hlados", "typ": "mestske", "farba": "#009DE0", "pruh": "#FFFFFF", "pismo": "#009DE0", "pruhText": "HLADOŠ – jedlo kým je teplé", "vaha": 1 },
+    { "id": "ficak", "typ": "hatchback", "farba": "#2DBE6C", "pruh": "#FFFFFF", "pismo": "#2DBE6C", "pruhText": "FIČÁK – rozvoz po Blave", "vaha": 1 }
+  ],
+  "fyzika": {
+    "popis": "maxKmh = najvyššia rýchlosť; zrychlenie, zatacanie a prilnavost sú násobky základu (js/config.js, AUTO); hmotnost v kg (zrážky)",
+    "mestske":   { "maxKmh": 140, "zrychlenie": 0.82, "zatacanie": 1.12, "prilnavost": 1.0,  "hmotnost": 1000 },
+    "hatchback": { "maxKmh": 165, "zrychlenie": 0.92, "zatacanie": 1.05, "prilnavost": 1.0,  "hmotnost": 1250 },
+    "sedan":     { "maxKmh": 170, "zrychlenie": 1.0,  "zatacanie": 1.0,  "prilnavost": 1.0,  "hmotnost": 1400 },
+    "kombi":     { "maxKmh": 170, "zrychlenie": 0.97, "zatacanie": 0.98, "prilnavost": 1.0,  "hmotnost": 1450 },
+    "suv":       { "maxKmh": 160, "zrychlenie": 0.92, "zatacanie": 0.9,  "prilnavost": 1.05, "hmotnost": 1750 },
+    "suvlux":    { "maxKmh": 200, "zrychlenie": 1.1,  "zatacanie": 0.92, "prilnavost": 1.08, "hmotnost": 2100 },
+    "mpv":       { "maxKmh": 150, "zrychlenie": 0.8,  "zatacanie": 0.85, "prilnavost": 0.95, "hmotnost": 1900 },
+    "dodavka":   { "maxKmh": 130, "zrychlenie": 0.7,  "zatacanie": 0.78, "prilnavost": 0.9,  "hmotnost": 2600 },
+    "pickup":    { "maxKmh": 160, "zrychlenie": 0.9,  "zatacanie": 0.86, "prilnavost": 1.05, "hmotnost": 2100 },
+    "sport":     { "maxKmh": 230, "zrychlenie": 1.45, "zatacanie": 1.1,  "prilnavost": 1.25, "hmotnost": 1350 },
+    "muscle":    { "maxKmh": 210, "zrychlenie": 1.35, "zatacanie": 0.92, "prilnavost": 0.9,  "hmotnost": 1650 }
+  }
+}

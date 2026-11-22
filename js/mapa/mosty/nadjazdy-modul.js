@@ -1,5 +1,6 @@
 // Modul: chôdza a jazda po nadjazdoch, lávkach a nadchodoch.
 // Mostovky stavia dlaždica (js/mapa/mosty/nadjazdy.js) a ich profily (výška po 2 m) dá do objekt.userData.nadjazdy.
+// Iné moduly môžu pridať vlastné profily udalosťou 'pochodzne-plochy' { kluc, profily } (prázdne = odobrať).
 // Zverejní:
 //   hra.mosty.vyska(x, z, y) → výška mostovky, ak je bod na moste a výška y je blízko nej (hráč alebo auto ide
 //                              po moste), inak null – pod mostom ostáva terén
@@ -24,6 +25,11 @@ export default {
     for (const [kluc, a] of hra.mapa?.dlazdice?.aktivne ?? []) if (a.uroven === 'detail') pridaj(kluc, a.objekt);
     hra.na('dlazdica-nacitana', ({ kluc, uroven, objekt }) => { if (uroven === 'detail') pridaj(kluc, objekt); else { this.dlazdice.delete(kluc); this.preindexuj(); } });
     hra.na('dlazdica-uvolnena', ({ kluc, nahrada }) => { if (!nahrada) { this.dlazdice.delete(kluc); this.preindexuj(); } });
+    // pochôdzne plochy mimo dlaždíc (napr. lávky a schodiská Átriakov, js/mapa/atriaky/): rovnaký tvar profilov
+    hra.na('pochodzne-plochy', ({ kluc, profily }) => {
+      if (profily?.length) this.dlazdice.set(`plochy:${kluc}`, profily); else this.dlazdice.delete(`plochy:${kluc}`);
+      this.preindexuj();
+    });
     hra.mosty = { vyska: (x, z, y) => this.vyska(x, z, y) };
   },
 

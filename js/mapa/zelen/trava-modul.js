@@ -81,7 +81,7 @@ export default {
     this.cas -= dt;
     if (this.cas > 0) return;
     this.cas = 0.25;
-    const dosah = DOSAH[nacitajKvalitu('vysoka')] ?? 30;
+    const dosah = hra.stav.grafika?.trava ?? DOSAH[nacitajKvalitu('vysoka')] ?? 30;
     const k = hra.kamera.position;
     // vysoko nad zemou (vyhliadka, lietanie kamerou) tráva nie je vidieť
     const nadZemou = k.y - hra.mapa.vyska(k.x, k.z);

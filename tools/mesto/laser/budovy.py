@@ -94,6 +94,11 @@ def spracuj_oblast(dl_oblast, dmp_r, dmr_r):
         kl = f'{i}_{j}'
         d = json.load(open(os.path.join(VYSTUP, 'd', f'{kl}.json'))); data[kl] = d
         for b in d['budovy']:
+            # časti nad priechodmi a podlubiami (priechody.py: „priechod“, „minVyska“) a vyvýšené časti budov
+            # (casti-budov.mjs: „cast“) ostávajú, ako sú – laser nad nimi vidí celú budovu a prízemné kúsky by
+            # inak narástli do výšky domu a horná časť by „visela“ (rozšírenie LOD2 na širšie centrum, noc 22. 11.)
+            if 'priechod' in b or 'minVyska' in b or b.get('cast'):
+                continue
             # pôvodné údaje z OSM (aby sa skript dal spustiť opakovane); pri --len-strechy ostávajú výšky z dlaždice
             if not LEN_STRECHY:
                 if 'vyskaOsm' in b: b['vyska'] = b['vyskaOsm']; b['zdrojVysky'] = b.get('zdrojOsm', b.get('zdrojVysky', 'odhad'))

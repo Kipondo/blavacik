@@ -1,0 +1,285 @@
+{
+ "nazov": "2026-11-22",
+ "commit": "d567ce3",
+ "cas": "2026-11-22T04:34",
+ "hodina": 13.0,
+ "body": [
+  {
+   "id": "hlavne-namestie",
+   "nazov": "Hlavné námestie",
+   "x": 34,
+   "z": 58,
+   "ms": 218883,
+   "snimky": [
+    [
+     "ulica",
+     "hlavne-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavne-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "michalska-brana",
+   "nazov": "Michalská brána",
+   "x": -78,
+   "z": -140,
+   "ms": 233751,
+   "snimky": [
+    [
+     "ulica",
+     "michalska-brana-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "michalska-brana-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "obchodna",
+   "nazov": "Obchodná",
+   "x": 250,
+   "z": -370,
+   "ms": 220851,
+   "snimky": [
+    [
+     "ulica",
+     "obchodna-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "obchodna-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "hodzovo-namestie",
+   "nazov": "Hodžovo námestie",
+   "x": 100,
+   "z": -560,
+   "ms": 214002,
+   "snimky": [
+    [
+     "ulica",
+     "hodzovo-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hodzovo-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "safarikovo-namestie",
+   "nazov": "Šafárikovo námestie",
+   "x": 620,
+   "z": 215,
+   "ms": 213954,
+   "snimky": [
+    [
+     "ulica",
+     "safarikovo-namestie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "safarikovo-namestie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "most-snp-sever",
+   "nazov": "Most SNP z nábrežia",
+   "x": -90,
+   "z": 420,
+   "ms": 207012,
+   "snimky": [
+    [
+     "ulica",
+     "most-snp-sever-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "most-snp-juh",
+   "nazov": "Most SNP z Petržalky",
+   "x": -260,
+   "z": 900,
+   "ms": 204254,
+   "snimky": [
+    [
+     "ulica",
+     "most-snp-juh-ulica.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "eurovea-nabrezie",
+   "nazov": "Nábrežie pri Eurovei",
+   "x": 1100,
+   "z": 430,
+   "ms": 235639,
+   "snimky": [
+    [
+     "ulica",
+     "eurovea-nabrezie-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "eurovea-nabrezie-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "nivy",
+   "nazov": "Nivy",
+   "x": 1556,
+   "z": -330,
+   "ms": 198683,
+   "snimky": [
+    [
+     "ulica",
+     "nivy-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "nivy-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "hlavna-stanica",
+   "nazov": "Hlavná stanica",
+   "x": -97,
+   "z": -1640,
+   "ms": 202378,
+   "snimky": [
+    [
+     "ulica",
+     "hlavna-stanica-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "hlavna-stanica-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "jungmannova",
+   "nazov": "Petržalka – Jungmannova",
+   "x": 450,
+   "z": 2110,
+   "ms": 184148,
+   "snimky": [
+    [
+     "ulica",
+     "jungmannova-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "jungmannova-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "romanova",
+   "nazov": "Petržalka – Romanova",
+   "x": 270,
+   "z": 3150,
+   "ms": 203793,
+   "snimky": [
+    [
+     "ulica",
+     "romanova-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "romanova-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "aupark",
+   "nazov": "Aupark",
+   "x": -155,
+   "z": 1000,
+   "ms": 208747,
+   "snimky": [
+    [
+     "ulica",
+     "aupark-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "aupark-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "trnavske-myto",
+   "nazov": "Trnavské mýto",
+   "x": 1500,
+   "z": -1635,
+   "ms": 205471,
+   "snimky": [
+    [
+     "ulica",
+     "trnavske-myto-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "trnavske-myto-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "karlova-ves",
+   "nazov": "Karlova Ves – Karloveská",
+   "x": -4520,
+   "z": -2580,
+   "ms": 186413,
+   "snimky": [
+    [
+     "ulica",
+     "karlova-ves-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "karlova-ves-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "mlynska-dolina",
+   "nazov": "Mlynská dolina – Átriaky",
+   "x": -2902,
+   "z": -1770,
+   "ms": 192507,
+   "snimky": [
+    [
+     "ulica",
+     "mlynska-dolina-ulica.jpg"
+    ],
+    [
+     "zhora",
+     "mlynska-dolina-zhora.jpg"
+    ]
+   ]
+  },
+  {
+   "id": "kamzik",
+   "nazov": "Výhľad z Kamzíka",
+   "x": -943,
+   "z": -4345,
+   "ms": 194156,
+   "snimky": [
+    [
+     "ulica",
+     "kamzik-ulica.jpg"
+    ]
+   ]
+  }
+ ]
+}

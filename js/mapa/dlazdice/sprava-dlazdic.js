@@ -11,6 +11,7 @@ import { nacitajOpravyBudov, aplikujOpravy } from '../budovy/opravy.js';
 import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
 
+// predvolené okruhy (bez predvoľby kvality); skutočné nastaví nastavPolomery() podľa js/grafika/predvolby.js
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
 const ROZPOCET_MS = 7;
@@ -31,6 +32,8 @@ export class SpravaDlazdic {
     this.priprav = null;        // (objekt) → Promise: príprava shaderov a textúr pred ukázaním (nastaví modul dlaždíc)
     this.poslednaKontrola = -1e9;
     this.stred = { x: 0, z: 0 };
+    this.polomerDetail = POLOMER_DETAIL;  // m – plne podrobné dlaždice
+    this.polomerLod = POLOMER_LOD;        // m – jednoduché bloky budov (ďalej sa nestavia nič)
   }
 
   rect(t) {
@@ -64,13 +67,20 @@ export class SpravaDlazdic {
     return this.data.get(kluc);
   }
 
+  /** Zmení okruhy podrobných a jednoduchých dlaždíc (kvalita grafiky, skracovanie dohľadu). */
+  nastavPolomery(detail, lod) {
+    this.polomerDetail = detail;
+    this.polomerLod = Math.max(detail, lod);
+    this.poslednaKontrola = -1e9; // prepočítať hneď
+  }
+
   /** Čo má byť načítané okolo bodu (x, z): zoznam { t, uroven, d } zoradený od najbližšej. */
   ziadane(x, z) {
     const out = [];
     for (const t of this.zoznam) {
       const d = this.vzdialenost(t, x, z);
-      if (d < POLOMER_DETAIL) out.push({ t, uroven: 'detail', d });
-      else if (d < POLOMER_LOD && t.pocet > 0) out.push({ t, uroven: 'lod', d });
+      if (d < this.polomerDetail) out.push({ t, uroven: 'detail', d });
+      else if (d < this.polomerLod && t.pocet > 0) out.push({ t, uroven: 'lod', d });
     }
     return out.sort((a, b) => a.d - b.d);
   }
@@ -78,16 +88,20 @@ export class SpravaDlazdic {
   /** Na štarte: postaví všetko v okolí naraz (čaká sa na to pri načítavaní hry). */
   async nacitajOkolie(x, z, priebeh = () => {}) {
     this.stred = { x, z };
-    const ziadane = this.ziadane(x, z);
+    // zvyšok (vzdialené dlaždice LOD) dobehne za behu; polomer podľa predvoľby kvality (#99) – vopred, aby počet
+    // dlaždíc „n/N“ pre vlak na obrazovke načítavania (#102) sedel a vlak došiel až po poslednej dlaždici
+    const ziadane = this.ziadane(x, z).filter(({ t, uroven }) => uroven !== 'lod' || this.vzdialenost(t, x, z) <= this.polomerDetail * 1.6);
     let n = 0;
     for (const { t, uroven } of ziadane) {
-      if (uroven === 'lod' && this.vzdialenost(t, x, z) > POLOMER_DETAIL * 1.6) continue; // zvyšok dobehne za behu
       const data = await this.nacitajData(t.kluc);
       const gen = postavDlazdicu(t.kluc, data, this.rect(t), uroven, this.kontext);
       let r = gen.next();
       while (!r.done) r = gen.next();
       this._pridaj(t.kluc, uroven, r.value, data);
-      if (++n % 4 === 0) priebeh(`Staviam mesto… ${n} dlaždíc`);
+      // „n/N“ číta obrazovka načítavania (js/ui/nacitavanie/priebeh.js) – podľa toho ide vlak
+      priebeh(`Staviam mesto… ${++n}/${ziadane.length} dlaždíc`);
+      // jeden snímok pre obrazovku načítavania (vlak sa hýbe plynulo); v skrytej karte stačí krátka pauza
+      await new Promise((r) => { requestAnimationFrame(r); setTimeout(r, 40); });
     }
   }
 
@@ -129,14 +143,14 @@ export class SpravaDlazdic {
       // odstránime až keď je ďaleko (malá rezerva, aby dlaždice neblikali na hranici)
       if (!u) {
         const t = this.zoznam.find((q) => q.kluc === kluc);
-        const lim = a.uroven === 'detail' ? POLOMER_DETAIL + 150 : POLOMER_LOD + 150;
+        const lim = a.uroven === 'detail' ? this.polomerDetail + 150 : this.polomerLod + 150;
         if (!t || this.vzdialenost(t, x, z) > lim) this._odober(kluc);
       }
     }
     // prvá dlaždica, ktorej chýba požadovaná úroveň
     for (const { t, uroven } of ziadane) {
       const a = this.aktivne.get(t.kluc);
-      if (a?.uroven === uroven || (a?.uroven === 'detail' && uroven === 'lod' && this.vzdialenost(t, x, z) < POLOMER_DETAIL + 150)) continue;
+      if (a?.uroven === uroven || (a?.uroven === 'detail' && uroven === 'lod' && this.vzdialenost(t, x, z) < this.polomerDetail + 150)) continue;
       this._zacni(t, uroven);
       break;
     }
