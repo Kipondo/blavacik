@@ -44,6 +44,11 @@ export async function nacitajPamiatky(pamiatky, kontext) {
     if (!vysledok.objekt.userData.bezTiena) {
       vysledok.objekt.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     }
+    // za hmlou sa pamiatka nekreslí (js/kamera/dohlad.js): stred a polomer celej stavby
+    const gula = new THREE.Box3().setFromObject(vysledok.objekt).getBoundingSphere(new THREE.Sphere());
+    if (Number.isFinite(gula.radius) && !vysledok.objekt.userData.dohlad) {
+      vysledok.objekt.userData.dohlad = { x: gula.center.x, z: gula.center.z, max: Infinity, r: gula.radius };
+    }
     skupina.add(vysledok.objekt);
     if (vysledok.update) aktualizacie.push(vysledok.update);
   }

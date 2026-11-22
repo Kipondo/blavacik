@@ -34,6 +34,9 @@ import poskodenieAut from './auto/poskodenie-modul.js';
 import rozlisenie from './grafika/rozlisenie.js';
 import vykon from './ui/vykon.js';
 import cyklopruhy from './mapa/cesty/cyklopruhy-modul.js';
+import kvalita from './grafika/kvalita.js';
+import drobnosti from './mapa/vybavenie/dosah-drobnosti.js';
+import meranie from './ui/meranie-trasy.js';
 
 // --- doprava ---
 import grafCiest from './doprava/graf.js';
@@ -81,6 +84,9 @@ export default [
   poskodenieAut,
   rozlisenie,
   vykon,
+  kvalita,
+  drobnosti,
+  meranie,
   grafCiest,
   semafory,
   premavka,

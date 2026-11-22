@@ -336,7 +336,7 @@ export default {
     const { x, z } = hra.stav.pozicia;
     for (const st of this.stvorce.values()) {
       const d = Math.hypot(st.cx - x, st.cz - z);
-      if (d < DOHLAD + STVOREC * 0.7) {
+      if (d < Math.min(DOHLAD, hra.stav.dohlad ?? DOHLAD) + STVOREC * 0.7) {
         st.cakanie = (st.cakanie ?? 0) + 1;
         // počkaj na budovy z dlaždice (bod služby sa umiestni na fasádu), najviac 6 s
         if (!st.skupina && (this.budovaDlazdice(st.cx, st.cz) || st.cakanie > 6)) this.postavStvorec(st);

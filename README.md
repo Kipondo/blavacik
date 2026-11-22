@@ -13,6 +13,11 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 - **Lokálne:** v priečinku projektu spusti `python3 -m http.server 8000` a otvor `http://localhost:8000`
   (cez dvojklik na `index.html` to nepôjde – prehliadač nedovolí načítať moduly a JSON zo súboru).
 - **Editor postavy:** `editor-postavy.html` (odkaz je aj v menu hry) – vzhľad Ďoďa sa uloží a hra ho použije.
+- **Meranie výkonu (trasa #60):** otvor hru s `?meranie` na konci adresy (napr. `http://localhost:8000/?meranie`)
+  a stlač Hrať – hráč sa postupne prenesie na 16 miest testovacej trasy, na každom sa zmerajú snímky/s, čas snímky,
+  kreslenia, trojuholníky, čas procesora a čas načítania dlaždíc; na konci sa ukáže tabuľka (tlačidlo ju skopíruje).
+  Kvalitu zvoľ v menu pred meraním. Automaticky bez okna: `python3 tools/kontrola/meranie-trasy.py http://localhost:8000 vysoka`
+  (Playwright + Chrome; bez grafickej karty sú snímky/s len na porovnanie pred/po).
 
 ## Ovládanie
 | | Klávesnica | Mobil |
@@ -25,7 +30,7 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 | Pauza | Esc (uvoľní myš); späť do hry klikom | ❚❚ |
 | Mapa mesta (veľká) | M; ťahanie myšou alebo WASD = posun, koliesko = priblíženie, C = späť na hráča (kým je otvorená, myš ani klávesy nehýbu hrou) | – |
 | Vypísať polohu (pre misie) | P | – |
-| Ukazovateľ výkonu (snímky/s, čas snímky, rozlíšenie) | F3 | – |
+| Ukazovateľ výkonu (snímky/s, čas snímky, kreslenia, rozlíšenie, kvalita a dohľad) | F3 | – |
 | Lietanie (dočasné, na prezeranie) | 2× Medzerník zapne/vypne; Medzerník hore, Shift dole | – |
 | Presun na miesto (dočasné) | M → klik na veľkú mapu | – |
 
@@ -228,7 +233,7 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   aj sekundy), šum textúry je hotové plátno. Hotová dlaždica sa pred ukázaním pripraví pre grafickú kartu
   (`js/mapa/dlazdice/pripravit-dlazdicu.js`: shadery na pozadí cez `compileAsync`, veľké textúry zeme po jednej).
   3D fasády sa stavajú po podlažiach a do typovaných polí (menej odpadu v pamäti). **Automatické rozlíšenie**
-  (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na 55 %,
+  (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na minimum predvoľby kvality,
   pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **F3** ukáže snímky/s, priemerný
   a najhorší čas snímky, počet kreslení, trojuholníky a rozlíšenie (`js/ui/vykon.js`).
 - **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
@@ -236,10 +241,34 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   farebné ladenie, vyhladzovanie hrán (MSAA), jemná vineta; tiene slnka sú ostrejšie, stred tieňov je kúsok pred
   hráčom v smere pohľadu a je zarovnaný na texely (okraje neblikajú), na okraji tieňovej mapy sa tiene plynulo stratia.
   Strechy bez laserového modelu majú škridlu / štrk s normálovou mapou a drsnosťou (CC0, mapované zo svetových súradníc).
-  V menu sa dá zvoliť **Grafika: nízka / stredná / vysoká** (nízka = bez efektov, ako predtým; integrovaná grafika
-  začne na strednej). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
+  V menu sa dá zvoliť **Grafika: nízka / stredná / vysoká / ultra / auto** (od #58 – pozri *Predvoľby kvality a dohľad*). Na RTX 2060 (1569 × 1266) trvá snímok 10,6 ms bez efektov, 11,0 ms stredná, 12,9 ms vysoká –
   hra drží 60 FPS. Snímky pred/po: `docs/snimky/grafika/`. Ladenie AO v konzole:
   `hra.moduly.find(m => m.nazov === 'efekty').vykreslovac.matVysledok.uniforms.ladenie.value = 1`.
+- **Predvoľby kvality a dohľad** (issue #58, podľa Taipei Rush; `js/grafika/predvolby.js`, `js/grafika/kvalita.js`):
+  zblízka ostáva grafika rovnaká, šetrí sa diaľka. **Hmla končí pri dohľade** a za ňou sa nič nestavia ani nekreslí
+  (predtým jednoduché bloky budov do 3,2 km a pamiatky po celom meste). Plne podrobné dlaždice sú len v okruhu
+  okolo hráča, ďalej po koniec hmly **stredný pás**: jednoduché bloky budov s oknami (shader, v noci časť okien
+  svieti, z diaľky bez mihotania). **Drobnosti** (lavičky, značky, tabule ulíc) sa kreslia len zblízka, lampy do
+  dvojnásobku (`js/mapa/vybavenie/dosah-drobnosti.js`); pamiatky a skupiny stromov za hmlou skryje `js/kamera/dohlad.js`.
+
+  | | nízka | stredná | vysoká | ultra |
+  |---|---|---|---|---|
+  | dohľad (koniec hmly) | 420 m | 650 m | 900 m | 1300 m |
+  | plný detail (okruh) | 250 m | 350 m | 450 m | 600 m |
+  | drobnosti | 70 m | 105 m | 150 m | 220 m |
+  | autá / chodci najviac | 40 / 120 | 90 / 250 | 200 / 450 | 200 / 450 |
+  | tiene (mapa, dosah) | nie | 2048, 100 m | 4096, 120 m | 4096, 150 m |
+  | efekty (AO, MSAA) | nie | stredné | plné | plné |
+  | pomer pixelov min / max | 0,7 / 1,0 | 0,75 / 1,25 | 0,8 / 1,5 | 0,9 / 2,0 |
+
+  **Auto** (predvolená voľba) začne podľa grafickej karty (integrovaná → stredná, samostatná → vysoká) a podľa
+  plynulosti prejde o stupeň nižšie alebo vyššie. Keď hra dlhšie nestíha ani pri najnižšom automatickom rozlíšení,
+  **dohľad sa skráti** o 15 % (najviac na 55 %), pri rezerve sa vráti. Aktuálny stav ukáže menu pod výberom a F3.
+  Tiene, efekty a NPC na vysokej sú ako pred #58 (tabuľka Taipei Rush má na vysokej menej – zblízka by to bolo vidieť).
+  **Meranie** na trase #60 (`docs/meranie/58-trasa-60.json`, bez grafickej karty, vysoká pred → po): kreslení o 24–44 %
+  menej (napr. Hlavné nám. 1211 → 805, Eurovea 991 → 552), trojuholníkov o 14–32 % menej, jednoduchých dlaždíc
+  ~130 → ~12, podrobných 16–21 → 4–10; okolie po presune sa dostavia o rád rýchlejšie (Eurovea 37 s → 7 s).
+  Nízka: ~430 kreslení a ~1,9 mil. trojuholníkov. Snímky pred/po: `docs/snimky/kvalita/` (zblízka bez zmeny, diaľka v opare).
 - **Realistickejší vzhľad – zlatá hodinka** (`js/grafika/nalada.js`): nízke teplé slnko (~12° nad obzorom), dlhé tiene,
   chladnejšie modrasté tiene, teplá žiara okolo slnka a nasvietené oblaky, teplý opar do diaľky; všetky farby
   osvetlenia sú na jednom mieste (neskôr sa podľa herného času dá prepínať deň/noc).
@@ -537,6 +566,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` sú v hre tieto zmeny:
   Nastavenia v [js/cas/nastavenia.js](js/cas/nastavenia.js).
 
 ## Čo ďalej
+- Kvalita (#58): plynulé prelínanie podrobnej a jednoduchej dlaždice (dnes sa vymení celá naraz, v opare), vzdialené
+  stromy ako billboardy, na nízkej Lambert namiesto PBR a textúry v polovičnom rozlíšení; zmerať na integrovanej
+  grafike a RTX 2060 cez `?meranie` a doladiť hodnoty predvolieb.
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Laser na celé mesto (`--vsetko`), keď sa výrez odobrí (strechy sú už v binárnom formáte, ~250–500 kB na dlaždicu centra).
