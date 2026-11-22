@@ -202,8 +202,14 @@ export default {
       const x = naj.m[0] + nx * 1.0, z = naj.m[1] + nz * 1.0;
       // strop = spodok dosky prvého poschodia (dvere sú vo výklenku pod ňou)
       hra.stav.atriakyVchod = { x, z, y: teren(x, z), uhol: Math.atan2(-nx, -nz), blok: 'T', strop };
-      // ochoz (terasa) na tej istej strane: balkónové dvere v stene ustúpeného podlažia → izba 314
-      if (T.terasa) {
+      // ochoz (terasa): balkónové dvere izby 314 sú otvor v stene ustúpeného podlažia (poloha v JSON modelu,
+      // tools/blender/atriaky/bloky.py); izba je priamo v meste a chodí sa do nej pešo (js/mapa/atriaky/internat.js)
+      if (T.terasa && T.ochoz) {
+        const [ox, oz] = sv(T.ochoz.p), [qx, qz] = T.ochoz.n;
+        hra.stav.atriakyOchoz = { x: ox + qx * 1.0, z: oz + qz * 1.0, y: T.terasaY, uhol: Math.atan2(-qx, -qz),
+          dvere: [ox, oz], n: [qx, qz], sirka: T.ochoz.sirka, otvor: true };
+      } else if (T.terasa) {
+        // starší model bez otvoru: dvere v betónovom portáli pred stenou
         const u = odsadPolygon(j, -info.terasa), c = u[naj.i], e = u[(naj.i + 1) % u.length];
         const mo = [(c[0] + e[0]) / 2, (c[1] + e[1]) / 2];
         // dvere sú v portáli, ktorý vystupuje 0,6 m pred stenu (zakryje parapet ustúpeného podlažia)

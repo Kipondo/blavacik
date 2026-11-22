@@ -29,6 +29,8 @@ for meno in sys.argv[1:] or ['vstup']:
         s = info['stred']
         zaznamy.append({'model': 'vyskova-budova', 'subor': subor, 'nazov': nazov, 'x': s[0], 'z': s[1], 'dosah': dosah})
         print(f'{subor}: {time.time() - t0:.0f} s')
-with open('/tmp/atriaky-zaznamy.json', 'w') as f:
+import tempfile  # noqa: E402
+cesta = os.path.join(tempfile.gettempdir(), 'atriaky-zaznamy.json')   # /tmp na Linuxe, %TEMP% na Windows
+with open(cesta, 'w') as f:
     json.dump(zaznamy, f, ensure_ascii=False)
-print(len(zaznamy), 'záznamov → /tmp/atriaky-zaznamy.json')
+print(len(zaznamy), 'záznamov →', cesta)
