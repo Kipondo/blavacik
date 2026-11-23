@@ -1,26 +1,26 @@
-// Plochy križovatiek – čistý asfalt navrchu, aby sa čiary prekrížených ciest „nebili“.
+// Plochy križovatiek – asfalt v kruhu, ktorý vyplní medzery medzi pásmi ciest, čo sa v križovatke stretajú.
+// Majú ten istý materiál, textúru vo svetových súradniciach a výšku ako cesty (js/mapa/cesty/cesty.js), takže
+// prekrytie s pásmi ciest nevidno a nič nebliká. Značenie ciest pri križovatke končí (cesty.js, usekyZnacenia).
 
 import * as THREE from 'three';
-import { pridajStrukturu } from './struktura.js';
-import { pridajOpotrebenie } from './opotrebenie.js';
-import { texturaAsfaltu } from './textura-cesty.js';
+import { materialAsfaltu, NAD_TERENOM, MIERKA_ASFALTU } from './cesty.js';
 
 const SEGMENTY = 16;
 
 export function vytvorPlochyKrizovatiek(krizovatky, vyskopis) {
   const poz = [], uv = [], idx = [];
+  const m = MIERKA_ASFALTU;
   for (const k of krizovatky.values()) {
     const r = k.polomer;
     if (r < 2) continue;
     const stred = poz.length / 3;
-    const y = vyskopis.vyska(k.x, k.z) + 0.17;
-    poz.push(k.x, y, k.z);
-    uv.push(0.5, 0);
+    poz.push(k.x, vyskopis.vyska(k.x, k.z) + NAD_TERENOM, k.z);
+    uv.push(k.x / m, k.z / m);
     for (let i = 0; i <= SEGMENTY; i++) {
       const u = (i / SEGMENTY) * Math.PI * 2;
       const x = k.x + Math.cos(u) * r, z = k.z + Math.sin(u) * r;
-      poz.push(x, vyskopis.vyska(x, z) + 0.17, z);
-      uv.push(0.5 + Math.cos(u) * 0.45, Math.sin(u) * r / 9);
+      poz.push(x, vyskopis.vyska(x, z) + NAD_TERENOM, z);
+      uv.push(x / m, z / m);
       // (stred, i+1, i) – normála nahor
       if (i > 0) idx.push(stred, stred + i + 1, stred + i);
     }
@@ -30,9 +30,7 @@ export function vytvorPlochyKrizovatiek(krizovatky, vyskopis) {
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.setIndex(idx);
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, pridajOpotrebenie(pridajStrukturu(new THREE.MeshStandardMaterial({
-    map: texturaAsfaltu(), roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
-  }), 'asfalt', 3.5, 0.9), 0));
+  const mesh = new THREE.Mesh(geo, materialAsfaltu());
   mesh.receiveShadow = true;
   mesh.name = 'krizovatky';
   return mesh;

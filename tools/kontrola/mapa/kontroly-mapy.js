@@ -289,6 +289,7 @@ export const KATEGORIE = [
         const videne = new Set();
         g.traverse((o) => {
           if (!o.isMesh) return;
+          if (o.name !== 'asfalt') { o.geometry.dispose(); return; }   // značenie = ten istý pás (#136)
           const p = o.geometry.getAttribute('position').array, idx = o.geometry.index.array;
           for (let t = 0; t < idx.length; t += 3) {
             const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;

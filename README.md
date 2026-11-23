@@ -463,6 +463,15 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   po 2,5 m (terén cez vozovku presvital na 2 % plochy, teraz na 0,6 %), v zákrute pokos (cesta sa nezúži) a vnútorný
   okraj ostrej zákruty sa neprekrúti. Pod vozovkou a chodníkom nie je v mape povrchu trieda trávy (trsy trávy
   neprerastajú cez cestu).
+- **Cesty bez blikania – asfalt a značenie v dvoch vrstvách** (#136, `js/mapa/cesty/cesty.js`):
+  - **Asfalt:** všetky cesty a plochy križovatiek majú jeden spoločný materiál, textúru aj opotrebenie vo svetových
+    súradniciach a jednu výšku 0,12 m. Kde sa pásy prekrývajú (križovatky, súbežné pásy), vyzerajú na pixel
+    rovnako, takže nebliká nič. Predtým mala každá cesta vlastné UV a značenie a prekrývajúce sa cesty boli od seba
+    len o 5 mm.
+  - **Vodorovné značenie** (čiary, krajnice, stopy kolies, špina pri obrubníku) je priehľadná vrstva navrchu. Pri
+    križovatkách končí (ako chodníky), takže sa čiary rôznych ciest nekrížia. Cez vjazd obslužnej cesty
+    (`service`, `living_street`) značenie hlavnej cesty pokračuje.
+  - **Ďalej v #136:** chodníky, plochy, cyklopruhy a prechody v jednej vrstve.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
