@@ -128,6 +128,20 @@ Postup:
    Na issue, na ktorom už pracuje ten druhý, nesiahaj.
 3. **PR uzatvára issue** – do popisu PR napíš `Closes #N`.
 
+## Pamiatky a významné stavby
+Platí pri **každej** pamiatke a stavbe, ktorú dorábaš alebo prerábaš (#130):
+- Čo pošle majiteľ (fotky, súradnice, opis) je **len hrubý odhad** a ukazovateľ, čo sa mu nepáči – nie presný podklad.
+- Pred modelovaním vždy sprav **hĺbkový prieskum** zo všetkých voľne dostupných zdrojov: pôdorysy, rezy, pohľady,
+  výkresy, vizualizácie, fotky zo všetkých strán, počty podlaží, výšky, materiály, farby, detaily vstupov a striech.
+- Zdroje: OSM (`building:part`, `height`, `building:levels`), laser ÚGKK (DMP − DMR, LOD2), ortofoto ZBGIS,
+  3D modely mesta (opendata.bratislava.sk), Wikimedia Commons, Wikipédia, stránky architektov a developerov,
+  archinfo.sk, ASB a odborné články, súťažné návrhy, dokumentácia z verejných konaní (EIA na enviroportal.sk,
+  územné a stavebné konania – často s výkresmi), správy.
+- **Nič z Google Maps / Earth / Street View** (licencia).
+- Výkresy a cudzie fotky sa do repozitára **nedávajú** – len rozmery a opis slovami do `napady/pamiatky-podklady.md`
+  **s odkazmi na zdroje**; do repozitára ide len hotový model a skript, ktorý ho vyrába.
+- Ak ani po prieskume niečo nie je jasné, napíš majiteľovi, akú vlastnú fotku má dodať (odkiaľ, z akého uhla).
+
 ## Pravidlá kódu
 - Kód rozdeľ do **malých samostatných súborov podľa oblastí** (mapa, auto, chodec, polícia, misie, dialógy, UI).
   Jeden súbor = jedna zodpovednosť. Nové veci pridávaj radšej ako nový súbor než do cudzieho.
