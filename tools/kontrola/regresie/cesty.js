@@ -262,4 +262,45 @@ export const kontrolyCiest = [
       return { skontrolovane: n, chyby };
     },
   },
+  {
+    id: 'tunely-zasypane',
+    popis: 'Pred cestnými tunelmi pod rovnou ulicou (hra ich nekreslí) nie je v teréne slepá jama zo zárezu – napr. '
+      + 'Staromestská pod Hodžovým námestím pri Prezidentskom paláci (jama 7 m s oporným múrom)',
+    oprava: 'fix/tunel-hodzovo – tools/mesto/laser/zasyp_tunely.py (zoznam tunely.json); spúšťať po teren.py, pred cesty_teren.py',
+    tolerancia: 0,
+    async spusti(ctx) {
+      const chyby = [];
+      const r = await fetch('tools/mesto/laser/tunely.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba tools/mesto/laser/tunely.json' }] };
+      const D = ctx.index.dlazdica;
+      const cache = new Map();
+      const daj = async (k) => { if (!cache.has(k)) cache.set(k, await teren(k)); return cache.get(k); };
+      let n = 0;
+      for (const tunel of (await r.json()).tunely ?? []) {
+        for (const [px, pz] of tunel.portaly) {
+          // medián terénu do 60 m od portálu proti najnižšiemu bodu do 30 m = hĺbka jamy
+          const okolie = [], blizko = [];
+          for (let i = Math.floor((px - 60) / D); i <= Math.floor((px + 60) / D); i++) {
+            for (let j = Math.floor((pz - 60) / D); j <= Math.floor((pz + 60) / D); j++) {
+              const t = await daj(`${i}_${j}`);
+              if (!t) continue;
+              const krok = D / (t.n - 1);
+              for (let b = 0; b < t.n; b++) {
+                for (let a = 0; a < t.n; a++) {
+                  const d = Math.hypot(i * D + a * krok - px, j * D + b * krok - pz);
+                  if (d < 60) okolie.push(t.H[b * t.n + a]);
+                  if (d < 30) blizko.push(t.H[b * t.n + a]);
+                }
+              }
+            }
+          }
+          if (!blizko.length) continue;
+          n++;
+          const jama = median(okolie) - Math.min(...blizko);
+          if (jama > 2) chyby.push({ x: px, z: pz, text: `${tunel.nazov}: jama pri portáli ${jama.toFixed(1)} m` });
+        }
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
 ];

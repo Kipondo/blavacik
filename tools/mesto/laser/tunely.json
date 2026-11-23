@@ -1,0 +1,9 @@
+{
+  "popis": "Cestné tunely pod rovnou ulicou, pred ktorými sa zasype zárez z lasera (tools/mesto/laser/zasyp_tunely.py). Hra tunely nekreslí – cesta by inak zišla do slepej jamy. Portály = konce nájazdových ciest pri tuneli (x, z v metroch hry). Tunely v kopci (Sitina) sem nepatria.",
+  "tunely": [
+    {
+      "nazov": "Staromestská pod Hodžovým námestím",
+      "portaly": [[-82.1, -434.4], [-5.6, -490.5]]
+    }
+  ]
+}

@@ -5,6 +5,7 @@
     { "id": "michalska-brana", "nazov": "Michalská brána", "x": -78, "z": -140, "azimut": 340, "pohlady": ["ulica", "zhora"] },
     { "id": "obchodna", "nazov": "Obchodná", "x": 250, "z": -370, "azimut": 320, "pohlady": ["ulica", "zhora"] },
     { "id": "hodzovo-namestie", "nazov": "Hodžovo námestie", "x": 100, "z": -560, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    {"id": "hodzovo-tunel", "nazov": "Hodžovo nám. – nájazd do tunela", "x": 45, "z": -555, "azimut": 220, "pohlady": ["ulica", "zhora"]},
     { "id": "safarikovo-namestie", "nazov": "Šafárikovo námestie", "x": 620, "z": 215, "azimut": 140, "pohlady": ["ulica", "zhora"] },
     { "id": "most-snp-sever", "nazov": "Most SNP z nábrežia", "x": -90, "z": 420, "azimut": 210, "pohlady": ["ulica"],
       "kamera": [-120, 18, 445], "ciel": [-231, 30, 700] },

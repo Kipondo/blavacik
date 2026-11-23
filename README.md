@@ -462,6 +462,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     laser vidí pod mostom nižšiu zem. Profil po osi sa vyhladí (medián 45 m) a kde sa dve cesty kryjú, vyhrá nižšia
     (cesta pod mostom sa nezdvihne). Diaľnice a nájazdy: 57 → 13 strmých miest, všetky cesty 227 → 164; regresná
     kontrola `rychle-cesty-bez-skokov`.
+  - `python3 tools/mesto/laser/zasyp_tunely.py` (po `teren.py`, pred `cesty_teren.py`) zasype zárezy pred cestnými
+    tunelmi pod rovnou ulicou. Hra tunely nekreslí, laser však vidí otvorený zárez, a tak cesta zišla do slepej jamy
+    s oporným múrom. Na Staromestskej pod Hodžovým námestím pri Prezidentskom paláci bola jama hlboká 7 m. Jama pri
+    portáloch zo zoznamu `tools/mesto/laser/tunely.json` sa vyplní hladkou plochou z okolitej ulice (Laplaceova
+    rovnica), zasypaných je 5 500 m². Regresná kontrola `tunely-zasypane` a bod trasy `hodzovo-tunel`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
