@@ -131,6 +131,52 @@ export const kontrolyCiest = [
     },
   },
   {
+    id: 'rychle-cesty-bez-skokov',
+    popis: 'Rýchle cesty mimo podrobného terénu (diaľnice, cesty I.–III. triedy) bez úsekov strmších ako 22 % na 10 m '
+      + 'v hrubom teréne – najviac 30 (23. 11. 2026: 57 len na diaľniciach → 13)',
+    oprava: 'fix/teren-mosty-dialnice – tools/mesto/laser/cesty_teren_hruby.py (prepady pri koncoch mostov, #54); spúšťať po teren.py',
+    tolerancia: 30,
+    async spusti(ctx) {
+      const meta = await (await fetch('data/mapa/mesto/teren.json')).json();
+      const v = new Int16Array(await (await fetch('data/mapa/mesto/teren.bin')).arrayBuffer());
+      const { sirka: W, hlbka: D, krok: K, minX, minZ } = meta;
+      const h = (x, z) => {
+        const fx = Math.min(W - 1.0001, Math.max(0, (x - minX) / K)), fz = Math.min(D - 1.0001, Math.max(0, (z - minZ) / K));
+        const i = Math.floor(fx), j = Math.floor(fz), tx = fx - i, tz = fz - j;
+        return ((v[j * W + i] * (1 - tx) + v[j * W + i + 1] * tx) * (1 - tz) + (v[(j + 1) * W + i] * (1 - tx) + v[(j + 1) * W + i + 1] * tx) * tz) / 10;
+      };
+      const RYCHLE = new Set(['motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link']);
+      const detail = new Set(ctx.index.terenDetail?.dlazdice ?? []);
+      const chyby = [];
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        if (detail.has(kluc)) continue;
+        for (const c of d.cesty ?? []) {
+          if (!RYCHLE.has(c.typ) || c.most || c.nadjazd || !(c.body?.length > 1)) continue;
+          const body = [];
+          for (let i = 1; i < c.body.length; i++) {
+            const [ax, az] = c.body[i - 1], [bx, bz] = c.body[i];
+            const k = Math.max(1, Math.round(Math.hypot(bx - ax, bz - az) / 5));
+            for (let q = 0; q < k; q++) body.push([ax + (bx - ax) * q / k, az + (bz - az) * q / k]);
+          }
+          body.push(c.body.at(-1));
+          let posledny = -1e9;
+          for (let i = 2; i < body.length; i++) {
+            const [ax, az] = body[i - 2], [bx, bz] = body[i];
+            const L = Math.hypot(bx - ax, bz - az);
+            if (L < 8) continue;
+            n++;
+            if (Math.abs(h(bx, bz) - h(ax, az)) / L > 0.22 && i - posledny > 4) {
+              posledny = i;
+              chyby.push({ x: +body[i - 1][0].toFixed(1), z: +body[i - 1][1].toFixed(1), dlazdica: kluc, text: `${c.typ}: skok v hrubom teréne` });
+            }
+          }
+        }
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
     id: 'teren-bez-svov',
     popis: 'Susedné dlaždice podrobného terénu sa na spoločnej hrane nelíšia o viac ako 0,3 m (schod v teréne a na ceste)',
     oprava: 'fix/teren-nabrezie – tools/mesto/laser/svy_terenu.py zošil 19 švov až do 6,9 m (#54); spúšťať po cesty_teren.py',

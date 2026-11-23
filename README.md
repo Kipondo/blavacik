@@ -457,6 +457,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     terénu. Na 19 hranách bol schod až 6,9 m: úzky pás pri hrane z výplne okraja výrezu lasera, alebo dlaždice
     z rôznych behov. Chybný pás sa nahradí pokračovaním svahu, zvyšný rozdiel sa rozdelí napoly a plynulo doznie
     (sklon najviac ~12 %). Kontrolór mapy: `sev-terenu` 19 → 0; regresná kontrola `teren-bez-svov`.
+  - `python3 tools/mesto/laser/cesty_teren_hruby.py` (vždy po `teren.py`) vyhladí hrubý terén (20 m) pod rýchlymi
+    cestami mimo podrobného terénu. Na diaľniciach pri koncoch mostov cesta na posledných 5–10 m klesla o 2–4 m, lebo
+    laser vidí pod mostom nižšiu zem. Profil po osi sa vyhladí (medián 45 m) a kde sa dve cesty kryjú, vyhrá nižšia
+    (cesta pod mostom sa nezdvihne). Diaľnice a nájazdy: 57 → 13 strmých miest, všetky cesty 227 → 164; regresná
+    kontrola `rychle-cesty-bez-skokov`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
