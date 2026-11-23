@@ -32,11 +32,11 @@ const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.lengt
 export const kontrolyCiest = [
   {
     id: 'cesty-bez-prekrutenia',
-    popis: 'Pás vozovky sa v ostrých zákrutách neprekrúti – najviac 60 otočených trojuholníkov na milión '
-      + '(22. 11. 2026: 26 na milión, zvyšok sú hrany dlaždíc; pôvodný kód pred opravou ~300 na milión)',
-    oprava: 'c6c47a7 Cesty: … pokos v zákrutách (vnútorný okraj ostrej zákruty sa nevracia späť)',
+    popis: 'Pás vozovky sa v ostrých zákrutách neprekrúti – najviac 15 otočených trojuholníkov na milión '
+      + '(23. 11. 2026: 8 na milión – zostali vlásenky; 22. 11.: 26 na milión, pôvodný kód ~300 na milión)',
+    oprava: 'c6c47a7 Cesty: … pokos v zákrutách (vnútorný okraj ostrej zákruty sa nevracia späť) + test prevrátených trojuholníkov a zdvojených bodov (#136, časť 3)',
     tolerancia: 0,
-    naMilion: 60,
+    naMilion: 15,
     spusti(ctx) {
       const chyby = [];
       let n = 0;

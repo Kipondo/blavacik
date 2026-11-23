@@ -141,14 +141,17 @@ export function rozsahyZnacenia(body, jemne, krizovatky, typ = '', zebry = null)
  * Pridá pás (cestu) do spoločnej geometrie. Normála vždy nahor.
  * V priečnom smere má pás 3 rady vrcholov (okraj – stred – okraj), aby terén v strede širokej cesty
  * nepresvital cez vozovku. V zákrute sa okraj posunie po osi uhla (pokos) – cesta sa nezúži –
- * a vnútorný okraj ostrej zákruty sa nevracia späť (pás sa neprekrúti).
+ * a vnútorný okraj ostrej zákruty sa nevracia späť: ak by sa niektorý trojuholník medzi dvoma radmi prevrátil
+ * (normála nadol – vlásenky, krátke úseky v pravouhlej zákrute), okraj ostane na predošlom bode (pás sa neprekrúti).
  * svet = UV vo svetových súradniciach (asfalt), inak U naprieč (0..1) a V pozdĺž cesty (značenie).
  * od, po = pridajú sa len rady bodov od…po (vrátane); tvar sa počíta z celej osi, takže sedí na asfalt.
  */
 export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV = DLZKA_V, od = 0, po = body.length - 1 } = {}) {
   const zaciatok = s.poz.length / 3;
   let v = 0;
-  let predL = null, predP = null;
+  let predL = null, predP = null, predC = null;
+  // trojuholník (a, b, c) v rovine xz otočený normálou nadol (rovnaký test ako kontrola cesty-bez-prekrutenia)
+  const naruby = (a, b, c) => (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]) < -1e-9;
   for (let i = 0; i <= po; i++) {
     const [x, z] = body[i];
     const prev = body[Math.max(0, i - 1)], next = body[Math.min(body.length - 1, i + 1)];
@@ -170,7 +173,12 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
     // vnútorný okraj ostrej zákruty: ak by šiel proti smeru cesty, ostane na predošlom bode
     if (predL && (L[0] - predL[0]) * dx + (L[1] - predL[1]) * dz < 0) L = predL;
     if (predP && (P[0] - predP[0]) * dx + (P[1] - predP[1]) * dz < 0) P = predP;
-    predL = L; predP = P;
+    if (predC) {
+      const C = [x, z];
+      if (naruby(predL, L, predC) || naruby(predC, L, C)) L = predL;
+      if (naruby(predC, C, predP) || naruby(predP, C, P)) P = predP;
+    }
+    predL = L; predP = P; predC = [x, z];
     if (i < od) continue;
     s.poz.push(L[0], vyskopis.vyska(L[0], L[1]) + posun, L[1]);
     s.poz.push(x, vyskopis.vyska(x, z) + posun, z);
@@ -190,12 +198,13 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
   }
 }
 
-/** Rozdelí dlhé úseky na kratšie. */
+/** Rozdelí dlhé úseky na kratšie; zdvojené body (úsek kratší ako 1 cm, napr. na hrane dlaždice) vynechá. */
 export function zjemni(body, krok) {
   const out = [];
   for (let i = 0; i < body.length - 1; i++) {
     const [ax, az] = body[i], [bx, bz] = body[i + 1];
     const d = Math.hypot(bx - ax, bz - az);
+    if (d < 0.01) continue;
     const n = Math.max(1, Math.ceil(d / krok));
     for (let k = 0; k < n; k++) out.push([ax + ((bx - ax) * k) / n, az + ((bz - az) * k) / n]);
   }
