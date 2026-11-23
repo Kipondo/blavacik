@@ -9,10 +9,11 @@ export function najdiKrizovatky(cesty) {
   cesty.forEach((c, ci) => {
     c.body.forEach(([x, z], i) => {
       const k = kluc(x, z);
-      if (!body.has(k)) body.set(k, { x, z, ramena: 0, cesty: [], polomer: 0 });
+      if (!body.has(k)) body.set(k, { x, z, ramena: 0, cesty: [], typy: [], polomer: 0 });
       const b = body.get(k);
       b.ramena += i === 0 || i === c.body.length - 1 ? 1 : 2;
       b.cesty.push({ ci, i });
+      b.typy.push(c.typ);
       b.polomer = Math.max(b.polomer, c.sirka / 2);
     });
   });

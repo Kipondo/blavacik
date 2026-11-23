@@ -52,7 +52,7 @@ export async function postavMapu(data, scena, KONFIG, priebeh = () => {}, posli)
   priebeh('Staviam cesty a mosty…');
   const cesty = data.cesty ?? [];
   const { krizovatky } = najdiKrizovatky(cesty);
-  svet.add(vytvorCesty(cesty, vyskopis));
+  svet.add(vytvorCesty(cesty, vyskopis, krizovatky));
   svet.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
   svet.add(vytvorChodniky(cesty, krizovatky, vyskopis));
   svet.add(vytvorPrechody(data.prvky?.prechody, cesty, vyskopis));

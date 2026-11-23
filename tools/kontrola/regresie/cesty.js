@@ -41,6 +41,8 @@ export const kontrolyCiest = [
         const g = vytvorCesty(cesty, ROVINA);
         g.traverse((o) => {
           if (!o.isMesh) return;
+          // len asfalt (značenie je ten istý pás, len prerušený pri križovatkách – #136)
+          if (o.name !== 'asfalt') { o.geometry.dispose(); return; }
           const p = o.geometry.getAttribute('position').array, idx = o.geometry.index.array;
           for (let t = 0; t < idx.length; t += 3) {
             const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
