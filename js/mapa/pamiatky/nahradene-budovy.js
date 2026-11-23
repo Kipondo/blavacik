@@ -44,6 +44,19 @@ export function jeNahradene(x, z) {
   return false;
 }
 
+// Pôdorysy, v ktorých model pamiatky nesie vlastnú sochu (sochy-modul tam nestavia všeobecnú sochu z OSM).
+const zonySoch = [];
+
+/** Zaregistruje pôdorys [[x, z], …] (svet hry), v ktorom socha z OSM ustúpi soche z modelu pamiatky. */
+export function nahradSochy(body) {
+  zonySoch.push(body);
+}
+
+/** Stojí socha z OSM v pôdoryse, kde ju nahrádza model pamiatky? */
+export function jeSochaNahradena(x, z) {
+  return zonySoch.some((b) => vPolygone(x, z, b));
+}
+
 /** Leží bod priamo v pôdoryse niektorej nahradenej zóny (bez okraja)? */
 export function vNahradenom(x, z) {
   for (const n of zony) {

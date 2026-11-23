@@ -51,6 +51,12 @@ PRIZEMIE = {'central1': 6.0, 'central3': 6.0, 'sheraton': 5.0, 'krem': 5.0, 'teh
 BYTY = ('byty_a', 'byty_b', 'krem', 'tehla')
 VSTUP_NAMESTIE = 'r21708453'        # vstup z hlavného námestia – klenba na bielych „stromových“ stĺpoch
 VSTUP_ZAPAD = 'r21708446'           # západný vstup pri vajci – pred ním stĺp (totem)
+# rozšírenia pre ďalšie časti komplexu (eurovea_2.py): vlastné štýly fasád {štýl: funkcia(G, M, c, a, b, n, za, zb,
+# i, k)} a pätka / vzopätie presklenej strechy podľa časti (OSM id); pre Euroveu 1 sú prázdne
+FASADY = {}
+HRANA_KLENBY = {}
+VZNOS_KLENBY = {}
+SIET_KLENBY = {}
 
 
 def materialy():
@@ -159,7 +165,7 @@ class Cast:
         if self.strieska:
             self.z1 = self.zem + (3.6 if t.get('roof:shape') == 'skillion' else 4.2)
         elif self.klenba:
-            self.z1 = self.zem + KLENBA_HRANA
+            self.z1 = self.zem + HRANA_KLENBY.get(self.id, KLENBA_HRANA)
         else:
             h = VYSKY.get(self.id) or c.get('vyskaLaser') or (4.6 + (self.podlazi - 1) * 3.6)
             self.z1 = self.zem + h
@@ -233,7 +239,9 @@ def stena(G, M, c, a, b, n, z_od, i):
     posledne = len(urovne) - 2
     for k in range(len(urovne) - 1):
         za, zb = urovne[k], urovne[k + 1]
-        if za <= c.zem + 0.01 and zb - za > 3.0:
+        if s in FASADY:
+            FASADY[s](G, M, c, a, b, n, za, zb, i, k)
+        elif za <= c.zem + 0.01 and zb - za > 3.0:
             prizemie(G, M, c, a, b, n, za, zb)
         elif s in BYTY and k == posledne and c.podlazi >= 5:
             penthaus(G, M, a, b, n, za, zb)
@@ -450,11 +458,11 @@ def klenba(G, M, c, casti):
 
     def od_bokov(x, y):
         return min(vzdialenost_usecky(x, y, a, b) for a, b in bocne)
-    hrana, rohy = rozdel(c.body, KLENBA_SIET)
+    krok = SIET_KLENBY.get(c.id, KLENBA_SIET)
+    hrana, rohy = rozdel(c.body, krok)
     xs = [p[0] for p in c.body]
     ys = [p[1] for p in c.body]
     body = list(hrana)
-    krok = KLENBA_SIET
     y = min(ys) + krok / 2
     rad = 0
     while y < max(ys):
@@ -469,7 +477,7 @@ def klenba(G, M, c, casti):
     vys = delaunay_2d_cdt([Vector(p) for p in body], [(i, (i + 1) % m) for i in range(m)], [], 2, 1e-4)
     v2, trojuh = vys[0], vys[2]
     w = max(od_bokov(p.x, p.y) for p in v2) or 1.0
-    vznos = min(KLENBA_VZNOS, 0.6 * w)
+    vznos = min(VZNOS_KLENBY.get(c.id, KLENBA_VZNOS), 0.6 * w)
 
     def z(p):
         x, y = (p.x, p.y) if hasattr(p, 'x') else p

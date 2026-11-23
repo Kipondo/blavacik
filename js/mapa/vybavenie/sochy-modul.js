@@ -12,6 +12,7 @@ import { clone as klonujSKostrou } from 'three/addons/utils/SkeletonUtils.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { nacitajGlb } from '../../chodec/postava/nacitaj-postavu.js';
 import { klipyPreModel } from '../../chodec/npc/model-npc.js';
+import { jeSochaNahradena } from '../pamiatky/nahradene-budovy.js';
 
 const STVOREC = 400;
 const DOHLAD = 450;
@@ -182,6 +183,7 @@ export default {
     const skupiny = new Map();
     st.kolizie = [];
     for (const s of st.sochy) {
+      if (jeSochaNahradena(s.x, s.z)) continue;          // sochu nesie model pamiatky (nahraditSochy)
       const y = this.hra.mapa.vyska(s.x, s.z);
       const { diely, r } = this.diely(s, y);
       for (const [geo, mat, mx] of diely) {

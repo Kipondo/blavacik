@@ -136,6 +136,35 @@ Model z Blendera podľa 57 častí budov z OSM s výškami z lasera (`tools/blen
   z dlaždíc → `tools/blender/data/eurovea.json`), potom `python3 tools/blender/vyskove_budovy.py eurovea_1`.
 - Testovacia trasa: nové body „Eurovea – námestie pred vstupom do galérie“ a „Eurovea 1 zhora“.
 
+### Eurovea 2 – hadia strecha a socha v parku (vetva `feature/eurovea-2`, #131 časť 2)
+Model `eurovea-2` z Blendera (`tools/blender/vyskove/eurovea_2.py`, ~46 tis. trojuholníkov, ~200 kB) z 13 častí budov
+z OSM. Výšky sú podľa dokumentácie EIA a lasera. Prieskum (OSM, laser, EIA, stránky architekta, Commons, články; bez Google)
+je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower ostáva vo vlastnom modeli.
+- **Nákupné centrum:** teleso s atikou 12,4 m a zelenou rozchodníkovou strechou. V nej je **hadia presklená strecha**
+  (tvar „S“ s dvoma bublinami, ~165 m, 9–20 m široká): trojuholníková sieť, ktorá v bublinách prechádza do plochej
+  kupoly (vrchol ~16–17 m). Okolo nej je svetlý lem so skrinkami. Pod sklom sú steny pasáže s výkladmi. Na východe je
+  presklený valec vstupnej haly so striežkami nad dverami.
+- **Pribinova 34:**
+  - východná časť: tmavé zrkadlové sklo s čiernymi pásmi a béžovými štvorcami, bronzové lamely v partri;
+  - západná časť: bronzový rám so štvorcovými oknami;
+  - horné podlažia sú ustúpené, do dvora biele pásy.
+- **Eurovea Riverside:** terakotové bloky s vysunutými balkónmi a ustúpenými antracitovými mezonetmi, biele krčky
+  s lodžiami, krémová nárožná sekcia E.
+- **Pribinova 40:** podnož z perforovaných panelov, kancelárie z tmavého skla so šampanskými pásmi a lamelami.
+  Posledné 3 podlažia ustupujú od Dunaja.
+- **Blok pri Sklade č. 7:** plná béžovo-okrová fasáda, na streche chladiče.
+- **Socha v parku:** vlastné zjednodušené stvárnenie „molekuly“ z 8 farebných gúľ s priehradovými nosníkmi na štrkovom
+  kruhu (~13 m), nie kópia skutočného diela. Všeobecnú sochu z OSM na tom mieste hra nestavia: nový kľúč
+  `"nahraditSochy"` v JSON modelu → `js/mapa/pamiatky/nahradene-budovy.js` → `js/mapa/vybavenie/sochy-modul.js`.
+- Pasáž je vnútri centra, preto má kolíziu celé teleso. Vchody z OSM sú v `"vchody"` (na neskorší interiér). Hra
+  neobsahuje nápisy ani názvy obchodov.
+- **Generovanie:**
+  1. `python3 tools/blender/osm_eurovea.py --cast 2` (výrez OSM a terén → `tools/blender/data/eurovea-2.json`);
+  2. `python3 tools/blender/vyskove_budovy.py eurovea_2`.
+
+  Generátor Eurovea 1 dostal háčiky na vlastné fasády a výšku sklenej strechy. Jeho výstup sa nezmenil.
+- **Testovacia trasa:** nové body „Eurovea 2 – park so sochou gúľ“, „pasáž pod hadou strechou“ a „Eurovea 2 zhora“.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
