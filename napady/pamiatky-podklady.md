@@ -514,3 +514,99 @@ Central 3 a kino laser nemá. Odhad je 32 m a 28 m.
 - laser ÚGKK DMP 2.0 (CC BY 4.0) cez dlaždice mesta;
 - články: [europe-re.com (2010)](https://europe-re.com/eurovea-galleria-welcomes-its-first-visitors-sk/26623), [Waymarking – vajce](https://www.waymarking.com/waymarks/WMAPZW_Eurovea_Egg_Bratislava_Slovakia), [Heinze – penthausy](https://www.heinze.de/architekturobjekt/eurovea/9343172/), [sk.wikipedia](https://sk.wikipedia.org/wiki/Eurovea), [Sheraton – Spectator](https://spectator.sme.sk/politics-and-society/c/five-star-sheraton-hotel-opens-in-eurovea-centre-in-bratislava);
 - Commons: [promenáda 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea,_Danube_promenade.JPG), [hlavné námestie 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea,_main_square.JPG), [Sheraton 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_the_main_square_of_the_shopping_mall_Eurovea.JPG), [východný blok 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_the_shopping_mall_%22Eurovea%22,_main_square.JPG), [vajce a vstup 2014](https://commons.wikimedia.org/wiki/File:Bratislava_Eurovea_MYSELF_2014_-_panoramio.jpg), [vajce 2026](https://commons.wikimedia.org/wiki/File:Eurovea_(IMG_20260604_144544).jpg), [Central 3 2019](https://commons.wikimedia.org/wiki/File:Bratislava,_7.jpg), [sklenená strecha zhora 2011](https://commons.wikimedia.org/wiki/File:JESE%C5%87_VO_VN%C3%9ATROBLOKU_EUROVEA_-_panoramio.jpg), [vstup z námestia 2010](https://commons.wikimedia.org/wiki/File:Eurovea_Galleria_03.jpg), [oblý koniec bytov 2018](https://commons.wikimedia.org/wiki/File:Eurovea_shopping_mall_Bratislava_(2).jpg).
+
+## Eurovea 2 – hadia strecha, budovy a socha v parku (#131, časť 2; 23. 11. 2026)
+Prieskum je podľa #130. Google sa nepoužil.
+
+Zdroje:
+- OSM a laser ÚGKK (v dlaždiciach mesta);
+- dokumentácia EIA 2017 – text rozhodnutia a výkresy s výškovými kótami. Prečítané sú len čísla, výkresy sa do repozitára nedávajú;
+- stránky architekta GFI – pôdorysy a letecká fotka, len prezreté;
+- článok statika k sklenenej streche;
+- 13 fotiek z Wikimedia Commons (2020–2025), články a tlačové správy.
+
+Kde to je:
+- model: `tools/blender/vyskove/eurovea_2.py`;
+- dáta z OSM: `tools/blender/osm_eurovea.py --cast 2` → `tools/blender/data/eurovea-2.json`;
+- Eurovea Tower má vlastný model.
+
+**Hadia sklenená strecha** (OSM way 1164819251, je to diera v multipolygóne centra rel 15756118)
+
+Nie je rovná. Je to had v tvare „S“ s dvoma rozšíreniami („bublinami“). Od západu:
+- rovný úzky západný koniec, ~9 m široký (x≈1255). Napája sa na pasáž Eurovea 1 pri Sklade č. 7;
+- stúpa na SV ku kolenu s bublinou ~18 m (x≈1320, z≈385);
+- rovný úsek na JV;
+- vajcovitá „hlava“ ~32 × 20 m nad vstupnou halou (x≈1400).
+
+Os má ~169 m, plocha je 2 176 m². Statik uvádza „165 m long, 11 to 20 m wide“.
+
+Konštrukcia:
+- trojuholníková oceľová sieť (gridshell) so sklom, nie ETFE;
+- v úzkych častiach je to nízka valená klenba, v bublinách plochá kupola;
+- montovaná bez lešenia (statika OKF Brno, architekt GFI, 2019–2021);
+- trojuholníky majú ~1,5–2 m, oceľ je svetlá.
+
+Výšky:
+- sklo dosadá na hranu strechy centra +12,4 m;
+- vrchol je odhadom ~16 m v úzkych častiach a ~17 m v kupole nad halou. Žiadny zdroj číslo neuvádza.
+
+Okolo skla je svetlosivý obvodový lem ~2,5–3 m (#C9C8C2) s bielymi skrinkami po ~6–7 m. Zo zeme strechu takmer nevidno, lebo leží na streche centra medzi Pribinova 34 a Riverside. Z ulice je vidieť len kupolu nad halou.
+
+**Nákupné centrum**
+- Teleso má 2 podlažia. Atika je +12,425 m (EIA), laser dáva 12,4 m.
+- Strecha je extenzívna zelená (rozchodníky, trávy, 3 942 m²) a neprístupná. Nie je na nej park ani stromy.
+- Na východnom konci je vstupná hala – presklený valec ~13,5 m:
+  - stĺpiky po ~2,7 m, dva priečne pásy, číre sklo (#9FB8BE);
+  - dvoje otočné dvere so striežkami;
+  - otvorená na sever (námestie pri Pribinovej) aj na juh (predpolie veže a park).
+
+**Budovy:**
+
+| časť (OSM) | výška (atika) | vzhľad |
+|---|---|---|
+| Pribinova 34 východ (rel 21708458, 9 podl.) | ~41,0 m | tmavé zrkadlové sklo (#2E3439) s čiernymi pásmi na stropoch a béžovými štvorcami ~1 × 1 m šachovnicovo; zaoblené SV nárožie; dvojpodlažný parter s bronzovými lamelami (#B88D66) pod čiernou rímsou; najvyššie podlažie ustúpené a tmavé |
+| Pribinova 34 západ (rel 21708457, 8 podl.) | ~38,7 m | bronzovohnedý rám (#6E5A47) so štvorcovými oknami; 2 ustúpené tmavosivé podlažia (#3C3F43); presklený parter s bronzovými piliermi; do dvora biele pásy s pásovými oknami |
+| blok pri Sklade č. 7 (rel 21708456) | ~27–29 m | plná fasáda bez okien z béžových (#E2DCCB) a okrových (#C9AE6F) panelov v šikmom vzore; na streche chladiče (kiná / technika) |
+| Riverside terakota (rel 21708464, 21708462) | 28,7 m | terakotový obklad (#A95A3E), biele rímsy, vysunuté balkóny v svetlých a čiernych rámoch; 2 ustúpené mezonetové podlažia v antracite (#474B50) |
+| Riverside krčky (rel 21708463, 21708461) | laser 23,9 / 21,9 m | biele, s hlbokými lodžiami a sklenými zábradliami |
+| Riverside sekcia E (rel 21708460) | 31,8 m | krémový rám (#DAD4C6) s pravidelnou mriežkou okien a lodžiami, dvojpodlažný presklený parter. Toto je „nárožná béžová budova“ z opisu majiteľa |
+| Pribinova 40 podnož (rel 22198600) | 20,1 m | perforované kovové panely (#ADA592) v dvoch pásoch s tmavou štrbinou, ustúpené presklené prízemie |
+| Pribinova 40 kancelárie (way 1164819253, 6.–15. NP) | 57,6 m (s technikou 59,9 m) | tmavé sklo (#4D565C), šampanské pásy stropov a zvislé lamely (#BDB29C), zaoblené rohy; posledné 3 podlažia ustupujú od Dunaja |
+
+**Socha v parku** (OSM node 11184533280)
+
+Skutočné dielo:
+- „Octahedral Body“ od Viktora Freša, odhalená 21. 9. 2023;
+- výška 13 m, gule majú ⌀ 2,2–2,65 m;
+- ~10 gúľ (zelená, tmavomodrá, fialová, antracitová, petrolejová, levanduľová, žltá, okrová, červená) spojených striebornými štvorhrannými priehradovými nosníkmi;
+- spodné gule ležia na kruhu zo svetlého štrku ⌀ ~12–14 m.
+
+V hre: ide o dielo žijúceho autora, preto je v hre **vlastné zjednodušené stvárnenie**, nie kópia diela.
+- „Molekula“ z 8 farebných gúľ: 3 na zemi, jedna stredná, trojica vyššie a jedna navrchu, spolu ~13 m.
+- Gule spájajú priehradové nosníky a stoja na štrkovom kruhu.
+- Všeobecná socha z OSM sa na tom mieste nestavia (`nahraditSochy` v JSON modelu).
+
+**Rozhodnutia pre model:**
+- Pasáž pod sklom je vnútri centra, takže kolíziu má celé teleso centra. Vchody z OSM sú v `vchody` (na neskorší interiér).
+- Nápisy (názov centra nad vstupom, obchody) sa do hry nedávajú.
+- Park, promenáda a nábrežie pred Riverside sú z dlaždíc mesta. Nábrežie príde v ďalšej časti #131.
+
+**Neisté – vlastné fotky by pomohli:**
+- šikmo zhora na hadiu strechu (z veže, z terasy P34/P40 alebo z Mosta Apollo), aby bolo vidieť výšku klenby a kupol nad zelenou strechou;
+- presklený valec vstupnej haly z námestia pri Pribinovej, s človekom pre mierku; južný vstup z parku;
+- interiér pasáže – pohľad hore na mriežku (farba ocele);
+- ktorá časť Pribinova 34 má 38,7 m a ktorá 41,0 m (kóty EIA sú z projektu 2017);
+- nízka spojka medzi vežou a P40 (rel 22198599), odfotená z parku;
+- blok pri Sklade č. 7, odfotený kolmo z Pribinovej;
+- socha pri Ganz House (OSM node 14183845930, 7 m, pridaná 9/2026) – autor ani tvar sa nenašli.
+
+**Zdroje:**
+- OSM (ODbL): [way 1164819251](https://www.openstreetmap.org/way/1164819251), [way 1079311821](https://www.openstreetmap.org/way/1079311821), [way 1079311822](https://www.openstreetmap.org/way/1079311822), [way 1079311826](https://www.openstreetmap.org/way/1079311826), [way 1164819252](https://www.openstreetmap.org/way/1164819252), [way 1207028033](https://www.openstreetmap.org/way/1207028033), [node 11184533280](https://www.openstreetmap.org/node/11184533280);
+- laser ÚGKK DMP 2.0 (CC BY 4.0) cez dlaždice mesta;
+- EIA: [Polyfunkčný súbor Eurovea 2](https://www.enviroportal.sk/eia/detail/polyfunkcny-subor-eurovea-2), [rozhodnutie 2017](https://www.enviroportal.sk/eia/dokument/263084), [oznámenie o zmene s výkresmi](https://www.enviroportal.sk/eia/dokument/257740);
+- architekt GFI: [Eurovea 2](https://www.gfi.sk/en/realisations/eurovea-2), [Pribinova 40](https://www.gfi.sk/en/realisations/pribinova-40);
+- statika strechy: [SCIA User Contest 2020](https://books.scia.net/UC2020/184/);
+- výrobcovia a články: [Heinze](https://www.heinze.de/architekturobjekt/eurovea-2/13155785/), [Dörken](https://www.doerken.com/services/references/delta/eurovea2-bratislava), [WICONA](https://www.wicona.com/en-int/professionals/magazine/all-references/eurovea-2), [Startitup](https://www.startitup.sk/eurovea-sa-dokoncuje-a-pripravuje-na-otvorenie/), [across](https://www.across-magazine.com/euroveas-finishing-touches-before-the-ribbon-cutting/), [TASR – Beth Galí](https://www.teraz.sk/regiony/verejne-priestory-v-eurovea2-aj-v-zone/297492-clanok.html), [en.wikipedia](https://en.wikipedia.org/wiki/Eurovea_City);
+- JTRE a socha: [socha Octahedral Body](https://jtre.sk/en/news/sculpture_octahedral_body_unveiled), [Pribinova 40](https://jtre.sk/en/projekty/pribinova_40), [Pribinova 34](https://jtre.sk/en/projekty/pribinova_34), [súťaž na sochu](https://euroveacity.com/news/viktor_freso_has_won_competition), [nehnutelnosti.sk](https://www.nehnutelnosti.sk/magazin-o-byvani/2077-na-dunajskom-nabrezi-bude-stat-octahedral-body-od-viktora-fresa);
+- správca budov: [Riverside](https://d-fs.sk/?p=1914), [P40](https://d-fs.sk/?p=1946);
+- Commons: [Pribinova 34 (2023)](https://commons.wikimedia.org/wiki/File:Pribinova_34_office_building_in_Bratislava.jpg), [päta veže a hala (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_Bratislava.jpg), [P40 a veža (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_8.jpg), [nábrežie z Petržalky (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_vo_v%C3%BDstavbe_2.jpg), [Riverside z lode (2022)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_20072022.jpg), [z Dunaja (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_3.jpg), [interiér haly (2025)](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea.jpg), [stavenisko (2020)](https://commons.wikimedia.org/wiki/File:Eurovea_2_stavenisko.jpg).

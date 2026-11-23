@@ -9,6 +9,7 @@
 // Model sa načíta na pozadí – hra nečaká na stiahnutie geometrie, kolízie platia hneď.
 // "podlaTerenu": true v <subor>.json = model kopíruje terén (hradby, živé ploty): y vrcholu = terén + lokálna výška.
 // "nahradit": [[[x, z], …]] v <subor>.json = pôdorysy bez kolízie, z ktorých sa len vyhodia budovy a stromy dlaždíc.
+// "nahraditSochy": [[[x, z], …]] = pôdorysy, v ktorých socha z OSM (sochy-modul) ustúpi soche z modelu.
 // "bezKoliziiObrysov": true = z obrysov sa nerobia kolízie (stavbu s terasami a lávkami rieši vlastný modul s výškami).
 // "kolizie": [[[x, z], …]] = vlastné kolízne pôdorysy (napr. krídla okolo átria – do dvora sa dá vojsť).
 // "plochy": [{ body: [[x, z, h], …], sirka }] = pochôdzne plochy (schodisko pred vstupom), h nad základňou modelu
@@ -18,7 +19,7 @@
 
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
-import { nahradBudovy } from './nahradene-budovy.js';
+import { nahradBudovy, nahradSochy } from './nahradene-budovy.js';
 import { pridajPochodzne } from '../mosty/pochodzne-pamiatok.js';
 
 // Drobné prvky (stĺpiky, priečky – materiály „detail…“) sa z diaľky nekreslia: na pár pixeloch
@@ -94,6 +95,8 @@ export default async function postav(p, { vyskopis, kolizie }) {
   }
   // pôdorysy, z ktorých sa len vyhodia budovy a stromy dlaždíc (napr. blok na stĺpoch – pod ním sa dá prejsť)
   for (const w of info.nahradit ?? []) nahradBudovy(svet(w), 0.5);
+  // socha je súčasťou modelu (napr. socha z gúľ pri Eurovea 2) – všeobecná socha z OSM sa na tom mieste nestavia
+  for (const w of info.nahraditSochy ?? []) nahradSochy(svet(w));
   // ďalšie kolízie bez nahrádzania budov (hradby, múry). Model podľa terénu (ploty, živé ploty) je nízky:
   // kolízia dostane vrch (terén + výška modelu), aby nad ním kamera prešla (js/kamera/kolizia-kamery.js)
   for (const k of info.kolizie ?? []) {

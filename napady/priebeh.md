@@ -108,3 +108,17 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
   valené presklené strechy z obrysu pasáže (Delaunay v Blenderi), štíty a stĺpy na otvorených koncoch.
 - Trojuholníky: stĺpiky okien ako jedna plocha (94 → 50 tis.).
 - Ďalšie časti #131: Eurovea 2 + hadia strecha + park a socha gúľ → nábrežie → pomník Štefánika.
+
+## Eurovea 2 (#131 časť 2, 23. 11.) – vetva `feature/eurovea-2`
+- Po zlúčení #139–#142: celá testovacia trasa po zlúčení bez chýb (41 snímok); biela plocha na zábere fakulty
+  zhora bola len nedotiahnutá dlaždica počas dlhého behu (samostatný záber v poriadku).
+- Prieskum (agent, ~35 min; OSM, laser, EIA 2017 s výškovými kótami, GFI, SCIA, Commons, články) →
+  `napady/pamiatky-podklady.md`. Fotky a výkresy GFI/EIA len prezreté v scratchpade, nie v repozitári.
+- `tools/blender/osm_eurovea.py --cast 2` (časť 1 dáva bajt po bajte rovnaký výstup) → `data/eurovea-2.json`:
+  13 častí, vchody, poloha sochy a terén na kruhu pod ňou.
+- `eurovea_1.py` dostal háčiky (FASADY, HRANA/VZNOS/SIET_KLENBY) – Eurovea 1 sa nemení; `eurovea_2.py` ich používa:
+  vlastné fasády, ustúpené podlažia (časť sa rozdelí na spodok a odsadený vrch), P40 s orezanými hornými podlažiami,
+  strecha centra s dierou (Delaunay s obmedzenými hranami), hadia strecha vyhladená (Catmull–Rom) cez `e1.klenba`.
+- Socha: vlastná „molekula“ z gúľ (nie kópia diela žijúceho autora); OSM socha na tom mieste sa nestavia
+  (`nahraditSochy` → `jeSochaNahradena` v sochy-modul).
+- Ďalej v #131: nábrežie (promenáda, mólo, koľaj pri vode), potom pomník Štefánika.
