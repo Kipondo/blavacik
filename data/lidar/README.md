@@ -49,6 +49,8 @@ stred Petržalky s Chorvátskym ramenom) – detailný terén, cesty na teréne,
 ```bash
 python3 tools/mesto/laser/teren.py --sirsie-centrum
 python3 tools/mesto/laser/cesty_teren.py $(python3 -c "import sys; sys.path.insert(0,'tools/mesto/laser'); from spolocne import SIRSIE_CENTRUM as S; print(' '.join(f'{i}_{j}' for i, j in S))")
+# zošitie švov medzi dlaždicami (výplň pri okraji výrezu, dlaždice z rôznych behov) – vždy po cesty_teren.py
+python3 tools/mesto/laser/svy_terenu.py
 # budovy.py a stromy.py po jednej dlaždici – laser sa číta pre obálku všetkých vybraných dlaždíc naraz
 for t in $(python3 -c "import sys; sys.path.insert(0,'tools/mesto/laser'); from spolocne import SIRSIE_CENTRUM as S; print(' '.join(f'{i}_{j}' for i, j in S))"); do
   python3 tools/mesto/laser/budovy.py --dlazdice $t && python3 tools/mesto/laser/stromy.py --dlazdice $t
