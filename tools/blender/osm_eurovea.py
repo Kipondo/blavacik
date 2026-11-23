@@ -1,13 +1,15 @@
-# Podklady pre model Eurovea 1 (tools/blender/vyskove/eurovea_1.py) z OpenStreetMap a dlaždíc mesta (#131).
+# Podklady pre modely Eurovea 1 a 2 (tools/blender/vyskove/eurovea_1.py, eurovea_2.py) z OpenStreetMap a dlaždíc
+# mesta (#131).
 #
-#   python3 tools/blender/osm_eurovea.py               – stiahne výrez OSM (API openstreetmap.org, nie Overpass)
-#   python3 tools/blender/osm_eurovea.py --cache F     – použije uložený výrez (map.json z API)
+#   python3 tools/blender/osm_eurovea.py [--cast 2]               – stiahne výrez OSM (API openstreetmap.org, nie Overpass)
+#   python3 tools/blender/osm_eurovea.py [--cast 2] --cache F     – použije uložený výrez (map.json z API)
 #
-# Do tools/blender/data/eurovea.json idú časti budov Eurovea 1 (building:part, prípadne budova bez častí):
+# Časť 1 → tools/blender/data/eurovea.json, časť 2 → tools/blender/data/eurovea-2.json.
+# Do nich idú časti budov (building:part, prípadne budova bez častí):
 # obrys (metre hry, x východ, z juh, (0,0) = 48.1435 N, 17.1077 E), dvory, vybrané tagy (podlažia, tvar strechy,
 # materiál) a výška z laserového skenovania z dlaždíc mesta (data/mapa/mesto/d/, „vyskaLaser“) – OSM má len
 # podlažia. Ďalej presklené striešky (building=roof) pri Pribinovej, vchody (uzly entrance=*) a kruhové
-# kvetináče na priestranstve pri vajci (landuse=flowerbed).
+# kvetináče na priestranstve pri vajci (landuse=flowerbed); pri časti 2 poloha sochy v parku (tourism=artwork).
 # Vajce (relation 21708447) a kupola nad vstupom (way 762656643) sú v modeli eurovea-vajce, nie tu.
 # Dáta © prispievatelia OpenStreetMap, ODbL.
 
@@ -23,7 +25,8 @@ KOREN = os.path.normpath(os.path.join(TU, '..', '..'))
 LAT0, LON0 = 48.1435, 17.1077
 KX = 111320 * math.cos(math.radians(LAT0))
 KZ = 111132
-BBOX = '17.1185,48.1393,17.1252,48.1425'      # lon0,lat0,lon1,lat1 (API /map)
+BBOX = {'1': '17.1185,48.1393,17.1252,48.1425',      # lon0,lat0,lon1,lat1 (API /map)
+        '2': '17.1240,48.1380,17.1305,48.1415'}
 
 EUROVEA = 21708468                 # celý komplex (E1 + E2) – časti vnútri sú Eurovea 1, ak x < VYCHOD
 BUDOVY_E1 = (19111914, 19111915, 19111916)    # galéria, byty, kancelárie
@@ -35,14 +38,24 @@ OBLAST_VYCHOD = (1170.0, 1252.0, 330.0, 430.0)
 # vjazdmi do garáže z Pribinovej (762656635, 762656636 – opakujú vzhľad sklenej strechy galérie)
 STRIESKY = {762656620, 21708450, 762656635, 762656636}
 VYNECHAT_STRIESKY = set()
-# vstup do galérie pri kupole (OSM entrance) – podľa terénu v ňom sa model kladie (zakladnaBod)
-ZAKLADNA = (949.7, 317.8)
+# vstup do galérie pri kupole (OSM entrance) – podľa terénu v ňom sa model kladie (zakladnaBod) – ZAKLADNA['1']
+# Eurovea 2 (2023): nákupná pasáž s hadou presklenou strechou, Pribinova 34, Eurovea Riverside, Pribinova 40 a
+# spojovacia budova nad prejazdom pri Sklade č. 7 (rel 21708456, stred na x < VYCHOD). Západný koniec Riverside
+# (rel 21708465–67, x < VYCHOD) je už v modeli Eurovea 1; Eurovea Tower (rel 21708459) má vlastný model.
+BUDOVY_E2 = {('way', 1079311821), ('way', 1079311822), ('way', 1079311826), ('way', 1164819252),
+             ('relation', 21708456)}
+VYNECHAT_E2 = {('relation', 21708459)}
+SOCHA_E2 = 11184533280             # socha z farebných gúľ v parku pred vstupom (uzol tourism=artwork)
+KRUH_SOCHY = 6.5                   # m – polomer štrkovej plochy pod sochou (prieskum: priemer 12–14 m)
+# hlavný vstup do pasáže (otočné dvere, OSM entrance=main) – podľa terénu v ňom sa model kladie
+ZAKLADNA = {'1': (949.7, 317.8), '2': (1402.0, 388.5)}
+VYSTUP = {'1': 'eurovea.json', '2': 'eurovea-2.json'}
 TAGY = ('building', 'building:part', 'building:levels', 'building:min_level', 'min_height', 'height', 'roof:shape',
         'roof:levels', 'roof:material', 'roof:colour', 'building:material', 'building:colour', 'layer', 'name')
 
 
-def stiahni():
-    req = urllib.request.Request(f'https://api.openstreetmap.org/api/0.6/map.json?bbox={BBOX}',
+def stiahni(bbox):
+    req = urllib.request.Request(f'https://api.openstreetmap.org/api/0.6/map.json?bbox={bbox}',
                                  headers={'User-Agent': 'blavacik-mapa/1.0'})
     return json.load(urllib.request.urlopen(req, timeout=180))
 
@@ -115,11 +128,12 @@ class Teren:
 def main():
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8')     # Windows konzola (cp1250) nevie „→“
+    cislo = sys.argv[sys.argv.index('--cast') + 1] if '--cast' in sys.argv else '1'
     if '--cache' in sys.argv:
         with open(sys.argv[sys.argv.index('--cache') + 1], encoding='utf-8') as f:
             osm = json.load(f)
     else:
-        osm = stiahni()
+        osm = stiahni(BBOX[cislo])
     el = osm['elements']
     uzly = {e['id']: (e['lon'], e['lat']) for e in el if e['type'] == 'node'}
     cesty = {e['id']: e for e in el if e['type'] == 'way'}
@@ -159,10 +173,9 @@ def main():
     prvky = [e for e in el if e['type'] in ('way', 'relation') and ('building' in e.get('tags', {}) or 'building:part' in e.get('tags', {}))]
     obrysy = {(e['type'], e['id']): kruhy(e) for e in prvky}
     komplex = obrysy[('relation', EUROVEA)][0]
-    budovy_e1 = [obrysy[('relation', i)][0] for i in BUDOVY_E1]
     casti_stredy = [stred(obrysy[(e['type'], e['id'])][0]) for e in prvky if 'building:part' in e['tags']]
 
-    def patri(e, b):
+    def patri_e1(e, b):
         if e['id'] in VYNECHAT or e['id'] in VYNECHAT_STRIESKY or len(b) < 3:
             return False
         if e['id'] in STRIESKY:
@@ -170,14 +183,26 @@ def main():
         x, z = stred(b)
         if x > VYCHOD:
             return False
+        budovy_e1 = [obrysy[('relation', i)][0] for i in BUDOVY_E1]
         if vnutri(x, z, komplex) or any(vnutri(x, z, q) for q in budovy_e1):
             return True
         x0, x1, z0, z1 = OBLAST_VYCHOD
         return x0 < x < x1 and z0 < z < z1
 
+    def patri_e2(e, b):
+        k = (e['type'], e['id'])
+        if k in VYNECHAT_E2 or len(b) < 3:
+            return False
+        if k in BUDOVY_E2:
+            return True
+        x, z = stred(b)
+        return x > VYCHOD and any(vnutri(x, z, obrysy[q][0]) for q in BUDOVY_E2)
+
+    patri = patri_e2 if cislo == '2' else patri_e1
+
     # výšky z lasera: budovy dlaždíc (časti z OSM, priechody rozdelené na kúsky) so stredom v obryse časti
     laser = []
-    for cesta in glob.glob(os.path.join(KOREN, 'data', 'mapa', 'mesto', 'd', '[0-2]_[0-1].json')):
+    for cesta in glob.glob(os.path.join(KOREN, 'data', 'mapa', 'mesto', 'd', '[0-3]_[0-1].json')):
         with open(cesta, encoding='utf-8') as f:
             for b in json.load(f).get('budovy', []):
                 if b.get('vyskaLaser') or b.get('zdrojVysky') == 'lidar':
@@ -222,17 +247,28 @@ def main():
     kvetinace = []
     for e in el:
         t = e.get('tags', {})
-        if e['type'] == 'way' and t.get('landuse') == 'flowerbed':
+        if cislo == '1' and e['type'] == 'way' and t.get('landuse') == 'flowerbed':
             b = linia(e)
             x, z = stred(b)
             if 880 < x < 960 and 280 < z < 340:
                 r = max(math.hypot(p[0] - x, p[1] - z) for p in b)
                 kvetinace.append({'bod': [round(x, 2), round(z, 2)], 'polomer': round(r, 2)})
 
+    zakladna = ZAKLADNA[cislo]
     vystup = {'zdroj': '© prispievatelia OpenStreetMap (ODbL); výšky: laserové skenovanie ÚGKK SR cez dlaždice mesta',
-              'zakladna': {'bod': list(ZAKLADNA), 'teren': round(teren.vyska(*ZAKLADNA), 2)},
+              'zakladna': {'bod': list(zakladna), 'teren': round(teren.vyska(*zakladna), 2)},
               'casti': casti, 'vchody': vchody, 'kvetinace': kvetinace}
-    cesta = os.path.join(TU, 'data', 'eurovea.json')
+    if cislo == '2':
+        s = next(e for e in el if e['type'] == 'node' and e['id'] == SOCHA_E2)
+        sb = bod(s['lon'], s['lat'])
+        # terén na kruhu štrkovej plochy pod sochou (r = KRUH_SOCHY m, 16 bodov) – plocha kopíruje modelovaný trávnik
+        kruh = []
+        for k in range(16):
+            a = 2 * math.pi * k / 16
+            x, z = sb[0] + KRUH_SOCHY * math.cos(a), sb[1] + KRUH_SOCHY * math.sin(a)
+            kruh.append([round(x, 2), round(z, 2), round(teren.vyska(x, z), 2)])
+        vystup['socha'] = {'bod': sb, 'teren': round(teren.vyska(*sb), 2), 'kruh': kruh}
+    cesta = os.path.join(TU, 'data', VYSTUP[cislo])
     with open(cesta, 'w', encoding='utf-8') as f:
         json.dump(vystup, f, ensure_ascii=False, separators=(',', ':'))
     print(f'{len(casti)} častí, {len(vchody)} vchodov, {len(kvetinace)} kvetináčov → {os.path.relpath(cesta, KOREN)}')
