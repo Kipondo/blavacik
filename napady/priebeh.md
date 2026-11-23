@@ -30,12 +30,18 @@ Výkresy stanice prišli 22. 11. 2026 hneď na začiatku (pred B), nič nebolo r
 #116 (zlatá linka na titulke), #117 (Átriaky), #118 (výkon – tiene, bez vetra), #119 (Hlavná stanica: plášť,
 interiér, freska, strechy, dvere a chodci), #120 (trakčné vedenie električiek a trolejbusov v celom meste),
 #121 (kvalitnejšie autá, 17 sietí namiesto 27), #122 (Univerzita Komenského, Eurovea vajce, Eurovea Tower, Sky Park),
-#123 (workflow hlasov – sady viet stanice).
+#123 (workflow hlasov – sady viet stanice), #124 (vlaky na Hlavnej stanici podľa GTFS ŽSR, A2 + A3).
 
-## Rozpracované (22. 11. večer)
+## Rozpracované (22. 11. noc)
 | vetva | priečinok | stav |
 |---|---|---|
-| `feature/vlaky-poriadok` | `blavacik` | A2 + A3: GTFS ŽSR → `data/vlaky/poriadok.json`, trasy z OSM → `data/vlaky/trate.json`, modely `tools/blender/vlaky_blender.py`, modul `js/vlaky/`, koľaje 3D, tabule príchodov, hlásenia; **čaká:** PR |
+| `fix/poriadok-zlucovania` | `blavacik` | **PR #139** (#133, #135): stratené opravy, pravidlá „Zlučovanie“, regresné kontroly + workflow (v CI prešli), stromy nie na mostoch a vo vode; čaká na zlúčenie |
+| `feature/kontrola-mapy` | `blavacik` | #134 kontrolór mapy celého mesta + #130 pravidlo o prieskume pamiatok v CLAUDE.md; nadväzuje na #139 |
+| – | – | B – výkon (#110): podľa poradia v #59 až po #133–#137 a budovách; session na to nič nespravila |
+
+- Pred zlúčením: `python3 tools/kontrola/regresie.py` a `python3 tools/kontrola/kontrola-mapy.py` (CLAUDE.md, „Zlučovanie“).
+- Majiteľ 22. 11. v noci: **nespúšťať veľa ťažkých úloh naraz** (notebook), hra bez okna mala nahlas zvuk → testy po jednom, `--mute-audio`.
+- Poradie úloh (Kipondo v #59): #133 → #134 + #135 → #136 (len na výslovný pokyn) → #130 a budovy (#127, #131, #132, #125, #126, #128, #129) → priebežne #137.
 
 - GTFS ŽSR: odkaz `www.zsr.sk/files/…/gtfs.zip` vracia len stránku „GTFS info“ s odkazom do Národného katalógu
   otvorených dát (data.slovensko.sk, dataset ebeeedf1-…, distribúcia `download?id=556da5af-…`) – nástroj sťahuje odtiaľ.

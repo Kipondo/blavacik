@@ -1,0 +1,47 @@
+# Regresné kontroly a kontrolór mapy (#134): opravené chyby sa nesmú vrátiť a nové chyby mapy pribudnúť (stromy na mostoch a vo vode, tráva na cestách a v budovách,
+# stromy na vozovke, prekrútené cesty, terén pod cestami…). Zoznam: tools/kontrola/regresie/kontroly.js.
+# Beží pri každom PR do main a po zlúčení do main. Keď zlyhá, PR sa nezlučuje (CLAUDE.md, „Zlučovanie“);
+# aby to GitHub vynútil, majiteľ nastaví v Settings → Branches → main „Require status checks“ → „regresie“.
+name: Regresné kontroly
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regresie-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regresie:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Playwright a Chromium
+        run: |
+          pip install playwright==1.49.1
+          python -m playwright install --with-deps chromium
+      - name: Kontroly
+        run: python tools/kontrola/regresie.py --json regresie.json
+      - name: Kontrolór mapy (viac chýb ako v základe = chyba)
+        if: always()
+        run: python tools/kontrola/kontrola-mapy.py
+      - name: Výsledok
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regresie
+          path: |
+            regresie.json
+            .cache/kontrola-mapy/
+          if-no-files-found: ignore

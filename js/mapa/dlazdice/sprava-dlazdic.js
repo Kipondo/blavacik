@@ -21,7 +21,8 @@ export class SpravaDlazdic {
     this.index = index;
     this.velkost = index.dlazdica;
     this.scena = scena;
-    this.kontext = { vyskopis, kolizie, rieky: vyskopis.voda, KONFIG };
+    // voda = všetky vodné plochy mesta (aj jazerá) – stromy v nich sa nestavajú (js/mapa/zelen/stromy-dlazdice.js)
+    this.kontext = { vyskopis, kolizie, rieky: vyskopis.voda, voda: index.voda ?? [], KONFIG };
     this.vyskopis = vyskopis;
     this.kolizie = kolizie;
     this.posli = posli ?? (() => {});
