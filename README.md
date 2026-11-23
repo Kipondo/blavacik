@@ -457,6 +457,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     terénu. Na 19 hranách bol schod až 6,9 m: úzky pás pri hrane z výplne okraja výrezu lasera, alebo dlaždice
     z rôznych behov. Chybný pás sa nahradí pokračovaním svahu, zvyšný rozdiel sa rozdelí napoly a plynulo doznie
     (sklon najviac ~12 %). Kontrolór mapy: `sev-terenu` 19 → 0; regresná kontrola `teren-bez-svov`.
+  - `python3 tools/mesto/laser/cesty_teren_hruby.py` (vždy po `teren.py`) vyhladí hrubý terén (20 m) pod rýchlymi
+    cestami mimo podrobného terénu. Na diaľniciach pri koncoch mostov cesta na posledných 5–10 m klesla o 2–4 m, lebo
+    laser vidí pod mostom nižšiu zem. Profil po osi sa vyhladí (medián 45 m) a kde sa dve cesty kryjú, vyhrá nižšia
+    (cesta pod mostom sa nezdvihne). Diaľnice a nájazdy: 57 → 13 strmých miest, všetky cesty 227 → 164; regresná
+    kontrola `rychle-cesty-bez-skokov`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
@@ -489,9 +494,13 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     (`js/mapa/cesty/prechody-poloha.js`).
   - **Cyklopruhy** sú súvislý pás s pokosom v lomoch. Predtým boli samostatné štvoruholníky, ktoré sa v zákrutách
     prekrývali a blikali.
-  - **Ostré zákruty:** pri každom novom rade pásu sa skontroluje, či by sa trojuholník prevrátil (okraj potom
-    ostane na predošlom bode), a zdvojené body na hrane dlaždice sa vynechajú. Kontrolór mapy `cesta-zlom`
-    95 → 24 (zostali vlásenky).
+  - **Ostré zákruty a vlásenky:** zdvojené body na hrane dlaždice sa vynechajú. Vo vlásenke (zákruta nad ~100°) je
+    namiesto pokosu vejár radov okolo vrcholu, teda zaoblený spoj. Štvoruholník medzi radmi sa na každej strane
+    rozdelí uhlopriečkou, pri ktorej sa žiadny trojuholník neprevráti; ak taká nie je, okraj sa posunie. Kontrolór
+    mapy `cesta-zlom` 95 → 0.
+  - **Chodníky:** chodník sa preruší aj tam, kde by ležal na vlastnej vozovke (vnútorná strana ostrej zákruty).
+    Jednosmerky majú chodník po oboch stranách. Vľavo nie je len tam, kde je do ~8 m druhý pás rozdelenej cesty,
+    teda stredný pás. Kontrolór mapy `chodnik-na-vozovke` 23 150 → 0.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
