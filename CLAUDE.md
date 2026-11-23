@@ -73,8 +73,60 @@ vendor/               knižnice tretích strán (three.js)
 2. Pred začatím: `git checkout main && git pull`, potom `git checkout -b feature/...`.
 3. Commituj často, s krátkou správou po slovensky.
 4. Po dokončení pushni vetvu a **otvor pull request** do `main` s popisom, čo sa zmenilo a ako to otestovať.
-5. Pred PR si stiahni najnovší `main` a vyrieš konflikty u seba vo vetve.
+5. Pred PR si stiahni najnovší `main` a vyrieš konflikty u seba vo vetve (podrobne v časti „Zlučovanie“).
 6. Do `main` sa merguje len cez PR.
+
+## Zlučovanie
+Opravy sa nám pri zlučovaní strácali (stromy na mostoch, staré verzie dlaždíc, pravidlá v tomto súbore) –
+preto platí:
+1. **Najprv `main` do vetvy, až potom PR.** Pred otvorením aj pred zlúčením PR: `git fetch origin`
+   a `git merge origin/main` do svojej vetvy, vyriešiť konflikty, otestovať – až potom PR otvoriť / zlúčiť.
+2. **Generované súbory sa pri konflikte NIKDY neriešia výberom jednej strany** (`--ours` / `--theirs`, „vezmem
+   celý súbor z vetvy“). Celý súbor z jednej strany zahodí zmeny druhej (takto sa 21. 11. stratili zmeny
+   v 575 dlaždiciach). Po zlúčení sa súbor **pregeneruje skriptom**, aby obsahoval zmeny z oboch vetiev
+   (skripty aj opravy v nich sú v kóde, ten sa zlúči ručne). Ktorý skript čo vyrába:
+
+   | generovaný súbor | skript (z koreňa repozitára) |
+   |---|---|
+   | `data/mapa/mesto/index.json`, `data/mapa/mesto/d/*.json` (dlaždice) | `cd tools/mesto && npm run dlazdice`, potom doplnky v tomto poradí: `node osm-doplnky.mjs`, `node podchody.mjs`, `node casti-budov.mjs`, `node priechody-osm.mjs && python3 priechody.py`, `node nadjazdy.mjs` (všetky s `--max-old-space-size=8000`) |
+   | výšky, strechy a stromy v dlaždiciach, `data/mapa/mesto/strechy/*` | `python3 tools/mesto/laser/vysky.py`, `budovy.py`, `casti.py`, `stromy.py` (návod a výber dlaždíc v `data/lidar/README.md`) |
+   | `data/mapa/mesto/teren.bin`, `teren.json` (terén mesta) | `cd tools/mesto && npm run teren`, potom `python3 tools/mesto/laser/teren.py --len-detail` |
+   | `data/mapa/mesto/t/*.bin` (terén 2 m z lasera) | `python3 tools/mesto/laser/teren.py …` a **vždy po ňom** `python3 tools/mesto/laser/cesty_teren.py …` (vyhladenie pod cestami) |
+   | `data/mapa/cyklopruhy.json`, `ihriska.json`, `sluzby.json`, `podniky.json`, `sochy.json`, `zastavba.json` | `tools/mesto/cyklopruhy.mjs`, `ihriska.mjs`, `sluzby.mjs`, `podniky.mjs`, `sochy.mjs`, `zastavba.mjs` |
+   | `data/mapa/osm.json` (záložná mapa centra) | `node tools/osm/stiahni.mjs && node tools/osm/prevod.mjs` |
+   | `data/mhd/*` | `node tools/mhd/stiahni.mjs && node --max-old-space-size=4000 tools/mhd/spracuj.mjs` |
+   | `data/vlaky/poriadok.json`, `data/vlaky/trate.json` | `python3 tools/vlaky/gtfs_vlaky.py`, `python3 tools/vlaky/trate_osm.py` |
+   | `assets/pamiatky/*.glb(.gz)`, `assets/pamiatky/*.json`, `assets/vlaky/vlaky.glb` | skript v `tools/blender/` podľa hlavičky modelu (`blender -b --factory-startup -P …`) |
+   | `tools/blender/data/stanica.json` | `python3 tools/blender/osm_stanica.py` |
+   | `assets/zvuk/dialogy/*` | workflow `.github/workflows/hlasy.yml` (needituj ručne) |
+   | `docs/kontrola/<beh>/` | `python3 tools/kontrola/trasa.py` |
+
+   Keď skript na pregenerovanie nemáš (napr. chýba laser v `.cache/`), zlúč súbor **po položkách** (nástroj
+   na JSON, nie výber strany) a v PR napíš, čo treba pregenerovať.
+3. **Konflikty v kóde rieš ručne tak, aby ostali zmeny z oboch strán.** Keď nie je jasné, ktorá zmena platí
+   (obe menia to isté správanie), opýtaj sa majiteľa – nehádaj.
+4. **Po zlúčení spusti testovaciu trasu** (`python3 tools/kontrola/trasa.py --nazov po-zluceni`) a porovnaj snímky
+   pred/po (`docs/kontrola/porovnanie.html`); a **regresné kontroly** (`python3 tools/kontrola/regresie.py`).
+5. **Po zlúčení do `main` over nasadenie:** GitHub Pages nasadil nový commit (`gh api repos/Kipondo/blavacik/pages/builds/latest`
+   – `status: built` a `commit` = nový `main`) a workflowy na `main` neskončili chybou (`gh run list --branch main --limit 5`,
+   napr. `hlasy.yml`). Chybu oprav hneď samostatným PR.
+6. **Zlúčené vetvy maž** (`gh pr merge N --merge --delete-branch`, staré: `git push origin --delete <vetva>`), aby sa omylom
+   nezlúčili znova. Ponechaj len `main`, otvorené PR a vetvu `hlasenia` (obrázky do issues).
+7. **Každá nová oprava = nová kontrola** v `tools/kontrola/regresie/kontroly.js` (jedna opravená chyba = jedna kontrola,
+   s odkazom na commit/PR opravy). Kontroly bežia v GitHub Actions pri každom PR (`.github/workflows/regresie.yml`);
+   **PR, v ktorom kontrola zlyhá, sa nezlučuje.**
+
+## Úlohy pre dvoch Claudov (issues so štítkami)
+Úlohy sa zadávajú ako GitHub issues so štítkom podľa toho, kto ich robí:
+- `pre-kamosa` – úloha pre druhého Clauda (kamoša),
+- `pre-mna` – úloha pre prvého Clauda (majiteľa repozitára).
+
+Postup:
+1. **Na začiatku práce si pozri otvorené issues so svojím štítkom**
+   (`gh api "repos/Kipondo/blavacik/issues?labels=pre-mna&state=open"`, resp. `labels=pre-kamosa`).
+2. **Pred začatím napíš do issue komentár, že na ňom pracuješ** (a v akej vetve).
+   Na issue, na ktorom už pracuje ten druhý, nesiahaj.
+3. **PR uzatvára issue** – do popisu PR napíš `Closes #N`.
 
 ## Pravidlá kódu
 - Kód rozdeľ do **malých samostatných súborov podľa oblastí** (mapa, auto, chodec, polícia, misie, dialógy, UI).
