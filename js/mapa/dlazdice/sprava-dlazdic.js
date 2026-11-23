@@ -10,6 +10,7 @@ import { nacitajDoplnky } from './doplnky.js';
 import { nacitajOpravyBudov, aplikujOpravy } from '../budovy/opravy.js';
 import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
+import { upravOsiCiest } from '../cesty/upravy-osi.js';
 
 // predvolené okruhy (bez predvoľby kvality); skutočné nastaví nastavPolomery() podľa js/grafika/predvolby.js
 export const POLOMER_DETAIL = 900;
@@ -57,6 +58,8 @@ export class SpravaDlazdic {
       const [i, j] = kluc.split('_').map(Number);
       const obsah = fetch(`data/mapa/mesto/d/${kluc}.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
       this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index), nacitajOpravyBudov(), nacitajHustuZelen()]).then(([d, { teren, strechy }, opravy, zelen]) => {
+        // osi ciest: rovné úseky a plynulé oblúky (pravidlá ulice, js/mapa/cesty/upravy-osi.js)
+        upravOsiCiest(d.cesty);
         // ručné opravy podľa porovnania so skutočnosťou (budovy, hustá zeleň v parkoch)
         aplikujOpravy(d.budovy, opravy);
         doplnHustuZelen(d, this.rect({ i, j }), zelen);

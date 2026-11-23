@@ -4,6 +4,7 @@
 import { vytvorVyskopisMesta } from '../../../js/mapa/teren/vyska-mesto.js';
 import { nacitajDoplnky } from '../../../js/mapa/dlazdice/doplnky.js';
 import { KONFIG } from '../../../js/config.js';
+import { upravOsiCiest } from '../../../js/mapa/cesty/upravy-osi.js';
 
 export async function nacitajIndex() {
   return (await fetch('data/mapa/mesto/index.json')).json();
@@ -16,7 +17,8 @@ export async function nacitajDlazdice(index, stav = () => {}) {
   for (let a = 0; a < kluce.length; a += 64) {
     const davka = kluce.slice(a, a + 64);
     const data = await Promise.all(davka.map((k) => fetch(`data/mapa/mesto/d/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
-    davka.forEach((k, i) => { if (data[i]) dlazdice.set(k, data[i]); });
+    // osi ciest upravené ako v hre (js/mapa/dlazdice/sprava-dlazdic.js)
+    davka.forEach((k, i) => { if (data[i]) { upravOsiCiest(data[i].cesty); dlazdice.set(k, data[i]); } });
     stav(`Načítavam dlaždice… ${dlazdice.size} / ${kluce.length}`);
   }
   // výrez s detailným terénom (ako js/mapa/dlazdice/sprava-dlazdic.js)
