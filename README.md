@@ -453,6 +453,10 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     (múry a svahy nad 2,5 m ostávajú). Na Staromestskej klesli skoky z 0,9 m na 0,07 m.
   - `hra.mapa.vyska(x, z, y)` berie výšku objektu: kto je pod mostovkou, ide po teréne a neskočí na most.
     Bočný okraj nájazdovej rampy sa plynulo zlieva s terénom.
+  - `python3 tools/mesto/laser/svy_terenu.py` (vždy po `cesty_teren.py`) zošije švy medzi dlaždicami podrobného
+    terénu. Na 19 hranách bol schod až 6,9 m: úzky pás pri hrane z výplne okraja výrezu lasera, alebo dlaždice
+    z rôznych behov. Chybný pás sa nahradí pokračovaním svahu, zvyšný rozdiel sa rozdelí napoly a plynulo doznie
+    (sklon najviac ~12 %). Kontrolór mapy: `sev-terenu` 19 → 0; regresná kontrola `teren-bez-svov`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie

@@ -1,5 +1,6 @@
-// Kontroly ciest: pás vozovky sa v zákrutách neprekrúti (js/mapa/cesty/cesty.js) a terén pod cestami
-// v laserovom výreze je pozdĺžne vyhladený (tools/mesto/laser/cesty_teren.py → data/mapa/mesto/t/*.bin).
+// Kontroly ciest: pás vozovky sa v zákrutách neprekrúti (js/mapa/cesty/cesty.js), terén pod cestami
+// v laserovom výreze je pozdĺžne vyhladený (tools/mesto/laser/cesty_teren.py → data/mapa/mesto/t/*.bin)
+// a susedné dlaždice podrobného terénu majú na spoločnej hrane rovnakú výšku (tools/mesto/laser/svy_terenu.py).
 
 import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
 
@@ -90,6 +91,39 @@ export const kontrolyCiest = [
         n++;
         const priemer = odch.reduce((a, b) => a + b, 0) / odch.length;
         if (priemer > 0.05) chyby.push({ dlazdica: kluc, text: `terén pod cestami nie je vyhladený (odchýlka ${priemer.toFixed(3)} m)` });
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'teren-bez-svov',
+    popis: 'Susedné dlaždice podrobného terénu sa na spoločnej hrane nelíšia o viac ako 0,3 m (schod v teréne a na ceste)',
+    oprava: 'fix/teren-nabrezie – tools/mesto/laser/svy_terenu.py zošil 19 švov až do 6,9 m (#54); spúšťať po cesty_teren.py',
+    tolerancia: 0,
+    async spusti(ctx) {
+      const chyby = [];
+      const detail = new Set(ctx.index.terenDetail?.dlazdice ?? []);
+      const cache = new Map();
+      const daj = async (k) => { if (!cache.has(k)) cache.set(k, await teren(k)); return cache.get(k); };
+      let n = 0;
+      for (const kluc of detail) {
+        const [i, j] = kluc.split('_').map(Number);
+        const a = await daj(kluc);
+        if (!a) continue;
+        for (const [di, dj] of [[1, 0], [0, 1]]) {
+          const sused = `${i + di}_${j + dj}`;
+          if (!detail.has(sused)) continue;
+          const b = await daj(sused);
+          if (!b || b.n !== a.n) continue;
+          n++;
+          let max = 0;
+          for (let s = 0; s < a.n; s++) {
+            const ha = di ? a.H[s * a.n + a.n - 1] : a.H[(a.n - 1) * a.n + s];
+            const hb = di ? b.H[s * b.n] : b.H[s];
+            max = Math.max(max, Math.abs(ha - hb));
+          }
+          if (max > 0.3) chyby.push({ dlazdica: kluc, text: `šev ${kluc} | ${sused}: ${max.toFixed(2)} m` });
+        }
       }
       return { skontrolovane: n, chyby };
     },
