@@ -142,16 +142,58 @@ export function rozsahyZnacenia(body, jemne, krizovatky, typ = '', zebry = null)
  * V priečnom smere má pás 3 rady vrcholov (okraj – stred – okraj), aby terén v strede širokej cesty
  * nepresvital cez vozovku. V zákrute sa okraj posunie po osi uhla (pokos) – cesta sa nezúži –
  * a vnútorný okraj ostrej zákruty sa nevracia späť: ak by sa niektorý trojuholník medzi dvoma radmi prevrátil
- * (normála nadol – vlásenky, krátke úseky v pravouhlej zákrute), okraj ostane na predošlom bode (pás sa neprekrúti).
+ * (normála nadol – krátke úseky v pravouhlej zákrute), okraj ostane na predošlom bode (pás sa neprekrúti).
+ * Vo vlásenke (zákruta nad ~100°) je namiesto pokosu vejár radov okolo vrcholu – zaoblený spoj.
  * svet = UV vo svetových súradniciach (asfalt), inak U naprieč (0..1) a V pozdĺž cesty (značenie).
  * od, po = pridajú sa len rady bodov od…po (vrátane); tvar sa počíta z celej osi, takže sedí na asfalt.
  */
 export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV = DLZKA_V, od = 0, po = body.length - 1 } = {}) {
-  const zaciatok = s.poz.length / 3;
   let v = 0;
   let predL = null, predP = null, predC = null;
+  let predRad = -1;            // index prvého vrcholu predošlého pridaného radu
   // trojuholník (a, b, c) v rovine xz otočený normálou nadol (rovnaký test ako kontrola cesty-bez-prekrutenia)
   const naruby = (a, b, c) => (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]) < -1e-9;
+  /**
+   * Jeden rad okraj L – stred – okraj P. Štvoruholník k predošlému radu sa na každej strane rozdelí tou
+   * uhlopriečkou, pri ktorej sa žiadny trojuholník neprevráti; ak taká nie je, okraj sa posunie na prvý bod,
+   * pri ktorom je: predošlý okraj, stred, predošlý stred (tam sa trojuholník len zbalí).
+   */
+  const rad = (L, C, P, pridat) => {
+    let volbaL = 'A', volbaP = 'A';
+    if (predC) {
+      // strana L: A = (L0, L1, C0) + (C0, L1, C1), B = (L0, L1, C1) + (L0, C1, C0)
+      const vL = (q) => (!naruby(predL, q, predC) && !naruby(predC, q, C) ? 'A'
+        : !naruby(predL, q, C) && !naruby(predL, C, predC) ? 'B' : null);
+      // strana P: A = (C0, C1, P0) + (P0, C1, P1), B = (C0, C1, P1) + (C0, P1, P0)
+      const vP = (q) => (!naruby(predC, C, predP) && !naruby(predP, C, q) ? 'A'
+        : !naruby(predC, C, q) && !naruby(predC, q, predP) ? 'B' : null);
+      if (!vL(L)) L = [predL, C, predC].find((q) => vL(q)) ?? predC;
+      if (!vP(P)) P = [predP, C, predC].find((q) => vP(q)) ?? C;
+      volbaL = vL(L) ?? 'A';
+      volbaP = vP(P) ?? 'A';
+    }
+    predL = L; predP = P; predC = C;
+    if (!pridat) return;
+    const a = s.poz.length / 3;
+    s.poz.push(L[0], vyskopis.vyska(L[0], L[1]) + posun, L[1]);
+    s.poz.push(C[0], vyskopis.vyska(C[0], C[1]) + posun, C[1]);
+    s.poz.push(P[0], vyskopis.vyska(P[0], P[1]) + posun, P[1]);
+    if (svet) {
+      const m = MIERKA_ASFALTU;
+      s.uv.push(L[0] / m, L[1] / m, C[0] / m, C[1] / m, P[0] / m, P[1] / m);
+    } else {
+      s.uv.push(0, v, 0.5, v, 1, v);
+    }
+    if (predRad >= 0) {
+      const b = predRad;
+      // poradie vrcholov tak, aby normála smerovala nahor (okraj L – stred, stred – okraj P)
+      if (volbaL === 'A') s.idx.push(b, a, b + 1, b + 1, a, a + 1);
+      else s.idx.push(b, a, a + 1, b, a + 1, b + 1);
+      if (volbaP === 'A') s.idx.push(b + 1, a + 1, b + 2, b + 2, a + 1, a + 2);
+      else s.idx.push(b + 1, a + 1, a + 2, b + 1, a + 2, b + 2);
+    }
+    predRad = a;
+  };
   for (let i = 0; i <= po; i++) {
     const [x, z] = body[i];
     const prev = body[Math.max(0, i - 1)], next = body[Math.min(body.length - 1, i + 1)];
@@ -161,6 +203,22 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
     if (la < 1e-6) { ax = bx; az = bz; } else { ax /= la; az /= la; }
     if (lb < 1e-6) { bx = ax; bz = az; } else { bx /= lb; bz /= lb; }
     if (la < 1e-6 && lb < 1e-6) { ax = bx = 1; az = bz = 0; }
+    if (i > 0) v += Math.hypot(x - body[i - 1][0], z - body[i - 1][1]) / dlzkaV;
+    const pridat = i >= od;
+    // vlásenka (zákruta ostrejšia ako ~100°): namiesto pokosu vejár radov okolo vrcholu (zaoblený spoj);
+    // vnútorná strana sa testom prevrátenia zbalí do jedného bodu
+    if (la > 1e-6 && lb > 1e-6 && ax * bx + az * bz < -0.2) {
+      const t0 = Math.atan2(az, ax);
+      let dt = Math.atan2(bz, bx) - t0;
+      while (dt > Math.PI) dt -= 2 * Math.PI;
+      while (dt < -Math.PI) dt += 2 * Math.PI;
+      const K = Math.max(2, Math.ceil(Math.abs(dt) / (Math.PI / 8)));
+      for (let k = 0; k <= K; k++) {
+        const t = t0 + (dt * k) / K, nx = -Math.sin(t), nz = Math.cos(t);
+        rad([x + nx * pol, z + nz * pol], [x, z], [x - nx * pol, z - nz * pol], pridat);
+      }
+      continue;
+    }
     // normála ako os uhla, dĺžka pokosu najviac 2× šírka
     let nx = -(az + bz), nz = ax + bx;
     const ln = Math.hypot(nx, nz) || 1;
@@ -168,33 +226,11 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
     const kos = Math.max(0.5, nx * -az + nz * ax);
     const o = pol / kos;
     const dx = ax + bx, dz = az + bz;
-    if (i > 0) v += Math.hypot(x - body[i - 1][0], z - body[i - 1][1]) / dlzkaV;
     let L = [x + nx * o, z + nz * o], P = [x - nx * o, z - nz * o];
     // vnútorný okraj ostrej zákruty: ak by šiel proti smeru cesty, ostane na predošlom bode
     if (predL && (L[0] - predL[0]) * dx + (L[1] - predL[1]) * dz < 0) L = predL;
     if (predP && (P[0] - predP[0]) * dx + (P[1] - predP[1]) * dz < 0) P = predP;
-    if (predC) {
-      const C = [x, z];
-      if (naruby(predL, L, predC) || naruby(predC, L, C)) L = predL;
-      if (naruby(predC, C, predP) || naruby(predP, C, P)) P = predP;
-    }
-    predL = L; predP = P; predC = [x, z];
-    if (i < od) continue;
-    s.poz.push(L[0], vyskopis.vyska(L[0], L[1]) + posun, L[1]);
-    s.poz.push(x, vyskopis.vyska(x, z) + posun, z);
-    s.poz.push(P[0], vyskopis.vyska(P[0], P[1]) + posun, P[1]);
-    if (svet) {
-      const m = MIERKA_ASFALTU;
-      s.uv.push(L[0] / m, L[1] / m, x / m, z / m, P[0] / m, P[1] / m);
-    } else {
-      s.uv.push(0, v, 0.5, v, 1, v);
-    }
-    if (i > od) {
-      const a = zaciatok + (i - 1 - od) * 3;
-      // poradie vrcholov tak, aby normála smerovala nahor (okraj L – stred, stred – okraj P)
-      s.idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4);
-      s.idx.push(a + 1, a + 4, a + 2, a + 2, a + 4, a + 5);
-    }
+    rad(L, [x, z], P, pridat);
   }
 }
 
