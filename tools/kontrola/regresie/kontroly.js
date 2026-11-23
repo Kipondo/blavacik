@@ -11,6 +11,7 @@ import { bodVPolygone, vzdialenostOdCiary, vzdialenostOdOkraja, ohranicenie } fr
 import { kontrolyTravy } from './trava.js';
 import { kontrolyCiest } from './cesty.js';
 import { kontrolyDlazdic } from './dlazdice.js';
+import { vytvorHorizont } from '../../../js/mapa/teren/horizont.js';
 
 /** Stromy dlaždice presne tak, ako ich stavia hra (js/mapa/dlazdice/postav-dlazdicu.js → stromy-dlazdice.js). */
 const cacheStromov = new WeakMap();
@@ -112,6 +113,34 @@ export const KONTROLY = [
         }
       }
       return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'horizont-pod-dlazdicami',
+    popis: 'Horizont (vzdialený terén) sa vyrezáva len pod postavenými podrobnými dlaždicami (maska), nie kruhom okolo '
+      + 'hráča – po dlhom presune nebola v kruhu kým sa dlaždice postavili diera do hmly (biela plocha)',
+    oprava: 'fix/dlazdice-po-skoku – js/mapa/teren/horizont.js (maska dlaždíc), sprava-dlazdic.js dostavOkolie po teleporte',
+    tolerancia: 0,
+    spusti(ctx) {
+      const chyby = [];
+      try {
+        const D = ctx.index.dlazdica;
+        const H = { minX: -2000, maxX: 2000, minZ: -2000, maxZ: 2000 };
+        const h = vytvorHorizont({ vyskaTerenu: () => 0 }, { HRANICE: H }, D);
+        if (typeof h.userData.nastavDetail !== 'function') chyby.push({ text: 'horizont nemá nastavDetail (maska dlaždíc)' });
+        else {
+          h.userData.nastavDetail('0_0', true);
+          const sh = { uniforms: {}, vertexShader: '#include <common>\n#include <begin_vertex>', fragmentShader: '#include <common>\nvoid main() {' };
+          h.material.onBeforeCompile(sh);
+          const maska = sh.uniforms.maskaDetailu?.value?.image?.data;
+          if (!maska || !maska.some((v) => v === 255)) chyby.push({ text: 'maska dlaždíc sa po nastavDetail nezmenila' });
+          if (sh.fragmentShader.includes('distance(vSvet')) chyby.push({ text: 'horizont sa znova vyrezáva kruhom okolo hráča' });
+        }
+        h.geometry.dispose();
+      } catch (e) {
+        chyby.push({ text: `chyba kontroly: ${e.message}` });
+      }
+      return { skontrolovane: 1, chyby };
     },
   },
   ...kontrolyTravy,

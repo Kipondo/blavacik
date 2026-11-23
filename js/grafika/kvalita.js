@@ -60,7 +60,6 @@ export default {
     if (hmla?.isFog) { hmla.near = p.dohlad * p.hmlaOd; hmla.far = m; }
     const sprava = hra.mapa?.dlazdice;
     sprava?.nastavPolomery?.(Math.min(p.detail, m), m);
-    hra.mapa?.horizont?.userData.nastavPolomer?.(Math.min(p.detail, m) * 0.65);
     this.ukazStav();
   },
 

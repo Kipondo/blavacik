@@ -1,9 +1,11 @@
 // Vzdialený terén celého mesta v nízkom rozlíšení (100 m) – kopce na obzore (Malé Karpaty,
-// Kamzík, Devínska Kobyla). Okolo hráča sa nevykresľuje (tam sú podrobné dlaždice).
+// Kamzík, Devínska Kobyla). Nevykresľuje sa tam, kde už stojí podrobná dlaždica so zemou (maska dlaždíc,
+// nastavDetail – js/mapa/dlazdice/modul.js). Predtým sa vyrezal celý kruh okolo hráča: po dlhom presune
+// (teleport, MHD) bola v ňom, kým sa dlaždice postavili, diera do hmly (biela plocha).
 
 import * as THREE from 'three';
 
-export function vytvorHorizont(vyskopis, KONFIG, polomerDetailu) {
+export function vytvorHorizont(vyskopis, KONFIG, velkostDlazdice = 500) {
   const H = KONFIG.HRANICE;
   const KROK = 100;
   const okraj = 6000; // presah za hranice mesta, nech nie je vidieť koniec sveta
@@ -27,24 +29,44 @@ export function vytvorHorizont(vyskopis, KONFIG, polomerDetailu) {
   geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
   geo.computeVertexNormals();
 
-  const stred = { value: new THREE.Vector3() };
-  const polomer = { value: polomerDetailu };
+  // maska dlaždíc (1 texel = 1 dlaždica): 255 = podrobná dlaždica so zemou stojí → horizont sa tam nekreslí
+  const D = velkostDlazdice;
+  const i0 = Math.floor(H.minX / D), j0 = Math.floor(H.minZ / D);
+  const nI = Math.floor(H.maxX / D) - i0 + 1, nJ = Math.floor(H.maxZ / D) - j0 + 1;
+  const maska = new Uint8Array(nI * nJ);
+  const tex = new THREE.DataTexture(maska, nI, nJ, THREE.RedFormat, THREE.UnsignedByteType);
+  tex.magFilter = tex.minFilter = THREE.NearestFilter;
+  tex.needsUpdate = true;
+  const uniformy = {
+    maskaDetailu: { value: tex },
+    maskaRozmer: { value: new THREE.Vector4(i0, j0, nI, nJ) },
+    velkostDl: { value: D },
+  };
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
   mat.onBeforeCompile = (shader) => {
-    shader.uniforms.stredDetailu = stred;
-    shader.uniforms.polomerDetailu = polomer;
+    Object.assign(shader.uniforms, uniformy);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vSvet;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSvet = (modelMatrix * vec4(position, 1.0)).xyz;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 stredDetailu; uniform float polomerDetailu; varying vec3 vSvet;')
-      .replace('void main() {', 'void main() {\n  if (distance(vSvet.xz, stredDetailu.xz) < polomerDetailu) discard;');
+      .replace('#include <common>', '#include <common>\nuniform sampler2D maskaDetailu; uniform vec4 maskaRozmer; uniform float velkostDl; varying vec3 vSvet;')
+      .replace('void main() {', `void main() {
+  vec2 dl = floor(vSvet.xz / velkostDl) - maskaRozmer.xy;
+  if (dl.x >= 0.0 && dl.y >= 0.0 && dl.x < maskaRozmer.z && dl.y < maskaRozmer.w
+      && texture2D(maskaDetailu, (dl + 0.5) / maskaRozmer.zw).r > 0.5) discard;`);
   };
   const mesh = new THREE.Mesh(geo, mat);
   mesh.name = 'horizont';
   mesh.receiveShadow = false;
-  mesh.userData.nastavStred = (x, z) => stred.value.set(x, 0, z);
-  // okruh podrobných dlaždíc sa mení s kvalitou grafiky (js/grafika/kvalita.js)
-  mesh.userData.nastavPolomer = (r) => { polomer.value = r; };
+  /** Podrobná dlaždica (kľúč „i_j“) so zemou stojí (true) alebo bola uvoľnená (false). */
+  mesh.userData.nastavDetail = (kluc, stoji) => {
+    const [i, j] = kluc.split('_').map(Number);
+    const a = i - i0, b = j - j0;
+    if (a < 0 || b < 0 || a >= nI || b >= nJ) return;
+    const v = stoji ? 255 : 0;
+    if (maska[b * nI + a] === v) return;
+    maska[b * nI + a] = v;
+    tex.needsUpdate = true;
+  };
   return mesh;
 }
