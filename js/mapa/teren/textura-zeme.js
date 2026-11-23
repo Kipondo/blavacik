@@ -283,7 +283,10 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   triedyZahrad(g, d, rect, px, vJadre);
   for (const c_ of d.cesty ?? []) {
     if (c_.nadjazd) continue;
-    g.lineWidth = ((c_.sirka ?? 6) + 7) * mierka;
+    // pri cestách s 3D chodníkom (js/mapa/cesty/chodniky.js, 2,6 m) len pod chodník – za obrubníkom a chodníkom
+    // nesmie pokračovať druhý pás asfaltu (pravidlá ulice #136: cesta – obrubník – chodník – tráva/dlažba)
+    const lem = CESTY_S_CHODNIKOM.has(c_.typ) && !c_.most ? 5.2 : 7;
+    g.lineWidth = ((c_.sirka ?? 6) + lem) * mierka;
     cesta(c_.body, false);
     g.stroke();
     maska(c_.body, false, true, g.lineWidth);
