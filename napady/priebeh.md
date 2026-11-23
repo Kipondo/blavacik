@@ -92,3 +92,13 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
 - Snímky pred/po neukladám do repozitára (#137) – sú v PR (vetva `hlasenia`, priečinok `obrazky/`).
 - Rozhodnutie: nápisy univerzity áno, grafické logo STU nie; nádrž v átriu podľa opisu majiteľa (neoverená) –
   v issue žiadosť o vlastné fotky (átrium, čelo veže, schodisko zboku, hala).
+
+## Eurovea 1 (#131 časť 1, 23. 11.) – vetva `feature/eurovea-1` (nadväzuje na `feature/stavebna-fakulta`)
+- Prieskum (agent; OSM, laser, ~22 fotiek z Commons, články) → `napady/pamiatky-podklady.md`; agent sa raz zastavil
+  na týždennom limite API a po 11:00 pokračoval.
+- `tools/blender/osm_eurovea.py` (výrez z API openstreetmap.org – Overpass bol preťažený) → `data/eurovea.json`:
+  57 častí, výšky z lasera z dlaždíc, terén pod časťou (čítanie t/*.bin v Pythone), vchody, kvetináče.
+- Model `tools/blender/vyskove/eurovea_1.py`: štýly fasád podľa skupín, steny medzi susednými časťami sa nekreslia,
+  valené presklené strechy z obrysu pasáže (Delaunay v Blenderi), štíty a stĺpy na otvorených koncoch.
+- Trojuholníky: stĺpiky okien ako jedna plocha (94 → 50 tis.).
+- Ďalšie časti #131: Eurovea 2 + hadia strecha + park a socha gúľ → nábrežie → pomník Štefánika.

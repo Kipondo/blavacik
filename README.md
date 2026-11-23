@@ -104,6 +104,26 @@ v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md).
   obrysy z OSM: `LEN=stavebna-fakulta python3 tools/blender/osm_obrysy_overpass.py`.
 - Testovacia trasa: nové body „Stavebná fakulta STU – vstup s lomenicou“ a „komplex zhora“.
 
+### Eurovea 1 – celý komplex (vetva `feature/eurovea-1`, #131 časť 1)
+Model z Blendera podľa 57 častí budov z OSM s výškami z lasera (`tools/blender/vyskove/eurovea_1.py`,
+50 tis. trojuholníkov, 233 kB), prieskum (OSM, laser, fotky z Commons; bez Google) v
+[napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Vajce a kupola ostávajú v modeli `eurovea-vajce`.
+- **Central 1 a Central 3** pri Pribinovej: pásové okná (zelenosivé / tmavé sklo a svetlé parapetné pásy),
+  dvojpodlažné výklady. **Sheraton**: béžový kameň s jednotlivými zvislými oknami.
+- **Byty pri Dunaji**: terakotové piliere s bielymi pásmi stropov a lodžiami so sklenými zábradliami, striedané
+  so svetlými kamennými časťami; presklené penthausy pod tenkou strechou. **Východná skupina** pri Sklade č. 7:
+  krémový kameň a tehlovočervený blok s balkónmi, podlubie nad promenádou.
+- **Galéria**: výklady, strešné záhrady na podnoži; k námestiu sklenená stena s grafitovými piliermi, morskozelená
+  kocka a okrová „kinová škatuľa“.
+- **Presklené valené strechy** nad pasážami (hrana 11 m, vrchol ~14,5 m, trojuholníková sieť) – tvar sa počíta
+  z obrysu pasáže (aj zalomenej), na otvorených koncoch presklený štít; vstupy pri vajci a z námestia na stĺpoch
+  (pri námestí „stromové“). Presklené striešky nad vstupmi a vjazdmi do garáže, 4 kruhové kvetináče a stĺp pri vajci.
+- Pasáže pod sklenou strechou sú priechodné (kolíziu majú len plné budovy), vchody z OSM sú v `"vchody"`
+  (na neskorší interiér galérie). Bez názvov obchodov, log a sôch.
+- Generovanie: `python3 tools/blender/osm_eurovea.py` (výrez OSM z API openstreetmap.org + výšky lasera a terén
+  z dlaždíc → `tools/blender/data/eurovea.json`), potom `python3 tools/blender/vyskove_budovy.py eurovea_1`.
+- Testovacia trasa: nové body „Eurovea – námestie pred vstupom do galérie“ a „Eurovea 1 zhora“.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.

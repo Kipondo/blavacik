@@ -53,7 +53,7 @@
     {"model": "most-glb", "subor": "pristavny-most", "nahradzaMost": "Prístavný most", "nazov": "Prístavný most", "x": 2412, "z": 953, "dosah": 200},
     {"model": "most-glb", "subor": "most-lafranconi", "nahradzaMost": "Most Lanfranconi", "nazov": "Most Lafranconi", "x": -2408, "z": 139, "dosah": 200},
     {"model": "vyskova-budova", "subor": "nove-snd", "nazov": "Nové SND", "x": 1173.68, "z": 246.23, "dosah": 100},
-    {"nazov": "Eurovea", "x": 1114, "z": 377, "dosah": 150},
+    {"model": "vyskova-budova", "subor": "eurovea-1", "nazov": "Eurovea", "x": 1067.29, "z": 374.85, "dosah": 150},
     {"model": "vyskova-budova", "subor": "eurovea-tower", "nazov": "Eurovea Tower", "x": 1444.22, "z": 408.95, "zaber": {"kruh": 24}, "dosah": 70},
     {"model": "vyskova-budova", "subor": "univerzita-komenskeho", "nazov": "Univerzita Komenského", "x": 557.22, "z": 265.13, "dosah": 70},
     {"model": "vyskova-budova", "subor": "stavebna-fakulta", "nazov": "Stavebná fakulta STU", "x": 541.63, "z": -933.36, "dosah": 90},
