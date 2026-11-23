@@ -45,6 +45,8 @@
     { "id": "trnavske-myto", "nazov": "Trnavské mýto", "x": 1500, "z": -1635, "azimut": 90, "pohlady": ["ulica", "zhora"] },
     { "id": "karlova-ves", "nazov": "Karlova Ves – Karloveská", "x": -4520, "z": -2580, "azimut": 90, "pohlady": ["ulica", "zhora"] },
     { "id": "mlynska-dolina", "nazov": "Mlynská dolina – Átriaky", "x": -2902, "z": -1770, "azimut": 0, "pohlady": ["ulica", "zhora"] },
+    { "id": "sev-bedlova", "nazov": "Karlova Ves – Bedľová (bývalý schod v teréne na hrane dlaždíc)", "x": -3394, "z": -1500, "azimut": 0, "pohlady": ["ulica"],
+      "kamera": [-3360, 45, -1545], "ciel": [-3396, 0, -1497] },
     { "id": "kamzik", "nazov": "Výhľad z Kamzíka", "x": -943, "z": -4345, "azimut": 150, "pohlady": ["ulica"],
       "kamera": [-900, 60, -4250], "ciel": [0, 0, 0] }
   ]
