@@ -28,7 +28,7 @@ VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sk
           # štvrtá dávka: Univerzita Komenského, Eurovea vajce s kupolou
           'univerzita_komenskeho', 'eurovea_vajce',
           # Stavebná fakulta STU (#127)
-          'stavebna_fakulta']
+          'stavebna_fakulta', 'eurovea_1']
 
 
 def main():

@@ -441,3 +441,76 @@ do repozitára nejde nič z nich. Model: `tools/blender/vyskove/stavebna_fakulta
 - Commons: [STU-Building.JPG](https://commons.wikimedia.org/wiki/File:STU-Building.JPG), [Panorama STU](https://commons.wikimedia.org/wiki/File:Panorama_STU_-_panoramio.jpg) (strecha so svetlíkmi zhora), [zastávka STU 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Imricha_Karva%C5%A1a,_tramvajov%C3%A1_zast%C3%A1vka_STU_(2013-10-25;_01).jpg);
 - OSM (ODbL): lomenica 1324890210, prístrešok pri aule 1324890201, schody 241184965, rampa 1324890206, areál 248120516;
 - výškopis: laser ÚGKK (DMR) – výška dvora a anglických dvorcov.
+
+---
+
+## Eurovea 1 – celý komplex (#131, časť 1; 23. 11. 2026)
+Prieskum podľa #130. Zdroje sú OSM časti budov, výšky z lasera ÚGKK (už v dlaždiciach mesta), ~22 fotiek
+z Wikimedia Commons z rokov 2009–2026 (len prezreté, opísané slovami) a články. Google sa nepoužil.
+Model je v `tools/blender/vyskove/eurovea_1.py`, dáta z OSM sú v `tools/blender/osm_eurovea.py` → `tools/blender/data/eurovea.json`.
+
+**Rozloženie (OSM → skutočné budovy):**
+- **Central 1** – rel 21708445 a way 1254386623, oblúková fasáda.
+- **Vajce (Central 2)** – rel 21708447, je v modeli `eurovea-vajce`.
+- **Central 3** – rel 21708449. OSM ho chybne značí ako byty, sú to kancelárie.
+- **Sheraton** – ways 762656648, 1254386636 a 1254386637 na SZ rohu hlavného námestia.
+- **Byty pri Dunaji** – južný pás.
+- **Východná skupina** pri Sklade č. 7 – byty na galérii, hotel tam nie je. Patrí k nej sklenená časť galérie a „kinová škatuľa“ (21708454, 21708455).
+- Časti za Skladom č. 7 sú Eurovea 2 (2023), do tejto časti nepatria.
+
+**Výšky (laser, m nad terénom):**
+
+| časť | výška |
+|---|---|
+| Central 1 | 36,0 |
+| vajce | 35,2 |
+| Sheraton | 30,1 (krídlo k námestiu 20,2, vnútorná časť 17,1) |
+| byty so 6 podlažiami | ~23 |
+| byty so 7 podlažiami | 26–27 |
+| podnož galérie | 10,6–11,5 |
+| sklenená časť galérie pri námestí | 16,2 |
+
+Central 3 a kino laser nemá. Odhad je 32 m a 28 m.
+
+**Fasády** (farby sú odhady z fotiek):
+- **Central 1:** pásové okná, zelenosivé sklo ~2,2 m (#7F9C98) a svetlý parapetný pás ~1,0 m (#C9CCCC). Prízemie má dvojpodlažné výklady.
+- **Central 3:** tmavšie sklo (#4F5A60) so striebrobielymi pásmi.
+- **Sheraton:** teplý béžový kameň (#D8CCB6) s jednotlivými zvislými oknami ~1,4 × 2,4 m v nepravidelnom rytme a ustúpeným presklenným podlažím.
+- **Byty pri Dunaji** striedajú dva typy:
+  - terakotové piliere (#B0604C) s bielymi pásmi stropov (#E6E4DE) a lodžiami so sklenými zábradliami;
+  - svetlé kamenné časti (#E3E1DA) s pásovými oknami.
+
+  Rohy sú zaoblené. Najvyššie podlažie tvoria presklené penthausy pod tenkou presahujúcou strechou. Na streche podnože sú záhrady, pri promenáde presklené kaviarenské pavilóny.
+- **Východná skupina:** krémový kameň (#E3D9C6) s dierovanými oknami a tehlovočervený blok (#A65A45) s balkónmi. Časť 1254305684 visí nad promenádou (podlubie ~3,2 m).
+- **Galéria k námestiu:** sklenená stena so zvislými grafitovými piliermi (#4A4E54), morskozelená sklená kocka (#A8CFC4) a kinová škatuľa z béžovo-okrových panelov.
+
+**Presklené strechy:**
+- Nad hlavnou pasážou (way 762656642, ~164 m od kupoly k námestiu) je nízky sploštený oblúk. Tvorí ho trojuholníková oceľová sieť, oceľ je svetlosivá (#D9DCDD).
+- Hrana strechy je na ~11 m, vrchol na ~14–15 m. Článok uvádza ~2 300 trojuholníkov na ~5 500 m².
+- Vstupy pri vajci aj z námestia sú predsadené sklenené klenby. Pri námestí stoja na bielych „stromových“ stĺpoch.
+- Ploché sklenené striešky sú nad vstupmi do Sheratonu (~9 × 8 m) a Central 3 (~12 × 8 m). Pultové striešky sú nad vjazdmi do garáže z Pribinovej.
+
+**Priestranstvo pri vajci:**
+- dlažba zo sivých žulových kociek so svetlými pásmi;
+- 4 kruhové kvetináče ⌀ ~4 m (OSM flowerbed) so svetlým okrajom a strihanými kríkmi;
+- štíhle strieborné lampy;
+- stĺp (totem) ~1,5 × 0,5 × 8 m.
+
+**Rozhodnutia pre model:**
+- Totem je hrdzavooranžový bez loga.
+- Názvy obchodov a nápis galérie sa do hry nedávajú.
+- Sochy (Cirkusanti, 2012) sú diela žijúceho autora, nemodelujú sa.
+- Pasáže pod sklenou strechou sú priechodné, majú kolíziu len plné budovy. Vchody z OSM sú v `vchody` (na interiér galérie).
+
+**Neisté – vlastné fotky by pomohli:**
+- prierez a výška strechy nad hlavnou pasážou (zo strešnej záhrady alebo z vyššieho podlažia);
+- stredný severný vstup a južné vstupy z promenády;
+- výška kina a Central 3 (fotka spredu s viditeľnými podlažiami);
+- fasáda Sheratonu k Pribinovej a dvorové fasády bytov;
+- rozmery totemu a vzor pásov v dlažbe.
+
+**Zdroje:**
+- OSM: [API výrez](https://api.openstreetmap.org/api/0.6/map?bbox=17.1185,48.1385,17.1255,48.1415) (ODbL);
+- laser ÚGKK DMP 2.0 (CC BY 4.0) cez dlaždice mesta;
+- články: [europe-re.com (2010)](https://europe-re.com/eurovea-galleria-welcomes-its-first-visitors-sk/26623), [Waymarking – vajce](https://www.waymarking.com/waymarks/WMAPZW_Eurovea_Egg_Bratislava_Slovakia), [Heinze – penthausy](https://www.heinze.de/architekturobjekt/eurovea/9343172/), [sk.wikipedia](https://sk.wikipedia.org/wiki/Eurovea), [Sheraton – Spectator](https://spectator.sme.sk/politics-and-society/c/five-star-sheraton-hotel-opens-in-eurovea-centre-in-bratislava);
+- Commons: [promenáda 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea,_Danube_promenade.JPG), [hlavné námestie 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea,_main_square.JPG), [Sheraton 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_the_main_square_of_the_shopping_mall_Eurovea.JPG), [východný blok 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_the_shopping_mall_%22Eurovea%22,_main_square.JPG), [vajce a vstup 2014](https://commons.wikimedia.org/wiki/File:Bratislava_Eurovea_MYSELF_2014_-_panoramio.jpg), [vajce 2026](https://commons.wikimedia.org/wiki/File:Eurovea_(IMG_20260604_144544).jpg), [Central 3 2019](https://commons.wikimedia.org/wiki/File:Bratislava,_7.jpg), [sklenená strecha zhora 2011](https://commons.wikimedia.org/wiki/File:JESE%C5%87_VO_VN%C3%9ATROBLOKU_EUROVEA_-_panoramio.jpg), [vstup z námestia 2010](https://commons.wikimedia.org/wiki/File:Eurovea_Galleria_03.jpg), [oblý koniec bytov 2018](https://commons.wikimedia.org/wiki/File:Eurovea_shopping_mall_Bratislava_(2).jpg).
