@@ -471,7 +471,13 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   - **Vodorovné značenie** (čiary, krajnice, stopy kolies, špina pri obrubníku) je priehľadná vrstva navrchu. Pri
     križovatkách končí (ako chodníky), takže sa čiary rôznych ciest nekrížia. Cez vjazd obslužnej cesty
     (`service`, `living_street`) značenie hlavnej cesty pokračuje.
-  - **Ďalej v #136:** chodníky, plochy, cyklopruhy a prechody v jednej vrstve.
+  - Značenie leží na tých istých bodoch ako asfalt (rovnaké trojuholníky), takže na zvlnenom teréne nikde
+    nezapadne pod asfalt.
+  - **Chodníky bez vozovky:** jednosmerky (aj každý pás rozdelenej cesty) majú chodník vpravo. Predtým bol vľavo
+    a stál v strednom páse alebo až v protismernej vozovke. Chodník sa navyše preruší všade, kde by ležal na
+    vozovke inej cesty (`js/mapa/cesty/vozovky.js`). Cez vjazdy do dvorov pokračuje. Kontrolór mapy
+    `chodnik-na-vozovke`: 23 150 → 113 miest; regresná kontrola `chodniky-mimo-vozovky`.
+  - **Ďalej v #136:** cyklopruhy a prechody ako súčasť vrstvy značenia, ostré zákruty.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
