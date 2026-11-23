@@ -31,7 +31,7 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   svet.name = 'mapa';
   scena.add(svet);
 
-  const horizont = vytvorHorizont(vyskopis, KONFIG, kvalita.detail * 0.65);
+  const horizont = vytvorHorizont(vyskopis, KONFIG, data.mestoIndex.dlazdica);
   svet.add(horizont);
   svet.add(vytvorVodu(data.voda, KONFIG, vyskopis));
   svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
@@ -48,7 +48,8 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   const start = data.spawn?.hrac ?? { x: 0, z: 0 };
   priebeh('Staviam mesto okolo teba…');
   await sprava.nacitajOkolie(start.x, start.z, priebeh);
-  horizont.userData.nastavStred(start.x, start.z);
+  // horizont sa nekreslí pod postavenými podrobnými dlaždicami (ďalej ich sleduje js/mapa/dlazdice/modul.js)
+  for (const [kluc, a] of sprava.aktivne) horizont.userData.nastavDetail(kluc, a.uroven === 'detail');
   // zaparkované autá na uliciach v okolí štartu
   const blizke = sprava.cestyOkolia().filter((c) => Math.hypot(c.body[0][0] - start.x, c.body[0][1] - start.z) < 600);
   data.spawn = { ...data.spawn, auta: rozmiestniAuta(blizke, data.spawn?.ulice ?? []) };

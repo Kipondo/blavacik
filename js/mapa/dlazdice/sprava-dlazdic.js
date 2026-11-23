@@ -15,6 +15,9 @@ import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-bu
 export const POLOMER_DETAIL = 900;
 export const POLOMER_LOD = 3200;
 const ROZPOCET_MS = 7;
+// po dlhom presune (teleport, MHD), kým pod hráčom nie je podrobná dlaždica, sa stavia rýchlejšie – zem pod nohami
+// je dôležitejšia než pár snímok plynulosti
+const ROZPOCET_PO_PRESUNE_MS = 25;
 
 export class SpravaDlazdic {
   constructor({ index, scena, vyskopis, kolizie, KONFIG, posli }) {
@@ -27,6 +30,7 @@ export class SpravaDlazdic {
     this.kolizie = kolizie;
     this.posli = posli ?? (() => {});
     this.zoznam = index.dlazdice.map(([i, j, pocet, maxVyska]) => ({ i, j, kluc: `${i}_${j}`, pocet, maxVyska }));
+    this.kluce = new Set(this.zoznam.map((t) => t.kluc));
     this.aktivne = new Map();   // kluc → { uroven, objekt, data }
     this.data = new Map();      // kluc → Promise(data)
     this.uloha = null;          // práve stavaná dlaždica { kluc, uroven, gen, data }
@@ -106,13 +110,41 @@ export class SpravaDlazdic {
     }
   }
 
+  /**
+   * Po dlhom presune (teleport, MHD): dostavia chýbajúce podrobné dlaždice do `polomer` m – každú celú naraz,
+   * jednu za snímok (ako pri štarte hry), aby hráč nestál dlho na horizonte. Bežné stavanie počas toho čaká.
+   */
+  async dostavOkolie(x, z, polomer = 450) {
+    if (this.dostavuje) return;
+    this.dostavuje = true;
+    this.uloha = null;   // rozostavaná dlaždica z pôvodného miesta už nie je potrebná
+    try {
+      for (const { t, uroven } of this.ziadane(x, z)) {
+        if (uroven !== 'detail' || this.vzdialenost(t, x, z) > polomer) continue;
+        if (this.aktivne.get(t.kluc)?.uroven === 'detail') continue;
+        const data = await this.nacitajData(t.kluc);
+        const gen = postavDlazdicu(t.kluc, data, this.rect(t), 'detail', this.kontext);
+        let r = gen.next();
+        while (!r.done) r = gen.next();
+        this._pridaj(t.kluc, 'detail', r.value, data);
+        await new Promise((ok) => { requestAnimationFrame(ok); setTimeout(ok, 50); });
+      }
+    } finally {
+      this.dostavuje = false;
+      this.poslednaKontrola = -1e9;
+    }
+  }
+
   /** Volá sa každý snímok (modul js/mapa/dlazdice/modul.js). */
   update(x, z, cas) {
     this.stred = { x, z };
-    // 1) pokračuj v rozostavanej dlaždici v rámci časového rozpočtu
+    if (this.dostavuje) return;
+    // 1) pokračuj v rozostavanej dlaždici v rámci časového rozpočtu (väčší, kým pod hráčom chýba podrobná dlaždica)
     const zaciatok = performance.now();
     if (this.uloha?.caka) return;
-    while (this.uloha && !this.uloha.caka && performance.now() - zaciatok < ROZPOCET_MS) {
+    const vlastna = `${Math.floor(x / this.velkost)}_${Math.floor(z / this.velkost)}`;
+    const rozpocet = this.kluce.has(vlastna) && this.aktivne.get(vlastna)?.uroven !== 'detail' ? ROZPOCET_PO_PRESUNE_MS : ROZPOCET_MS;
+    while (this.uloha && !this.uloha.caka && performance.now() - zaciatok < rozpocet) {
       const r = this.uloha.gen.next();
       if (r.done) {
         const { kluc, uroven, data } = this.uloha;

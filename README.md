@@ -463,6 +463,13 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   po 2,5 m (terén cez vozovku presvital na 2 % plochy, teraz na 0,6 %), v zákrute pokos (cesta sa nezúži) a vnútorný
   okraj ostrej zákruty sa neprekrúti. Pod vozovkou a chodníkom nie je v mape povrchu trieda trávy (trsy trávy
   neprerastajú cez cestu).
+- **Žiadna biela plocha po dlhom presune** (`js/mapa/teren/horizont.js`, `js/mapa/dlazdice/`):
+  - Horizont (vzdialený terén) sa nekreslí len tam, kde už stojí podrobná dlaždica so zemou (maska dlaždíc). Predtým
+    sa vyrezal celý kruh okolo hráča a po teleporte alebo jazde MHD bola v ňom, kým sa dlaždice postavili, diera do
+    hmly (biela plocha).
+  - Po dlhom teleporte sa podrobné dlaždice do 450 m dostavajú hneď, každá celá naraz (`dostavOkolie`). Kým pod
+    hráčom chýba dlaždica, má stavanie väčší rozpočet. V teste trvá skok z Trnavského mýta na Bedľovú 11 s
+    (predtým viac ako 3 min).
 - **Cesty bez blikania – asfalt a značenie v dvoch vrstvách** (#136, `js/mapa/cesty/cesty.js`):
   - **Asfalt:** všetky cesty a plochy križovatiek majú jeden spoločný materiál, textúru aj opotrebenie vo svetových
     súradniciach a jednu výšku 0,12 m. Kde sa pásy prekrývajú (križovatky, súbežné pásy), vyzerajú na pixel
