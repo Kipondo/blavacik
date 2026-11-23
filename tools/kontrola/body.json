@@ -39,6 +39,8 @@
       "kamera": [-110.5, 1.7, -1684.6], "ciel": [-102.1, 6.5, -1697.1] },
     { "id": "stanica-nastupiste", "nazov": "Hlavná stanica – 1. nástupište", "x": -140.4, "z": -1727, "azimut": 57, "pohlady": ["ulica"],
       "kamera": [-150, 2.2, -1733.5], "ciel": [-110, 2.5, -1707] },
+    {"id": "liszt-slucka", "nazov": "Nám. Franza Liszta – slučka pri stanici", "x": -112, "z": -1590, "kamera": [-88, 1.7, -1540], "ciel": [-112, 3, -1605], "vzdialenost": 80, "vyska": 60, "azimut": 340, "pohlady": ["ulica", "zhora"]},
+    {"id": "cyklopruh-namestie-slobody", "nazov": "Cyklopruh pri Námestí slobody", "x": 172, "z": -975, "kamera": [164, 1.7, -940], "ciel": [183, 3, -1028], "azimut": 12, "pohlady": ["ulica", "zhora"]},
     { "id": "jungmannova", "nazov": "Petržalka – Jungmannova", "x": 450, "z": 2110, "azimut": 45, "pohlady": ["ulica", "zhora"] },
     { "id": "romanova", "nazov": "Petržalka – Romanova", "x": 270, "z": 3150, "azimut": 0, "pohlady": ["ulica", "zhora"] },
     { "id": "aupark", "nazov": "Aupark", "x": -155, "z": 1000, "azimut": 180, "pohlady": ["ulica", "zhora"] },
