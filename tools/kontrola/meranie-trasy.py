@@ -15,7 +15,7 @@ SIRKA, VYSKA = 640, 360
 NA_PREHLIADAC = 3   # po koľkých bodoch sa prehliadač spustí nanovo (menej pamäte)
 
 async def spusti(p):
-    b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
+    b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
     pg = await b.new_page(viewport={'width': SIRKA, 'height': VYSKA})
     if KVALITA:
         await pg.add_init_script(f"try {{ localStorage.setItem('blavacik.grafika', '{KVALITA}'); }} catch (e) {{}}")

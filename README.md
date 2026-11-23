@@ -40,6 +40,18 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Poriadok pri zlučovaní (vetva `fix/poriadok-zlucovania`)
+- **Prehľad strát:** všetkých 120 zlúčení v histórii `main` som prešiel skriptom – kde sa súbor zmenený na oboch
+  stranách vzal celý z jednej strany. Stratilo sa: pravidlo „Úlohy pre dvoch Claudov (issues so štítkami)“ v CLAUDE.md
+  (zlúčenie 2b00032, 20. 11.) – **vrátené**; zmeny 575 dlaždíc z `feature/laser-vysky` (9449d45, 21. 11.), hrad
+  z porovnania (etapa 4), Átriaky a Kamenné nám. v `pamiatky.json`, nápoveda internátu v `hud.js`, zatienenie zeme –
+  **neskôr sa vrátili** (pregenerovanie, model hradu z Blendera, ručné zlúčenie). Odškrtnuté opravy z `docs/porovnanie/opravy.md`
+  sú v `main` všetky.
+- **Stromy na mostoch a vo vode** (Most SNP, nájazdy, Dunaj pri nábreží, ostrovy) – laser bral mostovku za korunu;
+  opravené v kóde hry (`js/mapa/zelen/miesto-stromu.js`, `stromy-dlazdice.js`), takže ich žiadne pregenerovanie dlaždíc nevráti.
+- **Pravidlá zlučovania** v CLAUDE.md (časť „Zlučovanie“) s tabuľkou, ktorý skript vyrába ktorý generovaný súbor.
+- **Regresné kontroly** `tools/kontrola/regresie.py` a workflow `.github/workflows/regresie.yml` – popis nižšie.
+
 ### Vlaky a cestovný poriadok na Hlavnej stanici (vetva `feature/vlaky-poriadok`, úlohy A2 a A3)
 - **Cestovný poriadok** z GTFS ŽSR (Národný katalóg otvorených dát, CC0): `python3 tools/vlaky/gtfs_vlaky.py`
   stiahne najnovší GTFS a vyberie vlaky cez Bratislava hl. st. do `data/vlaky/poriadok.json` (~80 kB) – kategória,
@@ -902,6 +914,34 @@ Kamera sa na bod presunie hneď po presune hráča, takže moduly podľa polohy 
 drobnosti zblízka, 3D fasády, tráva) sa pripravia na ten bod; snímky sú vždy v plnom rozlíšení predvoľby.
 Prvý beh (stav `main` 21. 11. večer) je v `docs/kontrola/2026-11-22/`, beh po zlúčení nočných PR (6 bodov)
 v `docs/kontrola/2026-11-22-po-zluceni/` – porovnanie: `porovnanie.html?a=2026-11-22&b=2026-11-22-po-zluceni`.
+
+## Regresné kontroly (opravené chyby sa nevracajú)
+Za každú opravenú chybu jedna kontrola – bežia v prehliadači bez okna nad skutočnými dátami a volajú kód hry
+(filter stromov, mapu tried povrchu, modul trávy, stavbu ciest), takže zlyhajú, keď sa pri zlučovaní vráti stará
+verzia kódu alebo vygenerovaných dlaždíc. V GitHub Actions bežia pri každom PR (`.github/workflows/regresie.yml`);
+PR, v ktorom kontrola zlyhá, sa nezlučuje (pravidlá zlučovania sú v [CLAUDE.md](CLAUDE.md), časť „Zlučovanie“).
+```
+pip install playwright && python3 -m playwright install chromium      # raz (rovnako ako testovacia trasa)
+python3 tools/kontrola/regresie.py                                     # všetky kontroly (~5 min)
+python3 tools/kontrola/regresie.py --len stromy-na-mostoch,trava-na-cestach
+python3 tools/kontrola/regresie.py --rychlo                            # tráva len na 12 dlaždiciach
+```
+Ručne aj v prehliadači: `http://localhost:8000/tools/kontrola/regresie.html`. Zoznam kontrol: `tools/kontrola/regresie/kontroly.js`
+(stromy na mostoch, vo vode, na vozovke a v budovách; tráva na cestách a v budovách; prekrútené cesty; terén pod cestami;
+počty opráv v dlaždiciach – obchody, vyvýšené časti, priechody, podchody, nadjazdy, výšky a šikmé strechy z lasera,
+stromy z lasera). **Nová oprava = nová kontrola** – záznam s odkazom na commit/PR opravy.
+
+**Kontrolór mapy celého mesta** (#134) – nájde chyby mapy v celej Bratislave naraz, s polohou:
+```
+python3 tools/kontrola/kontrola-mapy.py                 # → .cache/kontrola-mapy/index.html (mapa s bodkami) a chyby.json
+python3 tools/kontrola/kontrola-mapy.py --len cesta-strma,budova-cez-cestu
+python3 tools/kontrola/kontrola-mapy.py --uloz-zaklad   # po oprave chýb znížiť základ
+```
+Kategórie (`tools/kontrola/mapa/kontroly-mapy.js`): stromy na mostoch, vo vode, na vozovke a v budovách; lampy, lavičky
+a semafory na vozovke, vo vode a v budovách; os cesty cez budovu; cesty cez seba bez križovatky; strmé úseky ciest
+(výškový model hry); zlomy pásu vozovky; budovy v Dunaji; švy podrobného terénu medzi dlaždicami. Počty sa porovnajú
+so základom `tools/kontrola/mapa-zaklad.json` – **viac chýb než v základe = PR neprejde** (rovnaký workflow
+`regresie.yml`). Tráva sa kontroluje vzorkou v regresných kontrolách.
 
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.

@@ -161,9 +161,10 @@ async def hlavna(arg):
 
     srv = spusti_server(arg.port)
     async with async_playwright() as p:
-        volby = {'headless': not arg.gpu}
+        # --mute-audio: hra v prehliadači bez okna inak hrá zvuky nahlas (autá, MHD, hlásenia)
+        volby = {'headless': not arg.gpu, 'args': ['--mute-audio']}
         if not arg.gpu:
-            volby['args'] = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+            volby['args'] += ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
         if arg.chrome:
             volby['executable_path'] = arg.chrome
         prehliadac = await p.chromium.launch(**volby)

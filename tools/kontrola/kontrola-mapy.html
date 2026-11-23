@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Blavačík – kontrolór mapy</title>
+  <!-- Spúšťa tools/kontrola/kontrola-mapy.py (Playwright); ručne: http://localhost:8000/tools/kontrola/kontrola-mapy.html -->
+  <!-- základ = koreň repozitára: kód hry číta dáta relatívne (data/mapa/…), rovnako ako v index.html -->
+  <base href="../../">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 16px; background: #fff; color: #111; }
+    td, th { padding: 4px 8px; border-bottom: 1px solid #ddd; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Kontrolór mapy</h1>
+  <p id="stav">Načítavam dáta…</p>
+  <table id="tab"></table>
+  <script type="module" src="tools/kontrola/mapa/beh.js"></script>
+</body>
+</html>

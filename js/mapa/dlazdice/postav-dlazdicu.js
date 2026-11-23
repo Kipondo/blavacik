@@ -22,7 +22,7 @@ import { planFasad3d } from '../budovy/fasady-3d.js';
 import { pripravTuby } from '../podchody/tuby.js';
 import { vytvorPodchody } from '../podchody/geometria.js';
 import { vytvorStromy } from '../zelen/stromy.js';
-import { stromyMimoCiest } from '../zelen/miesto-stromu.js';
+import { stromyDlazdice } from '../zelen/stromy-dlazdice.js';
 import { vytvorZnacky } from '../znacky/znacky.js';
 import { vytvorTabuleUlic } from '../znacky/tabule-ulic.js';
 import { vytvorLampy } from '../vybavenie/lampy.js';
@@ -32,7 +32,7 @@ import { vytvorVodu } from '../voda/voda.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
 import { vytvorNadjazdy } from '../mosty/nadjazdy.js';
 
-export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, rieky, KONFIG }) {
+export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, rieky, voda, KONFIG }) {
   const g = new THREE.Group();
   g.name = `dlazdica ${kluc} ${uroven}`;
 
@@ -100,11 +100,8 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
     g.add(f3);
   }
   yield;
-  // stromy nie na vozovke, koľajach ani v domoch (koruny z lasera nad cestou → kmeň na okraj)
-  const stromy = stromyMimoCiest(d.stromy, {
-    cesty: d.cesty, kolajnice: d.kolajnice, budovy: d.budovy,
-    sluzobne: (d.chodniky ?? []).filter((c) => c.typ === 'sluzobna'),
-  });
+  // stromy nie na vozovke, koľajach, v domoch, na mostoch ani vo vode (koruny z lasera nad cestou → kmeň na okraj)
+  const stromy = stromyDlazdice(d, { mosty: vyskopis.mosty ?? [], voda: voda ?? [] });
   g.add(vytvorStromy(stromy, vyskopis, k));
   yield;
   g.add(vytvorZnacky(d, krizovatky, vyskopis));
