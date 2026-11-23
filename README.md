@@ -82,6 +82,28 @@ v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md), modely v `tools/bl
 - Testovacia trasa: nové body „Univerzita Komenského – rotunda“, „Eurovea – presklené vajce“, „Eurovea Tower“,
   „Sky Park“.
 
+### Stavebná fakulta STU (vetva `feature/stavebna-fakulta`, #127)
+Precízny model z Blendera (`tools/blender/vyskove/stavebna_fakulta.py`, 35 tis. trojuholníkov, 84 kB) podľa prieskumu
+OSM, lasera, stránok fakulty, výročných správ a rozpočtov v CRZ (bez Google) – podklady s odkazmi
+v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md).
+- **Blok B** (podnož okolo átria): veľké svetlé panely s pásovými oknami v skupinách, tmavý sokel (terén pod blokom
+  klesá o ~3 m), stredný blok o podlažie vyšší s 28 pyramídovými svetlíkmi (12 + 16), aula s plnou rebrovanou stenou,
+  pásový prístrešok pri aule.
+- **Veža C** (24 NP, 77 m): svetlosivé parapetné pásy a tmavé sklo, lamely pri schodiskách na úzkych čelách,
+  strojovňa, antény a stožiar na streche. **Blok A** (6 NP) a spoj B–C.
+- **Hlavný vstup** (Imricha Karvaša): široké schodisko s podestou a čiernym zábradlím, lomenica – zalomená doska
+  s 5 hrebeňmi (biely podhľad, tmavý okraj), tri oranžové portály, nápis „STAVEBNÁ FAKULTA“, tabuľa „STU SvF“,
+  tri stožiare s vlajkami, rampa a presklená hala.
+- **Átrium:** trávnik, anglické dvorce so zábradlím, dlažba s plytkou nádržou, lavičky a stromy.
+- **V hre:** model sa kladie na terén pri spodnom stupni schodiska (`"zakladnaBod"` v `assets/pamiatky/<subor>.json`);
+  schodisko je pochôdzna plocha – hráč a chodci idú po schodoch hore (`"plochy"` → `js/mapa/mosty/pochodzne-pamiatok.js`
+  → modul nadjazdov); kolízie len krídla okolo átria, veža, blok A a spoj (`"kolizie"`); schody z OSM v mieste
+  modelu sa nekreslia dvakrát. Dvere na neskorší interiér: `"vchody"` (id `hlavny`).
+- **Náhľad modelu bez mesta:** `http://localhost:8000/tools/blender/nahlad.html?model=stavebna-fakulta`
+  (myš otáča, koliesko približuje). Generovanie: `python3 tools/blender/vyskove_budovy.py stavebna_fakulta`,
+  obrysy z OSM: `LEN=stavebna-fakulta python3 tools/blender/osm_obrysy_overpass.py`.
+- Testovacia trasa: nové body „Stavebná fakulta STU – vstup s lomenicou“ a „komplex zhora“.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.

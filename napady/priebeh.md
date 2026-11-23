@@ -80,3 +80,15 @@ odmieta súbory dlaždíc). Blender: `PYTHONPATH=%LOCALAPPDATA%\blender-balicky`
   v hre (jedna súprava na koľaj). Odstavené súpravy idú do depa na východ. Kolízie vlak–hráč zatiaľ nie sú.
 - Autá (22. 11.): detaily lacnou cestou – disky textúrou, tvarovanie vrcholov raz pri stavbe typu; zlúčením
   sietí je auto hráča/zaparkované lacnejšie na kreslenie, auto v premávke má +~700 trojuholníkov.
+
+## Stavebná fakulta STU (#127, 23. 11.) – vetva `feature/stavebna-fakulta`
+- Prieskum podľa #130 (OSM, laser, stránky a výročné správy SvF, CRZ, ASB, Commons; bez Google) →
+  `napady/pamiatky-podklady.md`; model `tools/blender/vyskove/stavebna_fakulta.py` (blok B s átriom, stredný blok
+  so svetlíkmi, aula, veža C, blok A, spoj, vstup s lomenicou, átrium s nádržou), obrysy `osm_obrysy_overpass.py`
+  (relácie teraz aj s dvormi, `LEN=` na jeden cieľ).
+- Hra: `zakladnaBod` (model na terén pri schodisku – terén pod blokom B klesá o 3 m), `plochy` (schodisko ako
+  pochôdzna plocha cez `js/mapa/mosty/pochodzne-pamiatok.js`), `kolizie` (krídla bez átria), `vchody` (interiér),
+  OSM schody v mieste modelu sa nekreslia.
+- Snímky pred/po neukladám do repozitára (#137) – sú v PR (vetva `hlasenia`, priečinok `obrazky/`).
+- Rozhodnutie: nápisy univerzity áno, grafické logo STU nie; nádrž v átriu podľa opisu majiteľa (neoverená) –
+  v issue žiadosť o vlastné fotky (átrium, čelo veže, schodisko zboku, hala).

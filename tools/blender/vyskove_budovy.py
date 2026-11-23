@@ -26,7 +26,9 @@ VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sk
           # tretia dávka: prerobené staré modely a ďalšie významné budovy
           'kamzik', 'rozhlas', 'nr_sr', 'nove_snd', 'nivy', 'sng', 'stadion_tehelne_pole', 'zimny_stadion', 'istropolis',
           # štvrtá dávka: Univerzita Komenského, Eurovea vajce s kupolou
-          'univerzita_komenskeho', 'eurovea_vajce']
+          'univerzita_komenskeho', 'eurovea_vajce',
+          # Stavebná fakulta STU (#127)
+          'stavebna_fakulta']
 
 
 def main():

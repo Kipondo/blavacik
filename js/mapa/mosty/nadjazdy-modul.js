@@ -7,6 +7,7 @@
 // Používa ho js/chodec/hrac.js a js/auto/auto.js (jeden riadok, bez modulu sa správajú ako predtým).
 
 import { vyskaNaMoste } from './nadjazdy.js';
+import { sledujPochodzne } from './pochodzne-pamiatok.js';
 
 const BUNKA = 64;
 
@@ -28,6 +29,11 @@ export default {
     // pochôdzne plochy mimo dlaždíc (napr. lávky a schodiská Átriakov, js/mapa/atriaky/): rovnaký tvar profilov
     hra.na('pochodzne-plochy', ({ kluc, profily }) => {
       if (profily?.length) this.dlazdice.set(`plochy:${kluc}`, profily); else this.dlazdice.delete(`plochy:${kluc}`);
+      this.preindexuj();
+    });
+    // pochôdzne plochy modelov pamiatok (schody pred vstupom – js/mapa/pamiatky/vyskova-budova.js)
+    sledujPochodzne((kluc, profily) => {
+      if (profily?.length) this.dlazdice.set(`pamiatka:${kluc}`, profily); else this.dlazdice.delete(`pamiatka:${kluc}`);
       this.preindexuj();
     });
     hra.mosty = { vyska: (x, z, y) => this.vyska(x, z, y) };
