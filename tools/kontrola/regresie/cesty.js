@@ -1,8 +1,12 @@
 // Kontroly ciest: pás vozovky sa v zákrutách neprekrúti (js/mapa/cesty/cesty.js), terén pod cestami
 // v laserovom výreze je pozdĺžne vyhladený (tools/mesto/laser/cesty_teren.py → data/mapa/mesto/t/*.bin)
-// a susedné dlaždice podrobného terénu majú na spoločnej hrane rovnakú výšku (tools/mesto/laser/svy_terenu.py).
+// susedné dlaždice podrobného terénu majú na spoločnej hrane rovnakú výšku (tools/mesto/laser/svy_terenu.py)
+// a zvýšený chodník neleží na vozovke (js/mapa/cesty/chodniky.js, vozovky.js).
 
 import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
+import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
+import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
+import { mriezkaVozoviek } from '../../../js/mapa/cesty/vozovky.js';
 
 const ROVINA = { vyska: () => 0, vyskaTerenu: () => 0 };
 
@@ -93,6 +97,36 @@ export const kontrolyCiest = [
         n++;
         const priemer = odch.reduce((a, b) => a + b, 0) / odch.length;
         if (priemer > 0.05) chyby.push({ dlazdica: kluc, text: `terén pod cestami nie je vyhladený (odchýlka ${priemer.toFixed(3)} m)` });
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'chodniky-mimo-vozovky',
+    popis: 'Zvýšený chodník neleží na vozovke cesty (rozdelené cesty mali chodník v protismernom páse) – najviac 200 miest',
+    oprava: 'feature/chodniky-plochy – chodniky.js: jednosmerka vpravo (bolo vľavo) a prerušenie na cudzej vozovke (#136); 23 150 → 113',
+    tolerancia: 200,
+    spusti(ctx) {
+      const chyby = [];
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        if (!cesty.length) continue;
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorChodniky(cesty, krizovatky, ROVINA);
+        const vozovky = mriezkaVozoviek(cesty);
+        const videne = new Set();
+        const p = g.children[0].geometry.getAttribute('position').array;
+        for (let t = 0; t < p.length; t += 9) {
+          n++;
+          const x = (p[t] + p[t + 3] + p[t + 6]) / 3, z = (p[t + 2] + p[t + 5] + p[t + 8]) / 3;
+          if (!vozovky.naVozovke(x, z, null, 0.5)) continue;
+          const id = `${Math.round(x / 3)}|${Math.round(z / 3)}`;
+          if (videne.has(id)) continue;
+          videne.add(id);
+          chyby.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: 'chodník na vozovke' });
+        }
+        g.traverse((o) => o.geometry?.dispose());
       }
       return { skontrolovane: n, chyby };
     },

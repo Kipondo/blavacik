@@ -7,6 +7,9 @@
 
 import { stromyDlazdice } from '../../../js/mapa/zelen/stromy-dlazdice.js';
 import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
+import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
+import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
+import { mriezkaVozoviek } from '../../../js/mapa/cesty/vozovky.js';
 import { bodVPolygone, vzdialenostOdOkraja, ohranicenie } from '../../../js/mapa/geometria.js';
 
 const BUNKA = 25;
@@ -299,6 +302,39 @@ export const KATEGORIE = [
             if (videne.has(id)) continue;
             videne.add(id);
             out.push({ x: +p[a].toFixed(1), z: +p[a + 2].toFixed(1), dlazdica: kluc, text: 'prekrížené okraje pásu' });
+          }
+          o.geometry.dispose();
+        });
+      }
+      return out;
+    },
+  },
+  {
+    id: 'chodnik-na-vozovke', popis: 'Zvýšený chodník s obrubníkom zasahuje do vozovky cesty viac ako 0,5 m (vjazdy do dvorov sa nerátajú, #136)',
+    spusti(ctx) {
+      const out = [];
+      const rovina = { vyska: () => 0, vyskaTerenu: () => 0 };
+      for (const [kluc, d] of ctx.dlazdice) {
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        if (!cesty.length) continue;
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorChodniky(cesty, krizovatky, rovina);
+        const vozovky = mriezkaVozoviek(cesty);
+        const videne = new Set();
+        g.traverse((o) => {
+          if (!o.isMesh) return;
+          // len vrch chodníka (prvá sieť skupiny), obrubníky a zadné steny ležia na jeho okraji
+          if (o === g.children[0]) {
+            const p = o.geometry.getAttribute('position').array;
+            for (let t = 0; t < p.length; t += 9) {
+              const x = (p[t] + p[t + 3] + p[t + 6]) / 3, z = (p[t + 2] + p[t + 5] + p[t + 8]) / 3;
+              const c = vozovky.vozovka(x, z, null, 0.5);
+              if (!c) continue;
+              const id = `${Math.round(x / 3)}|${Math.round(z / 3)}`;
+              if (videne.has(id)) continue;
+              videne.add(id);
+              out.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: `chodník na vozovke (${c.typ})` });
+            }
           }
           o.geometry.dispose();
         });

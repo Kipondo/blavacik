@@ -1,11 +1,13 @@
 // Chodníky s obrubníkmi pozdĺž mestských ciest (zvýšený pás vedľa vozovky).
-// Pri križovatkách sa chodník preruší, aby nezasahoval do vozovky.
+// Pri križovatkách a všade, kde by ležal na vozovke inej cesty (súbežné cesty, cesty bez spoločného bodu),
+// sa chodník preruší (js/mapa/cesty/vozovky.js, #136). Cez vjazdy do dvorov pokračuje.
 
 import * as THREE from 'three';
 import { pridajStrukturu } from './struktura.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
 import { zjemni } from './cesty.js';
 import { kluc } from './krizovatky.js';
+import { mriezkaVozoviek } from './vozovky.js';
 
 const SIRKA = 2.6;
 const OBRUBNIK = 0.16;      // šírka vrchu obrubníka (m)
@@ -28,6 +30,7 @@ function asfaltChodnika() {
 
 export function vytvorChodniky(cesty, krizovatky, vyskopis) {
   const poz = [], uv = [], obrPoz = [];
+  const vozovky = mriezkaVozoviek(cesty);
   for (const c of cesty) {
     if (!S_CHODNIKOM.has(c.typ) || c.most) continue;
     // body cesty, pri ktorých chodník končí (križovatky)
@@ -36,7 +39,9 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
       return { x, z, r: k.polomer + SIRKA + 1.5 };
     });
     const body = zjemni(c.body, 4);
-    const strany = c.jednosmerka ? [-1] : [1, -1]; // jednosmerka = len vpravo (pri dvojprúdovkách je vľavo stredový pás)
+    // jednosmerka = len vpravo (strana 1; pri dvojprúdovkách je vľavo stredový pás) – predtým tu bolo −1 (vľavo)
+    // a chodník rozdelených ciest stál v strednom páse až v protismernej vozovke
+    const strany = c.jednosmerka ? [1] : [1, -1];
     for (const strana of strany) {
       let pred = null;
       for (let i = 0; i < body.length; i++) {
@@ -48,10 +53,13 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
         const nx = -dz * strana, nz = dx * strana;
         const r0 = c.sirka / 2, rk = r0 + OBRUBNIK, r1 = r0 + SIRKA;
         const ix = x + nx * r0, iz = z + nz * r0, kx = x + nx * rk, kz = z + nz * rk, ox = x + nx * r1, oz = z + nz * r1;
+        // chodník by ležal na vozovke inej cesty (stred alebo vonkajší okraj) – tu sa preruší
+        const mx = x + nx * (r0 + SIRKA / 2), mz = z + nz * (r0 + SIRKA / 2);
+        const prerus = blizko || vozovky.naVozovke(mx, mz, c, 0.3) || vozovky.naVozovke(ox, oz, c, 0.3);
         const bod = {
           i: [ix, vyskopis.vyska(ix, iz), iz], k: [kx, vyskopis.vyska(kx, kz), kz], o: [ox, vyskopis.vyska(ox, oz), oz],
         };
-        if (pred && !blizko && !pred.blizko) {
+        if (pred && !prerus && !pred.prerus) {
           const A = pred.k, B = bod.k, C = bod.o, D = pred.o;
           // vrch chodníka (normála nahor – poradie podľa strany)
           const vrch = (p) => [p[0], p[1] + VYSKA, p[2]];
@@ -66,7 +74,7 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
           const zem = (p) => [p[0], p[1] - 0.05, p[2]];
           obrPoz.push(...zem(D), ...vrch(C), ...zem(C), ...zem(D), ...vrch(D), ...vrch(C));
         }
-        pred = { ...bod, blizko };
+        pred = { ...bod, prerus };
       }
     }
   }

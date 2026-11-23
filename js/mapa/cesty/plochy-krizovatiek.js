@@ -1,6 +1,6 @@
 // Plochy križovatiek – asfalt v kruhu, ktorý vyplní medzery medzi pásmi ciest, čo sa v križovatke stretajú.
 // Majú ten istý materiál, textúru vo svetových súradniciach a výšku ako cesty (js/mapa/cesty/cesty.js), takže
-// prekrytie s pásmi ciest nevidno a nič nebliká. Značenie ciest pri križovatke končí (cesty.js, usekyZnacenia).
+// prekrytie s pásmi ciest nevidno a nič nebliká. Značenie ciest pri križovatke končí (cesty.js, rozsahyZnacenia).
 
 import * as THREE from 'three';
 import { materialAsfaltu, NAD_TERENOM, MIERKA_ASFALTU } from './cesty.js';
