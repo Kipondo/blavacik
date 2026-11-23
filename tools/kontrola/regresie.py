@@ -39,7 +39,7 @@ class Obsluha(http.server.SimpleHTTPRequestHandler):
 async def spusti(url, casovy_limit):
     from playwright.async_api import async_playwright
     async with async_playwright() as p:
-        b = await p.chromium.launch(headless=True)
+        b = await p.chromium.launch(headless=True, args=['--mute-audio'])
         s = await b.new_page()
         chyby = []
         s.on('pageerror', lambda e: chyby.append(str(e)))
