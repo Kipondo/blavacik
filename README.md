@@ -909,6 +909,18 @@ Ručne aj v prehliadači: `http://localhost:8000/tools/kontrola/regresie.html`. 
 počty opráv v dlaždiciach – obchody, vyvýšené časti, priechody, podchody, nadjazdy, výšky a šikmé strechy z lasera,
 stromy z lasera). **Nová oprava = nová kontrola** – záznam s odkazom na commit/PR opravy.
 
+**Kontrolór mapy celého mesta** (#134) – nájde chyby mapy v celej Bratislave naraz, s polohou:
+```
+python3 tools/kontrola/kontrola-mapy.py                 # → .cache/kontrola-mapy/index.html (mapa s bodkami) a chyby.json
+python3 tools/kontrola/kontrola-mapy.py --len cesta-strma,budova-cez-cestu
+python3 tools/kontrola/kontrola-mapy.py --uloz-zaklad   # po oprave chýb znížiť základ
+```
+Kategórie (`tools/kontrola/mapa/kontroly-mapy.js`): stromy na mostoch, vo vode, na vozovke a v budovách; lampy, lavičky
+a semafory na vozovke, vo vode a v budovách; os cesty cez budovu; cesty cez seba bez križovatky; strmé úseky ciest
+(výškový model hry); zlomy pásu vozovky; budovy v Dunaji; švy podrobného terénu medzi dlaždicami. Počty sa porovnajú
+so základom `tools/kontrola/mapa-zaklad.json` – **viac chýb než v základe = PR neprejde** (rovnaký workflow
+`regresie.yml`). Tráva sa kontroluje vzorkou v regresných kontrolách.
+
 ## Ako pridať misiu
 Postup je v [data/misie/FORMAT.md](data/misie/FORMAT.md) – stačí pridať JSON súbory, kód netreba.
 

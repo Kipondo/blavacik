@@ -7,7 +7,7 @@ const ROVINA = { vyska: () => 0, vyskaTerenu: () => 0 };
 
 /** Podrobný terén dlaždice z data/mapa/mesto/t/<kluc>.bin (gzip, rozdiely po riadkoch, cm nad 100 m). */
 async function teren(kluc) {
-  const r = await fetch(`../../data/mapa/mesto/t/${kluc}.bin`);
+  const r = await fetch(`data/mapa/mesto/t/${kluc}.bin`);
   if (!r.ok) return null;
   let buf = await r.arrayBuffer();
   const b = new Uint8Array(buf, 0, 2);
