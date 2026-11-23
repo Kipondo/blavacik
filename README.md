@@ -482,9 +482,13 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     (`js/mapa/cesty/prechody-poloha.js`).
   - **Cyklopruhy** sú súvislý pás s pokosom v lomoch. Predtým boli samostatné štvoruholníky, ktoré sa v zákrutách
     prekrývali a blikali.
-  - **Ostré zákruty:** pri každom novom rade pásu sa skontroluje, či by sa trojuholník prevrátil (okraj potom
-    ostane na predošlom bode), a zdvojené body na hrane dlaždice sa vynechajú. Kontrolór mapy `cesta-zlom`
-    95 → 24 (zostali vlásenky).
+  - **Ostré zákruty a vlásenky:** zdvojené body na hrane dlaždice sa vynechajú. Vo vlásenke (zákruta nad ~100°) je
+    namiesto pokosu vejár radov okolo vrcholu, teda zaoblený spoj. Štvoruholník medzi radmi sa na každej strane
+    rozdelí uhlopriečkou, pri ktorej sa žiadny trojuholník neprevráti; ak taká nie je, okraj sa posunie. Kontrolór
+    mapy `cesta-zlom` 95 → 0.
+  - **Chodníky:** chodník sa preruší aj tam, kde by ležal na vlastnej vozovke (vnútorná strana ostrej zákruty).
+    Jednosmerky majú chodník po oboch stranách. Vľavo nie je len tam, kde je do ~8 m druhý pás rozdelenej cesty,
+    teda stredný pás. Kontrolór mapy `chodnik-na-vozovke` 23 150 → 0.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),

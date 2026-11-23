@@ -32,11 +32,10 @@ const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.lengt
 export const kontrolyCiest = [
   {
     id: 'cesty-bez-prekrutenia',
-    popis: 'Pás vozovky sa v ostrých zákrutách neprekrúti – najviac 15 otočených trojuholníkov na milión '
-      + '(23. 11. 2026: 8 na milión – zostali vlásenky; 22. 11.: 26 na milión, pôvodný kód ~300 na milión)',
+    popis: 'Pás vozovky sa v ostrých zákrutách ani vo vlásenkách neprekrúti – žiadny otočený trojuholník '
+      + '(23. 11. 2026: 0 – zaoblený spoj vo vlásenke a výber uhlopriečky; predtým 26 na milión, pôvodný kód ~300)',
     oprava: 'c6c47a7 Cesty: … pokos v zákrutách (vnútorný okraj ostrej zákruty sa nevracia späť) + test prevrátených trojuholníkov a zdvojených bodov (#136, časť 3)',
     tolerancia: 0,
-    naMilion: 15,
     spusti(ctx) {
       const chyby = [];
       let n = 0;
@@ -103,9 +102,9 @@ export const kontrolyCiest = [
   },
   {
     id: 'chodniky-mimo-vozovky',
-    popis: 'Zvýšený chodník neleží na vozovke cesty (rozdelené cesty mali chodník v protismernom páse) – najviac 200 miest',
-    oprava: 'feature/chodniky-plochy – chodniky.js: jednosmerka vpravo (bolo vľavo) a prerušenie na cudzej vozovke (#136); 23 150 → 113',
-    tolerancia: 200,
+    popis: 'Zvýšený chodník neleží na vozovke cesty (rozdelené cesty mali chodník v protismernom páse, ostré zákruty na vlastnej vozovke)',
+    oprava: 'feature/chodniky-plochy (#146) a fix/cesty-zvysky – chodniky.js: prerušenie na vozovke (aj vlastnej), jednosmerka bez stredného pásu (#136); 23 150 → 0',
+    tolerancia: 0,
     spusti(ctx) {
       const chyby = [];
       let n = 0;
