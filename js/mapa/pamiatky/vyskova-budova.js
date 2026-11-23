@@ -10,11 +10,16 @@
 // "podlaTerenu": true v <subor>.json = model kopíruje terén (hradby, živé ploty): y vrcholu = terén + lokálna výška.
 // "nahradit": [[[x, z], …]] v <subor>.json = pôdorysy bez kolízie, z ktorých sa len vyhodia budovy a stromy dlaždíc.
 // "bezKoliziiObrysov": true = z obrysov sa nerobia kolízie (stavbu s terasami a lávkami rieši vlastný modul s výškami).
+// "kolizie": [[[x, z], …]] = vlastné kolízne pôdorysy (napr. krídla okolo átria – do dvora sa dá vojsť).
+// "plochy": [{ body: [[x, z, h], …], sirka }] = pochôdzne plochy (schodisko pred vstupom), h nad základňou modelu
+//   (js/mapa/mosty/pochodzne-pamiatok.js). "vchody": [{ id, bod: [x, z], vyska }] = dvere na neskorší interiér.
+// "zakladnaBod": [x, z] = model sa položí na terén v tomto bode (inak na najnižší terén pod obrysmi).
 // Keď sa pod stavbou načíta alebo uvoľní podrobný terén z lasera, výšky sa prepočítajú.
 
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
 import { nahradBudovy } from './nahradene-budovy.js';
+import { pridajPochodzne } from '../mosty/pochodzne-pamiatok.js';
 
 // Drobné prvky (stĺpiky, priečky – materiály „detail…“) sa z diaľky nekreslia: na pár pixeloch
 // by len blikali (moaré) a zbytočne by sa kreslili tisíce trojuholníkov.
@@ -100,6 +105,8 @@ export default async function postav(p, { vyskopis, kolizie }) {
     minX: Math.min(o.minX, x), maxX: Math.max(o.maxX, x), minZ: Math.min(o.minZ, z), maxZ: Math.max(o.maxZ, z),
   }), { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity }) : null;
   const zakladna = () => {
+    // model so zvažujúcim sa terénom pod sebou sa kladie na terén v danom bode (napr. ulica pred vstupom)
+    if (info.zakladnaBod) return vyskopis.vyskaTerenu(...svetBod(...info.zakladnaBod));
     let zem = Infinity;
     for (const w of obrysy) for (const [x, z] of w) zem = Math.min(zem, vyskopis.vyskaTerenu(x, z));
     return Number.isFinite(zem) ? zem : vyskopis.vyskaTerenu(p.x, p.z);
@@ -107,6 +114,17 @@ export default async function postav(p, { vyskopis, kolizie }) {
 
   const g = new THREE.Group();
   g.position.set(p.x, info.podlaTerenu ? 0 : zakladna(), p.z);
+  // pochôdzne plochy (schody pred vstupom): výška = základňa modelu + h; prepočítajú sa so základňou
+  const klucPloch = `${p.subor}@${p.x},${p.z}`;
+  const zapisPlochy = () => {
+    if (!info.plochy?.length) return;
+    const y0 = g.position.y;
+    pridajPochodzne(klucPloch, info.plochy.map((pr) => ({
+      sirka: pr.sirka,
+      body: pr.body.map(([x, z, h]) => { const [wx, wz] = svetBod(x, z); return { x: wx, z: wz, h: y0 + h }; }),
+    })));
+  };
+  zapisPlochy();
   g.rotation.y = u;
   const docasny = info.podlaTerenu ? new THREE.Group() : zaloha(info);
   g.add(docasny);
@@ -155,7 +173,7 @@ export default async function postav(p, { vyskopis, kolizie }) {
     if (nove === podpis) return;
     podpis = nove;
     if (info.podlaTerenu) prisposobTerenu();
-    else g.position.y = zakladna();
+    else { g.position.y = zakladna(); zapisPlochy(); }
   };
   return { objekt: g, update };
 }

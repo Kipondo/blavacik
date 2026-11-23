@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Blavačík – náhľad modelu pamiatky</title>
+  <!-- Náhľad modelu z Blendera bez mesta (rýchle a ľahké): http://localhost:8000/tools/blender/nahlad.html?model=stavebna-fakulta
+       Ovládanie: ťahanie myšou = otáčanie, koliesko = priblíženie. Pre automatické snímky: window.pohlad(azimut°, vyska, vzdialenost, [x, y, z]). -->
+  <base href="../../">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #cfd8e0; font: 13px system-ui, sans-serif; }
+    #info { position: absolute; left: 8px; top: 8px; background: #fffc; padding: 4px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="info">Načítavam…</div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { nacitajModelPamiatky } from './js/mapa/pamiatky/model-glb.js';
+
+    const meno = new URLSearchParams(location.search).get('model') ?? 'stavebna-fakulta';
+    const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    r.setPixelRatio(1); r.setSize(innerWidth, innerHeight);
+    r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
+    r.shadowMap.enabled = true;
+    document.body.appendChild(r.domElement);
+    const sc = new THREE.Scene();
+    sc.background = new THREE.Color('#bcd2e6');
+    // odraz okolia pre sklo: jednoduchá obloha (gradient) cez PMREM
+    const oblohaSc = new THREE.Scene();
+    oblohaSc.add(new THREE.Mesh(new THREE.SphereGeometry(100, 16, 8), new THREE.MeshBasicMaterial({ color: '#9fc1e0', side: THREE.BackSide })));
+    sc.environment = new THREE.PMREMGenerator(r).fromScene(oblohaSc, 0.02).texture;
+    sc.add(new THREE.HemisphereLight('#ffffff', '#8a7f70', 1.2));
+    const slnko = new THREE.DirectionalLight('#fff4e0', 2.6);
+    slnko.position.set(120, 160, 60); slnko.castShadow = true;
+    slnko.shadow.mapSize.set(2048, 2048);
+    Object.assign(slnko.shadow.camera, { left: -150, right: 150, top: 150, bottom: -150, far: 500 });
+    sc.add(slnko);
+    const zem = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ color: '#9a9a92', roughness: 1 }));
+    zem.rotation.x = -Math.PI / 2; zem.receiveShadow = true; sc.add(zem);
+    const k = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.5, 3000);
+    let az = 30, vys = 60, vzd = 260, ciel = new THREE.Vector3(0, 15, 0);
+    function kresli() {
+      const a = THREE.MathUtils.degToRad(az);
+      k.position.set(ciel.x + Math.sin(a) * vzd, vys, ciel.z + Math.cos(a) * vzd);
+      k.lookAt(ciel);
+      r.render(sc, k);
+    }
+    window.pohlad = (azimut, vyska, vzdialenost, c) => {
+      az = azimut; vys = vyska; vzd = vzdialenost; if (c) ciel.set(...c);
+      kresli();
+      return r.domElement.toDataURL('image/jpeg', 0.9);
+    };
+    const model = await nacitajModelPamiatky(meno, { ao: false, gz: true });
+    if (model) { model.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; } }); sc.add(model); }
+    let troj = 0; model?.traverse((o) => { if (o.isMesh) troj += (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3; });
+    document.getElementById('info').textContent = model ? `${meno}: ${Math.round(troj)} trojuholníkov` : `${meno}: model sa nenačítal`;
+    let tah = null;
+    addEventListener('mousedown', (e) => { tah = { x: e.clientX, y: e.clientY, az, vys }; });
+    addEventListener('mousemove', (e) => { if (!tah) return; az = tah.az - (e.clientX - tah.x) * 0.3; vys = Math.max(2, tah.vys + (e.clientY - tah.y) * 0.5); kresli(); });
+    addEventListener('mouseup', () => { tah = null; });
+    addEventListener('wheel', (e) => { vzd *= e.deltaY > 0 ? 1.1 : 0.9; kresli(); });
+    addEventListener('resize', () => { r.setSize(innerWidth, innerHeight); k.aspect = innerWidth / innerHeight; k.updateProjectionMatrix(); kresli(); });
+    kresli();
+    window.pripraveny = true;
+  </script>
+</body>
+</html>

@@ -20,7 +20,12 @@ CIELE = {
     'univerzita-komenskeho': {'cesty': [1383879681], 'casti': [1340711263]},
     # „presklené vajce“ pri Eurovei (Pribinova 6, A1 ReSpect / Bose) a sklenená kupola nad vstupom do galérie
     'eurovea-vajce': {'relacie': [21708447], 'casti': [762656643]},
+    # Stavebná fakulta STU (O. Černý, 1962–1974): blok B s dvoma átriami (multipolygón), veža C (24 NP), blok A (6 NP);
+    # časti: spoj B–C, lomenica nad hlavným vstupom, pásový prístrešok pri aule
+    'stavebna-fakulta': {'relacie': [1181349], 'cesty': [77937579, 77937646], 'casti': [77937543, 1324890210, 1324890201]},
 }
+# len tieto (ostatné ostanú v obrysy.json, ako sú); prázdne = všetky z CIELE
+LEN = os.environ.get('LEN', '').split(',') if os.environ.get('LEN') else []
 
 
 SERVERY = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
@@ -58,6 +63,8 @@ def main():
     with open(cesta, encoding='utf8') as f:
         vystup = json.load(f)
     for meno, c in CIELE.items():
+        if LEN and meno not in LEN:
+            continue
         hlavne, casti = [], []
         for wid in c.get('cesty', []):
             e = overpass(f'[out:json];way({wid});out body geom;')['elements'][0]
@@ -82,7 +89,9 @@ def main():
                 else:
                     break
             b = body([{'lat': la, 'lon': lo} for la, lo in kruh])
-            hlavne.append({'id': str(rid), 't': e.get('tags', {}), 'body': b, 'plocha': round(plocha(b))})
+            # vnútorné prstence (dvory) – každý inner člen je uzavretý
+            dvory = [body(m['geometry']) for m in e['members'] if m['type'] == 'way' and m.get('role') == 'inner' and m.get('geometry')]
+            hlavne.append({'id': str(rid), 't': e.get('tags', {}), 'body': b, 'plocha': round(plocha(b)), **({'dvory': dvory} if dvory else {})})
         for wid in c.get('casti', []):
             e = overpass(f'[out:json];way({wid});out body geom;')['elements'][0]
             b = body(e['geometry'])

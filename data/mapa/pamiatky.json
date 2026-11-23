@@ -56,6 +56,7 @@
     {"nazov": "Eurovea", "x": 1114, "z": 377, "dosah": 150},
     {"model": "vyskova-budova", "subor": "eurovea-tower", "nazov": "Eurovea Tower", "x": 1444.22, "z": 408.95, "zaber": {"kruh": 24}, "dosah": 70},
     {"model": "vyskova-budova", "subor": "univerzita-komenskeho", "nazov": "Univerzita Komenského", "x": 557.22, "z": 265.13, "dosah": 70},
+    {"model": "vyskova-budova", "subor": "stavebna-fakulta", "nazov": "Stavebná fakulta STU", "x": 541.63, "z": -933.36, "dosah": 90},
     {"model": "vyskova-budova", "subor": "eurovea-vajce", "nazov": "Eurovea – presklené vajce", "x": 932.32, "z": 315.59, "dosah": 50},
     {"model": "vyskova-budova", "subor": "rozhlas", "nazov": "Slovenský rozhlas", "x": 466.85, "z": -1176.21, "dosah": 110},
     {"model": "vyskova-budova", "subor": "kamzik", "nazov": "Kamzík", "x": -963.38, "z": -4342.36, "dosah": 200},

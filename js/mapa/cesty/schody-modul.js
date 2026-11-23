@@ -4,7 +4,10 @@
 // pri dlhšom schodisku je po oboch stranách kovové zábradlie.
 // Stavia sa spolu s detailnou dlaždicou (udalosť 'dlazdica-nacitana'); sieť patrí objektu dlaždice
 // a uvoľní sa s ňou. Schody na mostoch a lávkach (nadjazd) a schody do podchodov (zdieľajú bod s data.podchody)
-// sa nekreslia – majú vlastnú stavbu.
+// sa nekreslia – majú vlastnú stavbu. Rovnako schody v mieste modelu pamiatky, ktorý má vlastné schodisko
+// ("nahradit" v assets/pamiatky/<subor>.json, napr. hlavný vstup Stavebnej fakulty).
+
+import { jeNahradene } from '../pamiatky/nahradene-budovy.js';
 
 const STUPEN = 0.3;        // m – dĺžka stupňa (nástupnica)
 const VYSKA = 0.15;        // m – výška schodu
@@ -198,6 +201,8 @@ export default {
     for (const c of chodniky) {
       if (c.typ !== 'steps' || c.nadjazd || c.most) continue;
       if (podZemou.size && c.body.some((b) => podZemou.has(kluc(b)))) continue;
+      const stred = c.body[Math.floor(c.body.length / 2)];
+      if (jeNahradene(stred[0], stred[1])) continue;     // model pamiatky má vlastné schodisko
       schodisko(c, vyska, o, zabradlia);
     }
     if (!o.idx.length) return null;

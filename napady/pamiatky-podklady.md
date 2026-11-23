@@ -1,6 +1,6 @@
 <!-- Prieskum pre modely pamiatok (vetva feature/pamiatky-uk-vajce). Zdroje sú na konci; Google Maps/Earth sa nepoužívali (licencia). -->
 
-# Podklady pre 3D modely: UK Šafárikovo nám., Eurovea, Sky Park
+# Podklady pre 3D modely: UK Šafárikovo nám., Eurovea, Sky Park, Stavebná fakulta STU
 
 Prepočet súradníc OSM na metre robím pre 48,14° s. š.: 1° zem. šírky ≈ 111 194 m, 1° zem. dĺžky ≈ 74 420 m. Vrcholy a rozmery pôdorysov som rátal ručne z uzlov OSM, takže presnosť je asi ±0,5 m.
 
@@ -370,3 +370,74 @@ bez Google. Podľa neho sú upravené modely (`tools/blender/vyskove/`).
   navrchu svetlosivé lamely a zvislice ohnuté dnu, prízemie ≈ 7 m presklené.
 - Offices (Vietzke & Borstelmann + GFI): bloky zhora ≈ 7, 6, 3, 4 podlažia posunuté o 1–2 m, biele pásy len na
   stykoch blokov, tmavé zvislé lamely, biela rebrovaná clona techniky.
+
+---
+
+## Stavebná fakulta STU (Radlinského 11 / Imricha Karvaša) – #127, 23. 11. 2026
+Prieskum podľa CLAUDE.md („Pamiatky a významné stavby“, #130): OSM, laser ÚGKK, stránky fakulty, výročné správy,
+rozpočty v CRZ, ASB, archinfo.sk, Wikimedia Commons. Google sa nepoužil. Fotky a výkresy sa len prezreli a opísali,
+do repozitára nejde nič z nich. Model: `tools/blender/vyskove/stavebna_fakulta.py`.
+
+**História.** Ing. arch. Oldřich Černý s kolektívom (Stavoprojekt Bratislava), projekt 1962, základný kameň
+28. 4. 1964, blok A v prevádzke 1967, celý komplex 1974. Neskoršie úpravy:
+- 2009–10 nový plášť veže C a spoja B–C;
+- 2011 rekonštrukcia hlavného vstupu;
+- 2020–21 obnova plášťa bloku B (metalický obklad, nové okná, obnovená lomenica nad vstupom, tienenie svetlíkov);
+- 2023 obnova bloku A a auly.
+
+**Hmoty** (výpočet z OSM, ±0,5 m):
+
+| časť | rozmery | podlažia, výška | OSM |
+|---|---|---|---|
+| Veža C (katedry, dekanát) | 47,2 × 14,7 m, os 124° | 24 NP (prízemie + 23 poschodí), 77,5 m (TASR) / 78 m (OSM) | way 77937579 |
+| Blok B (podnož) | ≈ 165 × 45 m | suterén čiastočne nad terénom + 3 NP, atika ~15,6 m | relation 1181349 |
+| Východné átrium (diera v B) | ≈ 52 × 25,4 m | – | inner way 77937277 |
+| Stredný blok medzi átriami | ≈ 43 m dlhý | o 1 podlažie vyšší | – |
+| Aula (vo V krídle) | strecha ≈ 27,4 × 29 m | vyššia ako podnož | – |
+| Blok A | 66 × 15 m | 6 NP | way 77937646 |
+| Spoj B–C | 10 × 7 m | 4 NP | way 77937543 |
+
+**Fasády.**
+- Veža: hliníkové elementy, raster 1,5 × 3 m. Svetlosivý parapetný pás 1,25 m, tmavé sklo 1,75 m, takže fasáda pôsobí vodorovne pruhovane.
+- Úzke čelá veže (schodiská) majú vodorovné lamely a zvislý požiarny pás. Na ktorom čele presne, nie je isté.
+- Blok B (od 2021): veľké svetlé pieskovo-béžové panely so škárami a pásové okná v sivých rámoch. Okná sú v skupinách, medzi nimi plné piliere.
+- Do 2020 mal blok B béžový drobný obklad a modré parapety.
+
+**Strechy.**
+- Všetky strechy sú ploché a tmavé.
+- Na strednom bloku je 28 pyramídových svetlíkov 2,4 × 2,4 m v skupinách 12 + 16, šachovnicovo, každý na tmavom golieri. Zdroj: rozpočet strechy SO-02 v CRZ (4 sklá na svetlík).
+- Na streche veže je strojovňa a desiatky malých parabol na stojanoch (prevádzkový poriadok antén).
+
+**Hlavný vstup** je na SV fasáde bloku B pri ulici Imricha Karvaša, OSM `entrance=main` 48.1519921, 17.1153318.
+- Lomenica: 18,1 × 7,7 m (way 1324890210), lomená doska s 5 hrebeňmi. Podhľad je biely, okraj oplechovaný tmavosivo.
+- Schodisko: OSM udáva 10 stupňov. Na fotke sú dve ramená s podestou a čierne zábradlie, prevýšenie ≈ 1,5 m.
+- Rampa vpravo pred dvojpodlažnou presklenou halou.
+- Pod lomenicou 3 vstupy v oranžových portáloch. Stredný je oblý a má biely nápis v dvoch riadkoch „STAVEBNÁ / FAKULTA“.
+- Vľavo hore je tabuľa „STU SvF“, vľavo od schodiska 3 stožiare.
+
+**Átrium.**
+- Východné átrium má dláždenú oddychovú plochu, bronzovú sochu (L. Korkoš, 1976; do hry nejde – umelecké dielo) a v pôdorysoch kruhové symboly stromov.
+- Laser ukazuje vnútro dvora o ~1,4–1,8 m vyššie než ulicu pri vstupe a pri fasádach zapustené pásy (anglické dvorce, obnovené 2021).
+- Plytkú nádrž z opisu majiteľa som v textoch ani výkresoch nenašiel, v modeli je ako odhad.
+
+**Rozhodnutia pre model.**
+- Model sa kladie na terén v bode pri spodnom stupni schodiska (`zakladnaBod`). Terén pod blokom B klesá o ~3 m, sokel preto siaha 4 m pod ulicu.
+- Schodisko je pochôdzna plocha: hráč aj chodci idú hore na podestu (`plochy`). Kolízie sú len krídla okolo átria, veža, blok A a spoj.
+- Dvere pre neskorší interiér sú v `vchody` (id `hlavny`) v `assets/pamiatky/stavebna-fakulta.json`.
+- Nápisy univerzity áno (verejná inštitúcia, ako pri UK), logo STU (bodkový raster) nie – len text „STU SvF“. Vlajky: SR (zjednodušený štátny znak), červená a oranžová bez znakov.
+
+**Neisté – fotky, ktoré by mal dodať majiteľ:**
+- átrium s nádržou (zo stredu dvora aj z okna nad ním);
+- úzke čelo veže k Radlinského (lamely);
+- schodisko zboku (počet stupňov, podesta);
+- vstupná hala zvnútra (pre interiér).
+
+**Zdroje:**
+- fakulta: [virtuálna prehliadka](https://www.svf.stuba.sk/sk/fakulta/virtualna-prehliadka), [o budove](https://www.svf.stuba.sk/sk/fakulta/o-fakulte/o-budove-fakulty), [obnova bloku B 2020](https://www.svf.stuba.sk/sk/diani-na-svf/obnova-a-modernizacia-budovy-svf.html?page_id=8031);
+- výročné správy SvF 2020, 2021, 2023, 2024 (`svf.stuba.sk/buxus/docs/dokumenty/vyrocne_spravy/`) a [80 rokov SvF](https://www.svf.stuba.sk/buxus/docs/rozne/80_rokov_SvF_vnutro_maly_subor.pdf);
+- [ASB – obnova fasády veže](https://www.asb.sk/stavebnictvo/obnova-fasady-stavebnej-fakulty-stu) a [archinfo.sk – O. Černý](https://www.archinfo.sk/diskusia/blog/architektura-vseobecne/oldrich-cerny-st-architekt-modernych-konceptov.html);
+- CRZ: [rozpočet strechy bloku B](https://crz.gov.sk//data/att/4479779_dokument1.pdf);
+- [prevádzkový poriadok antén](https://www.svf.stuba.sk/buxus/docs/dokumenty/smernice/Prevadzka_anten_2015.pdf) a [socha v átriu](https://umeniemesta.sk/diela/rec8nK9JkXp89K2vY);
+- Commons: [STU-Building.JPG](https://commons.wikimedia.org/wiki/File:STU-Building.JPG), [Panorama STU](https://commons.wikimedia.org/wiki/File:Panorama_STU_-_panoramio.jpg) (strecha so svetlíkmi zhora), [zastávka STU 2013](https://commons.wikimedia.org/wiki/File:Bratislava,_Imricha_Karva%C5%A1a,_tramvajov%C3%A1_zast%C3%A1vka_STU_(2013-10-25;_01).jpg);
+- OSM (ODbL): lomenica 1324890210, prístrešok pri aule 1324890201, schody 241184965, rampa 1324890206, areál 248120516;
+- výškopis: laser ÚGKK (DMR) – výška dvora a anglických dvorcov.
