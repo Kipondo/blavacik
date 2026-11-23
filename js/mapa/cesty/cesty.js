@@ -15,11 +15,13 @@ import { texturaAsfaltuSvet, texturaZnacenia, DLZKA_V } from './textura-cesty.js
 import { pridajStrukturu } from './struktura.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
 import { kluc } from './krizovatky.js';
+import { polohyPrechodov } from './prechody-poloha.js';
 
 const KROK = 2.5;         // delenie cesty na úseky (m), aby sedela na teréne (terén je po 2 m)
 export const NAD_TERENOM = 0.12;
 export const MIERKA_ASFALTU = 9;   // m na jedno opakovanie textúry asfaltu (svetové súradnice)
 const VOLNO_KRIZOVATKY = 1.0;      // m – značenie končí kúsok pred plochou križovatky
+const VOLNO_PRECHODU = 2.5;        // m – polovica medzery v značení pod zebrou (zebra má 3,5 m)
 const S_OKRAJMI = new Set(['motorway', 'trunk', 'primary', 'motorway_link', 'trunk_link']);
 // obslužné cesty (vjazdy do dvorov, parkovísk): značenie hlavnej cesty cez ne pokračuje, ich vlastné pri nej končí
 const DROBNE = new Set(['service', 'living_street', 'track', 'unknown']);
@@ -51,10 +53,17 @@ function materialZnacenia(pruhy, jednosmerka, okraje) {
  * @param {Array} cesty
  * @param {{ vyska(x, z): number }} vyskopis
  * @param {Map|null} krizovatky  z najdiKrizovatky – pri nich sa značenie preruší (bez nich ide značenie celé)
+ * @param {Array|null} prechody  body prechodov [[x, z], …] (OSM) – pod zebrou sa značenie preruší
  */
-export function vytvorCesty(cesty, vyskopis, krizovatky = null) {
+export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null) {
   const asfalt = { poz: [], uv: [], idx: [] };
   const skupiny = new Map();
+  // vzdialenosti prechodov od začiatku ich cesty (po osi)
+  const zebry = new Map();
+  for (const p of polohyPrechodov(prechody, cesty)) {
+    if (!zebry.has(p.c)) zebry.set(p.c, []);
+    zebry.get(p.c).push(p.s);
+  }
 
   for (const c of cesty) {
     const body = zjemni(c.body, KROK);
@@ -66,7 +75,7 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null) {
     if (!skupiny.has(k)) skupiny.set(k, { pruhy, jednosmerka: !!c.jednosmerka, okraje, poz: [], uv: [], idx: [] });
     const s = skupiny.get(k);
     // značenie na tých istých bodoch ako asfalt (rovnaké trojuholníky → nikde nezapadne pod asfalt)
-    for (const [od, po] of rozsahyZnacenia(c.body, body, krizovatky, c.typ)) {
+    for (const [od, po] of rozsahyZnacenia(c.body, body, krizovatky, c.typ, zebry.get(c))) {
       pridajPas(s, body, c.sirka / 2, NAD_TERENOM, vyskopis, { od, po });
     }
   }
@@ -95,17 +104,18 @@ function siet(s, mat, meno) {
 /**
  * Rozsahy bodov zjemnenej osi `jemne` (tie isté body ako asfalt), na ktorých sa kreslí značenie: bez kruhu
  * križovatky (polomer + VOLNO_KRIZOVATKY). Pri vjazde obslužnej cesty (DROBNE) značenie hlavnej cesty pokračuje,
- * značenie obslužnej cesty končí vždy. Vráti [[od, po], …] (indexy do `jemne`, vrátane).
+ * značenie obslužnej cesty končí vždy. Pod zebrami (zebry = vzdialenosti prechodov po osi) sa preruší tiež.
+ * Vráti [[od, po], …] (indexy do `jemne`, vrátane).
  */
-export function rozsahyZnacenia(body, jemne, krizovatky, typ = '') {
+export function rozsahyZnacenia(body, jemne, krizovatky, typ = '', zebry = null) {
   const n = jemne.length;
-  if (!krizovatky?.size || n < 2) return n >= 2 ? [[0, n - 1]] : [];
+  if (n < 2) return [];
   // rezy v dĺžke po osi (zjemnenie dĺžku nemení)
-  const rezy = [];
+  const rezy = (zebry ?? []).map((s) => [s - VOLNO_PRECHODU, s + VOLNO_PRECHODU]);
   let s = 0;
   body.forEach(([x, z], i) => {
     if (i) s += Math.hypot(x - body[i - 1][0], z - body[i - 1][1]);
-    const k = krizovatky.get(kluc(x, z));
+    const k = krizovatky?.get(kluc(x, z));
     if (!k) return;
     // hlavné cesty v uzle okrem tejto (typy obsahujú aj ju samu – raz)
     const hlavne = (k.typy ?? []).filter((t) => !DROBNE.has(t)).length - (DROBNE.has(typ) ? 0 : 1);
@@ -131,14 +141,17 @@ export function rozsahyZnacenia(body, jemne, krizovatky, typ = '') {
  * Pridá pás (cestu) do spoločnej geometrie. Normála vždy nahor.
  * V priečnom smere má pás 3 rady vrcholov (okraj – stred – okraj), aby terén v strede širokej cesty
  * nepresvital cez vozovku. V zákrute sa okraj posunie po osi uhla (pokos) – cesta sa nezúži –
- * a vnútorný okraj ostrej zákruty sa nevracia späť (pás sa neprekrúti).
+ * a vnútorný okraj ostrej zákruty sa nevracia späť: ak by sa niektorý trojuholník medzi dvoma radmi prevrátil
+ * (normála nadol – vlásenky, krátke úseky v pravouhlej zákrute), okraj ostane na predošlom bode (pás sa neprekrúti).
  * svet = UV vo svetových súradniciach (asfalt), inak U naprieč (0..1) a V pozdĺž cesty (značenie).
  * od, po = pridajú sa len rady bodov od…po (vrátane); tvar sa počíta z celej osi, takže sedí na asfalt.
  */
 export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV = DLZKA_V, od = 0, po = body.length - 1 } = {}) {
   const zaciatok = s.poz.length / 3;
   let v = 0;
-  let predL = null, predP = null;
+  let predL = null, predP = null, predC = null;
+  // trojuholník (a, b, c) v rovine xz otočený normálou nadol (rovnaký test ako kontrola cesty-bez-prekrutenia)
+  const naruby = (a, b, c) => (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]) < -1e-9;
   for (let i = 0; i <= po; i++) {
     const [x, z] = body[i];
     const prev = body[Math.max(0, i - 1)], next = body[Math.min(body.length - 1, i + 1)];
@@ -160,7 +173,12 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
     // vnútorný okraj ostrej zákruty: ak by šiel proti smeru cesty, ostane na predošlom bode
     if (predL && (L[0] - predL[0]) * dx + (L[1] - predL[1]) * dz < 0) L = predL;
     if (predP && (P[0] - predP[0]) * dx + (P[1] - predP[1]) * dz < 0) P = predP;
-    predL = L; predP = P;
+    if (predC) {
+      const C = [x, z];
+      if (naruby(predL, L, predC) || naruby(predC, L, C)) L = predL;
+      if (naruby(predC, C, predP) || naruby(predP, C, P)) P = predP;
+    }
+    predL = L; predP = P; predC = [x, z];
     if (i < od) continue;
     s.poz.push(L[0], vyskopis.vyska(L[0], L[1]) + posun, L[1]);
     s.poz.push(x, vyskopis.vyska(x, z) + posun, z);
@@ -180,12 +198,13 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
   }
 }
 
-/** Rozdelí dlhé úseky na kratšie. */
+/** Rozdelí dlhé úseky na kratšie; zdvojené body (úsek kratší ako 1 cm, napr. na hrane dlaždice) vynechá. */
 export function zjemni(body, krok) {
   const out = [];
   for (let i = 0; i < body.length - 1; i++) {
     const [ax, az] = body[i], [bx, bz] = body[i + 1];
     const d = Math.hypot(bx - ax, bz - az);
+    if (d < 0.01) continue;
     const n = Math.max(1, Math.ceil(d / krok));
     for (let k = 0; k < n; k++) out.push([ax + ((bx - ax) * k) / n, az + ((bz - az) * k) / n]);
   }

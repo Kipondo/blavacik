@@ -2,8 +2,10 @@
 // Pruh 1,5 m pri okraji asfaltu s bielou čiarou na strane áut a piktogramom bicykla každých 20 m.
 // Stavia sa spolu s detailnou dlaždicou mesta (udalosť 'dlazdica-nacitana'), keď je už načítaný detailný terén;
 // sieť je súčasťou objektu dlaždice, takže sa uvoľní spolu s ňou.
+// Pruh je súvislý pás s pokosom v lomoch (pridajPas z cesty.js, #136) – predtým bol každý úsek samostatný
+// štvoruholník a v zákrutách sa susedné úseky prekrývali (blikanie) alebo medzi nimi ostala medzera.
 
-import { NAD_TERENOM } from './cesty.js';
+import { NAD_TERENOM, pridajPas, zjemni } from './cesty.js';
 
 const SIRKA = 1.5;
 const OPAKOVANIE = 20;     // m – dĺžka textúry s jedným piktogramom
@@ -40,23 +42,24 @@ function texturaPruhu(THREE) {
   return t;
 }
 
-/** Body pruhu posunuté od osi cesty (vpravo +, vľavo −) a rozdelené po KROK m. */
-function posunutaLinia(body, posun) {
+/** Os pruhu: línia posunutá od osi cesty o d (vpravo +) s pokosom v lomoch (ako okraj pásu cesty). */
+function posunutaLinia(body, d) {
   const out = [];
-  for (let i = 0; i < body.length - 1; i++) {
-    const [ax, az] = body[i], [bx, bz] = body[i + 1];
-    const d = Math.hypot(bx - ax, bz - az);
-    if (d < 0.01) continue;
-    const nx = -(bz - az) / d, nz = (bx - ax) / d;     // vpravo v smere kreslenia (ako js/mapa/cesty/cesty.js)
-    const n = Math.max(1, Math.ceil(d / KROK));
-    for (let k = 0; k < n; k++) {
-      const t = k / n;
-      out.push([ax + (bx - ax) * t + nx * posun, az + (bz - az) * t + nz * posun, nx, nz]);
-    }
+  const n = body.length;
+  for (let i = 0; i < n; i++) {
+    const [x, z] = body[i];
+    const prev = body[Math.max(0, i - 1)], next = body[Math.min(n - 1, i + 1)];
+    let ax = x - prev[0], az = z - prev[1], bx = next[0] - x, bz = next[1] - z;
+    const la = Math.hypot(ax, az), lb = Math.hypot(bx, bz);
+    if (la < 1e-6) { ax = bx; az = bz; } else { ax /= la; az /= la; }
+    if (lb < 1e-6) { bx = ax; bz = az; } else { bx /= lb; bz /= lb; }
+    if (la < 1e-6 && lb < 1e-6) continue;
+    let nx = -(az + bz), nz = ax + bx;           // vpravo v smere kreslenia (ako js/mapa/cesty/cesty.js)
+    const ln = Math.hypot(nx, nz) || 1;
+    nx /= ln; nz /= ln;
+    const kos = Math.max(0.5, nx * -az + nz * ax);
+    out.push([x + nx * d / kos, z + nz * d / kos]);
   }
-  const [lx, lz] = body[body.length - 1], [px, pz] = body[body.length - 2] ?? body[0];
-  const d = Math.hypot(lx - px, lz - pz) || 1;
-  out.push([lx - (lz - pz) / d * posun, lz + (lx - px) / d * posun, -(lz - pz) / d, (lx - px) / d]);
   return out;
 }
 
@@ -99,7 +102,8 @@ export default {
     const x1 = x0 + velkost, z1 = z0 + velkost;
     // výška terénu (hra.mapa.vyska môže pripočítať vozovku – js/mapa/cesty/povrch-modul.js)
     const zem = hra.mapa.vyskaZeme ?? hra.mapa.vyska;
-    const poz = [], uv = [], idx = [];
+    const g = { poz: [], uv: [], idx: [] };
+    const vyskopis = { vyska: zem };
     for (const p of this.pruhy) {
       if (p.ohr.maxX < x0 - 20 || p.ohr.minX > x1 + 20 || p.ohr.maxZ < z0 - 20 || p.ohr.minZ > z1 + 20) continue;
       const strany = [];
@@ -107,37 +111,29 @@ export default {
       if (p.l) strany.push(-1);
       for (const s of strany) {
         const os = Math.max(0.5, p.s / 2 - SIRKA / 2 - 0.15);
-        const lin = posunutaLinia(p.body, s * os);
-        let v = 0, predch = null;
+        // u = 0 (biela čiara) na strane áut: pri pravom pruhu sa os otočí, aby strana áut bola „ľavým“ okrajom pásu
+        let lin = zjemni(posunutaLinia(p.body, s * os), KROK);
+        if (s > 0) lin = lin.reverse();
+        if (lin.length < 2) continue;
+        // úsek patrí štvorcu podľa svojho začiatku (aby sa na hranici nezdvojil); tvar sa počíta z celej osi
+        let od = -1;
         for (let k = 0; k < lin.length; k++) {
-          const [x, z, nx, nz] = lin[k];
-          if (predch) v += Math.hypot(x - predch[0], z - predch[1]) / OPAKOVANIE;
-          const vnutri = x >= x0 && x < x1 && z >= z0 && z < z1;
-          const dalsi = lin[k + 1];
-          // úsek patrí štvorcu podľa svojho začiatku (aby sa na hranici nezdvojil)
-          if (vnutri && dalsi) {
-            const a = poz.length / 3;
-            for (const [px, pz, q] of [[x, z, 0], [dalsi[0], dalsi[1], 1]]) {
-              const vv = q ? v + Math.hypot(dalsi[0] - x, dalsi[1] - z) / OPAKOVANIE : v;
-              // u = 0 na strane áut (bližšie k osi cesty)
-              const ix = px - nx * s * SIRKA / 2, iz = pz - nz * s * SIRKA / 2;
-              const ox = px + nx * s * SIRKA / 2, oz = pz + nz * s * SIRKA / 2;
-              poz.push(ix, zem(ix, iz) + NAD_TERENOM + 0.04, iz, ox, zem(ox, oz) + NAD_TERENOM + 0.04, oz);
-              uv.push(0, vv, 1, vv);
-            }
-            // normála nahor bez ohľadu na stranu
-            if (s > 0) idx.push(a + 1, a + 3, a, a, a + 3, a + 2);
-            else idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+          const [x, z] = lin[k];
+          const vnutri = x >= x0 && x < x1 && z >= z0 && z < z1 && k < lin.length - 1;
+          if (vnutri && od < 0) od = k;
+          if ((!vnutri || k === lin.length - 2) && od >= 0) {
+            const po = vnutri ? k + 1 : k;
+            if (po > od) pridajPas(g, lin, SIRKA / 2, NAD_TERENOM + 0.04, vyskopis, { od, po, dlzkaV: OPAKOVANIE });
+            od = -1;
           }
-          predch = [x, z];
         }
       }
     }
-    if (!idx.length) return null;
+    if (!g.idx.length) return null;
     const geo = new T.BufferGeometry();
-    geo.setAttribute('position', new T.Float32BufferAttribute(poz, 3));
-    geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
-    geo.setIndex(idx);
+    geo.setAttribute('position', new T.Float32BufferAttribute(g.poz, 3));
+    geo.setAttribute('uv', new T.Float32BufferAttribute(g.uv, 2));
+    geo.setIndex(g.idx);
     geo.computeVertexNormals();
     const m = new T.Mesh(geo, this.mat);
     m.name = 'cyklopruhy';

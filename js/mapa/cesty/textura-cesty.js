@@ -2,7 +2,7 @@
 //   – asfalt vo svetových súradniciach (spoločný pre všetky cesty a križovatky – prekrytie nevidno),
 //   – priehľadné vodorovné značenie podľa počtu pruhov a smeru: U = naprieč cestou (0..1),
 //     V = pozdĺž cesty (1 = DLZKA_V metrov); s čiarami aj stopy kolies a špina pri obrubníku,
-//   – zebra priechodov.
+//   – zebra priechodov (len biele pruhy, priehľadná).
 
 import * as THREE from 'three';
 
@@ -89,13 +89,12 @@ export function texturaZnacenia(pruhy = 2, jednosmerka = false, okraje = false) 
   return t;
 }
 
-/** Zebra – biele pruhy naprieč (U = metre naprieč cestou, perióda 1 m). */
+/** Zebra – biele pruhy (U = metre naprieč cestou, perióda 1 m), medzi nimi priehľadné – asfalt je pod nimi. */
 export function texturaZebry() {
   if (cache.has('zebra')) return cache.get('zebra');
   const c = document.createElement('canvas');
   c.width = 64; c.height = 16;
   const g = c.getContext('2d');
-  g.fillStyle = '#4b4c4e'; g.fillRect(0, 0, 64, 16);
   g.fillStyle = '#efeee8'; g.fillRect(0, 0, 32, 16);
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;

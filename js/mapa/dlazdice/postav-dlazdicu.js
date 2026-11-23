@@ -52,7 +52,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   const { krizovatky } = najdiKrizovatky(cesty);
   // cesty na nadjazdoch sa nekreslia na zem – mostovku stavia js/mapa/mosty/nadjazdy.js
   // asfalt a značenie (značenie pri križovatkách končí – js/mapa/cesty/cesty.js, #136)
-  g.add(vytvorCesty(cesty.filter((c) => !c.nadjazd), vyskopis, krizovatky));
+  g.add(vytvorCesty(cesty.filter((c) => !c.nadjazd), vyskopis, krizovatky, d.prvky?.prechody));
   yield;
   g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
   yield;
