@@ -98,6 +98,7 @@ preto platí:
    | `data/vlaky/poriadok.json`, `data/vlaky/trate.json` | `python3 tools/vlaky/gtfs_vlaky.py`, `python3 tools/vlaky/trate_osm.py` |
    | `assets/pamiatky/*.glb(.gz)`, `assets/pamiatky/*.json`, `assets/vlaky/vlaky.glb` | skript v `tools/blender/` podľa hlavičky modelu (`blender -b --factory-startup -P …`) |
    | `tools/blender/data/stanica.json` | `python3 tools/blender/osm_stanica.py` |
+   | `tools/blender/data/nivy.json` (Nivy, #132), `eurovea.json`, `eurovea-2.json` | `python3 tools/blender/osm_nivy.py`, `python3 tools/blender/osm_eurovea.py [--cast 2]` |
    | `assets/zvuk/dialogy/*` | workflow `.github/workflows/hlasy.yml` (needituj ručne) |
    | `docs/kontrola/<beh>/` | `python3 tools/kontrola/trasa.py` |
 

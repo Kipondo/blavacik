@@ -120,15 +120,24 @@ def postav(_obrysy):
     def blizko(p, poly, r):
         return Polygon(poly).exterior.distance(shapely.Point(p)) < r
 
+    # hlavný obrys v OSM obkresľuje aj západnú striešku – hmota centra je obrys bez nej (pod strieškou je otvorené
+    # predpolie a na jej vnútornom okraji celopresklená vstupná hala)
+    S_poly = Polygon(strieska)
+    telo_p = Polygon(H).difference(S_poly)
+    if telo_p.geom_type == 'MultiPolygon':
+        telo_p = max(telo_p.geoms, key=lambda g: g.area)
+    T = ccw([(p[0], p[1]) for p in list(telo_p.exterior.coords)[:-1]])
+    nT = len(T)
+
     # --- fasáda: prízemie, béžové panely so škárami, výbežky (sklo + biely pás), vstupná hala pod strieškou ---
-    for i in range(n):
-        a, b = H[i], H[(i + 1) % n]
+    for i in range(nT):
+        a, b = T[i], T[(i + 1) % nT]
         L = dlzka(a, b)
         if L < 0.05:
             continue
         m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
         vyb = any(blizko(m, v, 0.8) for v in vybezky)
-        hala = Polygon(strieska).buffer(4.0).contains(shapely.Point(m))
+        hala = S_poly.exterior.distance(shapely.Point(m)) < 0.3
         if hala:
             G.stena(sklo_h, a, b, -1.0, Z_STRIESKA)
             G.stena(bezova, a, b, Z_STRIESKA, Z_PARK + 1.1)
@@ -149,14 +158,14 @@ def postav(_obrysy):
             G.stena(biela if vyb else skara, p, q, z0, Z_PARK + 1.0)
             s += rnd.uniform(1.2, 3.2)
     # rímsa / zábradlie strešného parku
-    G.pas(biela, H, Z_PARK + 1.1, Z_PARK + 1.25, von=0.05, dnu=0.25)
+    G.pas(biela, T, Z_PARK + 1.1, Z_PARK + 1.25, von=0.05, dnu=0.25)
     # výbežky: biely zaoblený pás nad sklom a spodný biely lem
     for v in vybezky:
         G.pas(biela, v, Z_VYB[1] - 0.15, Z_VYB[1] + 0.25, von=0.35, dnu=0.0)
         G.pas(biela, v, Z_VYB[0] - 0.3, Z_VYB[0], von=0.45, dnu=0.0)
 
     # --- strecha: plošina s otvorom dvora, park (trávnik), dráha a chodník ---
-    plocha = Polygon(H).difference(Polygon(dvor))
+    plocha = telo_p.difference(Polygon(dvor))
     trojuholniky(G, plosina, plocha, Z_PARK)
     park = Polygon(lok(d['park_von']))
     for dnu in d['park_dnu']:
@@ -296,4 +305,7 @@ def postav(_obrysy):
 
     vchody = [{'id': v['id'], 'bod': [round(v['bod'][0] - stred[0], 2), round(v['bod'][1] - stred[1], 2)], 'vyska': 0.0,
                **({'nazov': v['nazov']} if 'nazov' in v else {})} for v in d['vchody']]
-    return G, [H], max(VYSKY.values()), 'nivy', {'stred': [round(stred[0], 2), round(stred[1], 2)], 'vchody': vchody}
+    # budovy dlaždíc sa vyhodia z celého obrysu (aj spod striešky); kolízie má len hmota bez predpolia
+    nahradit = [[[round(x - stred[0], 2), round(z - stred[1], 2)] for x, z in d['hlavny']]]
+    return G, [T], max(VYSKY.values()), 'nivy', {'stred': [round(stred[0], 2), round(stred[1], 2)], 'vchody': vchody,
+                                                 'nahradit': nahradit}

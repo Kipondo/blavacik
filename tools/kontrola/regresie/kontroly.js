@@ -13,6 +13,7 @@ import { kontrolyCiest } from './cesty.js';
 import { kontrolyDlazdic } from './dlazdice.js';
 import { kontrolyMostov } from './mosty.js';
 import { kontrolyGrafiky } from './grafika.js';
+import { kontrolyPamiatok } from './pamiatky.js';
 import { vytvorHorizont } from '../../../js/mapa/teren/horizont.js';
 
 /** Stromy dlaždice presne tak, ako ich stavia hra (js/mapa/dlazdice/postav-dlazdicu.js → stromy-dlazdice.js). */
@@ -150,4 +151,5 @@ export const KONTROLY = [
   ...kontrolyDlazdic,
   ...kontrolyMostov,
   ...kontrolyGrafiky,
+  ...kontrolyPamiatok,
 ];
