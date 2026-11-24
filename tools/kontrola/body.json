@@ -12,6 +12,8 @@
     { "id": "most-snp-juh", "nazov": "Most SNP z Petržalky", "x": -260, "z": 900, "azimut": 0, "pohlady": ["ulica"],
       "kamera": [-300, 30, 1000], "ciel": [-220, 20, 500] },
     { "id": "eurovea-nabrezie", "nazov": "Nábrežie pri Eurovei", "x": 1100, "z": 430, "azimut": 90, "pohlady": ["ulica", "zhora"] },
+    {"id": "eurovea-molo", "nazov": "Eurovea – mólo nad nábrežím (z dolného chodníka)", "x": 1043, "z": 440, "kamera": [1020, 1.7, 450], "ciel": [1044, 3, 442], "vzdialenost": 70, "vyska": 40, "azimut": 60, "pohlady": ["ulica", "zhora"]},
+    {"id": "eurovea-ponton", "nazov": "Pontón pri Starom moste", "x": 778, "z": 454, "kamera": [800, 1.7, 437], "ciel": [770, 0, 455], "vzdialenost": 70, "vyska": 40, "azimut": 20, "pohlady": ["ulica", "zhora"]},
     { "id": "univerzita-komenskeho", "nazov": "Univerzita Komenského – rotunda", "x": 640, "z": 245, "azimut": 260, "pohlady": ["ulica"],
       "kamera": [668, 9, 238], "ciel": [570, 14, 262] },
     { "id": "eurovea-vajce", "nazov": "Eurovea – presklené vajce", "x": 900, "z": 300, "azimut": 135, "pohlady": ["ulica"],

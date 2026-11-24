@@ -165,6 +165,30 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   Generátor Eurovea 1 dostal háčiky na vlastné fasády a výšku sklenej strechy. Jeho výstup sa nezmenil.
 - **Testovacia trasa:** nové body „Eurovea 2 – park so sochou gúľ“, „pasáž pod hadou strechou“ a „Eurovea 2 zhora“.
 
+### Eurovea – nábrežie: mólá a pontóny (vetva `feature/eurovea-nabrezie`, #131 časť 3)
+- **Prieskum** (OSM, laserový terén, Commons, krajinný architekt M. Desvigne): `napady/pamiatky-podklady.md`.
+  Prieskum ukázal tri úseky nábrežia:
+  - park Eurovea 1 – svahovitý trávnik, dolný chodník, betónová hrana s uväzovacími stĺpikmi a nízky kamenný múrik;
+  - Štefánikovo námestie a Sklad č. 7 – sedacie schody k dolnému nábrežiu so zábradlím a prístavné koľaje;
+  - Eurovea 2 – park s kopou a sochou a oplotený prístavný pás.
+
+  Terén, trávniky, chodníky, stromy aj koľaje už v hre sú (laser, OSM).
+- **Mólá Inessy Hansch** (3, `data/mapa/mola.json`, `js/mapa/mosty/mola.js`):
+  - **Predtým:** v OSM sú to lávky, takže ich hra postavila ako mostovku od terénu na brehu k terénu pri vode, 6–7 m
+    dolu svahom k rieke.
+  - **Teraz:** sú vodorovné vo výške brehu + 0,8 m, na brehu majú 5 schodov a koniec visí 6–7 m nad zemou pri vode.
+    Majú palubu zo sivých dosiek, svetlý oceľový nosník, dvojice štíhlych oceľových stĺpov a zábradlie s hustými
+    zvislými tyčami.
+  - Chôdza po móle ide po rovnakom profile (`profilMosta`).
+  - Schody na konci lávky sa po novom postavia aj vtedy, keď je koniec nižšie ako 1,1 m nad zemou. Predtým tam ostal
+    visieť (týka sa všetkých lávok).
+  - Regresná kontrola `mola-vodorovne`.
+- **Pontóny** (`js/mapa/pamiatky/ponton.js`):
+  - pri Starom moste pristávací pontón 74 × 6,6 m s čiernym oceľovým trupom, krémovou kajutou a 26 m lávkou na breh;
+  - pred Skladom č. 7 biely pontón 34 × 6,6 m s lávkou;
+  - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
+- **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
