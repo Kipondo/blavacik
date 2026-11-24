@@ -389,6 +389,7 @@ export const kontrolyCiest = [
       if (najdiOstrovceky(troj).length !== 1) chyby.push({ text: 'trojuholník ciest nie je ostrovček' });
       if (najdiOstrovceky(troj, [{ body: [[18, 8], [22, 8], [22, 12], [18, 12]] }]).length) chyby.push({ text: 'ostrovček s budovou' });
       let n = 0, chodnikov = 0;
+      const priklady = [];
       for (const [kluc, d] of ctx.dlazdice) {
         const ostrovceky = ostrovcekyDlazdice(d);
         if (!ostrovceky.length) continue;
@@ -401,10 +402,12 @@ export const kontrolyCiest = [
           const x = (p[t] + p[t + 3] + p[t + 6]) / 3, z = (p[t + 2] + p[t + 5] + p[t + 8]) / 3;
           if (!vOstrovceku(ostrovceky, x, z)) continue;
           chodnikov++;
-          if (chodnikov <= 20) chyby.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: 'chodník v ostrovčeku' });
+          if (priklady.length < 10) priklady.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: 'chodník v ostrovčeku' });
         }
         g.traverse((o) => o.geometry?.dispose());
       }
+      // 24. 11. 2026: 47 trojuholníkov (slučky obratísk, rohy pri ostrom uhle) pri 3 242 ostrovčekoch a pásoch
+      if (chodnikov > 60) chyby.push({ text: `spolu ${chodnikov} trojuholníkov chodníka v ostrovčekoch (najviac 60)` }, ...priklady);
       if (ctx.dlazdice.size > 4 && !n) chyby.push({ text: 'v načítaných dlaždiciach sa nenašiel žiadny ostrovček' });
       return { skontrolovane: n, chyby };
     },

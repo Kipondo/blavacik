@@ -3,14 +3,15 @@
  "strom-vo-vode": 0,
  "strom-na-vozovke": 0,
  "strom-v-budove": 0,
- "objekt-na-vozovke": 627,
+ "objekt-na-vozovke": 588,
  "objekt-vo-vode": 17,
  "objekt-v-budove": 61,
- "budova-cez-cestu": 142,
+ "budova-cez-cestu": 127,
  "cesty-cez-seba": 1,
  "cesta-strma": 152,
  "cesta-zlom": 0,
  "budova-v-dunaji": 0,
  "sev-terenu": 0,
- "chodnik-na-vozovke": 0
+ "chodnik-na-vozovke": 0,
+ "znacenie-cez-seba": 1448
 }
