@@ -13,6 +13,7 @@
 import * as THREE from 'three';
 import { texturaAsfaltuSvet, texturaZnacenia, DLZKA_V } from './textura-cesty.js';
 import { pridajStrukturu } from './struktura.js';
+import { ROH } from './krizovatky-tvar.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
 import { kluc } from './krizovatky.js';
 import { polohyPrechodov } from './prechody-poloha.js';
@@ -20,7 +21,7 @@ import { polohyPrechodov } from './prechody-poloha.js';
 const KROK = 2.5;         // delenie cesty na úseky (m), aby sedela na teréne (terén je po 2 m)
 export const NAD_TERENOM = 0.12;
 export const MIERKA_ASFALTU = 9;   // m na jedno opakovanie textúry asfaltu (svetové súradnice)
-const VOLNO_KRIZOVATKY = 1.0;      // m – značenie končí kúsok pred plochou križovatky
+const VOLNO_KRIZOVATKY = ROH;      // m – značenie končí tam, kde sa obrubník začína zatáčať (krizovatky-tvar.js)
 const VOLNO_PRECHODU = 2.5;        // m – polovica medzery v značení pod zebrou (zebra má 3,5 m)
 // obslužné cesty (vjazdy do dvorov, parkovísk): značenie hlavnej cesty cez ne pokračuje, ich vlastné pri nej končí
 const DROBNE = new Set(['service', 'living_street', 'track', 'unknown']);

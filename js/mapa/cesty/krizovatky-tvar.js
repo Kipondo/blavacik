@@ -7,7 +7,10 @@
 // medzi rovnými koncami pásov ostal klin trávy.
 // Bez Three.js – stavia z toho js/mapa/cesty/plochy-krizovatiek.js (asfalt), neskôr aj rohy chodníkov.
 
-const SEGMENTY_ROHU = 5;
+const SEGMENTY_ROHU = 6;
+/** m – o koľko za okraj najširšej cesty siaha tvar križovatky: polomer oblého rohu obrubníka (pri rovnako širokých
+ * cestách), tam končí aj značenie (cesty.js) a rovný chodník (chodniky.js), roh chodníka ide po oblúku. */
+export const ROH = 4.0;
 const KROK_OBLUKA = 0.3;    // rad na úsek oblého spoja
 
 /** Bod a smer na osi ramena vo vzdialenosti s od uzla. */
@@ -66,7 +69,7 @@ function oblySpoj(k, r, s, medzera) {
 export function tvarKrizovatky(k, cesty) {
   const ramena = ramenaKrizovatky(k, cesty);
   if (ramena.length < 2) return null;
-  const d = Math.max(...ramena.map((r) => r.w)) + 1;
+  const d = Math.max(...ramena.map((r) => r.w)) + ROH;
   for (const r of ramena) r.koniec = bodRamena(r, d);
   const okraj = (r, strana) => {
     // strana +1 = okraj smerom k väčšiemu uhlu (normála (−tz, tx)), −1 = k menšiemu
@@ -83,30 +86,31 @@ export function tvarKrizovatky(k, cesty) {
     if (a === n - 1) medzera += 2 * Math.PI;
     if (medzera >= Math.PI - 0.05) {
       // druhá strana priebežnej cesty: okraj ide rovno; vonkajšia strana ohybu: oblý spoj okolo uzla
-      medzery.push({ body: medzera > Math.PI + 0.05 ? oblySpoj(k, r, s, medzera) : [] });
+      const obl = medzera > Math.PI + 0.05;
+      medzery.push({ typ: obl ? 'oblúk' : 'rovno', body: obl ? oblySpoj(k, r, s, medzera) : [] });
       continue;
     }
     // priesečník vnútorných okrajov: E + t·u_r = S + v·u_s (smery na konci ramien)
     const ur = [r.koniec.tx, r.koniec.tz], us = [s.koniec.tx, s.koniec.tz];
     const det = ur[0] * -us[1] - ur[1] * -us[0];
-    if (Math.abs(det) <= 1e-3) { medzery.push({ body: [], roh: [E, S] }); continue; }
+    if (Math.abs(det) <= 1e-3) { medzery.push({ typ: 'priamo', body: [], roh: [E, S] }); continue; }
     const bx = S[0] - E[0], bz = S[1] - E[1];
     const t = (bx * -us[1] - bz * -us[0]) / det;
     const v = (ur[0] * bz - ur[1] * bx) / det;
     if (t > 0 && v > 0) {
       // ramená pod malým uhlom sa ešte za okrajom tvaru prekrývajú (vidlica) – vnútorné okraje sa vynechajú,
       // tvar ide po vonkajších okrajoch oboch ramien (inak by vznikli „háčiky“ cez seba)
-      medzery.push({ zlucene: true, body: [] });
+      medzery.push({ typ: 'zlúčené', zlucene: true, body: [] });
       continue;
     }
-    if (!(t < 0 && v < 0 && -t < 2 * d && -v < 2 * d)) { medzery.push({ body: [], roh: [E, S] }); continue; }
+    if (!(t < 0 && v < 0 && -t < 2 * d && -v < 2 * d)) { medzery.push({ typ: 'priamo', body: [], roh: [E, S] }); continue; }
     const X = [E[0] + ur[0] * t, E[1] + ur[1] * t];
     const roh = [];
     for (let j = 0; j <= SEGMENTY_ROHU; j++) {
       const u = j / SEGMENTY_ROHU, w = 1 - u;
       roh.push([w * w * E[0] + 2 * w * u * X[0] + u * u * S[0], w * w * E[1] + 2 * w * u * X[1] + u * u * S[1]]);
     }
-    medzery.push({ body: roh.slice(1, -1), roh });
+    medzery.push({ typ: 'roh', body: roh.slice(1, -1), roh });
   }
   const obrys = [];
   for (let a = 0; a < n; a++) {
@@ -116,7 +120,8 @@ export function tvarKrizovatky(k, cesty) {
     obrys.push(...medzery[a].body);
   }
   const rohy = medzery.filter((m) => m.roh).map((m) => m.roh);
-  return { obrys, rohy, d, ramena };
+  // medzery[a] je medzi ramenom a a a+1 (strana +1 ramena a, strana −1 ramena a+1)
+  return { obrys, rohy, d, ramena, medzery };
 }
 
 /**
@@ -153,5 +158,6 @@ export function tvarSpoja(k, cesty) {
   let medzera = s.uhol - r.uhol;
   if (medzera < Math.PI) { [r, s] = [s, r]; medzera = 2 * Math.PI - medzera; }
   if (medzera < Math.PI + 0.05) return null;
-  return { obrys: [[k.x, k.z], ...oblySpoj(k, r, s, medzera)], rohy: [] };
+  const obluk = oblySpoj(k, r, s, medzera);
+  return { obrys: [[k.x, k.z], ...obluk], rohy: [], ramena: [r, s], obluk };
 }

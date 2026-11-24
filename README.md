@@ -523,8 +523,18 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     (`js/mapa/cesty/opotrebenie.js`, `js/mapa/teren/material-zeme.js`).
   - **Bez druhého pásu asfaltu za chodníkom:** pri cestách s 3D chodníkom siaha asfaltový lem zeme len pod chodník
     (2,6 m), nie 3,5 m (`js/mapa/teren/textura-zeme.js`). Poradie je cesta – obrubník – chodník – tráva/dlažba.
-  - Ďalej: obrubníky po všetkých okrajoch ciest a rohy chodníkov pozdĺž oblých rohov križovatiek, potom ostrovčeky
-    s obrubníkom.
+  - **Rohy chodníkov s obrubníkom** (časť 2, `js/mapa/cesty/rohy-chodnikov.js`, `chodnik-rozmery.js`):
+    - Chodník obíde oblý roh križovatky po oblúku a spojí chodníky oboch ciest.
+    - Na rovnej strane priebežnej cesty (T-križovatka) sa chodník neprerušuje.
+    - Na vonkajšej strane ohybu (aj kde jedna cesta končí a druhá pod uhlom začína) ide chodník okolo uzla.
+    - Oblý roh obrubníka má polomer ~4 m (predtým ~1 m) a značenie končí tam, kde sa obrubník začína zatáčať.
+    - Rovný chodník končí presne na začiatku oblúka (vložený bod), nie na najbližšom 4 m úseku.
+    - Postaví sa 13 624 z 15 490 rohov (88 %). Zvyšok by ležal na vozovke inej cesty, a tak sa vynechá.
+    - Z ostrovčekov medzi cestami tak vznikajú zvýšené plochy s obrubníkom a oblými rohmi (napr. slučka pri stanici).
+    - Mapa povrchu (`povrch-modul.js`) pozná tvar križovatky (vozovka) aj rohy chodníkov, takže chodci na rohu stoja na
+      chodníku.
+    - Regresná kontrola `rohy-chodnikov`.
+  - Ďalej: ostrovčeky z OSM (zelené a dláždené plochy uzavreté cestami) so zjednodušeným tvarom a obrubníkom.
   - Body trasy `liszt-slucka` (Námestie Franza Liszta pri stanici) a `cyklopruh-namestie-slobody`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:

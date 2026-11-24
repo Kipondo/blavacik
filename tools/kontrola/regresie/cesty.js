@@ -7,6 +7,7 @@ import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
 import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
 import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
 import { tvarKrizovatky, tvarSpoja, spojeCiest } from '../../../js/mapa/cesty/krizovatky-tvar.js';
+import { preruseniaChodnikov } from '../../../js/mapa/cesty/rohy-chodnikov.js';
 import { mriezkaVozoviek } from '../../../js/mapa/cesty/vozovky.js';
 
 const ROVINA = { vyska: () => 0, vyskaTerenu: () => 0 };
@@ -260,6 +261,32 @@ export const kontrolyCiest = [
         }
       }
       return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'rohy-chodnikov',
+    popis: 'Chodník s obrubníkom obíde oblý roh križovatky (spojí chodníky oboch ciest) a na rovnej strane priebežnej '
+      + 'cesty pri T-križovatke sa neprerušuje (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice-2 – js/mapa/cesty/rohy-chodnikov.js, chodniky.js',
+    tolerancia: 0,
+    spusti(ctx) {
+      let postavene = 0, vhodne = 0, rovne = 0;
+      for (const d of ctx.dlazdice.values()) {
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        if (!cesty.length) continue;
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorChodniky(cesty, krizovatky, ROVINA);
+        postavene += g.userData.rohy?.postavene ?? 0;
+        vhodne += g.userData.rohy?.vhodne ?? 0;
+        for (const zoz of preruseniaChodnikov(cesty, krizovatky).values()) {
+          for (const u of zoz) for (const smer of [1, -1]) for (const strana of [1, -1]) if (u.r[smer][strana] === 0) rovne++;
+        }
+        g.traverse((o) => o.geometry?.dispose());
+      }
+      const chyby = [];
+      if (!vhodne || postavene < 0.5 * vhodne) chyby.push({ text: `postavených rohov chodníkov len ${postavene} z ${vhodne}` });
+      if (!rovne) chyby.push({ text: 'chodník sa pri križovatke prerušuje aj na rovnej strane priebežnej cesty' });
+      return { skontrolovane: vhodne, chyby };
     },
   },
   {

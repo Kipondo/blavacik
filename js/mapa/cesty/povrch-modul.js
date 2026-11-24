@@ -8,13 +8,14 @@
 
 import { NAD_TERENOM } from './cesty.js';
 import { cestyVJadre } from '../teren/textura-zeme.js';
+import { SIRKA, OBRUBNIK, VYSKA, S_CHODNIKOM } from './chodnik-rozmery.js';
+import { najdiKrizovatky } from './krizovatky.js';
+import { tvarKrizovatky, tvarSpoja, spojeCiest } from './krizovatky-tvar.js';
+import { rohyChodnikov } from './rohy-chodnikov.js';
 
 const N = 500;                // pixelov na dlaždicu (1 m)
-const CHODNIK = 0.28;         // výška chodníka nad terénom (chodniky.js)
-const SIRKA_CHODNIKA = 2.76;  // obrubník + chodník (chodniky.js)
-const S_CHODNIKOM = new Set(['primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'living_street',
-  'primary_link', 'secondary_link', 'tertiary_link']);
-const POSUN = [0, NAD_TERENOM, CHODNIK];
+const SIRKA_CHODNIKA = SIRKA + OBRUBNIK;  // obrubník + chodník (chodniky.js)
+const POSUN = [0, NAD_TERENOM, VYSKA];
 // číselný kľúč dlaždice (hra.mapa.vyska sa volá veľmi často – bez skladania reťazcov)
 const cislo = (i, j) => (i + 4096) * 8192 + (j + 4096);
 const cisloKluca = (kluc) => { const [i, j] = kluc.split('_').map(Number); return cislo(i, j); };
@@ -37,6 +38,22 @@ function mapaPovrchu(d, x0, z0, velkost) {
     };
     ciara(gc, c.sirka ?? 6);
     if (S_CHODNIKOM.has(c.typ) && !c.most) ciara(gch, (c.sirka ?? 6) + 2 * SIRKA_CHODNIKA);
+  }
+  // tvary križovatiek s oblými rohmi (asfalt) a rohy chodníkov (pravidlá ulice, krizovatky-tvar.js, rohy-chodnikov.js)
+  const cesty = (d.cesty ?? []).filter((c) => !dlazdene?.has(c) && (c.body?.length ?? 0) > 1);
+  const { krizovatky } = najdiKrizovatky(cesty);
+  const plocha = (g, body) => {
+    g.fillStyle = '#fff';
+    g.beginPath();
+    body.forEach(([x, z], i) => (i ? g.lineTo((x - x0) * m, (z - z0) * m) : g.moveTo((x - x0) * m, (z - z0) * m)));
+    g.closePath();
+    g.fill();
+  };
+  for (const k of krizovatky.values()) { const t = tvarKrizovatky(k, cesty); if (t) plocha(gc, t.obrys); }
+  for (const k of spojeCiest(cesty, krizovatky)) { const t = tvarSpoja(k, cesty); if (t) plocha(gc, t.obrys); }
+  for (const p of rohyChodnikov(cesty, krizovatky)) {
+    const von = p.vnutro.map(([x, z], j) => [x + p.normaly[j][0] * SIRKA, z + p.normaly[j][1] * SIRKA]);
+    plocha(gch, [...p.vnutro, ...von.reverse()]);
   }
   const a = gc.getImageData(0, 0, N, N).data, b = gch.getImageData(0, 0, N, N).data;
   const out = new Uint8Array(N * N);
