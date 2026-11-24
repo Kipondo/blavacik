@@ -40,8 +40,8 @@ pruhoch – predtým začínal v strede cesty, a preto sa ľavý a pravý pruh k
     - plocha medzi osami je menšia ako 1 500 m², alebo ide o úzky pás so strednou šírkou do 12 m;
     - nie je v nej budova;
     - po odpočítaní vozoviek ostane kus zelene;
-  - **deliaci pás** je priestor medzi jednosmerným pásom hlavnej cesty a protismerným pásom vľavo od neho
-    (medzera 0,3–12 m, bez budovy). Nájde sa aj tam, kde trieda prechádza cez hranicu dlaždice.
+  - **deliaci pás** je priestor medzi jednosmerným pásom hlavnej cesty a súbežným pásom vľavo od neho (protismerným
+    alebo zberným), medzera 0,3–12 m, bez budovy. Nájde sa aj tam, kde trieda prechádza cez hranicu dlaždice.
 
 ## Chodníky
 - **Chodník popri ceste:** vozovka – obrubník – (pás zelene so stromami) – chodník – zeleň alebo predzáhradka.

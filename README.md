@@ -198,9 +198,11 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - súbežné jazdné pásy rozdelenej cesty sa neprekrývajú (`js/mapa/cesty/sirky-pasov.js`) – v meste 669 úsekov.
 - **Cyklopruhy idú rovno pri okraji asfaltu:** rovnaká oprava prvého bodu (predtým začínali v strede cesty
   a krížili sa do „X“, napr. Mýtna pri NBS). Pruh sa zarovná k osi a šírke cesty, ako ju hra naozaj kreslí.
-- **Ostrovčeky a deliace pásy sú celé zelené s obrubníkom** (`js/mapa/cesty/ostrovceky.js`): malé plochy
-  obkolesené cestami bez budovy (v meste 361) a pásy medzi protismernými jazdnými pásmi hlavných ciest (2 881). Nie je v nich chodník okolitých ciest, len obrubník a tráva (aj tam, kde má OSM
-  betón).
+- **Ostrovčeky a deliace pásy sú celé zelené s obrubníkom** (`js/mapa/cesty/ostrovceky.js`):
+  - malé plochy obkolesené cestami, bez budovy (v meste 361);
+  - pásy medzi súbežnými jazdnými pásmi hlavných ciest (2 981).
+
+  Nie je v nich chodník okolitých ciest, len obrubník a tráva (aj tam, kde má OSM betón).
 - **Chodníky v zeleni majú rovnú hranu:**
   - osi chodníkov sa vyrovnajú ako cesty;
   - dlažba má ostrú hranu bez svetlého a zeleného vlnitého lemu;
