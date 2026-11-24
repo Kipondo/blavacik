@@ -101,6 +101,126 @@
       ],
       "farba": "#6e3f33",
       "fasada": "hala"
+    },
+    {
+      "miesto": "Dunajská 4 (#64) – kamenné pásy, tmavý sokel, vyložený stredný arkier nad soklom",
+      "bod": [
+        48.1442919,
+        17.1142966
+      ],
+      "farba": "#c9bfae",
+      "obchod": true,
+      "arkiere": [
+        {
+          "fasada": [
+            [
+              48.144399,
+              17.1143236
+            ],
+            [
+              48.1444227,
+              17.1144717
+            ]
+          ],
+          "od": 8.8,
+          "do": 26.5,
+          "presah": 2.0,
+          "sklo": false,
+          "farba": "#c9bfae"
+        },
+        {
+          "fasada": [
+            [
+              48.1444227,
+              17.1144717
+            ],
+            [
+              48.1444379,
+              17.1145672
+            ]
+          ],
+          "od": 8.8,
+          "do": 26.5,
+          "presah": 1.2,
+          "sklo": false,
+          "farba": "#c9bfae"
+        },
+        {
+          "fasada": [
+            [
+              48.1443658,
+              17.1141162
+            ],
+            [
+              48.1444369,
+              17.1145605
+            ]
+          ],
+          "od": 0.0,
+          "do": 8.8,
+          "presah": 0.08,
+          "sklo": false,
+          "farba": "#34333a"
+        }
+      ]
+    },
+    {
+      "miesto": "Dunajská 6–8 (#64) – horné podlažia vyložené o 2,5 m nad chodník (prízemie a 1. p. na uličnej čiare), sivý panelový arkier a sklená fasáda pred lodžiami",
+      "bod": [
+        48.1443683,
+        17.1148971
+      ],
+      "farba": "#c2b49a",
+      "podlubie": {
+        "fasada": [
+          [
+            48.1444664,
+            17.1145942
+          ],
+          [
+            48.1445348,
+            17.1150223
+          ]
+        ],
+        "hlbka": 2.5,
+        "vyska": 8.0
+      },
+      "arkiere": [
+        {
+          "fasada": [
+            [
+              48.1444664,
+              17.1145942
+            ],
+            [
+              48.1444835,
+              17.1147019
+            ]
+          ],
+          "od": 8.0,
+          "do": 26.5,
+          "presah": 0.1,
+          "sklo": false,
+          "farba": "#66676b"
+        },
+        {
+          "fasada": [
+            [
+              48.1444934,
+              17.1147611
+            ],
+            [
+              48.1445348,
+              17.1150223
+            ]
+          ],
+          "od": 8.0,
+          "do": 22.5,
+          "presah": 0.1,
+          "sklo": true,
+          "farba": "#70757d"
+        }
+      ]
     }
   ]
 }

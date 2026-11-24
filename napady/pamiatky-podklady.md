@@ -1120,3 +1120,48 @@ Zdroje:
 - [skyparktower.sk – fasáda 6. 10. 2026](https://www.skyparktower.sk/blog/sky-park-tower-zacina-s-instalaciou-jedinecnej-fasady-a-otvara-novu-ponuku-4-izbovych-rezidencii/)
 - [stavebnymagazin.sk](https://stavebnymagazin.sk/sky-park-tower-v-bratislave-veza-ma-byt-hotova-v-roku-2027-byty-su-uz-v-predaji/)
 - OSM way 1503417607 (stavba), 902159858 (stavenisko).
+
+## Dunajská 2–12 pri Kamennom námestí – podlubia a arkiere (#64; 24. 11. 2026)
+
+**Prieskum:** OSM, kataster (ZBGIS/ESKN, INSPIRE WFS), ortofoto ZBGIS 2023, laser v dlaždiciach hry, fotky z Commons,
+dohoda mesta o revitalizácii chodníka (CRZ 2022). Google nie.
+
+**Poloha:** párne čísla sú južne od osi Dunajskej, fasády hľadia na sever. Obchodný dom je na severnej strane.
+Uličná čiara parteru vedie v hre cez body (476,1; −96,1) a (550,9; −114,0).
+
+**Domy:**
+- **Dunajská 2** (OSM 386574223): 6 podlaží + podkrovie s vikiermi, odkvap ~22,4 m, hrebeň ~26,6 m. Podlubie
+  ani arkier nemá, v hre je správne.
+- **Dunajská 4** (OSM 74739754): 8 podlaží a nadstavba, ~32,8 m.
+  - Tmavý antracitový sokel na prízemí a 1. p. (~8,5–9 m), vyššie pásy kameňa typu travertín (~#c9bfae) a pásové okná.
+  - Stredný arkier (x 492–503) je vyložený konzolovo nad soklom. V katastri je pred domom pás 8878/2 hlboký
+    1,5–3,5 m, na fotkách vyzerá vyloženie skôr na 1–2 m.
+  - Najvyššie podlažia ustupujú v stupňoch po ~1,5–2 m.
+- **Dunajská 6–8** (OSM 1388864526, súp. č. 7614): polyfunkčný dom po roku 2008, 8 podlaží, ~27 m pri ulici,
+  dozadu terasovito klesá.
+  - Prízemie a 1. p. stoja na uličnej čiare. Horné podlažia (2. p. a vyššie) sú vyložené o ~2,5 m nad chodník –
+    obrys OSM je obrys vyložených podlaží.
+  - Vyložené časti: sivý panelový arkier (8 m, ~#66676b) a sklená fasáda (19,5 m) pred lodžiami s tehlovočervenou
+    stenou. Medzi nimi a na koncoch je béžový kamenný obklad (~#c2b49a).
+  - Na streche je presklená rotunda.
+- **Dunajská 12** (OSM 74740002): ~20,5 m, sklený raster, stojí ~5 m pred čiarou Dunajskej 4.
+
+**V hre** (ručné opravy `data/mapa/opravy-budov.json`, nové polia `podlubie` a `arkiere` v `js/mapa/budovy/opravy.js`):
+- **Dunajská 6–8:** prízemie a 1. p. sú ustúpené o 2,5 m pod vyložené podlažia, pod nimi sa dá prejsť po chodníku.
+  Na vyložených podlažiach je sivý arkier a sklená fasáda.
+- **Dunajská 4:** kamenná farba, tmavý sokel a vyložený stredný arkier (2 m) a východný segment (1,2 m) nad soklom.
+- Ustúpené horné podlažia už kreslí LOD2 strecha z lasera (#86, #103).
+
+**Neisté – vlastné fotky by pomohli:**
+1. z chodníka pod arkiermi Dunajskej 6–8 (hĺbka vyloženia);
+2. celkový pohľad na Dunajskú 4 z Kamenného námestia.
+
+Zdroje:
+- [CRZ – dohoda o revitalizácii chodníka Dunajská 6–8 (2022)](https://www.crz.gov.sk//data/att/3599820.pdf)
+- [Commons – kategória Dunajská 4](https://commons.wikimedia.org/wiki/Category:Dunajsk%C3%A1_4) a fotky
+  [Bratislava (005)](https://commons.wikimedia.org/wiki/File:Bratislava_(005).jpg),
+  [(010)](https://commons.wikimedia.org/wiki/File:Bratislava_(010).jpg),
+  [(011)](https://commons.wikimedia.org/wiki/File:Bratislava_(011).jpg)
+- [Kiacek 2023, ALFA](https://alfa.stuba.sk/wp-content/uploads/2023/06/02_2023_Kiacek.pdf) – regulácia bloku Špitálska–Dunajská
+- kataster: [INSPIRE WFS parcely](https://inspirews.skgeodesy.sk/geoserver/cp/ows)
+- OSM ways 386574223, 74739754, 1388864526, 74740002.
