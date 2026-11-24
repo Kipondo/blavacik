@@ -4,6 +4,8 @@
 // priebežnej cesty (T-križovatka) sa neprerušuje. Všade, kde by ležal na vozovke (inej cesty – súbežné cesty, cesty
 // bez spoločného bodu – aj vlastnej na vnútornej strane ostrej zákruty), sa chodník preruší (js/mapa/cesty/vozovky.js).
 // Cez vjazdy do dvorov pokračuje. Jednosmerky majú chodník vpravo a vľavo tam, kde vedľa nie je druhý pás rozdelenej cesty.
+// Na strane dopravného ostrovčeka alebo deliaceho pásu (js/mapa/cesty/ostrovceky.js) chodník nie je – len obrubník
+// a za ním tráva.
 
 import * as THREE from 'three';
 import { pridajStrukturu } from './struktura.js';
@@ -11,6 +13,7 @@ import { pridajOpotrebenie } from './opotrebenie.js';
 import { mriezkaVozoviek } from './vozovky.js';
 import { SIRKA, OBRUBNIK, VYSKA, S_CHODNIKOM } from './chodnik-rozmery.js';
 import { rohyChodnikov, preruseniaChodnikov } from './rohy-chodnikov.js';
+import { vOstrovceku } from './ostrovceky.js';
 
 const KROK = 4;             // m – najdlhší úsek chodníka
 
@@ -46,7 +49,7 @@ function vzorkyOsi(body, navyse) {
   });
 }
 
-export function vytvorChodniky(cesty, krizovatky, vyskopis) {
+export function vytvorChodniky(cesty, krizovatky, vyskopis, ostrovceky = []) {
   const poz = [], uv = [], obrPoz = [];
   const vozovky = mriezkaVozoviek(cesty);
   const prerusenia = preruseniaChodnikov(cesty, krizovatky);
@@ -66,6 +69,13 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
     obrPoz.push(...dol(Ai), ...dol(Bi), ...vrch(Bi), ...dol(Ai), ...vrch(Bi), ...vrch(Ai));
     for (const p of [Ai, Bi, B, Ai, B, A]) obrPoz.push(...vrch(p));
     obrPoz.push(...zem(D), ...vrch(C), ...zem(C), ...zem(D), ...vrch(D), ...vrch(C));
+  };
+  /** Len obrubník (okraj ostrovčeka): čelo od vozovky, vrch a zadná stena k tráve. */
+  const obrubnik = (pred, bod) => {
+    const Ai = pred.i, Bi = bod.i, A = pred.k, B = bod.k;
+    obrPoz.push(...dol(Ai), ...dol(Bi), ...vrch(Bi), ...dol(Ai), ...vrch(Bi), ...vrch(Ai));
+    for (const p of [Ai, Bi, B, Ai, B, A]) obrPoz.push(...vrch(p));
+    obrPoz.push(...zem(A), ...vrch(B), ...zem(B), ...zem(A), ...vrch(A), ...vrch(B));
   };
   const rad = (x, z, nx, nz, r0) => {
     const ix = x + nx * r0, iz = z + nz * r0, kx = x + nx * (r0 + OBRUBNIK), kz = z + nz * (r0 + OBRUBNIK);
@@ -106,9 +116,13 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
         const naVozovke = [r0 + 0.5, r0 + SIRKA / 2, r1].some((r) => vozovky.naVozovke(...bodVo(r), null, 0.3));
         // jednosmerka vľavo: druhý jazdný pás rozdelenej cesty do ~8 m za chodníkom = stredný pás, chodník nie je
         const strednyPas = c.jednosmerka && strana < 0 && vozovky.naVozovke(...bodVo(r1 + 3), c, -8);
-        const prerus = blizko || naVozovke || strednyPas;
-        const bod = { ...rad(x, z, nx, nz, r0), prerus };
+        // strana ostrovčeka: namiesto chodníka obrubník (ak sám neleží na vozovke)
+        const ostrov = !blizko && vOstrovceku(ostrovceky, ...bodVo(r0 + OBRUBNIK + 0.25))
+          && !vozovky.naVozovke(...bodVo(r0 + OBRUBNIK + 0.2), null, 0.3);
+        const prerus = blizko || naVozovke || strednyPas || ostrov;
+        const bod = { ...rad(x, z, nx, nz, r0), prerus, ostrov };
         if (pred && !prerus && !pred.prerus) usek(pred, bod);
+        else if (pred && ostrov && pred.ostrov) obrubnik(pred, bod);
         pred = bod;
       }
     }
@@ -122,11 +136,14 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
       const [nx, nz] = p.normaly[j];
       return [0.5, SIRKA / 2, SIRKA].some((r) => vozovky.naVozovke(x + nx * r, z + nz * r, null, 0.3));
     });
-    if (naVozovke) continue;
+    // roh v ostrovčeku: len obrubník po oblúku
+    const stred = Math.floor(p.vnutro.length / 2), [sx, sz] = p.vnutro[stred], [snx, snz] = p.normaly[stred];
+    const vOstrove = vOstrovceku(ostrovceky, sx + snx * (OBRUBNIK + 0.25), sz + snz * (OBRUBNIK + 0.25));
+    if (naVozovke && !vOstrove) continue;
     let pred = null;
     p.vnutro.forEach(([x, z], j) => {
       const bod = rad(x, z, p.normaly[j][0], p.normaly[j][1], 0);
-      if (pred) usek(pred, bod);
+      if (pred) (vOstrove ? obrubnik : usek)(pred, bod);
       pred = bod;
     });
     rohy++;

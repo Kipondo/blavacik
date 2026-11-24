@@ -7,6 +7,7 @@ import { kresliIhriska, triedyIhrisk } from './ihriska.js';
 import { kresliZahrady, triedyZahrad } from './zahrady.js';
 import { dieryPodchodov } from '../podchody/tuby.js';
 import { dokonci } from '../kroky.js';
+import { ostrovcekyDlazdice } from '../cesty/ostrovceky.js';
 
 export const FARBY_POKRYVKY = {
   zaklad: '#8c887d',
@@ -154,6 +155,15 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
   g.fillRect(0, 0, px, px);
   // záhrady a trávniky v obytnej zástavbe (js/mapa/teren/zahrady.js)
   kresliZahrady(g, d, rect, px, vJadre);
+  // trávniky v OSM často nesiahajú až po chodník – úzka medzera ostala ako sivé trojuholníky a pásy (#136)
+  g.lineJoin = 'round';
+  for (const p of d.pokryvka ?? []) {
+    if (!ZELEN.has(p.k)) continue;
+    g.strokeStyle = FARBY_POKRYVKY[p.k];
+    g.lineWidth = 2 * DOSAH_ZELENE * mierka;
+    cesta(p.body, true);
+    g.stroke();
+  }
   for (const p of d.pokryvka ?? []) {
     g.fillStyle = FARBY_POKRYVKY[p.k] ?? FARBY_POKRYVKY.zaklad;
     cesta(p.body, true);
@@ -163,12 +173,16 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
   kresliIhriska(g, rect, sx, sz, mierka);
   g.fillStyle = '#4f7f8f';
   for (const v of d.voda ?? []) { cesta(v.body, true); g.fill(); }
+  // dopravné ostrovčeky a deliace pásy sú celé zelené (js/mapa/cesty/ostrovceky.js)
+  g.fillStyle = FARBY_POKRYVKY.trava;
+  for (const o of ostrovcekyDlazdice(d)) { cesta(o.body, true); g.fill(); }
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const ch of d.chodniky ?? []) {
     if (ch.nadjazd) continue;            // lávka / nadchod – kreslí sa ako most (js/mapa/mosty/nadjazdy.js)
     g.strokeStyle = FARBY_CHODNIKOV[ch.typ] ?? FARBY_CHODNIKOV.footway;
-    g.lineWidth = Math.max(1, ch.sirka * mierka);
+    // o kúsok užšie ako v mape tried – farba podkladu (textúra je hrubšia) nepresvitá za ostrou hranou dlažby
+    g.lineWidth = Math.max(1, (ch.sirka - 0.8) * mierka);
     cesta(ch.body, false);
     g.stroke();
   }
@@ -210,6 +224,10 @@ export function* krokyTexturyDlazdice(d, rieky, rect, px = 512) {
   t.anisotropy = 8;
   return t;
 }
+
+// trávnaté plochy pokrývky, ktoré sa natiahnu o DOSAH_ZELENE m (zavrú medzeru k chodníku alebo ceste)
+const ZELEN = new Set(['trava', 'ihrisko', 'cintorin']);
+const DOSAH_ZELENE = 1.5;
 
 // Trieda povrchu pre materiál zeme (kanál R; G = zatienenie pri budovách, B = asfaltový chodník):
 // 0 = iný povrch (farba z textúry pokrývky), 0,25 = tráva,
@@ -301,6 +319,18 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   gm.beginPath();
   gm.ellipse(sx(JADRO.x), sz(JADRO.z), JADRO.rx * mierka, JADRO.rz * mierka, JADRO.uhol, 0, Math.PI * 2);
   gm.fill();
+  // trávnik natiahnutý k chodníku – len cez nezaradenú plochu („lighten“ nechá chodník, dlažbu a námestia tak)
+  g.save();
+  g.lineJoin = 'round';
+  g.globalCompositeOperation = 'lighten';
+  g.strokeStyle = seda(TRIEDA_POKRYVKY.trava);
+  g.lineWidth = 2 * DOSAH_ZELENE * mierka;
+  for (const p of d.pokryvka ?? []) {
+    if (!ZELEN.has(p.k)) continue;
+    cesta(p.body, true);
+    g.stroke();
+  }
+  g.restore();
   for (const p of d.pokryvka ?? []) {
     let v = TRIEDA_POKRYVKY[p.k] ?? 0;
     // námestia mimo historického jadra sú z betónových dlaždíc, nie z kamenných dosiek
@@ -322,6 +352,19 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.lineWidth = ((c_.sirka ?? 6) + (CESTY_S_CHODNIKOM.has(c_.typ) && !c_.most ? 5.6 : 0.3)) * mierka;
     cesta(c_.body, false);
     g.stroke();
+  }
+  // dopravné ostrovčeky: celé tráva (aj kde by bol chodník okolitých ciest alebo betón z OSM), pod vozovkou
+  // a obrubníkom nie (trsy trávy by prerastali cez cestu)
+  const ostrovceky = ostrovcekyDlazdice(d);
+  if (ostrovceky.length) {
+    g.fillStyle = seda(TRIEDA_POKRYVKY.trava);
+    for (const o of ostrovceky) { cesta(o.body, true); g.fill(); maska(o.body, true, false); }
+    for (const c_ of d.cesty ?? []) {
+      if (c_.nadjazd || vJadreDlazba.has(c_)) continue;
+      g.lineWidth = ((c_.sirka ?? 6) + 0.6) * mierka;
+      cesta(c_.body, false);
+      g.stroke();
+    }
   }
   g.restore();
   // strmé svahy bez inej pokrývky (napr. Hradný kopec) sú zatrávnené, nie holá hlina

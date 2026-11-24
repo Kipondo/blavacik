@@ -12,6 +12,7 @@ import { nacitajMola, oznacMola } from '../mosty/mola.js';
 import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
 import { upravOsiCiest } from '../cesty/upravy-osi.js';
+import { upravSirkyPasov } from '../cesty/sirky-pasov.js';
 
 // predvolené okruhy (bez predvoľby kvality); skutočné nastaví nastavPolomery() podľa js/grafika/predvolby.js
 export const POLOMER_DETAIL = 900;
@@ -61,6 +62,10 @@ export class SpravaDlazdic {
       this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index), nacitajOpravyBudov(), nacitajHustuZelen(), nacitajMola()]).then(([d, { teren, strechy }, opravy, zelen, mola]) => {
         // osi ciest: rovné úseky a plynulé oblúky (pravidlá ulice, js/mapa/cesty/upravy-osi.js)
         upravOsiCiest(d.cesty);
+        // súbežné jazdné pásy rozdelenej cesty sa neprekrývajú (js/mapa/cesty/sirky-pasov.js)
+        upravSirkyPasov(d.cesty);
+        // osi chodníkov tiež (rovné úseky a oblúky – bez cikcaku z kreslenia); body spoločné s cestami ostávajú
+        upravOsiCiest([...(d.chodniky ?? []), ...(d.cesty ?? [])]);
         // ručné opravy podľa porovnania so skutočnosťou (budovy, hustá zeleň v parkoch)
         aplikujOpravy(d.budovy, opravy);
         // mólá nad nábrežím: vodorovná mostovka namiesto lávky dolu svahom (js/mapa/mosty/mola.js)

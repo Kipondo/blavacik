@@ -41,5 +41,20 @@ export function mriezkaVozoviek(cesty) {
     }
     return null;
   };
-  return { vozovka, naVozovke: (x, z, okrem, rezerva) => vozovka(x, z, okrem, rezerva) !== null };
+  /**
+   * Všetky cesty, na ktorých vozovke leží bod (x, z) aspoň `rezerva` m od okraja. Ráta sa len kolmý priemet na úsek
+   * (nie okolie koncov úsekov) – pokračovanie cesty za spoločným bodom ani jej koniec nie je prekryv (#136).
+   */
+  const vsetky = (x, z, rezerva = 0) => {
+    const out = new Set();
+    for (const u of m.get(kluc(Math.floor(x / BUNKA), Math.floor(z / BUNKA))) ?? []) {
+      if (out.has(u.c)) continue;
+      const dx = u.bx - u.ax, dz = u.bz - u.az, L2 = dx * dx + dz * dz || 1e-9;
+      const t = ((x - u.ax) * dx + (z - u.az) * dz) / L2;
+      if (t < 0 || t > 1) continue;
+      if (Math.hypot(x - u.ax - dx * t, z - u.az - dz * t) < u.pol - rezerva) out.add(u.c);
+    }
+    return out;
+  };
+  return { vozovka, vsetky, naVozovke: (x, z, okrem, rezerva) => vozovka(x, z, okrem, rezerva) !== null };
 }

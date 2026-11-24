@@ -3,7 +3,10 @@
 // susedné dlaždice podrobného terénu majú na spoločnej hrane rovnakú výšku (tools/mesto/laser/svy_terenu.py)
 // a zvýšený chodník neleží na vozovke (js/mapa/cesty/chodniky.js, vozovky.js).
 
-import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
+import { vytvorCesty, pridajPas, zjemni, rozsahyZnacenia, bezPrekryvu, prednostZnacenia } from '../../../js/mapa/cesty/cesty.js';
+import { posunutaLinia } from '../../../js/mapa/cesty/cyklopruhy-modul.js';
+import { najdiOstrovceky, ostrovcekyDlazdice, vOstrovceku } from '../../../js/mapa/cesty/ostrovceky.js';
+import { vytvorObrubnikyChodnikov } from '../../../js/mapa/cesty/obrubniky-chodnikov.js';
 import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
 import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
 import { tvarKrizovatky, tvarSpoja, spojeCiest } from '../../../js/mapa/cesty/krizovatky-tvar.js';
@@ -27,6 +30,18 @@ export async function teren(kluc) {
     for (let i = 0; i < n; i++) { s = (s + dl[j * n + i]) & 0xffff; H[j * n + i] = s / 100 + 100; }
   }
   return { n, H };
+}
+
+/** Najkratšia vzdialenosť bodu od lomenej čiary. */
+function vzdialenostOdOsi(x, z, body) {
+  let m = Infinity;
+  for (let i = 1; i < body.length; i++) {
+    const [ax, az] = body[i - 1], [bx, bz] = body[i];
+    const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz || 1e-9;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / L2));
+    m = Math.min(m, Math.hypot(x - ax - dx * t, z - az - dz * t));
+  }
+  return m;
 }
 
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
@@ -287,6 +302,140 @@ export const kontrolyCiest = [
       if (!vhodne || postavene < 0.5 * vhodne) chyby.push({ text: `postavených rohov chodníkov len ${postavene} z ${vhodne}` });
       if (!rovne) chyby.push({ text: 'chodník sa pri križovatke prerušuje aj na rovnej strane priebežnej cesty' });
       return { skontrolovane: vhodne, chyby };
+    },
+  },
+  {
+    id: 'pas-cesty-od-zaciatku',
+    popis: 'Pás cesty (asfalt aj značenie) má plnú šírku už v prvom bode – predtým sa na začiatku každej cesty zúžil '
+      + 'na ~40 % (nenormovaný smer v prvom bode) a čiary pruhov išli šikmo krížom; to isté pri cyklopruhoch, ktoré '
+      + 'preto začínali v strede cesty a ľavý s pravým sa krížili do „X“ (Mýtna pri NBS)',
+    oprava: 'feature/pravidla-ulice-3 – js/mapa/cesty/cesty.js pridajPas, cyklopruhy-modul.js posunutaLinia',
+    tolerancia: 0,
+    async spusti(ctx) {
+      const chyby = [];
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        for (const c of d.cesty ?? []) {
+          if (!(c.body?.length > 1) || c.nadjazd) continue;
+          const body = zjemni(c.body, 2.5);
+          if (body.length < 2) continue;
+          const s = { poz: [], uv: [], idx: [] };
+          pridajPas(s, body, c.sirka / 2, 0, ROVINA, { po: 1 });
+          n++;
+          const sirka = Math.hypot(s.poz[0] - s.poz[6], s.poz[2] - s.poz[8]);
+          if (Math.abs(sirka - c.sirka) > 0.05) chyby.push({ x: c.body[0][0], z: c.body[0][1], dlazdica: kluc, text: `začiatok pásu ${sirka.toFixed(1)} m namiesto ${c.sirka} m (${c.nazov || c.typ})` });
+        }
+      }
+      // cyklopruhy: každý bod posunutej osi je od osi cesty aspoň 90 % posunu
+      let pruhy = [];
+      try { pruhy = (await (await fetch('data/mapa/cyklopruhy.json')).json()).pruhy ?? []; } catch { /* bez súboru */ }
+      for (const p of pruhy) {
+        const os = Math.max(0.5, p.s / 2 - 0.9);
+        for (const strana of [p.p ? 1 : 0, p.l ? -1 : 0].filter(Boolean)) {
+          const lin = posunutaLinia(p.body, strana * os);
+          n++;
+          const zle = lin.find(([x, z]) => vzdialenostOdOsi(x, z, p.body) < 0.9 * os);
+          if (zle && chyby.length < 50) chyby.push({ x: +zle[0].toFixed(1), z: +zle[1].toFixed(1), text: `cyklopruh mimo okraja cesty (${vzdialenostOdOsi(zle[0], zle[1], p.body).toFixed(1)} m od osi namiesto ${os.toFixed(1)} m)` });
+        }
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'znacenie-prednost',
+    popis: 'Kde sa vozovky dvoch ciest prekrývajú (rozdvojenie, pripájací pruh), kreslí čiary len dôležitejšia cesta – '
+      + 'čiary nejdú krížom cez seba (predtým napr. Bajkalská a diaľničné vetvy: dve sady čiar cez seba)',
+    oprava: 'feature/pravidla-ulice-3 – js/mapa/cesty/cesty.js bezPrekryvu, prednostZnacenia; vozovky.js vsetky',
+    tolerancia: 0,
+    spusti() {
+      const chyby = [];
+      // vidlica: hlavná cesta 14 m a odbočovacia vetva 7 m zo spoločného bodu pod malým uhlom
+      const M = { typ: 'primary', sirka: 14, pruhy: 4, body: [[0, 0], [120, 0]] };
+      const V = { typ: 'primary_link', sirka: 7, pruhy: 1, body: [[0, 0], [120, 12]] };
+      const cesty = [V, M];
+      const vozovky = mriezkaVozoviek(cesty);
+      const poradie = new Map(cesty.map((c, i) => [c, prednostZnacenia(c) - i * 1e-9]));
+      const rozsahy = (c) => {
+        const j = zjemni(c.body, 2.5);
+        return { j, r: bezPrekryvu(rozsahyZnacenia(c.body, j, null, c.typ), j, c, vozovky, poradie) };
+      };
+      const m = rozsahy(M), v = rozsahy(V);
+      const dlzkaM = m.r.reduce((a, [od, po]) => a + po - od, 0);
+      if (dlzkaM < m.j.length - 2) chyby.push({ text: `hlavná cesta prišla o značenie (${dlzkaM} z ${m.j.length - 1} úsekov)` });
+      for (const [od, po] of v.r) {
+        for (let i = od; i <= po; i++) {
+          const [x, z] = v.j[i];
+          if (Math.abs(z) < M.sirka / 2 - 0.3) { chyby.push({ x, z, text: 'čiary vetvy na vozovke hlavnej cesty' }); break; }
+        }
+      }
+      if (!v.r.length) chyby.push({ text: 'vetva nemá značenie ani tam, kde je už mimo hlavnej cesty' });
+      return { skontrolovane: 2, chyby };
+    },
+  },
+  {
+    id: 'ostrovceky-zelene',
+    popis: 'Dopravné ostrovčeky a deliace pásy (malé plochy obkolesené cestami, bez budovy) sa nájdu a nemajú '
+      + 'chodník okolitých ciest – len obrubník a trávu (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice-3 – js/mapa/cesty/ostrovceky.js, chodniky.js, textura-zeme.js',
+    tolerancia: 0,
+    spusti(ctx) {
+      const chyby = [];
+      // umelý trojuholník ciest: 1 ostrovček; s domom vnútri žiadny
+      const troj = [
+        { typ: 'secondary', sirka: 7, body: [[0, 0], [40, 0]] },
+        { typ: 'secondary', sirka: 7, body: [[40, 0], [20, 30]] },
+        { typ: 'secondary', sirka: 7, body: [[20, 30], [0, 0]] },
+      ];
+      if (najdiOstrovceky(troj).length !== 1) chyby.push({ text: 'trojuholník ciest nie je ostrovček' });
+      if (najdiOstrovceky(troj, [{ body: [[18, 8], [22, 8], [22, 12], [18, 12]] }]).length) chyby.push({ text: 'ostrovček s budovou' });
+      let n = 0, chodnikov = 0;
+      const priklady = [];
+      for (const [kluc, d] of ctx.dlazdice) {
+        const ostrovceky = ostrovcekyDlazdice(d);
+        if (!ostrovceky.length) continue;
+        n += ostrovceky.length;
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorChodniky(cesty, krizovatky, ROVINA, ostrovceky);
+        const p = g.children[0].geometry.getAttribute('position').array;
+        for (let t = 0; t < p.length; t += 9) {
+          const x = (p[t] + p[t + 3] + p[t + 6]) / 3, z = (p[t + 2] + p[t + 5] + p[t + 8]) / 3;
+          if (!vOstrovceku(ostrovceky, x, z)) continue;
+          chodnikov++;
+          if (priklady.length < 10) priklady.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: 'chodník v ostrovčeku' });
+        }
+        g.traverse((o) => o.geometry?.dispose());
+      }
+      // 24. 11. 2026: 47 trojuholníkov (slučky obratísk, rohy pri ostrom uhle) pri 3 242 ostrovčekoch a pásoch
+      if (chodnikov > 60) chyby.push({ text: `spolu ${chodnikov} trojuholníkov chodníka v ostrovčekoch (najviac 60)` }, ...priklady);
+      if (ctx.dlazdice.size > 4 && !n) chyby.push({ text: 'v načítaných dlaždiciach sa nenašiel žiadny ostrovček' });
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'obrubniky-chodnikov',
+    popis: 'Samostatné chodníky v zeleni majú obrubníky a žiadny obrubník neleží na vozovke cesty (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice-3 – js/mapa/cesty/obrubniky-chodnikov.js',
+    tolerancia: 0,
+    spusti(ctx) {
+      const chyby = [];
+      let trojuholnikov = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        const g = vytvorObrubnikyChodnikov(d, ROVINA);
+        const vozovky = mriezkaVozoviek((d.cesty ?? []).filter((c) => !c.nadjazd));
+        g.traverse((o) => {
+          if (!o.isMesh) return;
+          const p = o.geometry.getAttribute('position').array;
+          for (let t = 0; t < p.length; t += 9) {
+            trojuholnikov++;
+            const x = (p[t] + p[t + 3] + p[t + 6]) / 3, z = (p[t + 2] + p[t + 5] + p[t + 8]) / 3;
+            if (vozovky.naVozovke(x, z, null, 0.3) && chyby.length < 30) chyby.push({ x: +x.toFixed(1), z: +z.toFixed(1), dlazdica: kluc, text: 'obrubník chodníka na vozovke' });
+          }
+          o.geometry.dispose();
+        });
+      }
+      if (ctx.dlazdice.size > 4 && !trojuholnikov) chyby.push({ text: 'žiadne obrubníky chodníkov' });
+      return { skontrolovane: trojuholnikov, chyby };
     },
   },
   {
