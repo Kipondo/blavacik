@@ -165,6 +165,19 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   Generátor Eurovea 1 dostal háčiky na vlastné fasády a výšku sklenej strechy. Jeho výstup sa nezmenil.
 - **Testovacia trasa:** nové body „Eurovea 2 – park so sochou gúľ“, „pasáž pod hadou strechou“ a „Eurovea 2 zhora“.
 
+### Pomník M. R. Štefánika pri Eurovei (vetva `feature/stefanik`, #131 časť 4)
+- **Prieskum** (Vrábel, *Vojenská história* 2010; umeniemesta.sk; Commons; OSM): `napady/pamiatky-podklady.md`. Zadanie
+  si predstavovalo leva pri päte, v skutočnosti stojí navrchu pylónu.
+- **Model** (`js/mapa/pamiatky/stefanik.js`), obnovený pomník podľa diela Bohumila Kafku (1938, dielo je voľné):
+  - hranolový pylón 21,6 × 4,25 × ~3,4 m s travertínovým obkladom v mriežke 5 × 17 dosiek a rímsou;
+  - navrchu bronzový lev (6,4 m) kráča na východ, ľavou prednou labou sa opiera o šikmý štít, chvost visí cez okraj;
+  - ~5 m pred pylónom podstavec 3,44 m a socha letca 7,4 m: kombinéza, kožená prilba s okuliarmi na čele,
+    zvitok v pravej ruke, pravá noha vpredu;
+  - socha pozerá k Dunaju; bronz je takmer čierny hnedý.
+- **Bez nápisov:** bronzové tabule sú prázdne.
+- **Náhrady:** všeobecné sochy z OSM (Štefánik, lev) a „stromy“, ktoré laser videl v pylóne a v soche, model nahrádza.
+- **Testovacia trasa:** bod `stefanik`.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.

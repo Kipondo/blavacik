@@ -610,3 +610,63 @@ V hre: ide o dielo žijúceho autora, preto je v hre **vlastné zjednodušené s
 - JTRE a socha: [socha Octahedral Body](https://jtre.sk/en/news/sculpture_octahedral_body_unveiled), [Pribinova 40](https://jtre.sk/en/projekty/pribinova_40), [Pribinova 34](https://jtre.sk/en/projekty/pribinova_34), [súťaž na sochu](https://euroveacity.com/news/viktor_freso_has_won_competition), [nehnutelnosti.sk](https://www.nehnutelnosti.sk/magazin-o-byvani/2077-na-dunajskom-nabrezi-bude-stat-octahedral-body-od-viktora-fresa);
 - správca budov: [Riverside](https://d-fs.sk/?p=1914), [P40](https://d-fs.sk/?p=1946);
 - Commons: [Pribinova 34 (2023)](https://commons.wikimedia.org/wiki/File:Pribinova_34_office_building_in_Bratislava.jpg), [päta veže a hala (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_Bratislava.jpg), [P40 a veža (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_8.jpg), [nábrežie z Petržalky (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_vo_v%C3%BDstavbe_2.jpg), [Riverside z lode (2022)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_20072022.jpg), [z Dunaja (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_3.jpg), [interiér haly (2025)](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea.jpg), [stavenisko (2020)](https://commons.wikimedia.org/wiki/File:Eurovea_2_stavenisko.jpg).
+
+## Pomník M. R. Štefánika pri Eurovei (#131, časť 4; 24. 11. 2026)
+
+**Dielo a história:**
+- Obnovený pomník podľa diela Bohumila Kafku. Kafka zomrel v roku 1942, takže dielo je voľné.
+- Pôvodný pomník bol dokončený v roku 1938 na dnešnom Námestí Ľudovíta Štúra, asi 1 km na západ, oficiálne ho však
+  neodhalili. Leva odstránili v roku 1940, pylón neskôr a sochu v roku 1954.
+- Kópiu odhalili 4. 5. 2009:
+  - postavu znovu vymodelovali Gotthard a Jan Janda;
+  - architekt Pavol Kopačka upravil osadenie a znížil pylón;
+  - sochu odlial DSB EURO Blansko.
+- Lev je pôvodný bronz z roku 1938 (obnovený 1988), sem prenesený v roku 2009.
+
+**Skladba:** dva samostatné bloky na jednej osi, na nízkej kamennej plošine.
+- **Pylón:**
+  - hranolový (nie zúžený obelisk), ~21,6 m vysoký a ~4,25 m široký;
+  - hĺbka ~3,3–3,5 m (odmerané z fotky, istota nízka);
+  - obklad zo svetlého krémového vápenca podobného travertínu (~#E4DCD4 na slnku), na čelnej strane mriežka 5 × ~17 dosiek.
+- **Lev navrchu pylónu:**
+  - bronzový, 6,4 m dlhý, 4,2 m vysoký so základňou, 5,9 t;
+  - kráča na východ po vrchu pylónu, ľavou prednou labou sa opiera o šikmý štít so štátnym znakom na východnom konci;
+  - chvost presahuje západný okraj, hlava a štít východný.
+- **Socha Štefánika:**
+  - ~5 m pred pylónom (k Dunaju) na samostatnom podstavci 3,44 m (umeniemesta: 3,50 m), ~2,8 × 1,9 m, obklad 3 × 2 dosky;
+  - socha 7,40 m vrátane bronzovej základnej dosky, 6 t;
+  - letec v kombinéze, kožená prilba s okuliarmi vysunutými na čelo, v pravej ruke zvinutý zvitok, pravá noha vpredu;
+  - pozerá na juh k Dunaju (os ~187°), chrbtom k novej budove SND.
+- **Bronz:** takmer čierny teplý hnedý, bez zelenej patiny.
+- **Tabule:** predná na podstavci (meno a funkcie), Pittsburská dohoda na severnej strane pylónu. Text do hry nedávam –
+  tabule sú prázdne.
+- **Celková výška:** ~25,8 m nad plošinou. Údaje „27 m“ a „takmer 30 m“ sú o pylóne z roku 1938 (o ~7 m vyššom);
+  „15 m“ je o pylóne z roku 1988 pri SNM.
+
+**Poloha:**
+- socha: OSM uzol 915661112 (48.1396932, 17.1231400) = hra x 1146,9, z 423,1;
+- lev a pylón: uzol 4953350157 (48.1397715, 17.1231639) = hra x 1148,7, z 414,4.
+
+**Model:**
+- `js/mapa/pamiatky/stefanik.js` – zjednodušené, ale verné tvary (elipsoidy a valce z bronzu).
+- Všeobecné sochy z OSM (Štefánik, lev) na tomto mieste ustúpia modelu (`nahradSochy`).
+- Pozor na licenciu: sken sochy na Sketchfabe je CC BY-NC-ND, preto som ho ako podklad nepoužil.
+
+**Neisté – vlastné fotky by pomohli:**
+- celý pylón kolmo z východu alebo západu (hĺbka pylónu);
+- zväčšený štít leva z východu;
+- spodné časti východnej a západnej strany pylónu (ďalšie tabule – podľa Vrábla sú na pylóne tri);
+- rohy plošiny.
+
+Zdroje:
+- M. Vrábel, *Vojenská história* 2010, s. 129 (rozmery);
+- [umeniemesta.sk – dielo](https://umeniemesta.sk/diela/recuMgS47Yu0U9WjU);
+- [pam.epocha.sk – pamätník](https://pam.epocha.sk/pamatniky-bratislava/ruzinov-vrakuna-pod-biskupice/milan-rastislav-stefanik-pittsburghska-dohoda-1918-nam-m-r-stefanika);
+- [TASR / teraz.sk – návrat sochy](https://www.teraz.sk/slovensko/glvac-socha-stefanika-navrat-bratislava/83066-clanok.html);
+- [The Slovak Spectator – lev sa sťahuje k divadlu](https://spectator.sme.sk/politics-and-society/c/bronze-lion-moves-to-the-theatre);
+- Commons:
+  - [kategória pomníka](https://commons.wikimedia.org/wiki/Category:Milan_Rastislav_%C5%A0tef%C3%A1nik_monument,_Bratislava);
+  - [čelný pohľad](https://commons.wikimedia.org/wiki/File:Bratislava,_memorial_of_Milan_Rastislav_%C5%A0tef%C3%A1nik.JPG);
+  - [lev](https://commons.wikimedia.org/wiki/File:Lev_socha,_Bratislava_18_Slovakia.jpg);
+  - [z Dunaja](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_2.jpg);
+- OSM: [uzol 915661112](https://www.openstreetmap.org/node/915661112), [uzol 4953350157](https://www.openstreetmap.org/node/4953350157).

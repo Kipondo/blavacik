@@ -12,6 +12,7 @@
     { "id": "most-snp-juh", "nazov": "Most SNP z Petržalky", "x": -260, "z": 900, "azimut": 0, "pohlady": ["ulica"],
       "kamera": [-300, 30, 1000], "ciel": [-220, 20, 500] },
     { "id": "eurovea-nabrezie", "nazov": "Nábrežie pri Eurovei", "x": 1100, "z": 430, "azimut": 90, "pohlady": ["ulica", "zhora"] },
+    {"id": "stefanik", "nazov": "Pomník M. R. Štefánika pri Eurovei", "x": 1148, "z": 418, "kamera": [1141, 1.7, 446], "ciel": [1148, 11, 416], "vzdialenost": 60, "vyska": 32, "azimut": 345, "pohlady": ["ulica", "zhora"]},
     { "id": "univerzita-komenskeho", "nazov": "Univerzita Komenského – rotunda", "x": 640, "z": 245, "azimut": 260, "pohlady": ["ulica"],
       "kamera": [668, 9, 238], "ciel": [570, 14, 262] },
     { "id": "eurovea-vajce", "nazov": "Eurovea – presklené vajce", "x": 900, "z": 300, "azimut": 135, "pohlady": ["ulica"],
