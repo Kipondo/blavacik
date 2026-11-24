@@ -310,6 +310,51 @@ export const KATEGORIE = [
     },
   },
   {
+    id: 'znacenie-cez-seba', popis: 'Čiary dvoch ciest krížom cez seba – značenie cesty na vozovke inej cesty, ktorá tam má tiež značenie (mimo križovatiek, #136)',
+    spusti(ctx) {
+      const out = [];
+      const drobne = new Set(['service', 'living_street', 'track', 'unknown']);
+      for (const [kluc, d] of ctx.dlazdice) {
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        if (!cesty.length) continue;
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorCesty(cesty, { vyska: () => 0, vyskaTerenu: () => 0 }, krizovatky, d.prvky?.prechody);
+        const osi = mriezka(useky(cesty));
+        const vozovky = mriezkaVozoviek(cesty);
+        // stred každého radu značenia (rad = vrcholy okraj – stred – okraj) a cesta, na ktorej osi leží
+        const stredy = [];
+        g.traverse((o) => {
+          if (!o.isMesh) return;
+          if (o.name === 'znacenie') {
+            const p = o.geometry.getAttribute('position').array;
+            for (let t = 3; t < p.length; t += 9) {
+              const x = p[t], z = p[t + 2];
+              const u = osi(x, z).find((q) => vzdUsecka(x, z, q.ax, q.az, q.bx, q.bz) < 0.02);
+              if (u) stredy.push({ x, z, c: u.c, minX: x, maxX: x, minZ: z, maxZ: z });
+            }
+          }
+          o.geometry.dispose();
+        });
+        const vBunke = mriezka(stredy);
+        const videne = new Set();
+        for (const s of stredy) {
+          if (drobne.has(s.c.typ)) continue;
+          for (const c2 of vozovky.vsetky(s.x, s.z, 0.3)) {
+            if (c2 === s.c || drobne.has(c2.typ)) continue;
+            const dosah = (c2.sirka ?? 6) / 2 + 1;
+            const ma = vBunke(s.x, s.z).some((q) => q.c === c2 && Math.hypot(q.x - s.x, q.z - s.z) < dosah);
+            if (!ma) continue;
+            const id = `${Math.round(s.x / 3)}|${Math.round(s.z / 3)}`;
+            if (videne.has(id)) continue;
+            videne.add(id);
+            out.push({ x: +s.x.toFixed(1), z: +s.z.toFixed(1), dlazdica: kluc, text: `${s.c.nazov || s.c.typ} × ${c2.nazov || c2.typ}` });
+          }
+        }
+      }
+      return out;
+    },
+  },
+  {
     id: 'chodnik-na-vozovke', popis: 'Zvýšený chodník s obrubníkom zasahuje do vozovky cesty viac ako 0,5 m (vjazdy do dvorov sa nerátajú, #136)',
     spusti(ctx) {
       const out = [];

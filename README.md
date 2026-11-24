@@ -189,6 +189,26 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Pravidlá ulice 3: pruhy, cyklopruhy, ostrovčeky a chodníky v zeleni (vetva `feature/pravidla-ulice-3`, #136)
+- **Ako to vyzerá v skutočnosti a ako to robí hra:** `napady/pravidla-ulice.md`.
+- **Čiary pruhov nejdú krížom:**
+  - pás cesty má plnú šírku už v prvom bode (oprava chyby: na začiatku každej cesty sa zúžil na ~40 % a čiary
+    išli šikmo cez stred);
+  - kde sa vozovky dvoch ciest prekrývajú (rozdvojenie, pripájací pruh), kreslí čiary len dôležitejšia cesta;
+  - súbežné jazdné pásy rozdelenej cesty sa neprekrývajú (`js/mapa/cesty/sirky-pasov.js`) – v meste 669 úsekov.
+- **Cyklopruhy idú rovno pri okraji asfaltu:** rovnaká oprava prvého bodu (predtým začínali v strede cesty
+  a krížili sa do „X“, napr. Mýtna pri NBS). Pruh sa zarovná k osi a šírke cesty, ako ju hra naozaj kreslí.
+- **Ostrovčeky a deliace pásy sú celé zelené s obrubníkom** (`js/mapa/cesty/ostrovceky.js`): malé plochy
+  obkolesené cestami bez budovy. Nie je v nich chodník okolitých ciest, len obrubník a tráva (aj tam, kde má OSM
+  betón).
+- **Chodníky v zeleni majú rovnú hranu:**
+  - osi chodníkov sa vyrovnajú ako cesty;
+  - dlažba má ostrú hranu bez svetlého a zeleného vlnitého lemu;
+  - trávnik siaha až po chodník (predtým sivé trojuholníky v parkoch);
+  - nízke betónové obrubníky (`js/mapa/cesty/obrubniky-chodnikov.js`).
+- **Kontroly:** nová kategória kontroly mapy `znacenie-cez-seba` (čiary dvoch ciest na sebe) a regresné kontroly
+  `pas-cesty-od-zaciatku`, `znacenie-prednost`, `ostrovceky-zelene` a `obrubniky-chodnikov`.
+
 ### Slovenský rozhlas – Pyramída verne (vetva `feature/pyramida`, #125)
 - **Prieskum** (Wikipédia, ASB, Archiweb, Register architektúry, STVR, archinfo, Commons, OSM; bez Google):
   `napady/pamiatky-podklady.md`. Poloha v hre je správna – stred ihlanu je x 464,3, z −1168,1.

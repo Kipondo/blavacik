@@ -12,6 +12,8 @@ import { vytvorCesty } from '../cesty/cesty.js';
 import { najdiKrizovatky } from '../cesty/krizovatky.js';
 import { vytvorPlochyKrizovatiek } from '../cesty/plochy-krizovatiek.js';
 import { vytvorChodniky } from '../cesty/chodniky.js';
+import { ostrovcekyDlazdice } from '../cesty/ostrovceky.js';
+import { vytvorObrubnikyChodnikov } from '../cesty/obrubniky-chodnikov.js';
 import { vytvorPrechody } from '../cesty/prechody.js';
 import { vytvorKolajnice } from '../cesty/kolajnice.js';
 import { krokyBudov } from '../budovy/budovy.js';
@@ -56,7 +58,10 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   yield;
   g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis, cesty));
   yield;
-  g.add(vytvorChodniky(cesty, krizovatky, vyskopis));
+  g.add(vytvorChodniky(cesty, krizovatky, vyskopis, ostrovcekyDlazdice(d)));
+  yield;
+  // obrubníky samostatných chodníkov v zeleni (parky, sídliská)
+  g.add(vytvorObrubnikyChodnikov(d, vyskopis));
   yield;
   g.add(vytvorPrechody(d.prvky?.prechody, cesty, vyskopis));
   g.add(vytvorKolajnice((d.kolajnice ?? []).filter((kl) => !kl.nadjazd), vyskopis));

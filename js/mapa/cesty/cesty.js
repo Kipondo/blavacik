@@ -9,6 +9,9 @@
 //   2) značenie: priehľadná vrstva s čiarami pruhov, krajnicami, stopami kolies a špinou pri obrubníku, len o kúsok
 //      vyššie (polygonOffset, nie metre). Pri križovatkách končí (ako chodníky), takže sa čiary rôznych ciest
 //      nekrížia. Cesty s rovnakým značením sa zlučujú do jednej siete (rýchlejšie vykresľovanie).
+//      Kde sa dve cesty prekrývajú mimo križovatky (rozdvojenie, pripájací pruh, súbežné pásy z OSM), platí
+//      značenie dôležitejšej cesty – menšia ho na jej vozovke nekreslí (prednostZnacenia), takže čiary nejdú
+//      krížom cez seba; v rozdvojení ostane len úzke „V“ ich okrajových čiar ako v skutočnosti.
 
 import * as THREE from 'three';
 import { texturaAsfaltuSvet, texturaZnacenia, DLZKA_V } from './textura-cesty.js';
@@ -17,6 +20,7 @@ import { ROH } from './krizovatky-tvar.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
 import { kluc } from './krizovatky.js';
 import { polohyPrechodov } from './prechody-poloha.js';
+import { mriezkaVozoviek } from './vozovky.js';
 
 const KROK = 2.5;         // delenie cesty na úseky (m), aby sedela na teréne (terén je po 2 m)
 export const NAD_TERENOM = 0.12;
@@ -65,6 +69,8 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null)
     zebry.get(p.c).push(p.s);
   }
 
+  const vozovky = mriezkaVozoviek(cesty);
+  const poradie = new Map(cesty.map((c, i) => [c, prednostZnacenia(c) - i * 1e-9]));
   for (const c of cesty) {
     const body = zjemni(c.body, KROK);
     if (body.length < 2) continue;
@@ -76,7 +82,8 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null)
     if (!skupiny.has(k)) skupiny.set(k, { pruhy, jednosmerka: !!c.jednosmerka, okraje, poz: [], uv: [], idx: [] });
     const s = skupiny.get(k);
     // značenie na tých istých bodoch ako asfalt (rovnaké trojuholníky → nikde nezapadne pod asfalt)
-    for (const [od, po] of rozsahyZnacenia(c.body, body, krizovatky, c.typ, zebry.get(c))) {
+    const rozsahy = bezPrekryvu(rozsahyZnacenia(c.body, body, krizovatky, c.typ, zebry.get(c)), body, c, vozovky, poradie);
+    for (const [od, po] of rozsahy) {
       pridajPas(s, body, c.sirka / 2, NAD_TERENOM, vyskopis, { od, po });
     }
   }
@@ -133,6 +140,46 @@ export function rozsahyZnacenia(body, jemne, krizovatky, typ = '', zebry = null)
       const po = vReze ? i - 1 : i;
       if (po > od) out.push([od, po]);
       od = -1;
+    }
+  }
+  return out;
+}
+
+// poradie dôležitosti ciest pre značenie (vyššie = jeho čiary platia, keď sa vozovky prekrývajú)
+const DOLEZITOST = {
+  motorway: 10, trunk: 9, primary: 8, secondary: 7, tertiary: 6, motorway_link: 5.6, trunk_link: 5.4,
+  primary_link: 5.2, secondary_link: 5, tertiary_link: 4.8, unclassified: 4, residential: 4,
+};
+/** Dôležitosť cesty pre značenie: trieda, potom šírka a počet pruhov. */
+export function prednostZnacenia(c) {
+  return (DOLEZITOST[c.typ] ?? 1) + Math.min(30, c.sirka ?? 0) * 0.01 + Math.min(9, c.pruhy ?? 0) * 0.001;
+}
+
+/**
+ * Z rozsahov značenia cesty `c` vyhodí rady (body zjemnenej osi `jemne`), ktorých stred leží na vozovke
+ * dôležitejšej cesty (vozovky = mriezkaVozoviek, poradie = Map cesta → dôležitosť). Rady hneď pri konci úseku
+ * inej cesty sa nerátajú (vozovky.vsetky – len kolmý priemet), takže pokračovanie cesty sa nepreruší.
+ */
+export function bezPrekryvu(rozsahy, jemne, c, vozovky, poradie) {
+  if (!vozovky || DROBNE.has(c.typ)) return rozsahy;
+  const moja = poradie.get(c) ?? 0;
+  const prekryty = (i) => {
+    for (const d of vozovky.vsetky(jemne[i][0], jemne[i][1], 0.3)) {
+      if (d !== c && !DROBNE.has(d.typ) && (poradie.get(d) ?? 0) > moja) return true;
+    }
+    return false;
+  };
+  const out = [];
+  for (const [od, po] of rozsahy) {
+    let a = -1;
+    for (let i = od; i <= po; i++) {
+      const ok = !prekryty(i);
+      if (ok && a < 0) a = i;
+      if ((!ok || i === po) && a >= 0) {
+        const b = ok ? i : i - 1;
+        if (b > a) out.push([a, b]);
+        a = -1;
+      }
     }
   }
   return out;
@@ -201,8 +248,12 @@ export function pridajPas(s, body, pol, posun, vyskopis, { svet = false, dlzkaV 
     // smery úsekov pred a za bodom
     let ax = x - prev[0], az = z - prev[1], bx = next[0] - x, bz = next[1] - z;
     const la = Math.hypot(ax, az), lb = Math.hypot(bx, bz);
-    if (la < 1e-6) { ax = bx; az = bz; } else { ax /= la; az /= la; }
-    if (lb < 1e-6) { bx = ax; bz = az; } else { bx /= lb; bz /= lb; }
+    // najprv jednotkové smery, až potom náhrada chýbajúceho (v prvom bode sa predtým dosadil nenormovaný smer
+    // a pás sa na začiatku každej cesty zúžil – šikmé čiary a cyklopruhy krížom cez cestu)
+    if (la >= 1e-6) { ax /= la; az /= la; }
+    if (lb >= 1e-6) { bx /= lb; bz /= lb; }
+    if (la < 1e-6) { ax = bx; az = bz; }
+    if (lb < 1e-6) { bx = ax; bz = az; }
     if (la < 1e-6 && lb < 1e-6) { ax = bx = 1; az = bz = 0; }
     if (i > 0) v += Math.hypot(x - body[i - 1][0], z - body[i - 1][1]) / dlzkaV;
     const pridat = i >= od;

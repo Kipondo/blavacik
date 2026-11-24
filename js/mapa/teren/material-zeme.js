@@ -89,11 +89,18 @@ ${KAMEN_GLSL}`)
         vec3 tr2 = texture2D(triedy, vMapUv).rgb;
         float trieda = tr2.r;
         // triedy: 64 tráva, 128 chodník, 160 betónové dlaždice, 192 kamenné dosky, 255 kocky (textura-zeme.js)
-        float wK = smoothstep(0.86, 0.95, trieda);
-        float wD = smoothstep(0.7, 0.74, trieda) * (1.0 - wK);
-        float wB = smoothstep(0.58, 0.61, trieda) * (1.0 - wK - wD);
-        float wC = smoothstep(0.38, 0.46, trieda) * (1.0 - wK - wD - wB);
-        float wT = smoothstep(0.12, 0.2, trieda) * (1.0 - smoothstep(0.3, 0.38, trieda));
+        // Hranica tried je v strede medzi ich hodnotami a váhy sa dopĺňajú – medzi chodníkom a trávou nie je medzera,
+        // cez ktorú presvitala farba podkladu (svetlý lem okolo chodníkov), a hrana je ostrá (#136).
+        float hT = smoothstep(0.115, 0.135, trieda), hC = smoothstep(0.365, 0.385, trieda);
+        float hB = smoothstep(0.555, 0.575, trieda), hD = smoothstep(0.68, 0.70, trieda), hK = smoothstep(0.865, 0.885, trieda);
+        // rozhranie chodníka a nezaradenej plochy (0 → 128) prechádza cez hodnotu trávy (64) – to nie je tráva:
+        // susedné texely sú pod trávou aj nad ňou (predtým zelená vlnovka okolo chodníkov na betóne a hline)
+        vec2 tex = 1.0 / vec2(textureSize(triedy, 0));
+        float s1 = texture2D(triedy, vMapUv + vec2(tex.x, 0.0)).r, s2 = texture2D(triedy, vMapUv - vec2(tex.x, 0.0)).r;
+        float s3 = texture2D(triedy, vMapUv + vec2(0.0, tex.y)).r, s4 = texture2D(triedy, vMapUv - vec2(0.0, tex.y)).r;
+        float lem = (1.0 - smoothstep(0.06, 0.1, min(min(s1, s2), min(s3, s4)))) * smoothstep(0.34, 0.4, max(max(s1, s2), max(s3, s4)));
+        float wK = hK, wD = hD - hK, wB = hB - hD, wC = hC - hB;
+        float wT = (hT - hC) * (1.0 - lem);
         // jemná nerovnomernosť (špina, opotrebenie) z veľkého detailu
         float spina = texture2D(detailMapa, vSvet * 0.04).r * 2.0;
         vec3 kocky = texture2D(kockyF, vSvet / 2.4).rgb * mix(1.05, 1.35, spina * 0.5);
@@ -162,6 +169,6 @@ ${KAMEN_GLSL}`)
         mapN.xy *= 1.0 - wS;
         normal = normalize( tbn * mapN );`);
   };
-  mat.customProgramCacheKey = () => 'zem-dlazba-5';
+  mat.customProgramCacheKey = () => 'zem-dlazba-6';
   return mat;
 }
