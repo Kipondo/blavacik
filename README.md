@@ -189,6 +189,22 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Slovenský rozhlas – Pyramída verne (vetva `feature/pyramida`, #125)
+- **Prieskum** (Wikipédia, ASB, Archiweb, Register architektúry, STVR, archinfo, Commons, OSM; bez Google):
+  `napady/pamiatky-podklady.md`. Poloha v hre je správna – stred ihlanu je x 464,3, z −1168,1.
+- **Predtým:** schodovitá kopa krabíc z vrstiev OSM po podlažiach.
+- **Teraz** (`tools/blender/vyskove/rozhlas.py`):
+  - **ihlan:** obrátený, so súvislými šikmými stenami (~47°). Za stenami je 6 podlaží, každé o ~3,1 m širšie,
+    horná hrana má 74,6 m;
+  - **fasáda:** hnedá oceľová mriežka z kosoštvorcov (12 polí, jeden kosoštvorec na 2 podlažia), za ňou čelá dosiek,
+    tmavé pásy okien a svetlé podhľady;
+  - **podopretie:** ihlan stojí na 8 krížových stĺpoch s rozvetvenými hlavicami okolo tehlového bloku a betónového jadra;
+  - **strecha:** presklená a rebrovaná atika, veža do 67,5 m so vzperami a mriežkový stožiar do 82,6 m;
+  - **nápis** „SLOVENSKÝ ROZHLAS“ (verejná inštitúcia) na SZ a JV hrane;
+  - **podnož** z červenej tehly a bieleho betónu (obrysy OSM), koncertné štúdio 16,8 m a vstup s bielou strieškou na
+    stĺpoch.
+- **Regresná kontrola** `pyramida-tvar`. **Bod trasy** `pyramida` – z miesta, kde stál majiteľ.
+
 ### Nivy a Nivy Tower podľa skutočnosti (vetva `feature/nivy`, #132)
 - **Prieskum** (OSM, laser, Commons z rokov 2021–2022 vrátane leteckej fotky z dronu, tlačové správy, architekti; bez
   Google): `napady/pamiatky-podklady.md`. Platí postavený stav, nie vizualizácie z rokov 2017–2019.

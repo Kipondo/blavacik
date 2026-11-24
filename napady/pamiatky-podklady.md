@@ -834,3 +834,76 @@ Zdroje:
 - Saint-Gobain *Glass for Façade 2019*, s. 34–35;
 - Commons – séria z otvorenia 30. 9. 2021 (CC BY 2.0, ŽupaBA) a `Nivy Centrum in Bratislava.jpg` (2022);
 - OSM ways 829898609, 662313148, 1579717717, 1058302220, 989250478, 829898611, relation 22058963.
+
+## Slovenský rozhlas – Pyramída (#125; 24. 11. 2026)
+
+**Stavba:** Štefan Svetko, Štefan Ďurkovič, Barnabáš Kisling (a M. Skočková-Pisončíková); 1967–1983, vysielanie od 1985.
+Národná kultúrna pamiatka od 6. 12. 2017. Oceľovú konštrukciu (350 t) dodali Vítkovice v roku 1976, v roku 2022 dostala
+nový náter.
+
+**Poloha:** stred ihlanu je x 464,3, z −1168,1. Súhlasia s ním vrstvy OSM, jadro aj stožiar (uzol 700362876,
+`height=82.64`). Záznam v hre (466,85, −1176,21) je ťažisko celého areálu (way 5215475), od stredu ihlanu ho delí len
+8,5 m, takže je správne. Miesto, kde stál majiteľ (472, −1070), je križovatka Mýtnej s Námestím slobody 98 m južne,
+~38 m pred hlavným vstupom – odtiaľ vidno ihlan nárožím.
+
+**Natočenie:** strany na azimutoch 33,5° a 123,5°. JV stena hľadí na Mýtnu a nesie nápis, JZ stena na Námestie slobody.
+
+**Ihlan:**
+- **Podlažia:** 6 kancelárskych podlaží po ~3,45 m. Každá doska presahuje nižšiu o ~3,1–3,3 m na stranu
+  („každé poschodie sa rozširuje o 3,3 m“).
+- **Šikmá stena:** nárožia aj mriežka ležia v jednej šikmej rovine (~46–48°), takže zvonku je stena súvislá, nie schody.
+- **Rozmery a výšky:**
+  - horná hrana: štvorec 74,6 m;
+  - spodná doska: ~35–37 m;
+  - spodok ihlanu: ~16 m nad zemou;
+  - horná hrana: ~38,5 m.
+- **Mriežka:** na každej stene dve sady oceľových prútov rovnobežných s bočnými hranami. Tvoria kosoštvorce –
+  12 polí po ~6,2 m na hornej hrane, jeden kosoštvorec na 1 pole × 2 podlažia, nárožné prúty dvojité. Mriežka pokračuje
+  o podlažie nižšie k hlaviciam stĺpov.
+- **Pásy podlaží:** hnedé čelo dosky (~1,1 m), tmavý pás okien (~1,7 m) a svetlosivý rebrovaný podhľad dosky nad ním.
+- **Farba ocele:** po nátere 2022 tmavá čokoládovo hnedá (~#4a332e), predtým zvetraná hrdzavohnedá (~#74403a).
+  Je to natieraná oceľ, nie corten.
+- **Podopretie:** „tmavé jadro“ z opisu sú v skutočnosti 8 hnedých krížových oceľových stĺpov (rohy a stredy strán
+  štvorca ~31 m, hlavice ~12,6 m) s rozvetvenými vzperami. Vnútri je tehlový blok okolo betónového jadra 13 m,
+  v tieni pôsobí tmavo.
+- **Strecha:**
+  - presklená atika s hnedými stĺpikmi (~54 m, do ~45 m);
+  - tmavohnedá rebrovaná atika (~40 m, do ~49,5 m);
+  - veža (~13,5 m, do 67,5 m) so šikmými vzperami;
+  - mriežkový stožiar do 82,6 m (uvádza sa „80 m“).
+- **Nápis „SLOVENSKÝ ROZHLAS“:** len na hornej hrane SZ a JV steny (na JZ nie je). Je centrovaný, dlhý ~36 m,
+  písmená ~2 m, červenooranžové so svetlou tvárou, na tenkom ráme nad hranou.
+
+**Podnož** (OSM časti s výškami 4,2 – 16,8 m):
+- **Materiály:** červenohnedá klinkerová tehla, biely debnený pohľadový betón, niekoľko lososových omietnutých plôch.
+  Strechy sú pochôdzne terasy.
+- **Vstup v južnom rohu:** jednopodlažné krídlo s bielou betónovou strieškou (OSM 616786276, ~18,5 × 6,5 m) na 4–5
+  stĺpoch, presklené prízemie a vedľa široké schodisko s 27 stupňami na terasu.
+- **Koncertné štúdio:** SV blok k Belopotockého, 16,8 m, takmer bez okien, tehla; sála 12 000 m³ s 522 miestami
+  a organom so 6 373 píšťalami.
+- **Ostatné krídla:** okolo štúdia a na JZ 12,6 m, na SZ 8,4 m, pri Mýtnej 4,2 m s bielym betónovým múrom.
+
+**Rozhodnutia pre model** (`tools/blender/vyskove/rozhlas.py`):
+- Ihlan je postavený z výšok a strán dosiek podľa prieskumu, natočený podľa hornej vrstvy OSM.
+- Podnož je z obrysov OSM (`tools/blender/data/obrysy.json`).
+- Nápis je na SZ a JV hrane. Ide o verejnú inštitúciu, rovnako ako nápis UNIVERZITA KOMENSKÉHO.
+- Nápis na strieške vstupu (názov inštitúcie po premenovaní na STVR) sa nedáva.
+- Prieskum predpokladá rozdiel medzi OSM a fotkami v rozmeroch atík. Použité sú hodnoty z fotiek.
+
+**Neisté – vlastné fotky by pomohli:**
+1. JV stena kolmo spoza Mýtnej (~x 533, z −1123);
+2. strecha zhora zo západu alebo severozápadu (z vyššieho miesta);
+3. stĺpy a tehlový blok z terasy pod ihlanom.
+
+Zdroje:
+- [sk-Wikipédia](https://sk.wikipedia.org/wiki/Budova_Slovensk%C3%A9ho_rozhlasu)
+- [en-Wikipedia](https://en.wikipedia.org/wiki/Slovak_Radio_Building)
+- [ASB](https://www.asb.sk/architektura/budova-slovenskeho-rozhlasu)
+- [Archiweb](https://www.archiweb.cz/en/b/slovensky-rozhlas)
+- [Register architektúry](https://register-architektury.sk/en/objekt/165-slovensky-rozhlas)
+- [Structurae](https://structurae.net/fr/ouvrages/slovensky-rozhlas)
+- [STVR – 40 rokov](https://www.stvr.sk/novinky/tipy-z-programu/397071/pyramida-slovenskeho-rozhlasu-oslavuje-40-rokov-preco-je-to-vlastne-pyramida)
+- [zmudrig.sk](https://zmudrig.sk/preco-vyzera-budova-slovenskeho-rozhlasu-ako-obratena-pyramida/)
+- [archinfo.sk – obnova ocele 2022](https://www.archinfo.sk/diskusia/blog/pamiatky-historia/obnova-ocelovej-konstrukcie-budovy-slovenskeho-rozhlasu-v-bratislave-bola-oficialne-ukoncena.html)
+- [Commons – kategória](https://commons.wikimedia.org/wiki/Category:Slovak_Radio_Building)
+- OSM: ways 5215475, 277448084, 372316287–92, 616786276, uzly 700362876 a 3730845224.
