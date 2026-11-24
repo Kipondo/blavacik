@@ -611,6 +611,85 @@ V hre: ide o dielo žijúceho autora, preto je v hre **vlastné zjednodušené s
 - správca budov: [Riverside](https://d-fs.sk/?p=1914), [P40](https://d-fs.sk/?p=1946);
 - Commons: [Pribinova 34 (2023)](https://commons.wikimedia.org/wiki/File:Pribinova_34_office_building_in_Bratislava.jpg), [päta veže a hala (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_Bratislava.jpg), [P40 a veža (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_8.jpg), [nábrežie z Petržalky (2023)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_vo_v%C3%BDstavbe_2.jpg), [Riverside z lode (2022)](https://commons.wikimedia.org/wiki/File:Eurovea_Tower_20072022.jpg), [z Dunaja (2023)](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_3.jpg), [interiér haly (2025)](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea.jpg), [stavenisko (2020)](https://commons.wikimedia.org/wiki/File:Eurovea_2_stavenisko.jpg).
 
+## Eurovea – nábrežie (#131, časť 3; 24. 11. 2026)
+
+Prieskum: OSM (Overpass), výšky z laserového terénu hry (`data/mapa/mesto/t/*.bin`), fotky na Commons (len prezreté, nič
+skopírované), Michel Desvigne (krajinná architektúra), stratégia rozvoja prístavu (2020). Google nie.
+
+**Tri rozdielne úseky:**
+- A – park Eurovea 1 (lon 17.1175–17.123),
+- B – Štefánikovo námestie a Sklad č. 7 (17.123–17.125),
+- C – Eurovea 2 (17.125–17.1288).
+
+**Priečny rez úsekom A** (zhodný na štyroch miestach; vzdialenosti od brehovej čiary OSM):
+- fasáda ~60 m od brehu;
+- kryté kaviarenské terasy 8–14 m hlboké (48–57 m);
+- horná promenáda ~9 m voľnej šírky, 139,6 m n. m. (hra +0,6);
+- svah trávnika 22–25 m, klesá ~3 m;
+- dolný chodník 14–15 m od brehu, šírka ~3,5–4 m, 136,7 m (hra −2,3);
+- trávnatý breh 8–10 m s vysokými okrasnými trávami na hornej hrane;
+- betónová nábrežná hrana s oceľovými uväzovacími stĺpikmi ~2–2,5 m, ~133,8 m;
+- nízky kamenný múrik pri vode (~1–1,5 m) s kamenným záhozom, voda pri skenovaní ~132,5 m (hra −6,5).
+
+Ďalšie fakty z prieskumu:
+- Obe schodiská s 23 stupňami (OSM 59965071, 765260830) vedú z dolného chodníka **dolu k nábrežnej hrane**, nie z promenády.
+- Línia mobilnej protipovodňovej steny (OSM `barrier=coupure`) ide po okraji trávnika pri promenáde. Pri povodni
+  18. 9. 2024 boli dolný chodník a väčšina trávnika pod vodou.
+- Úsek B: od pomníka (~139,7 m) zostupuje široká sedacia terasa k dolnému nábrežiu (~136,7 m) so zábradlím zo zvislých
+  pozinkovaných tyčí a uväzovacím stĺpikom. Sklad č. 7 (1922, NKP) stojí priamo na nábreží.
+- Úsek C: park ~139,2 m s vyvýšenou trávnatou kopou (~141,4 m) so sochou gúľ, pod ním oplotený prístavný pás ~136,2 m
+  s obslužnou cestou a koľajami.
+
+**Mólá (Inessa Hansch)** – tri, kolmo na breh, smer ~189°, v OSM lávky (`bridge=yes`, `surface=wood`):
+
+| mólo | OSM | dĺžka | koniec pri vode |
+|---|---|---|---|
+| západné | 59965066 | 37,0 m | nad svahom brehu (133,6 m) |
+| stredné | 59965065 | 38,0 m | pri hladine (132,5 m) |
+| východné (pri Štefánikovom nám.) | 762656646 | 39,5 m | pri hladine (132,4 m) |
+
+- Na brehu má každé schody s 5 stupňami, betón s madlom (OSM 1002420936/35/34, `incline=down` od móla k promenáde) –
+  mostovka je teda ~0,8 m nad promenádou (istota nízka).
+- Mostovka je vodorovná „nad stromami“ (Desvigne). Nad dolným chodníkom ide ~3–4 m vysoko, na konci je 6–7 m nad zemou.
+- Z fotiek: rovný oceľový nosník so sivou plochou rímsou (~0,5 m), štíhle okrúhle oceľové stĺpy (niektoré v dvojiciach
+  do V), paluba zo sivých zvetraných dosiek, zábradlie ~1,1 m s oceľovými stĺpikmi, okrúhlym madlom a hustými zvislými
+  tyčami (pozinkované / nerez). Šírka ~3–4 m (odhad z fotiek s ľuďmi, istota nízka).
+
+**Pristávacie pontóny:**
+- Pri Starom moste: pontón 74 × 6,6 m (OSM 1134986880) s 26 m kovovou lávkou (OSM 1134986879), stred 48.139415, 17.118178.
+  Na fotke z 2024 je čierny oceľový trup, krémová nadstavba a značka kotviska „15“ (číslo do hry nedávam – bez nápisov).
+- Pred Skladom č. 7: menší biely pontón 34 × 6,6 m (OSM 589811215) s lávkou 19,8 m (OSM 589811214).
+- Verejné prístavisko Eurovea je len v pláne (stratégia prístavu 2020). Plávajúca reštaurácia sa v 2018 odtrhla a už tam nie je.
+
+**„Koľajnica pri vode“:**
+- Skutočné prístavné koľaje (rozchod 1435) začínajú zarážadlom pri päte Štefánikových schodov (48.139293, 17.123930),
+  idú popred Sklad č. 7 a ďalej na východ do Zimného prístavu. V hre už sú (koľajnice z OSM).
+- Zábradlie pri vode je na dolnom nábreží pri Štefánikovom námestí a pozdĺž Skladu 7 / Eurovea 2. V parku Eurovea 1 zábradlie
+  pri vode nie je (otvorený breh, betónová hrana so stĺpikmi).
+- Historický žeriav v tomto úseku nie je (najbližší portálový je za Mostom Apollo v Zimnom prístave).
+
+**Rozhodnutia pre model (časť 3):**
+- Mólá sú vodorovné vo výške brehu + 0,8 m, na brehu 5 schodov, na konci voľne nad vodou. Majú drevenú palubu, svetlý oceľový
+  nosník, dvojice štíhlych oceľových stĺpov a zábradlie s hustými zvislými tyčami (`data/mapa/mola.json`, `js/mapa/mosty/mola.js`).
+  Predtým hra postavila lávky z OSM ako mostovku od terénu na brehu k terénu pri vode, teda 6–7 m dolu svahom.
+- Pontóny: jednoduchý oceľový trup na hladine, nadstavba a lávka na breh, bez nápisov.
+
+**Neisté – vlastné fotky by pomohli:**
+- bočný pohľad na stredné mólo z dolného chodníka (≈ 48.13951, 17.12172) s človekom pod ním a fotka schodov na začiatku móla
+  (idú hore či dolu?) – výška a šírka paluby;
+- pohľad pozdĺž móla z trávnika – počet stĺpov a dvojice do V;
+- koľaje pred Skladom č. 7 od zarážadla na východ – vidno ich v dlažbe?;
+- nábrežná hrana pri päte schodov s 23 stupňami (≈ 48.13950, 17.12003) pozdĺž vody – šírka, rozostup stĺpikov, výška múrika;
+- pontón „15“ pri Starom moste z dolného chodníka zboku.
+
+Zdroje: OSM (ways 59965066, 59965065, 762656646, 1002420934–36, 59965071, 765260830, 1134986880, 589811215, 1320739280,
+53182418, 636897617, 291626956); [Michel Desvigne – Eurovea](https://micheldesvigne.com/); Commons:
+[Grass_riverbank_near_Eurovea_01](https://commons.wikimedia.org/wiki/File:Grass_riverbank_near_Eurovea_01.jpg),
+[Eurovea_shopping_mall_at_Danube_river](https://commons.wikimedia.org/wiki/File:Eurovea_shopping_mall_at_Danube_river.jpg),
+[Bratislava_z_Dunaja_2](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_2.jpg),
+[Bratislava_-_Rozvodnený_Dunaj_-_18._9._2024_05](https://commons.wikimedia.org/wiki/File:Bratislava_-_Rozvodnen%C3%BD_Dunaj_-_18._9._2024_05.jpg),
+[Bratislava_from_Danube_2020_59](https://commons.wikimedia.org/wiki/File:Bratislava_from_Danube_2020_59.jpg).
+
 ## Pomník M. R. Štefánika pri Eurovei (#131, časť 4; 24. 11. 2026)
 
 **Dielo a história:**
