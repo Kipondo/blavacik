@@ -15,6 +15,7 @@ import { kontrolyMostov } from './mosty.js';
 import { kontrolyGrafiky } from './grafika.js';
 import { kontrolyPamiatok } from './pamiatky.js';
 import { kontrolyBudov } from './budovy.js';
+import { kontrolyVykonu } from './vykon.js';
 import { vytvorHorizont } from '../../../js/mapa/teren/horizont.js';
 
 /** Stromy dlaždice presne tak, ako ich stavia hra (js/mapa/dlazdice/postav-dlazdicu.js → stromy-dlazdice.js). */
@@ -140,7 +141,8 @@ export const KONTROLY = [
           if (!maska || !maska.some((v) => v === 255)) chyby.push({ text: 'maska dlaždíc sa po nastavDetail nezmenila' });
           if (sh.fragmentShader.includes('distance(vSvet')) chyby.push({ text: 'horizont sa znova vyrezáva kruhom okolo hráča' });
         }
-        h.geometry.dispose();
+        // horizont je po kúskoch (#110) – uvoľniť geometrie všetkých kúskov
+        h.traverse((o) => o.geometry?.dispose());
       } catch (e) {
         chyby.push({ text: `chyba kontroly: ${e.message}` });
       }
@@ -154,4 +156,5 @@ export const KONTROLY = [
   ...kontrolyGrafiky,
   ...kontrolyPamiatok,
   ...kontrolyBudov,
+  ...kontrolyVykonu,
 ];

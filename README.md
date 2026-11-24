@@ -189,6 +189,30 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Výkon 2: úrovne detailu zeme, stromov a striech, zlúčené pamiatky (vetva `feature/vykon-2`, #110)
+- **Zem podrobných dlaždíc** má tri úrovne detailu nad tými istými vrcholmi: sieť 2 m do 220 m od hráča, 4 m do 520 m
+  a ďalej 10 m (`js/mapa/teren/zem-dlazdica.js`, prepína `js/mapa/dlazdice/lod-zeme.js`). Škáry na hranách prekryje sukňa.
+- **Drobnosti zďaleka:**
+  - obrubníky chodníkov a hroby sa kreslia do 220 m, vikiere a komíny do 300 m;
+  - komíny nevrhajú tieň.
+- **Stromy:**
+  - podrobný model do 100 m (predtým 125 m);
+  - vzdialené koruny majú 100 trojuholníkov namiesto 400 – v skupine pri hráčovi len stromy ďalej ako 160 m.
+- **Horizont** je po kúskoch (8 × 8), kreslia sa len tie v zábere.
+- **Statické pamiatky z kódu a prístrešky zastávok** majú jednu sieť na materiál (`js/mapa/zluc-siete.js`): pontóny,
+  pomník Štefánika a ďalšie mali desiatky sietí.
+- **Meranie** (`tools/kontrola/meranie-trasy.py`, kvalita „vysoká“, SwiftShader):
+
+  | miesto | trojuholníky pred → po | volania pred → po |
+  |---|---|---|
+  | Hlavné nám. | 3,91 → 3,32 mil. | 826 → 820 |
+  | Šafárikovo nám. | 4,16 → 3,15 mil. | 837 → 792 |
+  | Karlova Ves | 3,52 → 2,28 mil. | 503 → 491 |
+
+  Volania kreslenia sa menia aj s počtom áut a chodcov v zábere. Cieľ #110 (pod 2 mil. a 600 volaní) ešte nie je
+  splnený – zostáva LOD pamiatok z Blendera, tieň budov a viac volaní z dopravných značiek a zastávok.
+- **Regresné kontroly** `urovne-detailu-zeme` a `zlucene-siete-pamiatok` (`tools/kontrola/regresie/vykon.js`).
+
 ### Dunajská 4–8: vyložené podlažia a arkiere (vetva `fix/dunajska-arkiere`, #64)
 - **Prieskum** (kataster, ortofoto, laser, Commons, dohoda mesta o chodníku; bez Google): `napady/pamiatky-podklady.md`.
 - **Dunajská 6–8:** prízemie a 1. p. sú na uličnej čiare, horné podlažia sú vyložené o 2,5 m nad chodník (dá sa

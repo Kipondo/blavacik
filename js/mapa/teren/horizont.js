@@ -8,26 +8,40 @@ import * as THREE from 'three';
 export function vytvorHorizont(vyskopis, KONFIG, velkostDlazdice = 500) {
   const H = KONFIG.HRANICE;
   const KROK = 100;
+  const KUSY = 8;
   const okraj = 6000; // presah za hranice mesta, nech nie je vidieť koniec sveta
   const minX = H.minX - okraj, maxX = H.maxX + okraj, minZ = H.minZ - okraj, maxZ = H.maxZ + okraj;
-  const geo = new THREE.PlaneGeometry(maxX - minX, maxZ - minZ, Math.round((maxX - minX) / KROK), Math.round((maxZ - minZ) / KROK));
-  geo.rotateX(-Math.PI / 2);
-  geo.translate((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
-  const poz = geo.attributes.position;
-  const farby = new Float32Array(poz.count * 3);
+  // terén po kúskoch (KUSY × KUSY), aby sa kreslili len tie v zábere (#110: celý horizont bol ~320 tis.
+  // trojuholníkov v každom snímku, aj za chrbtom hráča)
+  const NX = Math.round((maxX - minX) / KROK), NZ = Math.round((maxZ - minZ) / KROK);
   const mesto = new THREE.Color('#8e8b82'), trava = new THREE.Color('#6f8f4f'), les = new THREE.Color('#40632f');
   const f = new THREE.Color();
-  for (let i = 0; i < poz.count; i++) {
-    const x = poz.getX(i), z = poz.getZ(i);
-    const vnutri = x > H.minX && x < H.maxX && z > H.minZ && z < H.maxZ;
-    const h = vnutri ? vyskopis.vyskaTerenu(x, z) : vyskopis.vyskaTerenu(Math.max(H.minX, Math.min(H.maxX, x)), Math.max(H.minZ, Math.min(H.maxZ, z)));
-    poz.setY(i, h - 1.5);
-    f.copy(h > 60 ? les : h > 15 ? trava : mesto);
-    if (!vnutri) f.copy(h > 60 ? les : trava);
-    farby[i * 3] = f.r; farby[i * 3 + 1] = f.g; farby[i * 3 + 2] = f.b;
+  const geometrie = [];
+  for (let a = 0; a < KUSY; a++) {
+    for (let b = 0; b < KUSY; b++) {
+      const ia = Math.round((NX * a) / KUSY), ib = Math.round((NX * (a + 1)) / KUSY);
+      const ja = Math.round((NZ * b) / KUSY), jb = Math.round((NZ * (b + 1)) / KUSY);
+      if (ib <= ia || jb <= ja) continue;
+      const x0 = minX + ia * KROK, x1 = minX + ib * KROK, z0 = minZ + ja * KROK, z1 = minZ + jb * KROK;
+      const geo = new THREE.PlaneGeometry(x1 - x0, z1 - z0, ib - ia, jb - ja);
+      geo.rotateX(-Math.PI / 2);
+      geo.translate((x0 + x1) / 2, 0, (z0 + z1) / 2);
+      const poz = geo.attributes.position;
+      const farby = new Float32Array(poz.count * 3);
+      for (let i = 0; i < poz.count; i++) {
+        const x = poz.getX(i), z = poz.getZ(i);
+        const vnutri = x > H.minX && x < H.maxX && z > H.minZ && z < H.maxZ;
+        const h = vnutri ? vyskopis.vyskaTerenu(x, z) : vyskopis.vyskaTerenu(Math.max(H.minX, Math.min(H.maxX, x)), Math.max(H.minZ, Math.min(H.maxZ, z)));
+        poz.setY(i, h - 1.5);
+        f.copy(h > 60 ? les : h > 15 ? trava : mesto);
+        if (!vnutri) f.copy(h > 60 ? les : trava);
+        farby[i * 3] = f.r; farby[i * 3 + 1] = f.g; farby[i * 3 + 2] = f.b;
+      }
+      geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
+      geo.computeVertexNormals();
+      geometrie.push(geo);
+    }
   }
-  geo.setAttribute('color', new THREE.BufferAttribute(farby, 3));
-  geo.computeVertexNormals();
 
   // maska dlaždíc (1 texel = 1 dlaždica): 255 = podrobná dlaždica so zemou stojí → horizont sa tam nekreslí
   const D = velkostDlazdice;
@@ -55,9 +69,15 @@ export function vytvorHorizont(vyskopis, KONFIG, velkostDlazdice = 500) {
   if (dl.x >= 0.0 && dl.y >= 0.0 && dl.x < maskaRozmer.z && dl.y < maskaRozmer.w
       && texture2D(maskaDetailu, (dl + 0.5) / maskaRozmer.zw).r > 0.5) discard;`);
   };
-  const mesh = new THREE.Mesh(geo, mat);
+  const mesh = new THREE.Group();
   mesh.name = 'horizont';
-  mesh.receiveShadow = false;
+  mesh.material = mat;            // spoločný materiál kúskov (kontroly čítajú shader masky)
+  for (const geo of geometrie) {
+    const kus = new THREE.Mesh(geo, mat);
+    kus.name = 'horizont';
+    kus.receiveShadow = false;
+    mesh.add(kus);
+  }
   /** Podrobná dlaždica (kľúč „i_j“) so zemou stojí (true) alebo bola uvoľnená (false). */
   mesh.userData.nastavDetail = (kluc, stoji) => {
     const [i, j] = kluc.split('_').map(Number);

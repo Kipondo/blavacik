@@ -10,6 +10,10 @@ import { materialZeme } from './material-zeme.js';
 const KROK = 5, KROK_DETAIL = 2;
 const RIADKOV_NA_KROK = 30;   // koľko riadkov siete sa spočíta naraz (potom sa vráti riadenie hre)
 const SUKNA = 2;              // m – o koľko nižšie ide „sukňa“ na okraji dlaždice
+// hrubšie úrovne detailu nad tými istými vrcholmi (každý 2. a 5. uzol) pre vzdialené dlaždice (#110):
+// v detailnej dlaždici 4 m a 10 m namiesto 2 m; prepína ich js/mapa/dlazdice/lod-zeme.js, škáry na hranách
+// dlaždíc prekryje sukňa (tá ostáva v plnom rozlíšení)
+const KROKY_LOD = [2, 5];
 
 export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   return dokonci(krokyZemeDlazdice(d, rect, vyskopis, rieky));
@@ -82,6 +86,8 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
     }
   }
   o = pridajSukne(P, N, U, I, o, v, pocet);
+  const sukne = I.subarray(n * n * 6, o);
+  const lod = [new THREE.BufferAttribute(I, 1), ...KROKY_LOD.map((s) => new THREE.BufferAttribute(indexyHrubsie(n, v, s, sukne), 1))];
   yield;
 
   const geo = new THREE.BufferGeometry();
@@ -89,7 +95,7 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
   geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
   geo.setAttribute('uv', new THREE.BufferAttribute(U, 2));
   geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vsetky * 3).fill(1), 3));
-  geo.setIndex(new THREE.BufferAttribute(I, 1));
+  geo.setIndex(lod[0]);
   geo.computeBoundingSphere();
   geo.computeBoundingBox();
 
@@ -97,7 +103,29 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
   mesh.receiveShadow = true;
   mesh.name = 'zem';
   mesh.userData.rect = rect;   // pre trávu zblízka (js/mapa/zelen/trava-modul.js číta mapu tried a pokrývky)
+  mesh.userData.lodIndexy = lod;
+  mesh.userData.lod = 0;
   return mesh;
+}
+
+/** Trojuholníky siete len cez každý s-tý uzol (posledný rad/stĺpec vždy na okraji) + sukňa v plnom rozlíšení. */
+function indexyHrubsie(n, v, s, sukne) {
+  const ciary = [];
+  for (let k = 0; k < n; k += s) ciary.push(k);
+  ciary.push(n);
+  const m = ciary.length - 1;
+  const I = new Uint32Array(m * m * 6 + sukne.length);
+  let o = 0;
+  for (let jj = 0; jj < m; jj++) {
+    for (let ii = 0; ii < m; ii++) {
+      const a = ciary[jj] * v + ciary[ii], b = ciary[jj + 1] * v + ciary[ii];
+      const c = ciary[jj] * v + ciary[ii + 1], e = ciary[jj + 1] * v + ciary[ii + 1];
+      I[o++] = a; I[o++] = b; I[o++] = c;
+      I[o++] = c; I[o++] = b; I[o++] = e;
+    }
+  }
+  I.set(sukne, o);
+  return I;
 }
 
 /**

@@ -1,5 +1,6 @@
 // Správca zastávok: modely (prístrešok, označník, tabuľa odchodov) sa stavajú len v okolí hráča
 // a vzdialené sa uvoľnia. Tabule odchodov sa prekresľujú, keď je hráč blízko.
+import { uvolniZlucene } from '../../mapa/zluc-siete.js';
 import { umiestnenie } from './umiestnenie.js';
 import { vytvorPristresok, vytvorOznacnik, vytvorTabulu } from '../modely/pristresok.js';
 import { texturaOznacnika, kresliOdchody } from '../modely/textury.js';
@@ -66,6 +67,7 @@ export class SpravaZastavok {
     const a = this.aktivne.get(id);
     a.oznacnik.userData.uvolni?.();
     a.tabula?.userData.uvolni?.();
+    uvolniZlucene(a.objekt);
     this.skupina.remove(a.objekt);
     this.aktivne.delete(id);
   }

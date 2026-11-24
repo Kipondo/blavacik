@@ -2,6 +2,8 @@
 // Lokálne osi: +z smeruje k ceste (otvorená strana prístrešku), +x pozdĺž cesty.
 // Geometrie a materiály sú spoločné pre všetky zastávky (šetrí pamäť a čas).
 
+import { zlucPodlaMaterialu } from '../../mapa/zluc-siete.js';
+
 let spolocne = null;
 
 function pripravSpolocne(THREE) {
@@ -43,6 +45,7 @@ export function vytvorPristresok(THREE, dlzka = 4) {
   g.add(kvader(THREE, S, S.drevo, dlzka * 0.7, 0.05, 0.4, -0.2, 0.48, -hl / 2 + 0.3)); // sedák lavičky
   g.add(kvader(THREE, S, S.kov, dlzka * 0.7, 0.45, 0.06, -0.2, 0.24, -hl / 2 + 0.12)); // podstavec lavičky
   g.userData.miestaNaSedenie = [-1.2, -0.6, 0, 0.6].map((x) => new THREE.Vector3(x - 0.2, 0.5, -hl / 2 + 0.35));
+  zlucPodlaMaterialu(g);       // stĺpy, sklá a lavička – jedna sieť na materiál (#110)
   return g;
 }
 
