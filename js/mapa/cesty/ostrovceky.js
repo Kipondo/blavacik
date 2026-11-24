@@ -33,7 +33,8 @@ const BUNKA = 25;
 const TRIEDY_PASOV = new Set(['motorway', 'trunk', 'primary', 'secondary', 'tertiary']);
 
 /**
- * Deliace pásy rozdelených ciest: medzi jednosmerným pásom a protismerným pásom vľavo od neho (pravá premávka).
+ * Deliace pásy rozdelených ciest: medzi jednosmerným pásom a súbežným pásom vľavo od neho – protismerným (pravá
+ * premávka) alebo zberným v rovnakom smere.
  * Nájdu sa aj tam, kde plocha medzi cestami nie je uzavretá v dlaždici (dlhé triedy cez hranicu dlaždíc).
  * Vráti polygóny [{ body, plocha, cista, … }] od vnútorného okraja jedného pásu po vnútorný okraj druhého.
  */
@@ -91,7 +92,7 @@ export function deliacePasy(cesty, budovy = []) {
       for (const u of m.get(Math.floor(v.x / BUNKA) * 100003 + Math.floor(v.z / BUNKA)) ?? []) {
         if (u.c === c) continue;
         const dx = u.bx - u.ax, dz = u.bz - u.az, L = Math.hypot(dx, dz) || 1e-9;
-        if ((dx * v.sx + dz * v.sz) / L > -0.95) continue;          // len protismerný súbežný pás
+        if (Math.abs((dx * v.sx + dz * v.sz) / L) < 0.95) continue; // len súbežný pás (protismerný aj zberný)
         // priesečník ľavej normály s úsekom
         const den = nx * dz - nz * dx;
         if (Math.abs(den) < 1e-9) continue;
