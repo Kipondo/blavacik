@@ -212,13 +212,14 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   zástavy aj socha mince.
 - **Teraz** (`tools/blender/vyskove/nbs.py`):
   - **veža:** pôdorys „kvapka“ so strieborným pásom na každom podlaží. Spodný presklený pás má terasu a sklonenú
-    sklenenú zástenu. Plecia do ~77 m majú čelá z tmavých lamiel. Zaoblený východný roh je lamelový, vedľa neho je
-    presklená šachta výťahov. Navrchu heliport s oceľovou obručou a stožiar;
+    sklenenú zástenu. Plecia do ~70 m majú čelá z tmavých lamiel. Zaoblený východný roh je lamelový, vedľa neho je
+    presklená šachta výťahov. Navrchu zdvihnutý heliport s prstencom konzol a stožiar;
   - **podnož:** žula s úzkymi oknami, zaoblená stena a vysoký presklený vstup na rohu, ustúpené presklené podlažie,
     biele krídla a átrium;
-  - **strieška:** tenká doska s kazetovým podhľadom na štíhlych stĺpoch, nad rohom vystrkuje klin. Pod ňou sa dá prejsť;
-  - **pred budovou:** dva kamenné pylóny prechádzajú otvormi v strieške, visia na nich zástavy SR a EÚ. Bronzová minca
-    Biatec má jazdca na koni a nápis BIATEC.
+  - **strieška:** tenká doska s kazetovým podhľadom (kosoštvorce) na štíhlych stĺpoch, nad rohom vystrkuje klin.
+    Pod ňou sa dá prejsť;
+  - **pred budovou:** dva kamenné pylóny pod kruhovými otvormi v strieške, visia na nich zástavy SR a EÚ. Bronzová
+    minca Biatec má jazdca na koni a nápis BIATEC.
 - **Regresná kontrola** `nbs-strieska`. **Bod trasy** `nbs` – od Biatecu, kde stál majiteľ.
 
 ### Nivy a Nivy Tower podľa skutočnosti (vetva `feature/nivy`, #132)

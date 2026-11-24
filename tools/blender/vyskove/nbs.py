@@ -2,16 +2,16 @@
 # 33 nadzemných podlaží (6 tvorí podnož), 111,6 m. Prieskum (#126) – napady/pamiatky-podklady.md, časť NBS.
 # Výšky sú od terénu pri hlavnom vstupe (146,7 m n. m.; terén klesá k Slovanskej o ~1,7 m), laser ÚGKK:
 #   – veža: pôdorys „kvapka“ – oblúk na západ (R 21,8 m, ~120°), dve kolmé rovné steny po 23,5 m a zaoblený
-#     východný roh; dvojplášťová sklenená fasáda so strieborným pásom na každom podlaží, heliport ~111 m,
-#     nad posledným podlažím presklená atika, kruhová oceľová obruč s radiálnymi rebrami, stožiar na JZ,
+#     východný roh; dvojplášťová sklenená fasáda so strieborným pásom na každom podlaží, strecha ~111 m,
+#     nad posledným podlažím presklená atika, nad ňou doska heliportu s prstencom konzol so sieťou, stožiar na JZ,
 #   – zaoblený východný roh obložený tmavými lamelami po celej výške, pri ňom presklená šachta výťahov
 #     (prečnieva nad strechu),
 #   – spodný presklený pás okolo oblúka (OSM 411828059) po ~34,5 m s terasou a von sklonenou sklenenou zástenou,
-#   – dve „plecia“ pozdĺž rovných stien (OSM 411828062/065) po ~77 m; ich čelá (5 m) majú tmavé lamely od ~33 m,
-#   – podnož: pri vstupe 2 podlažia leštenej portugalskej žuly (#b8afa6) s úzkymi oknami, zaoblená stena
+#   – dve „plecia“ pozdĺž rovných stien (OSM 411828062/065) po ~70 m; ich čelá (5 m) majú tmavé lamely od ~33 m,
+#   – podnož: pri vstupe 2 podlažia leštenej portugalskej žuly (#c2bab0) s úzkymi oknami, zaoblená stena
 #     a vysoký presklený vstup na rohu Mýtnej a Imricha Karvaša, inde biely obklad; nad kameňom ustúpené
-#     presklené podlažie a doska „markízy“ (podhľad ~12 m, kazetový rošt), ktorá nad rohom vystrkuje klin
-#     (OSM 411828074) – nesú ju štíhle okrúhle stĺpy a dva kamenné pylóny so zástavami SR a EÚ, ktoré
+#     presklené podlažie a doska „markízy“ (podhľad ~12 m, kazetový rošt pod 45°), ktorá nad rohom vystrkuje klin
+#     (OSM 411828074) – nesú ju štíhle okrúhle stĺpy a dva kamenné pylóny so zástavami SR a EÚ, z ktorých tyče
 #     prechádzajú kruhovými otvormi v doske; vyššie krídla podnože 21,4 m, átrium so sklenou strechou,
 #   – pred vstupom bronzová minca Biatec (Ľudmila Cvengrošová, 1988; ~3,2 m) na bielom betónovom valci.
 # Obrysy z OSM (tools/blender/data/obrysy.json, kľúč „nbs“).
@@ -33,9 +33,10 @@ KAMEN = 8.4                    # vrch kamennej časti podnože
 DOSKA = (12.0, 12.8)           # podhľad a vrch dosky striešky (strecha 4-podlažnej podnože)
 VEZA = [12.8 + 3.386 * k for k in range(30)]   # dosky veže; VEZA[29] = heliport 111,0 m
 PAS_TERASA = 34.5              # terasa na spodnom presklenom páse
-PLECIA = VEZA[19]              # ~77,1 m
+PLECIA = VEZA[17]              # ~70,4 m (12 podlaží pod strechou veže; laser v dlaždici 77,8 m zachytil aj vežu)
 ATIKA = 112.2
-OBRUC = 112.8
+HELIPORT = 112.6               # doska heliportu (Ø ~20,5 m) nad atikou, okolo prstenec konzol so sieťou
+OBRUC = 113.4
 VYTAH = 113.6
 HORNE = (12.8, 17.1, 21.4)     # vyššie krídlo podnože (OSM 1278278320): 2 podlažia
 ATRIUM = 23.0
@@ -156,7 +157,8 @@ def plocha_von(G, mat, body, smer):
 
 def materialy():
     return {
-        'zula': material('nbs-zula', '#b8afa6', drsnost=0.45),
+        'zula': material('nbs-zula', '#c2bab0', drsnost=0.45),
+        'hlinik': material('nbs-hlinik', '#a9b0b6', drsnost=0.4, kov=0.5),
         'biela': material('nbs-obklad-biely', '#e2e1dc', drsnost=0.6),
         'okna': sklo('nbs-okna', '#4f5c62', drsnost=0.08, kov=0.7),
         'ram': material('detail-nbs-ram', '#3c3f42', drsnost=0.5, kov=0.5),
@@ -175,7 +177,6 @@ def materialy():
         'stlp': material('nbs-stlp', '#d6d5d0', drsnost=0.5),
         'strecha': material('nbs-strecha', '#8d8b86', drsnost=0.95),
         'ocel': material('nbs-ocel', '#9fa4a6', drsnost=0.4, kov=0.7),
-        'disk': svetlo('nbs-disk', '#f4f2ea', 0.6),
         'cervene': svetlo('svetlo-cervene', '#ff2a1a', 6.0),
         'bronz': material('nbs-bronz', '#5b5340', drsnost=0.5, kov=0.6),
         'bronz_l': material('nbs-bronz-lesk', '#9c8458', drsnost=0.35, kov=0.8),
@@ -221,7 +222,7 @@ def stena_s_oknami(G, M, a, b, mat, podlazia, os_okna=2.2, sir=0.95):
 def podnoz(G, M, pod, spic, strieska, vchod):
     """Kamenná časť (žula pod strieškou, inde biely obklad), presklený vstup a ustúpené presklené podlažie."""
     P_str = Polygon(strieska).buffer(0.3)
-    zula = [(DNO, 0.0, None, None), (0.0, 4.6, 0.9, 3.5), (4.6, KAMEN, 5.4, 7.2)]
+    zula = [(DNO, 0.0, None, None), (0.0, 4.6, 0.8, 3.6), (4.6, KAMEN, 5.2, 7.2)]
     biela = [(DNO, 0.0, None, None), (0.0, 3.2, 0.7, 2.7), (3.2, 5.8, 3.9, 5.3), (5.8, KAMEN, 6.5, 7.9)]
     retaze = volne_retaze(pod, [spic])
     for r in retaze:
@@ -240,7 +241,7 @@ def podnoz(G, M, pod, spic, strieska, vchod):
                 continue
             pod_strieskou = P_str.contains(Point(m[0] + nx * 1.0, m[1] + ny * 1.0))
             stena_s_oknami(G, M, a, b, M['zula'] if pod_strieskou else M['biela'], zula if pod_strieskou else biela,
-                           os_okna=2.4 if pod_strieskou else 2.2)
+                           os_okna=2.6 if pod_strieskou else 2.2)
     # ríms kamennej časti (ústupok pred presklením) a ustúpené presklené podlažie
     plocha_tri(G, M['strecha'], Polygon(pod), KAMEN)
     for r in retaze:
@@ -264,7 +265,7 @@ def podnoz(G, M, pod, spic, strieska, vchod):
 def strieska_doska(G, M, hlavna, spic, pod, pylony, stlpy_vysoke):
     """Doska striešky nad celou 4-podlažnou podnožou: kazetový podhľad, okraj, kruhové otvory pre pylóny."""
     S = Polygon(hlavna).difference(Polygon(spic).buffer(0.05))
-    otvory = [Point(p).buffer(2.3, 24) for p in pylony]
+    otvory = [Point(p).buffer(1.65, 24) for p in pylony]
     for o in otvory:
         S = S.difference(o)
     S = orient(S if S.geom_type == 'Polygon' else max(S.geoms, key=lambda g: g.area), 1.0)
@@ -277,7 +278,9 @@ def strieska_doska(G, M, hlavna, spic, pod, pylony, stlpy_vysoke):
         for p, q in zip(b, b[1:]):
             G.stena(mat, p, q, DOSKA[0], DOSKA[1])
     # kazetový rošt ~2,2 m (rebrá svetlejšie, kazety tmavé)
-    u = SMER_IK[0], -SMER_IK[1]
+    c45 = math.sqrt(0.5)
+    u = (c45 * (SMER_IK[0] + SMER_IK[1]), c45 * (SMER_IK[1] - SMER_IK[0]))   # kosoštvorce pod 45° k hrane
+    u = (u[0], -u[1])
     v = -u[1], u[0]
     rebra = vonku.buffer(-0.15)
     for (ex, ey), (fx, fy) in ((u, v), (v, u)):
@@ -299,12 +302,12 @@ def strieska_doska(G, M, hlavna, spic, pod, pylony, stlpy_vysoke):
                 plocha_von(G, M['rebra'], [(a2[0], a2[1], z0), (b2[0], b2[1], z0), (b2[0], b2[1], z1), (a2[0], a2[1], z1)], (-fx, -fy, 0))
                 plocha_von(G, M['rebra'], [(a1[0], a1[1], z0), (b1[0], b1[1], z0), (b2[0], b2[1], z0), (a2[0], a2[1], z0)], (0, 0, -1))
             s += 2.2
-    # v kruhových otvoroch biely svietiaci disk okolo pylónu
+    # okolo kruhových otvorov biely „tanier“ v podhľade (cez otvor vidno oblohu)
     for p in pylony:
         for i in range(24):
             a0, a1 = 2 * math.pi * i / 24, 2 * math.pi * (i + 1) / 24
-            q = lambda r, a: (p[0] + r * math.cos(a), p[1] + r * math.sin(a), DOSKA[0] + 0.35)
-            plocha_von(G, M['disk'], [q(0.6, a0), q(2.0, a0), q(2.0, a1), q(0.6, a1)], (0, 0, -1))
+            q = lambda r, a: (p[0] + r * math.cos(a), p[1] + r * math.sin(a), DOSKA[0] - 0.03)
+            plocha_von(G, M['beton'], [q(1.65, a0), q(2.4, a0), q(2.4, a1), q(1.65, a1)], (0, 0, -1))
     # vysoké stĺpy od terénu pod klinom striešky
     for c in stlpy_vysoke:
         G.valec(M['stlp'], c, 0.23, -0.3, DOSKA[0], seg=12, vrch=False)
@@ -316,7 +319,8 @@ def pylony_a_zastavy(G, M, pylony, n_zastav):
     nx, ny = n_zastav
     ux, uy = -ny, nx
     for idx, c in enumerate(pylony):
-        G.kvader(M['zula'], c, (ux, uy), 0.85, 0.85, -0.3, DOSKA[1] + 1.0)
+        G.kvader(M['zula'], c, (ux, uy), 0.85, 0.85, -0.3, 10.5)
+        G.valec(M['ocel'], c, 0.1, 10.5, DOSKA[1] + 0.9, seg=8, r1=0.06)
         d0 = 0.425 + 0.25
         o = (c[0] + nx * d0, c[1] + ny * d0)
 
@@ -490,7 +494,8 @@ def veza(G, M, B):
         if typ == 'sklo':
             sklenena_fasada(G, M, r, VEZA + [ATIKA], seed=11, top_tech=28)
         elif typ == 'lamely':
-            lamely(G, M, r, VEZA[0], ATIKA)
+            lamely(G, M, r, VEZA[0], ATIKA + 1.0)
+            G.pas(M['pas'], r, ATIKA + 1.0, ATIKA + 1.3, von=0.2, dnu=0.3, uzavreta=False)
         else:
             # presklená šachta výťahov – číre sklo len so zvislými stĺpikmi, prečnieva nad strechu
             zavesova_stena(G, jemne(r, 1.0), [VEZA[0], VYTAH], sklo=M['sklo_vytah'], ram=M['stlpik'], vnor=0.08,
@@ -501,18 +506,18 @@ def veza(G, M, B):
             plocha_tri(G, M['strecha'], Polygon(list(r) + vnut[::-1]).buffer(0), VYTAH)
     T = Polygon(obrys)
     plocha_tri(G, M['strecha'], T, VEZA[29])
-    # kruhová oceľová obruč heliportu s radiálnymi rebrami
-    rc = B((CF[0] - 9.5, CF[1]))
-    kruh = [(rc[0] + 12.4 * math.cos(2 * math.pi * i / 40), rc[1] + 12.4 * math.sin(2 * math.pi * i / 40)) for i in range(40)]
-    G.pas(M['ocel'], kruh, OBRUC - 0.18, OBRUC + 0.18, von=0.18, dnu=0.18)
-    for i in range(24):
-        a = 2 * math.pi * i / 24
-        G.tram(M['ocel'], (rc[0] + 12.3 * math.cos(a), rc[1] + 12.3 * math.sin(a), OBRUC),
-               (rc[0] + 2.5 * math.cos(a), rc[1] + 2.5 * math.sin(a), VEZA[29] + 0.9), 0.16)
-    for i in range(0, 40, 5):
-        p = kruh[i]
-        G.tram(M['ocel'], (p[0], p[1], VEZA[29]), (p[0], p[1], OBRUC), 0.14)
-    G.valec(M['ocel'], rc, 2.5, VEZA[29], VEZA[29] + 0.9, seg=12)
+    # heliport nad oblou časťou: doska Ø ~20,5 m na stĺpikoch, okolo prstenec 20 tmavých konzol so sieťou a rúrou
+    rc = B((CF[0] - 7.9, CF[1]))
+    G.valec(M['doska'], rc, 10.25, HELIPORT - 0.35, HELIPORT, seg=40)
+    for i in range(8):
+        a = 2 * math.pi * i / 8
+        G.valec(M['ocel'], (rc[0] + 7.0 * math.cos(a), rc[1] + 7.0 * math.sin(a)), 0.18, VEZA[29], HELIPORT - 0.35, seg=6, vrch=False)
+    kruh = [(rc[0] + 13.8 * math.cos(2 * math.pi * i / 48), rc[1] + 13.8 * math.sin(2 * math.pi * i / 48)) for i in range(48)]
+    G.pas(M['ocel'], kruh, OBRUC - 0.15, OBRUC + 0.15, von=0.15, dnu=0.15)
+    for i in range(20):
+        a = 2 * math.pi * i / 20
+        G.tram(M['lamela'], (rc[0] + 10.2 * math.cos(a), rc[1] + 10.2 * math.sin(a), HELIPORT - 0.2),
+               (rc[0] + 13.8 * math.cos(a), rc[1] + 13.8 * math.sin(a), OBRUC), 0.2)
     # tenký stožiar (bleskozvod) na JZ
     s = B((CF[0] - 12.7, CF[1] + 12.7))
     G.valec(M['ocel'], s, 0.12, VEZA[29], 118.5, seg=6, r1=0.05)
@@ -532,13 +537,13 @@ def spodny_pas(G, M, B, T):
         G.pas(M['pas'], linia, VEZA[6], PAS_TERASA, von=0.3, dnu=0.0, uzavreta=False)
         # zástena: sklenené tabule sklonené von na oceľových konzolách
         O = odsad(linia, 0.3, uzavreta=False)
-        V = odsad(linia, 0.75, uzavreta=False)
+        V = odsad(linia, 1.2, uzavreta=False)
         for a, b, c, d in zip(O, O[1:], V, V[1:]):
             plocha_von(G, M['sklo_vytah'], [(a[0], a[1], PAS_TERASA), (b[0], b[1], PAS_TERASA),
-                                            (d[0], d[1], PAS_TERASA + 1.4), (c[0], c[1], PAS_TERASA + 1.4)],
+                                            (d[0], d[1], PAS_TERASA + 2.2), (c[0], c[1], PAS_TERASA + 2.2)],
                        (b[1] - a[1], -(b[0] - a[0]), 0.3))
         for i in range(0, len(O), 1):
-            G.tram(M['ocel'], (O[i][0], O[i][1], PAS_TERASA - 0.6), (V[i][0], V[i][1], PAS_TERASA + 1.45), 0.07)
+            G.tram(M['ocel'], (O[i][0], O[i][1], PAS_TERASA - 0.6), (V[i][0], V[i][1], PAS_TERASA + 2.25), 0.07)
     plocha_tri(G, M['strecha'], Polygon(poly).buffer(0), PAS_TERASA)
     return poly
 
@@ -554,7 +559,8 @@ def plecia(G, M, B, T):
                 if L > 8:
                     sklenena_fasada(G, M, [a, b], VEZA[:20], seed=31)
                 else:
-                    sklenena_fasada(G, M, [a, b], VEZA[:7], seed=33, krok=1.25)
+                    zavesova_stena(G, jemne([a, b], 1.25), VEZA[:7], sklo=M['hlinik'], ram=M['stlpik'], vnor=0.05,
+                                   stlpik=0.05, priecka=0.05, uzavreta=False, naklon=0.0)
                     lamely(G, M, [a, b], VEZA[6], PLECIA + 0.6)
             for a, b in zip(r, r[1:]):
                 G.stena(M['sklo_vytah'], a, b, PLECIA, PLECIA + 1.0)
@@ -598,13 +604,7 @@ def postav(obrysy):
     pod = ccw([B(p) for p in ocisti(pod_hra, 0.3)])
 
     podnoz(G, M, pod, spic, strieska, B(VCHOD))
-    # vysoké stĺpy od terénu pod klinom striešky: v rohu a 1,2 m dnu od hrán
-    stlpy_vysoke = [B((490.1, -1065.3))]
-    for d, t in ((SMER_IK, 13.0), (SMER_IK, 24.0), (SMER_MY, 12.0)):
-        # 1,2 m dnu od hrany striešky
-        p = (ROH_STRIESKY[0] + d[0] * t, ROH_STRIESKY[1] + d[1] * t)
-        n = (d[1], -d[0]) if d is SMER_IK else (-d[1], d[0])
-        stlpy_vysoke.append(B((p[0] + n[0] * 1.2, p[1] + n[1] * 1.2)))
+    stlpy_vysoke = [B((514.2, -1050.0))]   # jediný dlhý stĺp od terénu – pri rohu podnože južne od vstupu
     pyl = [B(p) for p in PYLONY]
     S = strieska_doska(G, M, hlavna, spic, pod, pyl, stlpy_vysoke)
     # zástavy hľadia k Mýtnej (azimut ~310°)

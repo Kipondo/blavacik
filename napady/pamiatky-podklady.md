@@ -927,25 +927,27 @@ vstupe má ~146,7 m n. m., k Slovanskej klesá na ~145,0 m. Model preto stojí n
 - **Šachta výťahov:** vedľa rohu je úzka presklená šachta panoramatických výťahov, ktorá prečnieva nad strechu.
 - **Zužovanie v troch stupňoch:**
   - **Spodný pás** (OSM 411828059) okolo oblúka, ~5 m hlboký. Má 10 podlaží a končí terasou na ~34,5 m.
-    Na hrane terasy je von sklonené sklenené zábradlie ~1,4 m na šikmých oceľových konzolách.
-  - **Dve „plecia“** (OSM 411828062/065) pozdĺž rovných stien, každé ~23,5 × 5 m, siahajú po ~77 m.
-    - OSM uvádza 20 podlaží, laser však nameral ~77,8 m, čo zodpovedá 22 – 23 podlažiam.
+    Na hrane terasy je von sklonená sklenená zástena (~2 – 3 m) na šikmých oceľových konzolách.
+  - **Dve „plecia“** (OSM 411828062/065) pozdĺž rovných stien, každé ~23,5 × 5 m, siahajú po ~70 m.
+    - Na fotke zo severu je nad plecom ~12 podlaží veže, OSM uvádza 20 podlaží a teleobjektív ~69 – 70 m.
+      Laser v dlaždici hry ukazuje 77,8 m, ale pás je len 5 m široký a medián zrejme zachytil aj vežu.
     - Ich 5 m široké čelá vedľa oblúka sú od ~33 m nahor obložené tmavými lamelami. To sú tmavé zvislé pásy, ktoré
-      vidno z Námestia slobody.
+      vidno z Námestia slobody. Pod nimi sú svetlé hliníkové panely (~#a9b0b6).
   - **Hlavné teleso** končí plochou strechou s heliportom na ~111 m.
 - **Koruna:**
   - nad posledným podlažím presklená atika a za ňou tmavšie technické podlažie;
-  - nad oblou časťou kruhová oceľová obruč heliportu (~25 m) s radiálnymi rebrami;
+  - nad oblou časťou heliport: doska s priemerom ~20,5 m zdvihnutá nad atiku, okolo nej prstenec 16 – 20 tmavých
+    radiálnych konzol so sieťou a rúrou (spolu ~27 m);
   - na JZ tenký stožiar s bleskozvodom.
   - Na heliporte nikdy nepristál vrtuľník.
-- **Výška podlažia veže** je ~3,4 m (odhad z lasera: strecha podnože ~12,8 m, terasa pásu ~34,5 m, plecia ~77 m,
-  heliport ~111 m).
+- **Výška podlažia veže** je ~3,4 m (odhad z lasera a fotiek: strecha podnože ~12,8 m, terasa pásu ~34,5 m,
+  plecia ~70 m, strecha veže ~111 m).
 
 **Podnož** (OSM 411828068, 1278278316/17/19/20):
 - **Rozsah:** zaberá celý blok medzi Mýtnou, Imricha Karvaša a Slovanskou.
 - **Kamenná časť:** 2 podlažia (~8,4 m) obložené leštenou portugalskou žulou, svetlou béžovosivou s ružovkastým
-  nádychom (~#b8afa6).
-  - Úzke zvislé okná: ~0,9 × 1,8 m, v prízemí ~2,6 m, os ~2,2 – 2,4 m.
+  nádychom (~#c2bab0).
+  - Úzke, hlboko osadené zvislé okná: ~1 × 2,8 m v prízemí, ~1 × 2 m vyššie, os ~2,6 m.
   - Pri vstupe je stena zaoblená (vypuklá).
   - Strany k Slovanskej a Imricha Karvaša sú biele.
 - **Hlavný vstup:** vysoký presklený zárez (~7 m) na rohu Mýtnej a Imricha Karvaša, otočený na JZ.
@@ -956,9 +958,12 @@ vstupe má ~146,7 m n. m., k Slovanskej klesá na ~145,0 m. Model preto stojí n
 **Strieška („markíza“, OSM 411828074, `building:part=roof`):**
 - **Stavba:** železobetónová doska nad celou 4-podlažnou časťou podnože; podhľad ~12 m, hrana ~0,8 m (~#cfcfcb).
 - **Tvar:** nad rohom pri vstupe vystrkuje ostrý klin – hrany ~35 m pozdĺž Mýtnej a ~64 m pozdĺž Imricha Karvaša.
-- **Podhľad:** tmavý kazetový rošt ~2,2 × 2,2 m – svetlejšie rebrá (~#9a9893), tmavé kazety (~#3f3a36).
-- **Podpory:** pod klinom ju nesú vysoké štíhle stĺpy od terénu a **dva kamenné pylóny** (~0,85 m).
-  - Pylóny prechádzajú kruhovými otvormi v doske (~4,5 m); v otvoroch je biely svietiaci disk.
+- **Podhľad:** tmavý kazetový rošt ~2,2 × 2,2 m natočený o 45° k hranám (kosoštvorce) – svetlejšie rebrá (~#9a9893),
+  tmavé kazety (~#3f3a36).
+- **Podpory:** okrúhle stĺpy (~0,3 – 0,4 m) po ~6 m pred ustúpeným presklením a jeden dlhý stĺp od terénu pri rohu
+  podnože južne od vstupu. Klin nad rohom (presah ~19 m) je vyložený a nesú ho **dva kamenné pylóny** (~0,85 m).
+  - Kamenné pylóny končia ~10,5 m a tenká tyč z nich prechádza kruhovými otvormi v doske (~3,3 m), cez ktoré vidno
+    oblohu. Okolo otvorov je v podhľade biely „tanier“ (~4,8 m).
   - Na pylónoch visia zvislé zástavy ~1,4 × 4 m (vrch ~9,6 m): **SR vľavo a EÚ vpravo** pri pohľade od Mýtnej (od 2017).
 - **Nápis:** veľký nápis s názvom banky na budove nie je.
 
