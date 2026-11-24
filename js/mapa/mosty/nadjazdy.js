@@ -51,7 +51,10 @@ export function profilMosta(m, vyskaTerenu) {
     return p.teren + clr;
   });
   // kotvy: koniec na zemi = výška terénu, voľný koniec (napája sa na iný most) sa riadi len podjazdmi
-  const hA = volne[0] ? null : body[0].teren, hB = volne[1] ? null : body.at(-1).teren;
+  let hA = volne[0] ? null : body[0].teren, hB = volne[1] ? null : body.at(-1).teren;
+  // mólo (js/mapa/mosty/mola.js): vodorovne vo výške brehu + nad, koniec pri vode visí nad vodou
+  const molo = m.molo;
+  if (molo) hA = hB = (molo.brehNaKonci ? body.at(-1).teren : body[0].teren) + molo.nad;
   const zaklad = (p) => (hA !== null && hB !== null ? hA + (hB - hA) * (p.s / s) : hA ?? hB ?? Math.max(...potreba));
   for (let i = 0; i < body.length; i++) {
     const p = body[i];
@@ -63,6 +66,7 @@ export function profilMosta(m, vyskaTerenu) {
   const predlz = (naKonci) => {
     const kraj = naKonci ? body.at(-1) : body[0];
     if (volne[naKonci ? 1 : 0] || m.druh === 'kolaj' || kraj.h - kraj.teren < 0.7) return [];
+    if (molo && naKonci !== molo.brehNaKonci) return [];      // mólo: schody len na brehu
     const ux = naKonci ? kraj.ux : -kraj.ux, uz = naKonci ? kraj.uz : -kraj.uz;
     const sklon = m.druh === 'cesta' ? D.sklon : 0.55;
     const out = [];
@@ -71,7 +75,15 @@ export function profilMosta(m, vyskaTerenu) {
       const x = kraj.x + ux * KROK * k, z = kraj.z + uz * KROK * k;
       const t = vyskaTerenu(x, z);
       h -= sklon * KROK;
-      if (h <= t + 0.05) break;
+      if (h <= t + 0.05) {
+        // posledný kratší úsek až po terén (aj krátke schody, napr. 5 stupňov na mólo – predtým koniec visel do 1,1 m)
+        const zvysok = (h + sklon * KROK - t) / sklon;
+        if (zvysok > 0.3) {
+          const dd = KROK * (k - 1) + Math.min(KROK, zvysok);
+          out.push({ x: kraj.x + ux * dd, z: kraj.z + uz * dd, s: naKonci ? s + dd : -dd, ux: kraj.ux, uz: kraj.uz, teren: t, h: t + 0.02, predlzenie: m.druh === 'cesta' ? 'rampa' : 'schody' });
+        }
+        break;
+      }
       out.push({ x, z, s: naKonci ? s + KROK * k : -KROK * k, ux: kraj.ux, uz: kraj.uz, teren: t, h, predlzenie: m.druh === 'cesta' ? 'rampa' : 'schody' });
     }
     return out;
@@ -138,6 +150,9 @@ function materialy() {
     beton: new THREE.MeshStandardMaterial({ color: '#a29e95', roughness: 0.88, side: S }),
     kov: new THREE.MeshStandardMaterial({ color: '#3d4a44', roughness: 0.5, metalness: 0.6, side: S }),
     kolajnica: new THREE.MeshStandardMaterial({ color: '#6c6660', roughness: 0.35, metalness: 0.8, side: S }),
+    // mólá: sivé zvetrané drevené dosky, svetlá pozinkovaná / nerezová oceľ (nosník, stĺpy, zábradlie)
+    drevo: new THREE.MeshStandardMaterial({ color: '#8b7f70', roughness: 0.95, side: S }),
+    ocel: new THREE.MeshStandardMaterial({ color: '#a7adb0', roughness: 0.45, metalness: 0.55, side: S }),
   };
   return MAT;
 }
@@ -148,7 +163,7 @@ export function vytvorNadjazdy(nadjazdy, vyskopis, kolizie) {
   skupina.name = 'nadjazdy';
   const profily = [];
   if (!nadjazdy?.length) return { skupina, profily };
-  const Z = { vrch: { cesta: new Zberac(), chodnik: new Zberac(), kolaj: new Zberac() }, beton: new Zberac(), kov: new Zberac(), kolajnica: new Zberac() };
+  const Z = { vrch: { cesta: new Zberac(), chodnik: new Zberac(), kolaj: new Zberac(), drevo: new Zberac() }, beton: new Zberac(), kov: new Zberac(), kolajnica: new Zberac(), ocel: new Zberac() };
   for (const m of nadjazdy) {
     const pr = profilMosta(m, vyskopis.vyskaTerenu);
     if (!pr) continue;
@@ -168,6 +183,8 @@ export function vytvorNadjazdy(nadjazdy, vyskopis, kolizie) {
   pridaj(Z.beton, M.beton);
   pridaj(Z.kov, M.kov);
   pridaj(Z.kolajnica, M.kolajnica);
+  pridaj(Z.vrch.drevo, M.drevo);
+  pridaj(Z.ocel, M.ocel);
   return { skupina, profily };
 }
 
@@ -177,7 +194,10 @@ function postavMost(pr, Z, kolizie) {
   const kraj = m.druh === 'cesta' ? 0.35 : m.druh === 'kolaj' ? 0.4 : 0.1;   // šírka rímsy pod zábradlím
   const W = w + kraj;
   const bod = (p, o, y) => [p.x - p.uz * o, y, p.z + p.ux * o];
-  const vrch = Z.vrch[m.druh] ?? Z.vrch.chodnik;
+  const molo = !!m.molo;
+  const vrch = molo ? Z.vrch.drevo : Z.vrch[m.druh] ?? Z.vrch.chodnik;
+  const telo = molo ? Z.ocel : Z.beton;      // rímsy, boky a spodok mostovky
+  const zabradlie = molo ? Z.ocel : Z.kov;
   for (let i = 1; i < b.length; i++) {
     const a = b[i - 1], c = b[i];
     // vrch mostovky (pochôdzna / jazdná plocha) a rímsy po okrajoch; schody ku koncu lávky po stupňoch
@@ -195,14 +215,14 @@ function postavMost(pr, Z, kolizie) {
     } else vrch.stvor(bod(a, w, a.h), bod(a, -w, a.h), bod(c, -w, c.h), bod(c, w, c.h));
     for (const s of [1, -1]) {
       const o0 = s * w, o1 = s * W;
-      if (s > 0) Z.beton.stvor(bod(a, o1, a.h + 0.12), bod(a, o0, a.h + 0.12), bod(c, o0, c.h + 0.12), bod(c, o1, c.h + 0.12));
-      else Z.beton.stvor(bod(a, o0, a.h + 0.12), bod(a, o1, a.h + 0.12), bod(c, o1, c.h + 0.12), bod(c, o0, c.h + 0.12));
+      if (s > 0) telo.stvor(bod(a, o1, a.h + 0.12), bod(a, o0, a.h + 0.12), bod(c, o0, c.h + 0.12), bod(c, o1, c.h + 0.12));
+      else telo.stvor(bod(a, o0, a.h + 0.12), bod(a, o1, a.h + 0.12), bod(c, o1, c.h + 0.12), bod(c, o0, c.h + 0.12));
     }
     // boky a spodok
     const yA = a.h - D.hrubka, yC = c.h - D.hrubka;
-    Z.beton.stvor(bod(a, W, yA), bod(c, W, yC), bod(c, W, c.h + 0.12), bod(a, W, a.h + 0.12));
-    Z.beton.stvor(bod(c, -W, yC), bod(a, -W, yA), bod(a, -W, a.h + 0.12), bod(c, -W, c.h + 0.12));
-    Z.beton.stvor(bod(a, -W, yA), bod(c, -W, yC), bod(c, W, yC), bod(a, W, yA));
+    telo.stvor(bod(a, W, yA), bod(c, W, yC), bod(c, W, c.h + 0.12), bod(a, W, a.h + 0.12));
+    telo.stvor(bod(c, -W, yC), bod(a, -W, yA), bod(a, -W, a.h + 0.12), bod(c, -W, c.h + 0.12));
+    telo.stvor(bod(a, -W, yA), bod(c, -W, yC), bod(c, W, yC), bod(a, W, yA));
     // zábradlie
     if (m.druh === 'cesta') {
       // betónový parapet 0,9 m
@@ -235,9 +255,18 @@ function postavMost(pr, Z, kolizie) {
       // kovové zábradlie: madlo a stredná tyč
       for (const s of [1, -1]) {
         const o = s * (W - 0.04);
-        for (const [y, v] of [[1.05, 0.07], [0.55, 0.04]]) {
-          Z.kov.stvor(bod(a, o, a.h + y), bod(c, o, c.h + y), bod(c, o, c.h + y + v), bod(a, o, a.h + y + v));
-          Z.kov.stvor(bod(c, o, c.h + y), bod(a, o, a.h + y), bod(a, o, a.h + y + v), bod(c, o, c.h + y + v));
+        for (const [y, v] of molo ? [[1.05, 0.07], [0.15, 0.04]] : [[1.05, 0.07], [0.55, 0.04]]) {
+          zabradlie.stvor(bod(a, o, a.h + y), bod(c, o, c.h + y), bod(c, o, c.h + y + v), bod(a, o, a.h + y + v));
+          zabradlie.stvor(bod(c, o, c.h + y), bod(a, o, a.h + y), bod(a, o, a.h + y + v), bod(c, o, c.h + y + v));
+        }
+        // mólo: husté zvislé tyče medzi madlom a spodnou tyčou
+        if (molo && !a.predlzenie && !c.predlzenie) {
+          const L = Math.hypot(c.x - a.x, c.z - a.z), n = Math.max(1, Math.round(L / 0.25));
+          for (let k = 1; k < n; k++) {
+            const t = k / n, p = { x: a.x + (c.x - a.x) * t, z: a.z + (c.z - a.z) * t, ux: a.ux, uz: a.uz };
+            const [x, , z] = bod(p, o, 0), h = a.h + (c.h - a.h) * t;
+            zabradlie.kvader(x, h + 0.19, h + 1.05, z, 0.02, 0.02, a.ux, a.uz);
+          }
         }
       }
     }
@@ -246,7 +275,7 @@ function postavMost(pr, Z, kolizie) {
   if (m.druh === 'chodnik') {
     for (const p of b) for (const s of [1, -1]) {
       const [x, , z] = bod(p, s * (W - 0.04), 0);
-      Z.kov.kvader(x, p.h + 0.1, p.h + 1.12, z, 0.05, 0.05, p.ux, p.uz);
+      zabradlie.kvader(x, p.h + 0.1, p.h + 1.12, z, 0.05, 0.05, p.ux, p.uz);
     }
   }
   // piliere mimo podjazdov, kde je mostovka nad terénom
@@ -258,7 +287,14 @@ function postavMost(pr, Z, kolizie) {
     const spodok = p.h - D.hrubka;
     if (spodok - p.teren < 1.2 || !volne(p.s)) continue;
     posledny = p.s;
-    if (m.druh === 'chodnik') {
+    if (molo) {
+      // mólo: dvojica štíhlych oceľových stĺpov naprieč mólom
+      for (const o of [-w * 0.6, w * 0.6]) {
+        const x = p.x - p.uz * o, z = p.z + p.ux * o;
+        Z.ocel.kvader(x, p.teren - 0.3, spodok, z, 0.28, 0.28, p.ux, p.uz);
+        kolizie?.pridajKruh(x, z, 0.25, { typ: 'pilier' });
+      }
+    } else if (m.druh === 'chodnik') {
       Z.beton.kvader(p.x, p.teren - 0.3, spodok, p.z, 0.6, 0.6, p.ux, p.uz);
       kolizie?.pridajKruh(p.x, p.z, 0.45, { typ: 'pilier' });
     } else {

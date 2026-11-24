@@ -8,8 +8,10 @@
 import { postavDlazdicu, uvolniObjekt } from './postav-dlazdicu.js';
 import { nacitajDoplnky } from './doplnky.js';
 import { nacitajOpravyBudov, aplikujOpravy } from '../budovy/opravy.js';
+import { nacitajMola, oznacMola } from '../mosty/mola.js';
 import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
+import { upravOsiCiest } from '../cesty/upravy-osi.js';
 
 // predvolené okruhy (bez predvoľby kvality); skutočné nastaví nastavPolomery() podľa js/grafika/predvolby.js
 export const POLOMER_DETAIL = 900;
@@ -56,9 +58,13 @@ export class SpravaDlazdic {
     if (!this.data.has(kluc)) {
       const [i, j] = kluc.split('_').map(Number);
       const obsah = fetch(`data/mapa/mesto/d/${kluc}.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
-      this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index), nacitajOpravyBudov(), nacitajHustuZelen()]).then(([d, { teren, strechy }, opravy, zelen]) => {
+      this.data.set(kluc, Promise.all([obsah, nacitajDoplnky(kluc, this.index), nacitajOpravyBudov(), nacitajHustuZelen(), nacitajMola()]).then(([d, { teren, strechy }, opravy, zelen, mola]) => {
+        // osi ciest: rovné úseky a plynulé oblúky (pravidlá ulice, js/mapa/cesty/upravy-osi.js)
+        upravOsiCiest(d.cesty);
         // ručné opravy podľa porovnania so skutočnosťou (budovy, hustá zeleň v parkoch)
         aplikujOpravy(d.budovy, opravy);
+        // mólá nad nábrežím: vodorovná mostovka namiesto lávky dolu svahom (js/mapa/mosty/mola.js)
+        oznacMola(d.nadjazdy, mola);
         doplnHustuZelen(d, this.rect({ i, j }), zelen);
         // detailný terén sa zaregistruje skôr, než sa dlaždica začne stavať (budovy, cesty aj zem ho už použijú)
         if (teren && this.data.has(kluc)) { this.vyskopis.pridajDetail?.(i, j, teren.v, teren.n, teren.krok); d._detailTerenu = true; }

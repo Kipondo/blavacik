@@ -6,12 +6,14 @@
 import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
 import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
 import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
+import { tvarKrizovatky, tvarSpoja, spojeCiest } from '../../../js/mapa/cesty/krizovatky-tvar.js';
+import { preruseniaChodnikov } from '../../../js/mapa/cesty/rohy-chodnikov.js';
 import { mriezkaVozoviek } from '../../../js/mapa/cesty/vozovky.js';
 
 const ROVINA = { vyska: () => 0, vyskaTerenu: () => 0 };
 
 /** Podrobný terén dlaždice z data/mapa/mesto/t/<kluc>.bin (gzip, rozdiely po riadkoch, cm nad 100 m). */
-async function teren(kluc) {
+export async function teren(kluc) {
   const r = await fetch(`data/mapa/mesto/t/${kluc}.bin`);
   if (!r.ok) return null;
   let buf = await r.arrayBuffer();
@@ -78,14 +80,19 @@ export const kontrolyCiest = [
         const odch = [];
         for (const c of d.cesty ?? []) {
           if (c.most || c.nadjazd || !(c.body?.length > 1)) continue;
+          // vzorka každé 2 m dĺžky osi (nezávisle od počtu bodov – zaoblené lomy osi pridali body, js/mapa/cesty/upravy-osi.js),
+          // bez krajného radu uzlov dlaždice (cesta pozdĺž hranice z nej vychádza a vracia sa – profil by preskakoval)
           const prof = [];
+          let dalsia = 0, s0 = 0;
           for (let k = 1; k < c.body.length; k++) {
             const [ax, az] = c.body[k - 1], [bx, bz] = c.body[k];
-            const L = Math.max(1, Math.floor(Math.hypot(bx - ax, bz - az) / 2));
-            for (let s = 0; s < L; s++) {
-              const u = (ax + (bx - ax) * s / L - i * ctx.index.dlazdica) / krok, v = (az + (bz - az) * s / L - j * ctx.index.dlazdica) / krok;
-              if (u >= 0 && u < t.n - 1 && v >= 0 && v < t.n - 1) prof.push(t.H[Math.round(v) * t.n + Math.round(u)]);
+            const L = Math.hypot(bx - ax, bz - az);
+            for (; dalsia < s0 + L; dalsia += 2) {
+              const f = L > 0 ? (dalsia - s0) / L : 0;
+              const u = (ax + (bx - ax) * f - i * ctx.index.dlazdica) / krok, v = (az + (bz - az) * f - j * ctx.index.dlazdica) / krok;
+              if (u >= 1 && u <= t.n - 2 && v >= 1 && v <= t.n - 2) prof.push(t.H[Math.round(v) * t.n + Math.round(u)]);
             }
+            s0 += L;
           }
           if (prof.length < 12) continue;
           let suma = 0;
@@ -210,10 +217,84 @@ export const kontrolyCiest = [
     },
   },
   {
+    id: 'krizovatky-oble-rohy',
+    popis: 'Asfalt križovatky má tvar podľa ciest s oblými rohmi (nie kruh cez okraje) bez prekrížených obrysov '
+      + '(„háčiky“ pri vidliciach) a spoj dvoch ciest so zlomom nemá na vonkajšej strane klin trávy (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice – js/mapa/cesty/krizovatky-tvar.js, plochy-krizovatiek.js, upravy-osi.js',
+    tolerancia: 10,
+    spusti(ctx) {
+      const chyby = [];
+      const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]));
+      const pretina = (a, b, c, d) => o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+      const jednoduchy = (P) => {
+        for (let i = 0; i < P.length; i++) {
+          for (let j = i + 2; j < P.length; j++) {
+            if (i === 0 && j === P.length - 1) continue;
+            if (pretina(P[i], P[(i + 1) % P.length], P[j], P[(j + 1) % P.length])) return false;
+          }
+        }
+        return true;
+      };
+      const vnutri = (x, z, P) => {
+        let c = false;
+        for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+          if ((P[i][1] > z) !== (P[j][1] > z) && x < (P[j][0] - P[i][0]) * (z - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0]) c = !c;
+        }
+        return c;
+      };
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        const cesty = d.cesty ?? [];
+        const { krizovatky } = najdiKrizovatky(cesty);
+        for (const k of krizovatky.values()) {
+          const t = tvarKrizovatky(k, cesty);
+          if (!t) continue;
+          n++;
+          if (!jednoduchy(t.obrys)) chyby.push({ x: k.x, z: k.z, dlazdica: kluc, text: `prekrížený obrys križovatky (${t.ramena.length} ramien)` });
+        }
+        for (const k of spojeCiest(cesty, krizovatky)) {
+          const t = tvarSpoja(k, cesty);
+          if (!t) continue;
+          n++;
+          const m = t.obrys[Math.floor(t.obrys.length / 2)];
+          if (!vnutri(k.x + (m[0] - k.x) * 0.8, k.z + (m[1] - k.z) * 0.8, t.obrys)) chyby.push({ x: k.x, z: k.z, dlazdica: kluc, text: 'klin na vonkajšej strane spoja ciest' });
+        }
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'rohy-chodnikov',
+    popis: 'Chodník s obrubníkom obíde oblý roh križovatky (spojí chodníky oboch ciest) a na rovnej strane priebežnej '
+      + 'cesty pri T-križovatke sa neprerušuje (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice-2 – js/mapa/cesty/rohy-chodnikov.js, chodniky.js',
+    tolerancia: 0,
+    spusti(ctx) {
+      let postavene = 0, vhodne = 0, rovne = 0;
+      for (const d of ctx.dlazdice.values()) {
+        const cesty = (d.cesty ?? []).filter((c) => !c.nadjazd && c.body?.length > 1);
+        if (!cesty.length) continue;
+        const { krizovatky } = najdiKrizovatky(cesty);
+        const g = vytvorChodniky(cesty, krizovatky, ROVINA);
+        postavene += g.userData.rohy?.postavene ?? 0;
+        vhodne += g.userData.rohy?.vhodne ?? 0;
+        for (const zoz of preruseniaChodnikov(cesty, krizovatky).values()) {
+          for (const u of zoz) for (const smer of [1, -1]) for (const strana of [1, -1]) if (u.r[smer][strana] === 0) rovne++;
+        }
+        g.traverse((o) => o.geometry?.dispose());
+      }
+      const chyby = [];
+      if (!vhodne || postavene < 0.5 * vhodne) chyby.push({ text: `postavených rohov chodníkov len ${postavene} z ${vhodne}` });
+      if (!rovne) chyby.push({ text: 'chodník sa pri križovatke prerušuje aj na rovnej strane priebežnej cesty' });
+      return { skontrolovane: vhodne, chyby };
+    },
+  },
+  {
     id: 'tunely-zasypane',
-    popis: 'Pred cestnými tunelmi pod rovnou ulicou (hra ich nekreslí) nie je v teréne slepá jama zo zárezu – napr. '
-      + 'Staromestská pod Hodžovým námestím pri Prezidentskom paláci (jama 7 m s oporným múrom)',
-    oprava: 'fix/tunel-hodzovo – tools/mesto/laser/zasyp_tunely.py (zoznam tunely.json); spúšťať po teren.py, pred cesty_teren.py',
+    popis: 'Pred cestnými tunelmi pod rovnou ulicou a pred vjazdmi do podzemných garáží (hra ich nekreslí) nie je '
+      + 'v teréne slepá jama zo zárezu – napr. Staromestská pod Hodžovým námestím pri Prezidentskom paláci (jama 7 m '
+      + 's oporným múrom), Žabotova pod traťou, 12 vjazdov do garáží pod rovnou ulicou',
+    oprava: 'fix/tunel-hodzovo, fix/zasyp-garaze – tools/mesto/laser/zasyp_tunely.py (zoznam tunely.json); spúšťať po teren.py, pred cesty_teren.py',
     tolerancia: 0,
     async spusti(ctx) {
       const chyby = [];
@@ -222,29 +303,35 @@ export const kontrolyCiest = [
       const D = ctx.index.dlazdica;
       const cache = new Map();
       const daj = async (k) => { if (!cache.has(k)) cache.set(k, await teren(k)); return cache.get(k); };
+      const vyska = async (x, z) => {
+        const i = Math.floor(x / D), j = Math.floor(z / D), t = await daj(`${i}_${j}`);
+        if (!t) return NaN;
+        const krok = D / (t.n - 1);
+        return t.H[Math.round((z - j * D) / krok) * t.n + Math.round((x - i * D) / krok)];
+      };
       let n = 0;
       for (const tunel of (await r.json()).tunely ?? []) {
-        for (const [px, pz] of tunel.portaly) {
-          // medián terénu do 60 m od portálu proti najnižšiemu bodu do 30 m = hĺbka jamy
-          const okolie = [], blizko = [];
-          for (let i = Math.floor((px - 60) / D); i <= Math.floor((px + 60) / D); i++) {
-            for (let j = Math.floor((pz - 60) / D); j <= Math.floor((pz + 60) / D); j++) {
-              const t = await daj(`${i}_${j}`);
-              if (!t) continue;
-              const krok = D / (t.n - 1);
-              for (let b = 0; b < t.n; b++) {
-                for (let a = 0; a < t.n; a++) {
-                  const d = Math.hypot(i * D + a * krok - px, j * D + b * krok - pz);
-                  if (d < 60) okolie.push(t.H[b * t.n + a]);
-                  if (d < 30) blizko.push(t.H[b * t.n + a]);
+        for (const [px0, pz0] of tunel.portaly) {
+          // ako zasyp_tunely.py: uzol do 5 m od portálu proti mediánu okna 42 m okolo neho (svah nevadí, len jama)
+          const px = Math.round(px0 / 2) * 2, pz = Math.round(pz0 / 2) * 2;
+          let jama = 0;
+          for (let dx = -4; dx <= 4; dx += 2) {
+            for (let dz = -4; dz <= 4; dz += 2) {
+              if (dx * dx + dz * dz > 25) continue;
+              const h = await vyska(px + dx, pz + dz);
+              if (!Number.isFinite(h)) continue;
+              const okno = [];
+              for (let a = -20; a <= 20; a += 2) {
+                for (let b = -20; b <= 20; b += 2) {
+                  const v = await vyska(px + dx + a, pz + dz + b);
+                  if (Number.isFinite(v)) okno.push(v);
                 }
               }
+              jama = Math.max(jama, median(okno) - h);
             }
           }
-          if (!blizko.length) continue;
           n++;
-          const jama = median(okolie) - Math.min(...blizko);
-          if (jama > 2) chyby.push({ x: px, z: pz, text: `${tunel.nazov}: jama pri portáli ${jama.toFixed(1)} m` });
+          if (jama > 1.5) chyby.push({ x: px0, z: pz0, text: `${tunel.nazov}: jama pri portáli ${jama.toFixed(1)} m` });
         }
       }
       return { skontrolovane: n, chyby };

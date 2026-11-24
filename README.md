@@ -165,6 +165,43 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   Generátor Eurovea 1 dostal háčiky na vlastné fasády a výšku sklenej strechy. Jeho výstup sa nezmenil.
 - **Testovacia trasa:** nové body „Eurovea 2 – park so sochou gúľ“, „pasáž pod hadou strechou“ a „Eurovea 2 zhora“.
 
+### Eurovea – nábrežie: mólá a pontóny (vetva `feature/eurovea-nabrezie`, #131 časť 3)
+- **Prieskum** (OSM, laserový terén, Commons, krajinný architekt M. Desvigne): `napady/pamiatky-podklady.md`.
+  Prieskum ukázal tri úseky nábrežia:
+  - park Eurovea 1 – svahovitý trávnik, dolný chodník, betónová hrana s uväzovacími stĺpikmi a nízky kamenný múrik;
+  - Štefánikovo námestie a Sklad č. 7 – sedacie schody k dolnému nábrežiu so zábradlím a prístavné koľaje;
+  - Eurovea 2 – park s kopou a sochou a oplotený prístavný pás.
+
+  Terén, trávniky, chodníky, stromy aj koľaje už v hre sú (laser, OSM).
+- **Mólá Inessy Hansch** (3, `data/mapa/mola.json`, `js/mapa/mosty/mola.js`):
+  - **Predtým:** v OSM sú to lávky, takže ich hra postavila ako mostovku od terénu na brehu k terénu pri vode, 6–7 m
+    dolu svahom k rieke.
+  - **Teraz:** sú vodorovné vo výške brehu + 0,8 m, na brehu majú 5 schodov a koniec visí 6–7 m nad zemou pri vode.
+    Majú palubu zo sivých dosiek, svetlý oceľový nosník, dvojice štíhlych oceľových stĺpov a zábradlie s hustými
+    zvislými tyčami.
+  - Chôdza po móle ide po rovnakom profile (`profilMosta`).
+  - Schody na konci lávky sa po novom postavia aj vtedy, keď je koniec nižšie ako 1,1 m nad zemou. Predtým tam ostal
+    visieť (týka sa všetkých lávok).
+  - Regresná kontrola `mola-vodorovne`.
+- **Pontóny** (`js/mapa/pamiatky/ponton.js`):
+  - pri Starom moste pristávací pontón 74 × 6,6 m s čiernym oceľovým trupom, krémovou kajutou a 26 m lávkou na breh;
+  - pred Skladom č. 7 biely pontón 34 × 6,6 m s lávkou;
+  - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
+- **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
+
+### Pomník M. R. Štefánika pri Eurovei (vetva `feature/stefanik`, #131 časť 4)
+- **Prieskum** (Vrábel, *Vojenská história* 2010; umeniemesta.sk; Commons; OSM): `napady/pamiatky-podklady.md`. Zadanie
+  si predstavovalo leva pri päte, v skutočnosti stojí navrchu pylónu.
+- **Model** (`js/mapa/pamiatky/stefanik.js`), obnovený pomník podľa diela Bohumila Kafku (1938, dielo je voľné):
+  - hranolový pylón 21,6 × 4,25 × ~3,4 m s travertínovým obkladom v mriežke 5 × 17 dosiek a rímsou;
+  - navrchu bronzový lev (6,4 m) kráča na východ, ľavou prednou labou sa opiera o šikmý štít, chvost visí cez okraj;
+  - ~5 m pred pylónom podstavec 3,44 m a socha letca 7,4 m: kombinéza, kožená prilba s okuliarmi na čele,
+    zvitok v pravej ruke, pravá noha vpredu;
+  - socha pozerá k Dunaju; bronz je takmer čierny hnedý.
+- **Bez nápisov:** bronzové tabule sú prázdne.
+- **Náhrady:** všeobecné sochy z OSM (Štefánik, lev) a „stromy“, ktoré laser videl v pylóne a v soche, model nahrádza.
+- **Testovacia trasa:** bod `stefanik`.
+
 ### Trakčné vedenie električiek a trolejbusov (vetva `feature/trakcne-vedenie`)
 - **Električky:** nad každou koľajou (OSM, dáta dlaždíc) trolejový drôt vo výške 5,6 m, stĺpy po ~30 m na vonkajšej
   strane koľají – pri obrubníku, ak koľaj ide po ceste – s ramenom a vzperou nad drôt; na mostoch vo výške mostovky.
@@ -467,6 +504,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     s oporným múrom. Na Staromestskej pod Hodžovým námestím pri Prezidentskom paláci bola jama hlboká 7 m. Jama pri
     portáloch zo zoznamu `tools/mesto/laser/tunely.json` sa vyplní hladkou plochou z okolitej ulice (Laplaceova
     rovnica), zasypaných je 5 500 m². Regresná kontrola `tunely-zasypane` a bod trasy `hodzovo-tunel`.
+  - **Prehľad všetkých ciest a chodníkov** (odchýlka terénu od okolia 42 m, ako na mape pri paláci):
+    - Väčšina „červených“ pásov sú skutočné úvozy a ulice v záreze do svahu (Hlboká cesta, Partizánska,
+      Urbánkova s oporným múrom). Tie ostávajú.
+    - Slepé jamy boli ešte pri 12 vjazdoch do podzemných garáží pod rovnou ulicou (Mlynské nivy, Mýtna, Cintorínska,
+      Dunajská, Palkovičova, Miletičova…). Ďalšia bola na Žabotovej, ktorá pri stanici končila v jame pod traťou
+      (klesali do nej aj koľaje). Teraz sú v `tunely.json` a zasypané (najviac o 5,2 m). Žabotova teraz na konci
+      vystúpi k trati (26 %, kontrolór mapy `cesta-strma` 164 → 165).
+    - Vjazdy do garáží v svahu (Slávičie údolie, Údolná, Mlynská dolina) sa nezasypávajú, rovnako ako tunel Sitina:
+      zasypanie by z konca cesty urobilo strmý kopec (kontrolór mapy `cesta-strma`).
+    - Kandidátov vypíše `python3 tools/mesto/laser/najdi_slepe_jamy.py`.
+    - `zasyp_tunely.py` zasype jamu, ktorej sa portál dotýka do 5 m (najviac 3 000 m², väčšia je prírodná). Opakuje
+      to, kým jama pri portáli nezmizne, takže ďalšie spustenie nič nemení.
+    - Body trasy `zabotova-trat`, `nivy-rampa`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
@@ -506,6 +556,36 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   - **Chodníky:** chodník sa preruší aj tam, kde by ležal na vlastnej vozovke (vnútorná strana ostrej zákruty).
     Jednosmerky majú chodník po oboch stranách. Vľavo nie je len tam, kde je do ~8 m druhý pás rozdelenej cesty,
     teda stredný pás. Kontrolór mapy `chodnik-na-vozovke` 23 150 → 0.
+- **Pravidlá ulice – jednoduchosť a jasnosť** (#136, časť 1):
+  - **Rovné ulice a plynulé oblúky** (`js/mapa/cesty/upravy-osi.js`): os cesty sa pri načítaní dlaždice zjednoduší
+    (Douglas–Peucker, 0,4 m), takže rovná ulica nemá cikcak z kreslenia v OSM. V lome sa namiesto ostrého rohu vloží
+    krátky oblúk (odsek najviac 4 m). Body, ktoré cesta zdieľa s inou cestou (križovatky), a konce ostávajú presne
+    na mieste. Kontrolór mapy `cesta-strma` 164 → 151.
+  - **Biele okrajové čiary** majú všetky cesty okrem obslužných, obytných zón a poľných ciest. V strede sú
+    prerušované alebo plné čiary ako doteraz.
+  - **Križovatky s oblými rohmi** (`js/mapa/cesty/krizovatky-tvar.js`, `plochy-krizovatiek.js`): asfalt križovatky
+    je presne medzi okrajmi ciest, ktoré sa v nej stretajú. Medzi susednými ramenami je oblý roh s vrcholom
+    v priesečníku okrajov. Ramená sledujú os cesty, aj keď sa hneď za križovatkou zatáča. Predtým to bol kruh.
+    Pri vidliciach (ramená pod malým uhlom) ide tvar po vonkajších okrajoch. Kde jedna cesta končí a druhá pod
+    uhlom začína, je na vonkajšej strane ohybu oblý spoj – predtým tam ostal klin trávy.
+    Regresná kontrola `krizovatky-oble-rohy`.
+  - **Pokojnejší asfalt:** menej a jemnejšie praskliny a záplaty na vozovke aj na asfaltovom chodníku
+    (`js/mapa/cesty/opotrebenie.js`, `js/mapa/teren/material-zeme.js`).
+  - **Bez druhého pásu asfaltu za chodníkom:** pri cestách s 3D chodníkom siaha asfaltový lem zeme len pod chodník
+    (2,6 m), nie 3,5 m (`js/mapa/teren/textura-zeme.js`). Poradie je cesta – obrubník – chodník – tráva/dlažba.
+  - **Rohy chodníkov s obrubníkom** (časť 2, `js/mapa/cesty/rohy-chodnikov.js`, `chodnik-rozmery.js`):
+    - Chodník obíde oblý roh križovatky po oblúku a spojí chodníky oboch ciest.
+    - Na rovnej strane priebežnej cesty (T-križovatka) sa chodník neprerušuje.
+    - Na vonkajšej strane ohybu (aj kde jedna cesta končí a druhá pod uhlom začína) ide chodník okolo uzla.
+    - Oblý roh obrubníka má polomer ~4 m (predtým ~1 m) a značenie končí tam, kde sa obrubník začína zatáčať.
+    - Rovný chodník končí presne na začiatku oblúka (vložený bod), nie na najbližšom 4 m úseku.
+    - Postaví sa 13 624 z 15 490 rohov (88 %). Zvyšok by ležal na vozovke inej cesty, a tak sa vynechá.
+    - Z ostrovčekov medzi cestami tak vznikajú zvýšené plochy s obrubníkom a oblými rohmi (napr. slučka pri stanici).
+    - Mapa povrchu (`povrch-modul.js`) pozná tvar križovatky (vozovka) aj rohy chodníkov, takže chodci na rohu stoja na
+      chodníku.
+    - Regresná kontrola `rohy-chodnikov`.
+  - Ďalej: ostrovčeky z OSM (zelené a dláždené plochy uzavreté cestami) so zjednodušeným tvarom a obrubníkom.
+  - Body trasy `liszt-slucka` (Námestie Franza Liszta pri stanici) a `cyklopruh-namestie-slobody`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),
@@ -573,7 +653,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   (`js/mapa/dlazdice/pripravit-dlazdicu.js`: shadery na pozadí cez `compileAsync`, veľké textúry zeme po jednej).
   3D fasády sa stavajú po podlažiach a do typovaných polí (menej odpadu v pamäti). **Automatické rozlíšenie**
   (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na minimum predvoľby kvality,
-  pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **F3** ukáže snímky/s, priemerný
+  pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **Ustálenie** (výkon, krok 1): rozlíšenie
+  sa hľadá len prvých 45 s a „auto“ kvalita len prvú minútu (od štartu alebo zmeny voľby). Potom sa nič nemení –
+  obraz nekolíše medzi ostrým a rozmazaným a dlaždice sa neprestavajú s inými textúrami. Výnimkou je núdza:
+  pri dlhých veľmi pomalých snímkach (nad 34 ms, 6 s) sa rozlíšenie zníži o krok. Regresná kontrola
+  `rozlisenie-ustalene`. **F3** ukáže snímky/s, priemerný
   a najhorší čas snímky, počet kreslení, trojuholníky a rozlíšenie (`js/ui/vykon.js`).
 - **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
   kúty, dvory a ulice pri pohľade zhora), vzdušná perspektíva (vzdialené mestá a kopce blednú do farby oblohy),
