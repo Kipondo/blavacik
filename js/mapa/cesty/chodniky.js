@@ -117,7 +117,7 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis, ostrovceky = []) {
         // jednosmerka vľavo: druhý jazdný pás rozdelenej cesty do ~8 m za chodníkom = stredný pás, chodník nie je
         const strednyPas = c.jednosmerka && strana < 0 && vozovky.naVozovke(...bodVo(r1 + 3), c, -8);
         // strana ostrovčeka: namiesto chodníka obrubník (ak sám neleží na vozovke)
-        const ostrov = !blizko && vOstrovceku(ostrovceky, ...bodVo(r0 + SIRKA / 2))
+        const ostrov = !blizko && vOstrovceku(ostrovceky, ...bodVo(r0 + OBRUBNIK + 0.25))
           && !vozovky.naVozovke(...bodVo(r0 + OBRUBNIK + 0.2), null, 0.3);
         const prerus = blizko || naVozovke || strednyPas || ostrov;
         const bod = { ...rad(x, z, nx, nz, r0), prerus, ostrov };
@@ -138,7 +138,7 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis, ostrovceky = []) {
     });
     // roh v ostrovčeku: len obrubník po oblúku
     const stred = Math.floor(p.vnutro.length / 2), [sx, sz] = p.vnutro[stred], [snx, snz] = p.normaly[stred];
-    const vOstrove = vOstrovceku(ostrovceky, sx + snx * SIRKA / 2, sz + snz * SIRKA / 2);
+    const vOstrove = vOstrovceku(ostrovceky, sx + snx * (OBRUBNIK + 0.25), sz + snz * (OBRUBNIK + 0.25));
     if (naVozovke && !vOstrove) continue;
     let pred = null;
     p.vnutro.forEach(([x, z], j) => {

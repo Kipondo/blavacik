@@ -35,11 +35,13 @@ pruhoch – predtým začínal v strede cesty, a preto sa ľavý a pravý pruh k
   pri priechodoch). Lemuje ho obrubník, vnútri je tráva alebo dlažba.
 - **V hre sú všetky ostrovčeky zelené** (tráva aj tam, kde OSM uvádza betón) s obrubníkom po obvode a bez
   chodníka, aby bolo na prvý pohľad jasné, kde je cesta a kde ostrovček.
-- **Ako ich hra nájde** (`js/mapa/cesty/ostrovceky.js`): ostrovček je stena rovinného grafu ciest pre autá
-  a musí splniť tieto podmienky:
-  - plocha medzi osami je menšia ako 1 500 m², alebo ide o úzky pás so strednou šírkou do 12 m;
-  - nie je v nej budova;
-  - po odpočítaní vozoviek ostane kus zelene.
+- **Ako ich hra nájde** (`js/mapa/cesty/ostrovceky.js`):
+  - **ostrovček** je stena rovinného grafu ciest pre autá, ktorá splní tieto podmienky:
+    - plocha medzi osami je menšia ako 1 500 m², alebo ide o úzky pás so strednou šírkou do 12 m;
+    - nie je v nej budova;
+    - po odpočítaní vozoviek ostane kus zelene;
+  - **deliaci pás** je priestor medzi jednosmerným pásom hlavnej cesty a protismerným pásom vľavo od neho
+    (medzera 0,3–12 m, bez budovy). Nájde sa aj tam, kde trieda prechádza cez hranicu dlaždice.
 
 ## Chodníky
 - **Chodník popri ceste:** vozovka – obrubník – (pás zelene so stromami) – chodník – zeleň alebo predzáhradka.
