@@ -5,7 +5,9 @@
 //     po koniec hmly, za ňou sa nestavia nič (pamiatky a skupiny stromov za hmlou skryje js/kamera/dohlad.js),
 //   – keď hra dlhšie nestíha ani pri najnižšom automatickom rozlíšení (js/grafika/rozlisenie.js), dohľad sa skráti
 //     o 15 % (zaokrúhlené na 5 m, najviac na 55 %); keď je rezerva, pomaly sa vráti,
-//   – „auto“: prvý odhad podľa grafickej karty, potom podľa plynulosti o stupeň nižšie (alebo vyššie).
+//   – „auto“: prvý odhad podľa grafickej karty, potom podľa plynulosti o stupeň nižšie (alebo vyššie) – len prvých
+//     USTALENIE_S sekúnd od štartu alebo od zmeny voľby; potom sa úroveň už nemení (zmena úrovne prestavia dlaždice
+//     a mení textúry – to rušilo; výkon, krok 1).
 // hra.stav.dohlad = aktuálny dohľad v m (po skrátení).
 
 import { PREDVOLBY, UROVNE, urovenPreVolbu } from './predvolby.js';
@@ -18,6 +20,7 @@ const OKIEN_HORE = 6;
 const NAJKRATSI = 0.55;    // podiel dohľadu predvoľby, kratší sa nespraví
 const AUTO_DOLE_MS = 30;   // auto: aj pri najkratšom dohľade takto pomalé → nižšia kvalita
 const AUTO_HORE_MS = 9;    // auto: takto rýchle pri plnom rozlíšení a dohľade 30 s → vyššia kvalita
+const USTALENIE_S = 60;    // s – auto mení úroveň len v tomto čase od štartu / zmeny voľby
 const zaokruhli5 = (m) => Math.round(m / 5) * 5;
 
 export default {
@@ -30,6 +33,7 @@ export default {
     this.pomalych = 0; this.rychlych = 0; this.autoRychle = 0;
     this.poslednyZaznam = -1;
 
+    this.zaciatok = performance.now();
     this.popis = vlozKvalituDoMenu(this.volba, (v) => this.zmenVolbu(hra, v));
     this.nastavUroven(hra, urovenPreVolbu(this.volba, hra.renderer?.getContext()));
   },
@@ -37,6 +41,7 @@ export default {
   zmenVolbu(hra, volba) {
     this.volba = volba;
     this.neuspesne.clear();
+    this.zaciatok = performance.now();
     this.nastavUroven(hra, urovenPreVolbu(volba, hra.renderer?.getContext()));
   },
 
@@ -83,7 +88,7 @@ export default {
       if (++this.pomalych >= OKIEN_DOLE) {
         this.pomalych = 0;
         if (this.dohlad > najkratsi) this.nastavDohlad(hra, Math.max(najkratsi, zaokruhli5(this.dohlad * 0.85)));
-        else if (this.volba === 'auto' && m.medianMs > AUTO_DOLE_MS) this._autoDole(hra);
+        else if (this.volba === 'auto' && m.medianMs > AUTO_DOLE_MS && this._hlada()) this._autoDole(hra);
       }
     } else if (m.medianMs < RYCHLE_MS) {
       this.pomalych = 0;
@@ -96,11 +101,16 @@ export default {
     }
 
     // auto: veľká rezerva pri plnom rozlíšení a plnom dohľade → skúsiť vyššiu kvalitu
-    if (this.volba === 'auto') {
+    if (this.volba === 'auto' && this._hlada()) {
       const plne = m.podiel >= 1 && this.dohlad >= p.dohlad;
       this.autoRychle = plne && m.medianMs < AUTO_HORE_MS ? this.autoRychle + 1 : 0;
       if (this.autoRychle >= 20) this._autoHore(hra);
     }
+  },
+
+  /** Auto ešte hľadá úroveň (prvých USTALENIE_S sekúnd)? */
+  _hlada() {
+    return performance.now() - this.zaciatok < USTALENIE_S * 1000;
   },
 
   _autoDole(hra) {
