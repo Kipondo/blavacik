@@ -211,9 +211,10 @@ export const kontrolyCiest = [
   },
   {
     id: 'tunely-zasypane',
-    popis: 'Pred cestnými tunelmi pod rovnou ulicou (hra ich nekreslí) nie je v teréne slepá jama zo zárezu – napr. '
-      + 'Staromestská pod Hodžovým námestím pri Prezidentskom paláci (jama 7 m s oporným múrom)',
-    oprava: 'fix/tunel-hodzovo – tools/mesto/laser/zasyp_tunely.py (zoznam tunely.json); spúšťať po teren.py, pred cesty_teren.py',
+    popis: 'Pred cestnými tunelmi pod rovnou ulicou a pred vjazdmi do podzemných garáží (hra ich nekreslí) nie je '
+      + 'v teréne slepá jama zo zárezu – napr. Staromestská pod Hodžovým námestím pri Prezidentskom paláci (jama 7 m '
+      + 's oporným múrom), Žabotova pod traťou, 12 vjazdov do garáží pod rovnou ulicou',
+    oprava: 'fix/tunel-hodzovo, fix/zasyp-garaze – tools/mesto/laser/zasyp_tunely.py (zoznam tunely.json); spúšťať po teren.py, pred cesty_teren.py',
     tolerancia: 0,
     async spusti(ctx) {
       const chyby = [];
@@ -222,29 +223,35 @@ export const kontrolyCiest = [
       const D = ctx.index.dlazdica;
       const cache = new Map();
       const daj = async (k) => { if (!cache.has(k)) cache.set(k, await teren(k)); return cache.get(k); };
+      const vyska = async (x, z) => {
+        const i = Math.floor(x / D), j = Math.floor(z / D), t = await daj(`${i}_${j}`);
+        if (!t) return NaN;
+        const krok = D / (t.n - 1);
+        return t.H[Math.round((z - j * D) / krok) * t.n + Math.round((x - i * D) / krok)];
+      };
       let n = 0;
       for (const tunel of (await r.json()).tunely ?? []) {
-        for (const [px, pz] of tunel.portaly) {
-          // medián terénu do 60 m od portálu proti najnižšiemu bodu do 30 m = hĺbka jamy
-          const okolie = [], blizko = [];
-          for (let i = Math.floor((px - 60) / D); i <= Math.floor((px + 60) / D); i++) {
-            for (let j = Math.floor((pz - 60) / D); j <= Math.floor((pz + 60) / D); j++) {
-              const t = await daj(`${i}_${j}`);
-              if (!t) continue;
-              const krok = D / (t.n - 1);
-              for (let b = 0; b < t.n; b++) {
-                for (let a = 0; a < t.n; a++) {
-                  const d = Math.hypot(i * D + a * krok - px, j * D + b * krok - pz);
-                  if (d < 60) okolie.push(t.H[b * t.n + a]);
-                  if (d < 30) blizko.push(t.H[b * t.n + a]);
+        for (const [px0, pz0] of tunel.portaly) {
+          // ako zasyp_tunely.py: uzol do 5 m od portálu proti mediánu okna 42 m okolo neho (svah nevadí, len jama)
+          const px = Math.round(px0 / 2) * 2, pz = Math.round(pz0 / 2) * 2;
+          let jama = 0;
+          for (let dx = -4; dx <= 4; dx += 2) {
+            for (let dz = -4; dz <= 4; dz += 2) {
+              if (dx * dx + dz * dz > 25) continue;
+              const h = await vyska(px + dx, pz + dz);
+              if (!Number.isFinite(h)) continue;
+              const okno = [];
+              for (let a = -20; a <= 20; a += 2) {
+                for (let b = -20; b <= 20; b += 2) {
+                  const v = await vyska(px + dx + a, pz + dz + b);
+                  if (Number.isFinite(v)) okno.push(v);
                 }
               }
+              jama = Math.max(jama, median(okno) - h);
             }
           }
-          if (!blizko.length) continue;
           n++;
-          const jama = median(okolie) - Math.min(...blizko);
-          if (jama > 2) chyby.push({ x: px, z: pz, text: `${tunel.nazov}: jama pri portáli ${jama.toFixed(1)} m` });
+          if (jama > 1.5) chyby.push({ x: px0, z: pz0, text: `${tunel.nazov}: jama pri portáli ${jama.toFixed(1)} m` });
         }
       }
       return { skontrolovane: n, chyby };
