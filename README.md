@@ -189,6 +189,36 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Nivy a Nivy Tower podľa skutočnosti (vetva `feature/nivy`, #132)
+- **Prieskum** (OSM, laser, Commons z rokov 2021–2022 vrátane leteckej fotky z dronu, tlačové správy, architekti; bez
+  Google): `napady/pamiatky-podklady.md`. Platí postavený stav, nie vizualizácie z rokov 2017–2019.
+- **Nivy** (`tools/blender/vyskove/nivy.py`, podklady `tools/blender/osm_nivy.py` → `tools/blender/data/nivy.json`):
+  - jednotná hmota po strešný park (21 m, laser) – predtým rôzne vysoké pásy z neúplných častí OSM;
+  - slepá fasáda z béžových panelov so škárami nepravidelnej šírky a tmavé prízemie;
+  - na Mlynských nivách tri presklené výbežky s bielym zaobleným pásom;
+  - **západný vstup:** tenká biela strieška s presklenou trojuholníkovou mriežkou na 4 šikmých stĺpoch v tvare Y.
+    Pod ňou je otvorené predpolie a celopresklená hala; obrys v OSM obkresľuje aj striešku, preto je hmota
+    obrys bez nej;
+  - **strešný park:**
+    - bežecký okruh presne podľa OSM (533 m, overený leteckou fotkou, 2 m, tmavočervený s bielymi okrajmi)
+      a dláždený chodník popri ňom;
+    - trávnik podľa OSM a ~110 stromov;
+    - svetlík v tvare J a pílovitá strecha so 6 šedmi a fotovoltikou;
+    - zapustený dvor s drevenými sedacími schodmi;
+    - drevené valcové pavilóny, hrdzavé kabíny výťahov, technika a žlté „slnko“ na ihrisku;
+  - vchody z OSM sú vo `vchody` (na neskorší interiér).
+- **Nivy Tower** (`tools/blender/vyskove/nivy_tower.py`):
+  - 125 m, sklo v dvoch odtieňoch (zelenkavé a modravé, nie zrkadlo);
+  - šikmé tmavé zárezy („stuhy“) na troch stranách;
+  - severná doska s tmavými žalúziami techniky navrchu;
+  - juhozápadný blok končí ~113 m, na ňom je ustúpená presklená reštaurácia s terasou;
+  - východne od veže je päťuholníková strieška na stĺpoch v tvare Y.
+- **Generovanie:**
+  1. `python3 tools/blender/osm_nivy.py`;
+  2. `blender -b --factory-startup -P tools/blender/vyskove_budovy.py -- nivy nivy_tower`.
+- **Regresná kontrola** `nivy-strieska-vstupu`. **Body trasy:** `nivy` (opravený, kamera bola vnútri budovy),
+  `nivy-tower`, `nivy-vstup`, `nivy-strecha`.
+
 ### Pomník M. R. Štefánika pri Eurovei (vetva `feature/stefanik`, #131 časť 4)
 - **Prieskum** (Vrábel, *Vojenská história* 2010; umeniemesta.sk; Commons; OSM): `napady/pamiatky-podklady.md`. Zadanie
   si predstavovalo leva pri päte, v skutočnosti stojí navrchu pylónu.

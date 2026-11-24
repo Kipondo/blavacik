@@ -749,3 +749,88 @@ Zdroje:
   - [lev](https://commons.wikimedia.org/wiki/File:Lev_socha,_Bratislava_18_Slovakia.jpg);
   - [z Dunaja](https://commons.wikimedia.org/wiki/File:Bratislava_z_Dunaja_2.jpg);
 - OSM: [uzol 915661112](https://www.openstreetmap.org/node/915661112), [uzol 4953350157](https://www.openstreetmap.org/node/4953350157).
+
+## Nivy a Nivy Tower (#132; 24. 11. 2026)
+
+Prieskum: OSM (Overpass a API), laserové výšky v dlaždiciach hry a fotky z Commons z rokov 2021–2022. Jednu takmer kolmú
+fotku z dronu som georeferencoval podľa OSM (7,74 px/m) a meral z nej strechu. Ďalej tlačové správy a stránky architektov.
+Google som nepoužil. Platí postavený stav: vizualizácie z rokov 2017–2019 (zelenkavá strieška, „pétanque“, „bouldering“)
+sa nepostavili.
+
+**Nivy – centrum a autobusová stanica** (Benoy, SIEBERT + TALAŠ; strecha BDP, 2ka, Terra Florida; HB Reavis; otvorené
+30. 9. 2021):
+- **Hmota:** obrys OSM 829898609 má ~349 × 151 m a 40 980 m², dlhá os ~99°.
+  - Nad zemou sú 3 obchodné podlažia a strešný park na úrovni ~21 m (laser).
+  - V podzemí je na −1 autobusová stanica (~30 000 m², od 2025 prestavba), na −2 parkovisko.
+  - Východná tretina strechy je otvorené parkovisko.
+- **Fasáda:** nad prízemím je takmer slepá, z veľkých béžových panelov nepravidelných šírok (materiál žiadny zdroj
+  neuvádza). Pri zemi sú tmavosivé panely a úzke zelené steny.
+  - Na Mlynských nivách sú **tri presklené výbežky** (OSM 1243845382 / 81 / 79, ~35–38 × 13–17 m). Na 2. podlaží majú
+    reštaurácie za oblým pásom skla, nad ním biely zaoblený pás po strechu a pod ním biely lem.
+- **Hlavný vstup** je na západnom konci fasády pri Mlynských nivách (OSM 989250478):
+  - tenká biela, mierne lomená doska ~50 × 25 m s LED linkou po okraji, na úrovni strechy ~17–20 m;
+  - presklený otvor ~26 × 12 m s 5 priečnymi nosníkmi a nepravidelnou trojuholníkovou mriežkou;
+  - nesú ju **4 šikmé sivé stĺpy v tvare Y**;
+  - pod ňou je celopresklená vstupná hala.
+
+  Podobná klinovitá strieška (~33 × 32 m) je pri Nivy Tower.
+- **Strešný park** (12 000 m², viac ako 130 stromov):
+  - **bežecký okruh** – oficiálne 550 m; OSM way 1579717717 má 533 m a os z fotky z dronu leží do 0,5 m od nej. Je široký
+    ~2 m, tmavočervený, bez čiar. Popri ňom ide svetlý dláždený chodník široký 3–4 m (OSM 1058302220);
+  - **svetlík v tvare J** – rameno ~105 × 11,6 m (na východe rozšírené na ~16 m), oblúk s vonkajším polomerom ~25 m
+    a severné rameno ~13 × 55 m; nízka klenba s jemnou mriežkou;
+  - **pílovitá strecha** nad halou – ~60 × 30 m, 6 šedov s presklením na sever, fotovoltika na južnom;
+  - **zapustený dvor** – ~75 × 37 m, podlaha na 2. podlaží, drevené sedacie schody, žltá lezecká stena, esovitá drevená
+    rampa;
+  - **pavilóny a kabíny** – dva drevené valcové pavilóny so zelenou strechou, 5 hrdzavých kabín výťahov;
+  - **ihrisko „slnečná sústava“** – žlté slnko s prstencami.
+- **Výšky nad parkom:** technika ~28,8 m, kabíny 25–28 m (laser).
+
+**Nivy Tower** (Benoy + SIEBERT + TALAŠ, 2017–2020):
+- **Rozmery:** 125 m, 30 nadzemných a 3 podzemné podlažia. Obdĺžnik ~52 × 27 m (OSM 662313148), dlhá os ~98,8°,
+  schodík 1,4 m na južnej strane.
+- **Zárezy („stuhy“):** hmotu delia na troch stranách šikmé tmavé zárezy (ASB).
+  - Južný ide od 15 m od JZ rohu pri zemi po ~33 m pri streche (~8–9°), merané na ortofote.
+  - Východný ide od 16 m po 12 m od JV rohu, západný je ~12 m od JZ rohu.
+  - V noci v nich svieti modrá LED.
+- **Hmota nahor:**
+  - Severná doska a juhovýchodný blok idú po 125 m; severná doska má navrchu ~2 podlažia tmavých protidažďových žalúzií
+    nad technikou.
+  - Juhozápadný blok končí ~113 m. Na ňom je ustúpená presklená reštaurácia (29. NP) s terasou na juhozápad.
+  - Strieška, koruna ani anténa nie sú.
+- **Fasáda:** závesová stena (19 000 m² skla Saint-Gobain) v dvoch odtieňoch, zelenkavom a modravom.
+  - Odrazivosť je len 13–26 %, takže v slnku pôsobí oceľovo modro, pod mrakmi tmavomodro – nie je to zrkadlo.
+  - Má potlačené nepriehľadné polia a modul ~1,35–1,40 m.
+  - Prízemie a reštaurácia sú priehľadné. Logo nájomcu sa nemodeluje.
+- **Vstup:** päťuholníková strieška východne od veže (OSM 829898611, ~34 × 32 m) – biely podhľad, presklený stred,
+  stĺpy v tvare Y.
+
+**Rozhodnutia pre model:**
+- **Generovanie:** `tools/blender/osm_nivy.py` vyrobí `tools/blender/data/nivy.json` a `tools/blender/vyskove/nivy.py`
+  z neho model.
+- **Hmota Nív:** postavená z hlavného obrysu po park (21 m), s otvorom pre dvor. Časti z OSM nemajú hmotu po park
+  modelovanú jednotne – hlavný obrys má 7 podlaží a väčšina častí 2–4.
+- **Strieška pri veži** je v modeli `nivy-tower`.
+- **Interiér:** vchody z OSM sú vo `vchody` (na neskorší interiér).
+
+**Neisté – vlastné fotky by pomohli:**
+- západná strieška zboku z chodníka pri zastávke (výška, poloha stĺpov) a pohľad hore na mriežku;
+- dráha zblízka (povrch, značky);
+- severná (Páričkova) a východná fasáda Nív;
+- Nivy Tower:
+  - celá z juhozápadu (zárezy, ustúpená reštaurácia);
+  - východná strana (zárez a žalúzie);
+  - západná strana.
+
+Zdroje:
+- [HB Reavis – Nivy](https://hbreavis.com/en/project/nivy-mall/);
+- [noviny.sk 2021](https://www.noviny.sk/slovensko/633454-hb-reavis-postavil-bratislave-novu-autobusovu-stanicu);
+- [EFB – zelená strecha](https://efb-greenroof.eu/?p=8775);
+- [Benoy](https://www.benoy.com/news/2021/10/benoy-project-nivy-opens-in-bratislava/);
+- [BIG SEE 2023](https://bigsee.eu/?p=130866);
+- [Wikipédia](https://sk.wikipedia.org/wiki/Nivy_(multifunk%C4%8Dn%C3%A9_centrum));
+- [startitup 2025 – prestavba stanice](https://www.startitup.sk/autobusova-stanica-nivy-v-bratislave-prechadza-rekonstrukciou-toto-su-najzasadnejsie-zmeny/);
+- [HB Reavis – Nivy Tower](https://hbreavis.com/en/project/nivy-tower-2/);
+- Saint-Gobain *Glass for Façade 2019*, s. 34–35;
+- Commons – séria z otvorenia 30. 9. 2021 (CC BY 2.0, ŽupaBA) a `Nivy Centrum in Bratislava.jpg` (2022);
+- OSM ways 829898609, 662313148, 1579717717, 1058302220, 989250478, 829898611, relation 22058963.
