@@ -907,3 +907,95 @@ Zdroje:
 - [archinfo.sk – obnova ocele 2022](https://www.archinfo.sk/diskusia/blog/pamiatky-historia/obnova-ocelovej-konstrukcie-budovy-slovenskeho-rozhlasu-v-bratislave-bola-oficialne-ukoncena.html)
 - [Commons – kategória](https://commons.wikimedia.org/wiki/Category:Slovak_Radio_Building)
 - OSM: ways 5215475, 277448084, 372316287–92, 616786276, uzly 700362876 a 3730845224.
+
+## Národná banka Slovenska (#126; 24. 11. 2026)
+
+**Stavba:** Martin Kusý a Pavol Paňák (víťazný návrh súťaže), výstavba od 11/1996, otvorená 23. 5. 2002. Zhotoviteľ
+Združenie H–V–Z (Hydrostav, Váhostav, ZIPP). 33 nadzemných podlaží, z nich 6 tvorí podnož, 3 podzemné + medzipodlažie.
+Výška 111 m (NBS), 111,6 m po strechu (OSM, SkyscraperPage), 111,7 m (CTBUH). Zastavaná plocha 6 272 m².
+Dvojplášťová fasáda, 23 výťahov, z toho 6 rýchlovýťahov (3,15 m/s) v obvodovej presklenej šachte veže.
+
+**Poloha:** záznam v hre (549,38; −1 099,95) je ťažisko celej budovy (OSM way 10158374), je správny. Terén pri hlavnom
+vstupe má ~146,7 m n. m., k Slovanskej klesá na ~145,0 m. Model preto stojí na teréne pri vstupe.
+
+**Veža** (OSM way 229588344, fotky z Commons):
+- **Pôdorys „kvapka“:** na západ (k Mýtnej a Námestiu slobody) kruhový oblúk s polomerom ~21,8 m a uhlom ~120°.
+  Z neho idú na východ dve navzájom kolmé rovné steny po ~23,5 m (azimuty 122° a 33°) a zaoblený východný roh (R ~10 m).
+- **Fasáda:** sklo číre až jemne zelenkavomodré, v module ~1,4 m. Na každom podlaží je strieborný vodorovný pás – lávka
+  medzi plášťami. Na oblúku pôsobia pásy veľmi výrazne.
+- **Zaoblený východný roh:** obložený tmavými kovovými lamelami (~#3f4246) po celej výške.
+- **Šachta výťahov:** vedľa rohu je úzka presklená šachta panoramatických výťahov, ktorá prečnieva nad strechu.
+- **Zužovanie v troch stupňoch:**
+  - **Spodný pás** (OSM 411828059) okolo oblúka, ~5 m hlboký. Má 10 podlaží a končí terasou na ~34,5 m.
+    Na hrane terasy je von sklonené sklenené zábradlie ~1,4 m na šikmých oceľových konzolách.
+  - **Dve „plecia“** (OSM 411828062/065) pozdĺž rovných stien, každé ~23,5 × 5 m, siahajú po ~77 m.
+    - OSM uvádza 20 podlaží, laser však nameral ~77,8 m, čo zodpovedá 22 – 23 podlažiam.
+    - Ich 5 m široké čelá vedľa oblúka sú od ~33 m nahor obložené tmavými lamelami. To sú tmavé zvislé pásy, ktoré
+      vidno z Námestia slobody.
+  - **Hlavné teleso** končí plochou strechou s heliportom na ~111 m.
+- **Koruna:**
+  - nad posledným podlažím presklená atika a za ňou tmavšie technické podlažie;
+  - nad oblou časťou kruhová oceľová obruč heliportu (~25 m) s radiálnymi rebrami;
+  - na JZ tenký stožiar s bleskozvodom.
+  - Na heliporte nikdy nepristál vrtuľník.
+- **Výška podlažia veže** je ~3,4 m (odhad z lasera: strecha podnože ~12,8 m, terasa pásu ~34,5 m, plecia ~77 m,
+  heliport ~111 m).
+
+**Podnož** (OSM 411828068, 1278278316/17/19/20):
+- **Rozsah:** zaberá celý blok medzi Mýtnou, Imricha Karvaša a Slovanskou.
+- **Kamenná časť:** 2 podlažia (~8,4 m) obložené leštenou portugalskou žulou, svetlou béžovosivou s ružovkastým
+  nádychom (~#b8afa6).
+  - Úzke zvislé okná: ~0,9 × 1,8 m, v prízemí ~2,6 m, os ~2,2 – 2,4 m.
+  - Pri vstupe je stena zaoblená (vypuklá).
+  - Strany k Slovanskej a Imricha Karvaša sú biele.
+- **Hlavný vstup:** vysoký presklený zárez (~7 m) na rohu Mýtnej a Imricha Karvaša, otočený na JZ.
+- **Ustúpené presklené podlažie** nad kameňom; pred ním stoja štíhle okrúhle stĺpy (~0,4 m, rozostup ~6,5 m).
+- **Vyššie krídlo** k Slovanskej siaha do ~21,4 m. Vnútri sú tri átriá, hlavné má lipy, nad ním je sklená strecha.
+- **Severná špica** (OSM 1278278319): 6 podlaží, biela, do ~20 m.
+
+**Strieška („markíza“, OSM 411828074, `building:part=roof`):**
+- **Stavba:** železobetónová doska nad celou 4-podlažnou časťou podnože; podhľad ~12 m, hrana ~0,8 m (~#cfcfcb).
+- **Tvar:** nad rohom pri vstupe vystrkuje ostrý klin – hrany ~35 m pozdĺž Mýtnej a ~64 m pozdĺž Imricha Karvaša.
+- **Podhľad:** tmavý kazetový rošt ~2,2 × 2,2 m – svetlejšie rebrá (~#9a9893), tmavé kazety (~#3f3a36).
+- **Podpory:** pod klinom ju nesú vysoké štíhle stĺpy od terénu a **dva kamenné pylóny** (~0,85 m).
+  - Pylóny prechádzajú kruhovými otvormi v doske (~4,5 m); v otvoroch je biely svietiaci disk.
+  - Na pylónoch visia zvislé zástavy ~1,4 × 4 m (vrch ~9,6 m): **SR vľavo a EÚ vpravo** pri pohľade od Mýtnej (od 2017).
+- **Nápis:** veľký nápis s názvom banky na budove nie je.
+
+**Biatec** (OSM node 4134276196):
+- **Dielo:** bronzová socha mince od Ľudmily Cvengrošovej, model z roku 1988, signatúra „CVENGROŠOVÁ 88“.
+  Odhalili ju v decembri 2008 ako symbol prechodu na euro.
+- **Rozmery:** ~317 × 349 cm, minca ~3,2 m.
+- **Podstavec:** krátka trojboká bronzová nôžka na bielom betónovom valci (~1 m, výška 26 cm) a štvorcovej doske ~1,8 m.
+- **Líce:** cválajúci kôň s jazdcom (vavrínový veniec, ratolesť s lipovými listami) a nápis „BIATEC“.
+- **Rub:** keltský ornament a nápis „BIATEC VLÁDCA KELTOV / NA ÚZEMÍ BRATISLAVY / SÚČASNÍK JÚLIA CAESARA“.
+- **Natočenie:** líce hľadí od budovy k ulici.
+- **Farba:** patina ~#5b5340, vyleštené časti ~#9c8458.
+- **Iná socha:** od 06/2025 stojí pred budovou aj socha Imricha Karvaša. Je v `data/mapa/sochy.json` a model ju nemení.
+
+**Rozhodnutia pre model** (`tools/blender/vyskove/nbs.py`):
+- **Tvar veže:** oblúk a zaoblený roh sú kružnice preložené bodmi OSM. Plecia, pás a podnož sú z obrysov OSM; zaoblená
+  stena pri vstupe je vyhladená.
+- **Kolízie:** pod strieškou sa dá prejsť, kolíziu majú len podnož, pylóny, stĺpy a socha.
+- **Biatec** je súčasťou modelu – socha z OSM ustúpi (`nahraditSochy`).
+- **Rub mince** je bez textu: písmená by mali ~0,12 m a v hre by sa nedali prečítať.
+
+**Neisté – vlastné fotky by pomohli:**
+1. koruna veže zblízka (z Námestia slobody teleobjektívom);
+2. podhľad striešky so stĺpmi zo stredu Imricha Karvaša pred vstupom, pohľad na SV;
+3. čelo „pleca“ s lamelami;
+4. strana k Slovanskej (vyššie krídlo podnože).
+
+Zdroje:
+- [NBS – leták o budove (2016)](https://nbs.sk/_img/documents/_publikacie/ostatnepublik/budovanbs.pdf)
+- [nextroom.at (H. Moravčíková)](https://nextroom.at/building.php?id=30748)
+- [ÖGFA – Architekturtage 2010](https://oegfa.at/programm/architekturtage/architekturtage-2010/headquarters-of-the-national-bank-of-slovakia)
+- [CTBUH Skyscraper Center](https://www.skyscrapercenter.com/building/narodna-banka-slovenska/9035)
+- [SkyscraperPage](https://skyscraperpage.com/cities/?buildingID=500)
+- [Wikipedia – National Bank of Slovakia Tower](https://en.wikipedia.org/wiki/National_Bank_of_Slovakia_Tower)
+- [noviny.sk – heliport (2023)](https://www.noviny.sk/slovensko/858508-heliport-bez-helikoptery-ake-su-plany-s-nevyuzivanou-plochou)
+- [Umenie mesta – Biatec](https://www.umeniemesta.sk/diela/recdg8AVBEN1XstYJ)
+- [pam.epocha.sk – Biatec](https://pam.epocha.sk/pamatniky-bratislava/stare-mesto/biatec-ul-imricha-karvasa)
+- [Commons – kategória](https://commons.wikimedia.org/wiki/Category:National_Bank_of_Slovakia_(Bratislava))
+- OSM: ways 10158374, 229588344, 411828059/62/65/68/74, 1278278316/17/19/20, uzly 4134276196, 4134276201, 4134276207/08.
+- Laser ÚGKK (DMP − DMR) z dlaždíc hry.

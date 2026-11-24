@@ -50,4 +50,29 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'nbs-strieska',
+    popis: 'Národná banka Slovenska: veľká strieška pred vstupom (OSM 411828074, building:part=roof) je doska na stĺpoch – '
+      + 'pod ňou sa dá prejsť (nie plná kamenná krabica), budovy dlaždíc sú tam vyhodené a socha Biatec je súčasťou modelu',
+    oprava: 'feature/nbs (#126) – tools/blender/vyskove/nbs.py podľa prieskumu',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/nbs.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/nbs.json' }] };
+      const info = await r.json();
+      const lok = ([x, z]) => [x - info.stred[0], z - info.stred[1]];
+      // body pod klinom striešky (medzi pylónmi zástav a stenou podnože) a pri soche Biatec
+      const podStrieskou = [[500.0, -1066.0], [503.0, -1058.0], [498.5, -1072.0]].map(lok);
+      const biatec = lok([481.7, -1049.4]);
+      if (!info.bezKoliziiObrysov) chyby.push({ text: 'obrysy modelu robia kolízie – strieška by bola plný blok' });
+      const kolizie = info.bezKoliziiObrysov ? (info.kolizie ?? []) : (info.obrysy ?? []);
+      for (const [x, z] of podStrieskou) {
+        if (kolizie.some((k) => vnutri(x, z, k))) chyby.push({ text: `bod pod strieškou (${x.toFixed(1)}, ${z.toFixed(1)}) je v kolízii` });
+        if (!(info.nahradit ?? []).some((k) => vnutri(x, z, k))) chyby.push({ text: `pod strieškou (${x.toFixed(1)}, ${z.toFixed(1)}) ostávajú budovy dlaždíc` });
+      }
+      if (!(info.nahraditSochy ?? []).some((k) => vnutri(biatec[0], biatec[1], k))) chyby.push({ text: 'socha Biatec z OSM sa stavia navyše k modelu' });
+      return { skontrolovane: podStrieskou.length + 1, chyby };
+    },
+  },
 ];

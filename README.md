@@ -205,6 +205,22 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
     stĺpoch.
 - **Regresná kontrola** `pyramida-tvar`. **Bod trasy** `pyramida` – z miesta, kde stál majiteľ.
 
+### Národná banka Slovenska verne (vetva `feature/nbs`, #126)
+- **Prieskum** (leták NBS, nextroom, ÖGFA, CTBUH, Wikipédia, Umenie mesta, Commons, OSM, laser; bez Google):
+  `napady/pamiatky-podklady.md`.
+- **Predtým:** veľká strieška pred vstupom bola plná kamenná krabica s pásmi okien („sivá krabica“) a chýbali
+  zástavy aj socha mince.
+- **Teraz** (`tools/blender/vyskove/nbs.py`):
+  - **veža:** pôdorys „kvapka“ so strieborným pásom na každom podlaží. Spodný presklený pás má terasu a sklonenú
+    sklenenú zástenu. Plecia do ~77 m majú čelá z tmavých lamiel. Zaoblený východný roh je lamelový, vedľa neho je
+    presklená šachta výťahov. Navrchu heliport s oceľovou obručou a stožiar;
+  - **podnož:** žula s úzkymi oknami, zaoblená stena a vysoký presklený vstup na rohu, ustúpené presklené podlažie,
+    biele krídla a átrium;
+  - **strieška:** tenká doska s kazetovým podhľadom na štíhlych stĺpoch, nad rohom vystrkuje klin. Pod ňou sa dá prejsť;
+  - **pred budovou:** dva kamenné pylóny prechádzajú otvormi v strieške, visia na nich zástavy SR a EÚ. Bronzová minca
+    Biatec má jazdca na koni a nápis BIATEC.
+- **Regresná kontrola** `nbs-strieska`. **Bod trasy** `nbs` – od Biatecu, kde stál majiteľ.
+
 ### Nivy a Nivy Tower podľa skutočnosti (vetva `feature/nivy`, #132)
 - **Prieskum** (OSM, laser, Commons z rokov 2021–2022 vrátane leteckej fotky z dronu, tlačové správy, architekti; bez
   Google): `napady/pamiatky-podklady.md`. Platí postavený stav, nie vizualizácie z rokov 2017–2019.
