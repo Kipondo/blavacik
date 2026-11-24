@@ -6,6 +6,8 @@
     { "id": "obchodna", "nazov": "Obchodná", "x": 250, "z": -370, "azimut": 320, "pohlady": ["ulica", "zhora"] },
     { "id": "hodzovo-namestie", "nazov": "Hodžovo námestie", "x": 100, "z": -560, "azimut": 0, "pohlady": ["ulica", "zhora"] },
     {"id": "hodzovo-tunel", "nazov": "Hodžovo nám. – nájazd do tunela", "x": 45, "z": -555, "azimut": 220, "pohlady": ["ulica", "zhora"]},
+    {"id": "zabotova-trat", "nazov": "Žabotova – koniec pod traťou pri stanici", "x": 82, "z": -1640, "kamera": [77, 1.7, -1600], "ciel": [83, 1, -1655], "vzdialenost": 70, "vyska": 50, "azimut": 200, "pohlady": ["ulica", "zhora"]},
+    {"id": "nivy-rampa", "nazov": "Mlynské nivy – vjazd do garáže", "x": 1423, "z": -301, "kamera": [1366, 1.7, -310], "ciel": [1428, 0, -300], "vzdialenost": 70, "vyska": 50, "azimut": 90, "pohlady": ["ulica", "zhora"]},
     { "id": "safarikovo-namestie", "nazov": "Šafárikovo námestie", "x": 620, "z": 215, "azimut": 140, "pohlady": ["ulica", "zhora"] },
     { "id": "most-snp-sever", "nazov": "Most SNP z nábrežia", "x": -90, "z": 420, "azimut": 210, "pohlady": ["ulica"],
       "kamera": [-120, 18, 445], "ciel": [-231, 30, 700] },
