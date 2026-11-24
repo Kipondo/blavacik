@@ -6,6 +6,7 @@
 import { vytvorCesty } from '../../../js/mapa/cesty/cesty.js';
 import { vytvorChodniky } from '../../../js/mapa/cesty/chodniky.js';
 import { najdiKrizovatky } from '../../../js/mapa/cesty/krizovatky.js';
+import { tvarKrizovatky, tvarSpoja, spojeCiest } from '../../../js/mapa/cesty/krizovatky-tvar.js';
 import { mriezkaVozoviek } from '../../../js/mapa/cesty/vozovky.js';
 
 const ROVINA = { vyska: () => 0, vyskaTerenu: () => 0 };
@@ -78,14 +79,19 @@ export const kontrolyCiest = [
         const odch = [];
         for (const c of d.cesty ?? []) {
           if (c.most || c.nadjazd || !(c.body?.length > 1)) continue;
+          // vzorka každé 2 m dĺžky osi (nezávisle od počtu bodov – zaoblené lomy osi pridali body, js/mapa/cesty/upravy-osi.js),
+          // bez krajného radu uzlov dlaždice (cesta pozdĺž hranice z nej vychádza a vracia sa – profil by preskakoval)
           const prof = [];
+          let dalsia = 0, s0 = 0;
           for (let k = 1; k < c.body.length; k++) {
             const [ax, az] = c.body[k - 1], [bx, bz] = c.body[k];
-            const L = Math.max(1, Math.floor(Math.hypot(bx - ax, bz - az) / 2));
-            for (let s = 0; s < L; s++) {
-              const u = (ax + (bx - ax) * s / L - i * ctx.index.dlazdica) / krok, v = (az + (bz - az) * s / L - j * ctx.index.dlazdica) / krok;
-              if (u >= 0 && u < t.n - 1 && v >= 0 && v < t.n - 1) prof.push(t.H[Math.round(v) * t.n + Math.round(u)]);
+            const L = Math.hypot(bx - ax, bz - az);
+            for (; dalsia < s0 + L; dalsia += 2) {
+              const f = L > 0 ? (dalsia - s0) / L : 0;
+              const u = (ax + (bx - ax) * f - i * ctx.index.dlazdica) / krok, v = (az + (bz - az) * f - j * ctx.index.dlazdica) / krok;
+              if (u >= 1 && u <= t.n - 2 && v >= 1 && v <= t.n - 2) prof.push(t.H[Math.round(v) * t.n + Math.round(u)]);
             }
+            s0 += L;
           }
           if (prof.length < 12) continue;
           let suma = 0;
@@ -204,6 +210,53 @@ export const kontrolyCiest = [
             max = Math.max(max, Math.abs(ha - hb));
           }
           if (max > 0.3) chyby.push({ dlazdica: kluc, text: `šev ${kluc} | ${sused}: ${max.toFixed(2)} m` });
+        }
+      }
+      return { skontrolovane: n, chyby };
+    },
+  },
+  {
+    id: 'krizovatky-oble-rohy',
+    popis: 'Asfalt križovatky má tvar podľa ciest s oblými rohmi (nie kruh cez okraje) bez prekrížených obrysov '
+      + '(„háčiky“ pri vidliciach) a spoj dvoch ciest so zlomom nemá na vonkajšej strane klin trávy (pravidlá ulice)',
+    oprava: 'feature/pravidla-ulice – js/mapa/cesty/krizovatky-tvar.js, plochy-krizovatiek.js, upravy-osi.js',
+    tolerancia: 10,
+    spusti(ctx) {
+      const chyby = [];
+      const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]));
+      const pretina = (a, b, c, d) => o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+      const jednoduchy = (P) => {
+        for (let i = 0; i < P.length; i++) {
+          for (let j = i + 2; j < P.length; j++) {
+            if (i === 0 && j === P.length - 1) continue;
+            if (pretina(P[i], P[(i + 1) % P.length], P[j], P[(j + 1) % P.length])) return false;
+          }
+        }
+        return true;
+      };
+      const vnutri = (x, z, P) => {
+        let c = false;
+        for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+          if ((P[i][1] > z) !== (P[j][1] > z) && x < (P[j][0] - P[i][0]) * (z - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0]) c = !c;
+        }
+        return c;
+      };
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        const cesty = d.cesty ?? [];
+        const { krizovatky } = najdiKrizovatky(cesty);
+        for (const k of krizovatky.values()) {
+          const t = tvarKrizovatky(k, cesty);
+          if (!t) continue;
+          n++;
+          if (!jednoduchy(t.obrys)) chyby.push({ x: k.x, z: k.z, dlazdica: kluc, text: `prekrížený obrys križovatky (${t.ramena.length} ramien)` });
+        }
+        for (const k of spojeCiest(cesty, krizovatky)) {
+          const t = tvarSpoja(k, cesty);
+          if (!t) continue;
+          n++;
+          const m = t.obrys[Math.floor(t.obrys.length / 2)];
+          if (!vnutri(k.x + (m[0] - k.x) * 0.8, k.z + (m[1] - k.z) * 0.8, t.obrys)) chyby.push({ x: k.x, z: k.z, dlazdica: kluc, text: 'klin na vonkajšej strane spoja ciest' });
         }
       }
       return { skontrolovane: n, chyby };

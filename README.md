@@ -556,6 +556,26 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   - **Chodníky:** chodník sa preruší aj tam, kde by ležal na vlastnej vozovke (vnútorná strana ostrej zákruty).
     Jednosmerky majú chodník po oboch stranách. Vľavo nie je len tam, kde je do ~8 m druhý pás rozdelenej cesty,
     teda stredný pás. Kontrolór mapy `chodnik-na-vozovke` 23 150 → 0.
+- **Pravidlá ulice – jednoduchosť a jasnosť** (#136, časť 1):
+  - **Rovné ulice a plynulé oblúky** (`js/mapa/cesty/upravy-osi.js`): os cesty sa pri načítaní dlaždice zjednoduší
+    (Douglas–Peucker, 0,4 m), takže rovná ulica nemá cikcak z kreslenia v OSM. V lome sa namiesto ostrého rohu vloží
+    krátky oblúk (odsek najviac 4 m). Body, ktoré cesta zdieľa s inou cestou (križovatky), a konce ostávajú presne
+    na mieste. Kontrolór mapy `cesta-strma` 164 → 151.
+  - **Biele okrajové čiary** majú všetky cesty okrem obslužných, obytných zón a poľných ciest. V strede sú
+    prerušované alebo plné čiary ako doteraz.
+  - **Križovatky s oblými rohmi** (`js/mapa/cesty/krizovatky-tvar.js`, `plochy-krizovatiek.js`): asfalt križovatky
+    je presne medzi okrajmi ciest, ktoré sa v nej stretajú. Medzi susednými ramenami je oblý roh s vrcholom
+    v priesečníku okrajov. Ramená sledujú os cesty, aj keď sa hneď za križovatkou zatáča. Predtým to bol kruh.
+    Pri vidliciach (ramená pod malým uhlom) ide tvar po vonkajších okrajoch. Kde jedna cesta končí a druhá pod
+    uhlom začína, je na vonkajšej strane ohybu oblý spoj – predtým tam ostal klin trávy.
+    Regresná kontrola `krizovatky-oble-rohy`.
+  - **Pokojnejší asfalt:** menej a jemnejšie praskliny a záplaty na vozovke aj na asfaltovom chodníku
+    (`js/mapa/cesty/opotrebenie.js`, `js/mapa/teren/material-zeme.js`).
+  - **Bez druhého pásu asfaltu za chodníkom:** pri cestách s 3D chodníkom siaha asfaltový lem zeme len pod chodník
+    (2,6 m), nie 3,5 m (`js/mapa/teren/textura-zeme.js`). Poradie je cesta – obrubník – chodník – tráva/dlažba.
+  - Ďalej: obrubníky po všetkých okrajoch ciest a rohy chodníkov pozdĺž oblých rohov križovatiek, potom ostrovčeky
+    s obrubníkom.
+  - Body trasy `liszt-slucka` (Námestie Franza Liszta pri stanici) a `cyklopruh-namestie-slobody`.
 - **Laserové skenovanie ÚGKK (etapa a2 z issue #8) – výrez Starého Mesta s Hradným kopcom** (1,5 × 1 km,
   od Michalskej brány po nábrežie a hrad, dlaždice −2…0 × −1…0), na ktorom sa postup ladí pred spustením na celé mesto:
   - terén celého mesta z DMR 6.0 (predtým Copernicus: Staré Mesto bolo o 6–10 m vyššie, hradná plošina o 10 m nižšie),

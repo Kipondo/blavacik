@@ -107,8 +107,8 @@ ${KAMEN_GLSL}`)
         // (procedurálne, bez ďalšej textúry – shader zeme už má takmer všetkých 16 textúrových jednotiek)
         float zrnoA = mix(0.5, sum2(vSvet * 7.0) * 0.6 + sum2(vSvet * 19.0) * 0.4, 1.0 - smoothstep(8.0, 35.0, length(vViewPosition)));
         vec3 asfaltCh = vec3(0.092, 0.09, 0.087) * (0.82 + 0.3 * fbm2(vSvet * 0.04)) * (0.86 + 0.28 * zrnoA);
-        asfaltCh *= mix(1.0, 0.78, step(0.62, fbm2(vSvet * 0.09 + 7.0)));
-        asfaltCh *= mix(1.0, 0.6, (1.0 - smoothstep(0.0, 0.015, abs(fbm2(vSvet * 0.25 + 3.0) - 0.5))) * step(0.5, sum2(vSvet * 0.05)));
+        asfaltCh *= mix(1.0, 0.9, step(0.66, fbm2(vSvet * 0.09 + 7.0)));
+        asfaltCh *= mix(1.0, 0.85, (1.0 - smoothstep(0.0, 0.012, abs(fbm2(vSvet * 0.25 + 3.0) - 0.5))) * step(0.68, sum2(vSvet * 0.05)));
         diffuseColor.rgb = mix(diffuseColor.rgb, kocky, wK);
         diffuseColor.rgb = mix(diffuseColor.rgb, mix(chodnik, asfaltCh, wA / max(wC, 1e-3)), wC);
         // veľké svetlé kamenné dosky v radoch (námestia, pešia zóna): textúra = 4 × 4 m (tools/textury/dosky.py)

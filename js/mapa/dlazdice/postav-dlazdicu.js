@@ -54,7 +54,7 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   // asfalt a značenie (značenie pri križovatkách končí – js/mapa/cesty/cesty.js, #136)
   g.add(vytvorCesty(cesty.filter((c) => !c.nadjazd), vyskopis, krizovatky, d.prvky?.prechody));
   yield;
-  g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis));
+  g.add(vytvorPlochyKrizovatiek(krizovatky, vyskopis, cesty));
   yield;
   g.add(vytvorChodniky(cesty, krizovatky, vyskopis));
   yield;

@@ -22,7 +22,6 @@ export const NAD_TERENOM = 0.12;
 export const MIERKA_ASFALTU = 9;   // m na jedno opakovanie textúry asfaltu (svetové súradnice)
 const VOLNO_KRIZOVATKY = 1.0;      // m – značenie končí kúsok pred plochou križovatky
 const VOLNO_PRECHODU = 2.5;        // m – polovica medzery v značení pod zebrou (zebra má 3,5 m)
-const S_OKRAJMI = new Set(['motorway', 'trunk', 'primary', 'motorway_link', 'trunk_link']);
 // obslužné cesty (vjazdy do dvorov, parkovísk): značenie hlavnej cesty cez ne pokračuje, ich vlastné pri nej končí
 const DROBNE = new Set(['service', 'living_street', 'track', 'unknown']);
 
@@ -69,7 +68,8 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null)
     const body = zjemni(c.body, KROK);
     if (body.length < 2) continue;
     pridajPas(asfalt, body, c.sirka / 2, NAD_TERENOM, vyskopis, { svet: true });
-    const okraje = S_OKRAJMI.has(c.typ);
+    // biela plná čiara pri oboch okrajoch – všetky cesty okrem obslužných (pravidlá ulice)
+    const okraje = !DROBNE.has(c.typ);
     const pruhy = c.typ === 'service' || c.typ === 'living_street' ? 1 : Math.max(1, Math.min(6, (c.pruhy ?? 2) | 0));
     const k = `${pruhy}|${!!c.jednosmerka}|${okraje}`;
     if (!skupiny.has(k)) skupiny.set(k, { pruhy, jednosmerka: !!c.jednosmerka, okraje, poz: [], uv: [], idx: [] });
