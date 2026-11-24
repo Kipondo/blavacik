@@ -13,6 +13,7 @@ import { nacitajHustuZelen, doplnHustuZelen } from '../zelen/husta-zelen.js';
 import { bezNahradenych, bezStromovVNahradenych } from '../pamiatky/nahradene-budovy.js';
 import { upravOsiCiest } from '../cesty/upravy-osi.js';
 import { upravSirkyPasov } from '../cesty/sirky-pasov.js';
+import { nastavLodDlazdice } from './lod-zeme.js';
 
 // predvolené okruhy (bez predvoľby kvality); skutočné nastaví nastavPolomery() podľa js/grafika/predvolby.js
 export const POLOMER_DETAIL = 900;
@@ -173,6 +174,15 @@ export class SpravaDlazdic {
         }
         this.uloha = null;
         this._pridaj(kluc, uroven, r.value, data);
+      }
+    }
+    // úrovne detailu podrobných dlaždíc podľa vzdialenosti (zem 2 / 4 / 10 m, drobnosti) – aj počas stavby ďalšej
+    if (cas - (this.poslednyLod ?? -1e9) >= 0.25) {
+      this.poslednyLod = cas;
+      for (const [kluc, a] of this.aktivne) {
+        if (a.uroven !== 'detail') continue;
+        const [i, j] = kluc.split('_').map(Number);
+        nastavLodDlazdice(a.objekt, this.vzdialenost({ i, j }, x, z));
       }
     }
     if (this.uloha) return;

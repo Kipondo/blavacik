@@ -19,6 +19,7 @@
 // Záznam bez "model" je len pomenovaná oblasť (napr. park, námestie).
 
 import * as THREE from 'three';
+import { zlucPodlaMaterialu } from '../zluc-siete.js';
 
 export async function nacitajPamiatky(pamiatky, kontext) {
   const skupina = new THREE.Group();
@@ -41,6 +42,8 @@ export async function nacitajPamiatky(pamiatky, kontext) {
     const { p, vysledok } = r.value;
     if (!vysledok?.objekt) continue;
     vysledok.objekt.name = p.nazov ?? p.model;
+    // statická pamiatka z kódu: menej volaní kreslenia
+    if (!vysledok.update && !vysledok.objekt.userData.nezlucovat) zlucPodlaMaterialu(vysledok.objekt);
     if (!vysledok.objekt.userData.bezTiena) {
       vysledok.objekt.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     }

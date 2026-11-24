@@ -72,7 +72,8 @@ function vytvorKominy(kominy) {
     m.setMatrixAt(i, mat);
     m.setColorAt(i, FARBY_KOMINOV[(Math.abs(Math.round(x * 3 + z * 7))) % FARBY_KOMINOV.length]);
   });
-  m.castShadow = true; m.receiveShadow = true;
+  // komíny tieň nevrhajú: v tieňovej mape boli ~110 tis. trojuholníkov a ich tieň na streche je takmer neviditeľný (#110)
+  m.castShadow = false; m.receiveShadow = true;
   m.name = 'kominy';
   return m;
 }

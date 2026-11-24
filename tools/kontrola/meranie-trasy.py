@@ -4,7 +4,7 @@
 # SwiftShader kreslí procesorom – snímky/s sú len na porovnanie pred/po na tom istom stroji;
 # kreslenia, trojuholníky a časy stavby dlaždíc sú porovnateľné priamo.
 # Keď stránka spadne (málo pamäte pri veľa presunoch cez celé mesto), prehliadač sa spustí znova a pokračuje sa ďalším bodom.
-import asyncio, json, sys
+import asyncio, json, os, sys
 from playwright.async_api import async_playwright
 
 URL = sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:8000'
@@ -15,13 +15,17 @@ SIRKA, VYSKA = 640, 360
 NA_PREHLIADAC = 3   # po koľkých bodoch sa prehliadač spustí nanovo (menej pamäte)
 
 async def spusti(p):
-    b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
+    # Chrome zo systému (Linux), inak prehliadač z Playwrightu (Windows, macOS)
+    chrome = '/usr/bin/google-chrome' if os.path.exists('/usr/bin/google-chrome') else None
+    b = await p.chromium.launch(executable_path=chrome, args=['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
     pg = await b.new_page(viewport={'width': SIRKA, 'height': VYSKA})
     if KVALITA:
         await pg.add_init_script(f"try {{ localStorage.setItem('blavacik.grafika', '{KVALITA}'); }} catch (e) {{}}")
     await pg.goto(URL)
     await pg.wait_for_function("document.querySelector('.menu-hrat') && !document.querySelector('.menu-hrat').disabled", timeout=400000)
     await pg.evaluate("document.querySelector('.menu-hrat').click()")
+    # moduly hry (aj meranie) sa spúšťajú až po štarte – v SwiftShader to trvá aj minúty
+    await pg.wait_for_function("window.hra && typeof hra.merajTrasu === 'function' && hra.stav && !hra.stav.pauza", timeout=900000)
     await pg.wait_for_timeout(2000)
     return b, pg
 

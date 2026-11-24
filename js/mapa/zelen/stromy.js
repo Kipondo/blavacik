@@ -13,9 +13,12 @@ import { materialKory, materialListov, materialKmenaDaleko, materialKorunyDaleko
 
 const CHUNK = 250;      // m – veľkosť skupiny (menej volaní kreslenia; blízke stromy sa vyberajú po jednom)
 const DOHLAD = 650;     // ďalej ako toto sa stromy skryjú (aj tak sú v opare)
-const BLIZKO = 125;     // m – bližšie podrobný model
+const BLIZKO = 100;     // m – bližšie podrobný model (#110: predtým 125 m; pri 75 m boli stromy v parku zhora viditeľne jednoduchšie)
 const TIEN_DETAIL = 35; // m – bližšie vrhá tieň podrobný model (listy), ďalej len jednoduchá koruna (#110)
 const POSUN = 6;        // m – po takom posune kamery sa prepočíta, ktoré stromy sú blízko
+// Vzdialené koruny (#110): chunk ďalej ako BLIZKO kreslí všetky koruny zjednodušene (100 trojuholníkov namiesto 400);
+// v chunku pri hráčovi majú podrobnejšiu korunu len stromy do STREDNE m, ďalšie jednoduchú (po stromoch)
+const STREDNE = 160;
 // Vrstva len pre tieň: zástupné koruny sa kreslia do tieňovej mapy, nie do obrazu (kamera tieňa má vrstvu
 // zapnutú – js/grafika/dosah-tienov.js). Podrobné listy stromov ďalej ako TIEN_DETAIL tak tieň nekreslia
 // (v tieňovej mape boli ~0,5 mil. trojuholníkov), tieň za ne vrhá zhluk gúľ (rovnaký ako vzdialená koruna).
@@ -46,7 +49,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
   skupina.name = 'stromy';
   if (!stromy?.length) return skupina;
 
-  const { blob, kuzele, kmenGeo } = geometrieDaleko();
+  const { blob, kuzele, kmenGeo, blobJednoduchy, kuzeleJednoduche } = geometrieDaleko();
   const chunky = new Map();
   stromy.forEach((s, i) => {
     const k = `${Math.floor(s[0] / CHUNK)},${Math.floor(s[1] / CHUNK)}`;
@@ -102,6 +105,14 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       }
     }
     koruny.count = kl; ihlice.count = ki;
+    // jednoduché koruny vzdialených stromov v aktívnom chunku (rovnaké matice a farby, menej trojuholníkov)
+    const korunyJ = new THREE.InstancedMesh(blobJednoduchy, materialKorunyDaleko(), Math.max(1, kl));
+    const ihliceJ = new THREE.InstancedMesh(kuzeleJednoduche, materialKorunyDaleko(), Math.max(1, ki));
+    for (const im of [korunyJ, ihliceJ]) {
+      im.count = 0; im.castShadow = false; im.receiveShadow = true;
+      im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      im.setColorAt(0, farba);
+    }
 
     // blízke modely: pre každý druh v chunku kôra + listy, naplnia sa podľa polohy kamery
     const blizke = new Map();
@@ -137,6 +148,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
       im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       chunk.add(im);
     }
+    for (const im of [korunyJ, ihliceJ]) { im.frustumCulled = false; chunk.add(im); }
     for (const im of [kmene, koruny, ihlice]) {
       // vzdialená úroveň tieň nevrhá: do BLIZKO ho vrhajú podrobné modely / zástupné koruny, ďalej je strom
       // mimo kamery tieňa (±120 m); inak by sa do tieňovej mapy kreslili koruny všetkých stromov chunku
@@ -146,6 +158,7 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
     }
     const stav = {
       stromy: stromyCh, blizke, kmene, koruny, ihlice, tienKoruny, tienIhlice, aktivne: false, px: 0, pz: 0,
+      geoKoruny: [blob, blobJednoduchy], geoIhlice: [kuzele, kuzeleJednoduche], korunyJ, ihliceJ,
       minX, maxX, minZ, maxZ,
       povodneKmene: kmene.instanceMatrix.array.slice(), povodneKoruny: koruny.instanceMatrix.array.slice(), povodneIhlice: ihlice.instanceMatrix.array.slice(),
       farbyKoruny: koruny.instanceColor?.array.slice(), farbyIhlice: ihlice.instanceColor?.array.slice(),
@@ -161,8 +174,9 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
 
 /** Vzdialená úroveň chunku: všetky stromy (chunk je ďaleko) alebo len tie, ktoré nie sú blízko – inštancie sa
  *  zhustia na začiatok poľa a count sa zníži (skryté stromy sa nekreslia ani ako nulové inštancie, #110). */
-function nastavDaleko(st, vsetky) {
-  const { kmene, koruny, ihlice } = st;
+function nastavDaleko(st, vsetky, kam = null) {
+  const { kmene, koruny, ihlice, korunyJ, ihliceJ } = st;
+  korunyJ.count = 0; ihliceJ.count = 0;
   if (vsetky) {
     kmene.instanceMatrix.array.set(st.povodneKmene);
     koruny.instanceMatrix.array.set(st.povodneKoruny);
@@ -173,25 +187,31 @@ function nastavDaleko(st, vsetky) {
   } else {
     const kA = kmene.instanceMatrix.array, rA = koruny.instanceMatrix.array, iA = ihlice.instanceMatrix.array;
     const rF = koruny.instanceColor?.array, iF = ihlice.instanceColor?.array;
-    let nk = 0, nr = 0, ni = 0;
+    const rJ = korunyJ.instanceMatrix.array, iJ = ihliceJ.instanceMatrix.array;
+    const rJF = korunyJ.instanceColor?.array, iJF = ihliceJ.instanceColor?.array;
+    const s2 = STREDNE * STREDNE;
+    let nk = 0, nr = 0, ni = 0, nrJ = 0, niJ = 0;
     for (const t of st.stromy) {
       if (t.skryty) continue;
       kA.set(st.povodneKmene.subarray(t.j * 16, t.j * 16 + 16), nk++ * 16);
+      // ďaleko od kamery (aj v chunku pri hráčovi): jednoduchá koruna
+      const daleko = kam && (t.x - kam.x) ** 2 + (t.z - kam.z) ** 2 > s2;
       if (t.ihl) {
-        iA.set(st.povodneIhlice.subarray(t.k * 16, t.k * 16 + 16), ni * 16);
-        if (iF) iF.set(st.farbyIhlice.subarray(t.k * 3, t.k * 3 + 3), ni * 3);
-        ni++;
+        const [A, F, i] = daleko ? [iJ, iJF, niJ++] : [iA, iF, ni++];
+        A.set(st.povodneIhlice.subarray(t.k * 16, t.k * 16 + 16), i * 16);
+        if (F) F.set(st.farbyIhlice.subarray(t.k * 3, t.k * 3 + 3), i * 3);
       } else {
-        rA.set(st.povodneKoruny.subarray(t.k * 16, t.k * 16 + 16), nr * 16);
-        if (rF) rF.set(st.farbyKoruny.subarray(t.k * 3, t.k * 3 + 3), nr * 3);
-        nr++;
+        const [A, F, i] = daleko ? [rJ, rJF, nrJ++] : [rA, rF, nr++];
+        A.set(st.povodneKoruny.subarray(t.k * 16, t.k * 16 + 16), i * 16);
+        if (F) F.set(st.farbyKoruny.subarray(t.k * 3, t.k * 3 + 3), i * 3);
       }
     }
+    korunyJ.count = nrJ; ihliceJ.count = niJ;
     // kmene sa kreslia vždy aspoň s jednou (nulovou) inštanciou – ich onBeforeRender spúšťa prepočet blízkych stromov
     if (!nk) { kA.fill(0, 0, 16); nk = 1; }
     kmene.count = nk; koruny.count = nr; ihlice.count = ni;
   }
-  for (const im of [kmene, koruny, ihlice]) {
+  for (const im of [kmene, koruny, ihlice, korunyJ, ihliceJ]) {
     im.instanceMatrix.needsUpdate = true;
     if (im.instanceColor) im.instanceColor.needsUpdate = true;
   }
@@ -200,6 +220,9 @@ function nastavDaleko(st, vsetky) {
 /** Prepočíta blízke stromy chunku podľa polohy kamery. */
 function aktualizujDetail(st, kam) {
   const dx = Math.max(st.minX - kam.x, 0, kam.x - st.maxX), dz = Math.max(st.minZ - kam.z, 0, kam.z - st.maxZ);
+  // vzdialený chunk: koruny z jednoduchších gúľ (zďaleka rovnaký obrys, štvrtina trojuholníkov)
+  const u = dx * dx + dz * dz > BLIZKO * BLIZKO ? 1 : 0;
+  if (st.koruny.geometry !== st.geoKoruny[u]) { st.koruny.geometry = st.geoKoruny[u]; st.ihlice.geometry = st.geoIhlice[u]; }
   if (dx * dx + dz * dz > BLIZKO * BLIZKO) {
     if (st.aktivne) {
       // celý chunk je ďaleko – len vzdialené koruny
@@ -252,7 +275,8 @@ function aktualizujDetail(st, kam) {
     im.count = n; im.visible = n > 0;
     if (n) { im.instanceMatrix.needsUpdate = true; im.computeBoundingSphere(); }
   }
-  if (zmena) nastavDaleko(st, false);
+  // rozdelenie na podrobné a jednoduché koruny závisí od vzdialenosti – prepočíta sa pri každom posune
+  nastavDaleko(st, false, kam);
 }
 
 let cacheGeo = null;
@@ -261,22 +285,29 @@ function geometrieDaleko() {
   if (cacheGeo) return cacheGeo;
   const kmenGeo = new THREE.CylinderGeometry(0.1, 0.17, 3.2, 6);
   kmenGeo.translate(0, 1.6, 0);
-  const casti = [];
-  [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5], [-0.3, 3.7, 1.2, 1.3]].forEach(([x, y, z, r], k) => {
-    const g = new THREE.IcosahedronGeometry(r, 1);
-    const p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const n = Math.sin(p.getX(i) * 3.1 + k) * Math.cos(p.getZ(i) * 2.7 - k) * 0.22 * r;
-      p.setXYZ(i, p.getX(i) * (1 + n / r) + x, p.getY(i) * 0.9 + y, p.getZ(i) * (1 + n / r) + z);
-    }
-    casti.push(g);
-  });
-  const blob = spojGeometrie(casti, 2.6, 7.4);
-  const k1 = new THREE.ConeGeometry(2.3, 4.6, 9).toNonIndexed(); k1.translate(0, 3.6, 0);
-  const k2 = new THREE.ConeGeometry(1.6, 3.6, 9).toNonIndexed(); k2.translate(0, 6.0, 0);
-  const kuzele = spojGeometrie([k1, k2], 1.2, 8);
-  for (const g of [blob, kuzele, kmenGeo]) g.userData.zdielane = true;
-  cacheGeo = { blob, kuzele, kmenGeo };
+  // zhluk gúľ koruny; detail 1 = 400 trojuholníkov (bližšie chunky), detail 0 = 100 (ďalej ako JEDNODUCHO)
+  const zhluk = (detail) => {
+    const casti = [];
+    [[0, 4.9, 0, 2.3], [1.3, 4.3, 0.6, 1.6], [-1.1, 4.4, -0.7, 1.7], [0.2, 6.1, -0.4, 1.5], [-0.3, 3.7, 1.2, 1.3]].forEach(([x, y, z, r], k) => {
+      const g = new THREE.IcosahedronGeometry(r * (detail ? 1 : 1.06), detail);
+      const p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) {
+        const n = Math.sin(p.getX(i) * 3.1 + k) * Math.cos(p.getZ(i) * 2.7 - k) * 0.22 * r;
+        p.setXYZ(i, p.getX(i) * (1 + n / r) + x, p.getY(i) * 0.9 + y, p.getZ(i) * (1 + n / r) + z);
+      }
+      casti.push(g);
+    });
+    return spojGeometrie(casti, 2.6, 7.4);
+  };
+  const kuzel = (seg) => {
+    const k1 = new THREE.ConeGeometry(2.3, 4.6, seg).toNonIndexed(); k1.translate(0, 3.6, 0);
+    const k2 = new THREE.ConeGeometry(1.6, 3.6, seg).toNonIndexed(); k2.translate(0, 6.0, 0);
+    return spojGeometrie([k1, k2], 1.2, 8);
+  };
+  const blob = zhluk(1), blobJednoduchy = zhluk(0);
+  const kuzele = kuzel(9), kuzeleJednoduche = kuzel(5);
+  for (const g of [blob, kuzele, kmenGeo, blobJednoduchy, kuzeleJednoduche]) g.userData.zdielane = true;
+  cacheGeo = { blob, kuzele, kmenGeo, blobJednoduchy, kuzeleJednoduche };
   return cacheGeo;
 }
 

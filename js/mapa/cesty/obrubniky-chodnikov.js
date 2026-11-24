@@ -13,7 +13,7 @@ import { vJadre } from '../teren/textura-zeme.js';
 const TYPY = new Set(['footway', 'cycleway', 'path', 'corridor']);
 const HRUBKA = 0.12;     // m – šírka obrubníka
 const VYSKA = 0.07;      // m nad terénom
-const KROK = 2;          // m – delenie, aby obrubník kopíroval terén
+const KROK = 4;          // m – delenie, aby obrubník kopíroval terén (terén je po 2 m, obrubník je nízky a zďaleka sa nekreslí)
 const BUNKA = 20;
 const DLAZBA = new Set(['dlazba', 'parkovisko']);
 
