@@ -4,6 +4,8 @@
 // Ak zníženie nepomohlo (brzdí procesor, nie grafická karta), vráti sa späť a chvíľu to neskúša
 // (pol minúty, pri ďalšom neúspechu dvakrát dlhšie, najviac 5 minút).
 // Rozsah pomeru pixelov je podľa kvality grafiky (hra.stav.grafika.pixel = [min, max], js/grafika/predvolby.js).
+// Ustálenie: rozlíšenie sa hľadá len prvých USTALENIE_S sekúnd (od štartu a od zmeny kvality). Potom sa už nemení,
+// aby obraz nekolísal medzi ostrým a rozmazaným – len keď hra dlhšie naozaj nestíha (NUDZA_MS), zníži sa o krok.
 // Pre ostatné moduly: hra.stav.rozlisenie = aktuálny podiel (0 – 1),
 //   hra.stav.meranieSnimok = { poradie, medianMs, podiel, naMinime } – posledné meranie (každých 1,5 s);
 //   naMinime = rozlíšenie už nejde znížiť alebo znižovanie nepomáha (js/grafika/kvalita.js potom skráti dohľad).
@@ -14,6 +16,9 @@ const OKNO = 1.5;            // s – dĺžka merania
 const POMALE_MS = 20;        // medián nad týmto → znížiť
 const RYCHLE_MS = 13.5;      // medián pod týmto (po 3 oknách) → zvýšiť
 const MIN = 0.55, KROK_DOLE = 0.1, KROK_HORE = 0.05;   // MIN = bez predvoľby kvality
+const USTALENIE_S = 45;      // s – potom sa rozlíšenie už nehľadá
+const NUDZA_MS = 34;         // medián nad týmto ...
+const NUDZA_OKIEN = 4;       // ... toľko meraní za sebou (6 s) → núdzové zníženie aj po ustálení
 
 export default {
   nazov: 'rozlisenie',
@@ -33,7 +38,9 @@ export default {
     hra.stav.rozlisenie = 1;
     // po zmene veľkosti okna (main.js nastaví veľkosť) ostane naše rozlíšenie
     window.addEventListener('resize', () => this._nastav(hra));
-    hra.na('kvalita', () => { this.nastavRozsah(hra); this.podiel = Math.max(this.min, Math.min(1, this.podiel)); this._nastav(hra); });
+    this.zaciatok = performance.now();
+    this.nudza = 0;
+    hra.na('kvalita', () => { this.nastavRozsah(hra); this.podiel = Math.max(this.min, Math.min(1, this.podiel)); this.zaciatok = performance.now(); this._nastav(hra); });
     this._nastav(hra);
   },
 
@@ -58,10 +65,22 @@ export default {
     const median = zoradene[zoradene.length >> 1];
     this.casy = [];
     this.okno = 0;
+    const ustalene = teraz - this.zaciatok > USTALENIE_S * 1000;
     hra.stav.meranieSnimok = {
       poradie: ++this.poradie, medianMs: median, podiel: this.podiel,
-      naMinime: this.podiel <= this.min + 1e-3 || teraz < this.blokDo,
+      naMinime: this.podiel <= this.min + 1e-3 || teraz < this.blokDo || ustalene,
     };
+    if (ustalene) {
+      // po ustálení len núdzovo nižšie (dlhšie veľmi pomalé snímky), nikdy späť hore
+      this.skuska = null;
+      this.nudza = median > NUDZA_MS ? this.nudza + 1 : 0;
+      if (this.nudza >= NUDZA_OKIEN && this.podiel > this.min + 1e-3) {
+        this.nudza = 0;
+        this.podiel = Math.max(this.min, this.podiel - KROK_DOLE);
+        this._nastav(hra);
+      }
+      return;
+    }
     // pomohlo posledné zníženie?
     if (this.skuska) {
       const { pred, podiel } = this.skuska;

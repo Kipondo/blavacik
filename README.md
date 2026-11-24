@@ -573,7 +573,11 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   (`js/mapa/dlazdice/pripravit-dlazdicu.js`: shadery na pozadí cez `compileAsync`, veľké textúry zeme po jednej).
   3D fasády sa stavajú po podlažiach a do typovaných polí (menej odpadu v pamäti). **Automatické rozlíšenie**
   (`js/grafika/rozlisenie.js`): keď karta nestíha (~50 snímok/s), zníži sa rozlíšenie kreslenia po krokoch až na minimum predvoľby kvality,
-  pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **F3** ukáže snímky/s, priemerný
+  pri rezerve sa vráti; keď zníženie nepomôže (brzdí procesor), vráti sa späť. **Ustálenie** (výkon, krok 1): rozlíšenie
+  sa hľadá len prvých 45 s a „auto“ kvalita len prvú minútu (od štartu alebo zmeny voľby). Potom sa nič nemení –
+  obraz nekolíše medzi ostrým a rozmazaným a dlaždice sa neprestavajú s inými textúrami. Výnimkou je núdza:
+  pri dlhých veľmi pomalých snímkach (nad 34 ms, 6 s) sa rozlíšenie zníži o krok. Regresná kontrola
+  `rozlisenie-ustalene`. **F3** ukáže snímky/s, priemerný
   a najhorší čas snímky, počet kreslení, trojuholníky a rozlíšenie (`js/ui/vykon.js`).
 - **Efekty a kvalita grafiky** (issue #31, etapa G1, `js/grafika/efekty/`): zatienenie kútov (AO z hĺbky – päty budov,
   kúty, dvory a ulice pri pohľade zhora), vzdušná perspektíva (vzdialené mestá a kopce blednú do farby oblohy),
