@@ -11,6 +11,8 @@ import { bodVPolygone, vzdialenostOdCiary, vzdialenostOdOkraja, ohranicenie } fr
 import { kontrolyTravy } from './trava.js';
 import { kontrolyCiest } from './cesty.js';
 import { kontrolyDlazdic } from './dlazdice.js';
+import { kontrolyMostov } from './mosty.js';
+import { kontrolyGrafiky } from './grafika.js';
 import { vytvorHorizont } from '../../../js/mapa/teren/horizont.js';
 
 /** Stromy dlaždice presne tak, ako ich stavia hra (js/mapa/dlazdice/postav-dlazdicu.js → stromy-dlazdice.js). */
@@ -146,4 +148,6 @@ export const KONTROLY = [
   ...kontrolyTravy,
   ...kontrolyCiest,
   ...kontrolyDlazdic,
+  ...kontrolyMostov,
+  ...kontrolyGrafiky,
 ];

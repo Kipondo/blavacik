@@ -1,10 +1,11 @@
-# Zasypanie zárezov pred cestnými tunelmi pod rovnou ulicou (issue #54).
+# Zasypanie zárezov pred cestnými tunelmi pod rovnou ulicou a pred vjazdmi do podzemných garáží (issue #54).
 #
 # Hra cestné tunely nekreslí (tools/osm/klasifikuj.mjs ich vynechá), laser však vidí otvorený zárez, ktorým
 # cesta klesá k portálu. V hre tak cesta zišla do slepej jamy hlbokej až 7 m s oporným múrom (Staromestská pod
-# Hodžovým námestím pri Prezidentskom paláci). Pre každý tunel zo zoznamu tools/mesto/laser/tunely.json sa:
+# Hodžovým námestím pri Prezidentskom paláci). To isté vjazdy do podzemných garáží (rampa končí v slepej jame pri
+# budove) a Žabotova pod traťou pri Hlavnej stanici. Pre každý záznam zo zoznamu tools/mesto/laser/tunely.json sa:
 #   1) nájde jama pri portáloch – uzly terénu aspoň 1 m pod mediánom okolia (okno 42 m), súvislá oblasť, ktorá
-#      sa portálu dotýka (do 12 m),
+#      sa portálu dotýka (do 5 m) a nie je väčšia ako 3000 m² (väčšia jama je prírodná – údolie, nie zárez),
 #   2) rozšíri sa o 6 m (svahy a múry zárezu),
 #   3) vyplní hladkou plochou z okraja (Laplaceova rovnica) – výška okolitej ulice sa plynulo premostí.
 # Uzly na spoločnej hrane dlaždíc dostanú v oboch dlaždiciach tú istú výšku (šev ostane zošitý).
@@ -26,8 +27,10 @@ N = DLAZDICA // KROK          # uzlov na dlaždicu bez spoločnej hrany (dlaždi
 OKOLIE = 150                  # m okolo portálov, ktoré sa načíta
 PRAH = 1.0                    # m pod mediánom okolia = jama
 OKNO = 21                     # uzlov (42 m) – medián okolia
-DOTYK = 12                    # m – jama sa musí dotýkať portálu
+DOTYK = 5                     # m – portál leží v jame (väčší dosah by po zasypaní chytil susedné nízke miesta)
 ROZSIRENIE = 3                # uzlov (6 m) – svahy zárezu
+MAX_JAMA = 3000               # m² – väčšia súvislá jama sa nezasype (prírodný terén)
+KOLA = 4                      # najviac toľkokrát pri jednom zázname
 
 
 def vypln(M, maska):
@@ -80,25 +83,42 @@ def main():
             continue
         platne = ~np.isnan(M)
         Mv = np.where(platne, M, np.nanmedian(M))
-        R = Mv - ndimage.median_filter(Mv, size=OKNO)
-        lab, _ = ndimage.label((R < -PRAH) & platne)
         X = (gx0 + np.arange(M.shape[1])) * KROK
         Z = (gz0 + np.arange(M.shape[0])) * KROK
         XX, ZZ = np.meshgrid(X, Z)
         blizko = np.zeros(M.shape, bool)
         for px, pz in P:
             blizko |= np.hypot(XX - px, ZZ - pz) < DOTYK
-        vybrane = set(np.unique(lab[blizko & (lab > 0)]))
-        if not vybrane:
+        # opakovať, kým pri portáli ostáva jama (po zasypaní hlbokého zárezu sa okolie zmení) – ďalšie spustenie
+        # skriptu potom už nič nemení
+        maska = np.zeros(M.shape, bool)
+        V = Mv.copy()
+        kola = 0
+        for _ in range(KOLA):
+            R = V - ndimage.median_filter(V, size=OKNO)
+            lab, _ = ndimage.label((R < -PRAH) & platne)
+            vybrane = set(np.unique(lab[blizko & (lab > 0)]))
+            velke = {l for l in vybrane if (lab == l).sum() * KROK * KROK > MAX_JAMA}
+            if velke:
+                print(f'{tunel["nazov"]}: jama nad {MAX_JAMA} m² sa nezasype (prírodný terén)')
+                vybrane -= velke
+            if not vybrane:
+                break
+            jama = np.isin(lab, list(vybrane))
+            m = ndimage.binary_dilation(jama, iterations=ROZSIRENIE) & platne
+            # okraj výrezu ostáva pevný
+            m[0, :] = m[-1, :] = m[:, 0] = m[:, -1] = False
+            V2 = vypln(V, m)
+            if np.abs(V2 - V)[m].max() < 0.05:
+                break          # okraj je rovnako nízko – ďalej už nie je čo zasypať (svah, nie jama)
+            V = V2
+            maska |= m
+            kola += 1
+        if not maska.any():
             print(f'{tunel["nazov"]}: jama nenájdená (už zasypaná)')
             continue
-        jama = np.isin(lab, list(vybrane))
-        maska = ndimage.binary_dilation(jama, iterations=ROZSIRENIE) & platne
-        # okraj výrezu ostáva pevný
-        maska[0, :] = maska[-1, :] = maska[:, 0] = maska[:, -1] = False
-        V = vypln(Mv, maska)
         zmena = (V - Mv)[maska]
-        print(f'{tunel["nazov"]}: jama {int(jama.sum()) * KROK * KROK} m², zasypané {int(maska.sum()) * KROK * KROK} m², '
+        print(f'{tunel["nazov"]}: zasypané {int(maska.sum()) * KROK * KROK} m² ({kola}×), '
               f'zdvihnuté najviac o {zmena.max():.1f} m (medián {np.median(zmena):.1f} m)')
         for kl, H in dlazdice.items():
             i, j = (int(v) for v in kl.split('_'))
