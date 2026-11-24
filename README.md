@@ -189,6 +189,15 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Dunajská 4–8: vyložené podlažia a arkiere (vetva `fix/dunajska-arkiere`, #64)
+- **Prieskum** (kataster, ortofoto, laser, Commons, dohoda mesta o chodníku; bez Google): `napady/pamiatky-podklady.md`.
+- **Dunajská 6–8:** prízemie a 1. p. sú na uličnej čiare, horné podlažia sú vyložené o 2,5 m nad chodník (dá sa
+  pod nimi prejsť). Na vyložených podlažiach je sivý panelový arkier a sklená fasáda pred lodžiami.
+- **Dunajská 4:** kamenné pásy (nie ružová omietka), tmavý sokel a nad ním vyložený stredný arkier.
+- **Ručné opravy budov** (`data/mapa/opravy-budov.json`) majú nové polia `podlubie` (zapustené prízemie pod
+  vyčnievajúcimi poschodiami) a `arkiere` (predsadená časť fasády od – do výšky). Dajú sa použiť aj na iné domy.
+- **Regresná kontrola** `podlubia-a-arkiere`. **Body trasy** `dunajska` a `dunajska-arkiere`.
+
 ### Sky Park Tower – stavenisko podľa stavu k novembru 2026 (vetva `feature/sky-park-tower`, #129)
 - **Prieskum:** ASB a YIM.BA 10/2026, Liebherr 6/2025, OSM; bez Google. Opis je v `napady/pamiatky-podklady.md`.
 - **Predtým:** hotová 125 m kocka z obrysu OSM `building=construction` v stavebnej jame hlbokej 12 m.

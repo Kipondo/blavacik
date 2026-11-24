@@ -3,7 +3,13 @@
 //
 // Položka: { "miesto": "…", "bod": [lat, lon], "nazov": "meno budovy v OSM (nepovinné)", "farba": "#…", "okenice": true, "farbaOkenic": 0–3,
 //            "vikiere": true|false, "obchod": true|false, "vyska": m, "strecha": "#…", "balkony": true, "stity": true,
-//            "fasada": "stare"|"obytne"|"kancelarie"|"jednoduche"|"panelak"|"dom"|"hala" (štýl fasády namiesto odhadu z typu) }
+//            "fasada": "stare"|"obytne"|"kancelarie"|"jednoduche"|"panelak"|"dom"|"hala" (štýl fasády namiesto odhadu z typu),
+//            "podlubie": { "fasada": [[lat, lon], [lat, lon]], "hlbka": m, "vyska": m },
+//            "arkiere": [{ "fasada": [[lat, lon], [lat, lon]], "od": m, "do": m, "presah": m, "sklo": true, "farba": "#…" }] }
+// Podlubie (#64): prízemie je ustúpené o „hlbka“ za líniu fasády (úsečka „fasada“ po líci domu), poschodia nad ním
+// vyčnievajú – budova sa rozdelí na zapustené prízemie (výklady) a vyvýšenú časť od výšky „vyska“ (so spodnou
+// plochou, bez kolízie – pod ňou sa dá prejsť). Arkier: predsadená časť fasády od „od“ do „do“ m nad terénom,
+// vysunutá o „presah“ pred úsečku „fasada“ (sklenená alebo vo farbe).
 
 import { bodVPolygone } from '../geometria.js';
 
@@ -54,13 +60,71 @@ function najdi(budovy, o) {
   return naj;
 }
 
-/** Prepíše vlastnosti budov podľa opráv (bod lat/lon, prípadne meno budovy z OSM). */
+/** Úsečka fasády v metroch hry: začiatok, jednotkový smer, dĺžka a normála dnu do budovy b. */
+function fasada(b, body) {
+  const [ax, az] = naXZ(body[0]), [bx, bz] = naXZ(body[1]);
+  const L = Math.hypot(bx - ax, bz - az) || 1;
+  const ux = (bx - ax) / L, uz = (bz - az) / L;
+  let nx = -uz, nz = ux;
+  let cx = 0, cz = 0;
+  for (const [x, z] of b.body) { cx += x; cz += z; }
+  cx /= b.body.length; cz /= b.body.length;
+  if ((cx - ax) * nx + (cz - az) * nz < 0) { nx = -nx; nz = -nz; }
+  return { ax, az, ux, uz, L, nx, nz };
+}
+
+/** Podlubie: zapustené prízemie (nová budova) a vyvýšené poschodia (pôvodná budova od výšky p.vyska). */
+export function podlubie(b, p) {
+  if (!p?.fasada || (b.minVyska ?? 0) > 0) return null;
+  const f = fasada(b, p.fasada);
+  const hlbka = p.hlbka ?? 2.5, vyska = p.vyska ?? 4.2;
+  let posun = 0;
+  const body = b.body.map(([x, z]) => {
+    const t = (x - f.ax) * f.ux + (z - f.az) * f.uz;
+    const d = (x - f.ax) * f.nx + (z - f.az) * f.nz;
+    if (t < -1 || t > f.L + 1 || Math.abs(d) > 1.5) return [x, z];
+    posun++;
+    return [x + f.nx * (hlbka - d), z + f.nz * (hlbka - d)];
+  });
+  if (!posun) return null;
+  const prizemie = {
+    body, diery: b.diery, vyska: vyska - 0.05, farba: b.farba, typOsm: b.typOsm, obchod: true, zdrojVysky: b.zdrojVysky,
+    tvarStrechy: 'plocha', podlubie: true,
+  };
+  b.minVyska = vyska;
+  return prizemie;
+}
+
+/** Arkier: predsadená časť fasády (vyvýšená, bez kolízie). */
+export function arkier(b, a) {
+  if (!a?.fasada) return null;
+  const f = fasada(b, a.fasada);
+  const presah = a.presah ?? 0.9;
+  const A = [f.ax, f.az], B = [f.ax + f.ux * f.L, f.az + f.uz * f.L];
+  const von = (p) => [p[0] - f.nx * presah, p[1] - f.nz * presah];
+  return {
+    body: [A, B, von(B), von(A)], minVyska: a.od ?? 7, vyska: a.do ?? 20, sklo: a.sklo ?? true,
+    farba: a.farba ?? (a.sklo === false ? b.farba : '#8fa3ad'), typOsm: b.typOsm, cast: 1, arkier: true,
+  };
+}
+
+/** Prepíše vlastnosti budov podľa opráv (bod lat/lon, prípadne meno budovy z OSM); podlubia a arkiere pridá. */
 export function aplikujOpravy(budovy = [], zoznam = []) {
   if (!zoznam.length) return;
+  const nove = [];
   for (const o of zoznam) {
     const b = najdi(budovy, o);
     if (!b) continue;
     for (const k of POLIA) if (o[k] !== undefined) b[k] = o[k];
     if (o.farba) b._farbaOprava = true;
+    // tvarové úpravy len pre budovu, v ktorej bod naozaj leží (nie najbližšiu v susednej dlaždici)
+    if (!(o.podlubie || o.arkiere) || !bodVPolygone(o.xz[0], o.xz[1], b.body)) continue;
+    const p = podlubie(b, o.podlubie);
+    if (p) nove.push(p);
+    for (const a of o.arkiere ?? []) {
+      const x = arkier(b, a);
+      if (x) nove.push(x);
+    }
   }
+  budovy.push(...nove);
 }
