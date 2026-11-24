@@ -1068,3 +1068,55 @@ Zdroje:
 - [archív – nebytové priestory](https://web.archive.org/web/20110408062455/http://3xw-design.co.uk/portfolio/sites/gloria/nebytove_g.html)
 - [Commons – kategória Glória House](https://commons.wikimedia.org/wiki/Category:Gl%C3%B3ria_House)
 - OSM: way 61398274, časti 1462633086–1462633101, [changeset 176590232](https://www.openstreetmap.org/changeset/176590232).
+
+## Sky Park Tower – stavenisko (#129; 24. 11. 2026)
+
+**Stavba:** Landererova × Čulenova (Downtown). Architekt Zaha Hadid Architects, developer Alto Real Estate (pôvodne
+Penta), žeriavy zo Skansky. Budova bude mať 33 nadzemných a 5 podzemných podlaží a 393 bytov. Na 1.–3. NP budú
+obchody a kancelárie, na 30.–33. NP penthousy.
+- Výkres situácie: ±0,000 = 137,55 m n. m., atika +119,45 m, anténa +124,79 m (preto sa uvádza 120 aj 125 m).
+- Dokončenie: Q3 2027 (ASB, ponuka bytov) alebo Q2 2028 (stránka projektu, YIM.BA).
+
+**Pôdorys:** jedna budova z dvoch oblých lalokov spojených užším pásom („dvojité zakrivenie“, arašid) s jedným jadrom,
+nie dve veže. 1.–8. NP tvorí terasovito rozšírenú podnož so zeleňou (k parku na SZ a na V). Od 8. NP má pôdorys
+~64 × 36 m. OSM way 1503417607 (~74 × 41 m, dlhá os ~111°) je obrys podnože.
+
+**Stav k 11/2026** (ASB 13. 10. 2026, YIM.BA 26. 8. a 12. 10. 2026, Liebherr 6/2025):
+- **Hrubá stavba:** 13. 10. 2026 bola na 14. NP (tempo 10–20 dní na podlažie). Model má stropy po 17. NP (~58 m).
+- **Jadro:** ~4 podlažia nad stropmi, žlté/okrové samošplhacie debnenie s plošinami a červený betónovací stožiar.
+- **Vrch stavby:** vrchné ~3 podlažia obopína pás žltých ochranných panelov.
+- **Nižšie podlažia:**
+  - holé sivé stropy, biele obvodové stĺpy (prefabrikáty) a modré zábradlia;
+  - modré záchytné siete okolo 5.–9. NP a oranžové murivo po 8.–9. NP;
+  - 1.–3. NP sú už zasklené (zelenkavé sklo v tmavých rámoch);
+  - montáž bieleho GRC exoskeletu sa začala v 10/2026, zatiaľ hlavne na podnoži.
+- **Parter:** biela oblá markíza, okolo oblých častí podnože sivé rúrkové lešenie.
+- **Žeriavy:**
+  - Z/SZ: Liebherr 190 HC-L so sklopným výložníkom (žltý stožiar, červený výložník);
+  - V/SV: 150 EC-B flat-top, celý žltý;
+  - oba majú vyrásť na 145 m. Malý tretí žeriav na fotkách z 10/2026 nie je.
+- **Okolie:** oplotenie pozdĺž Landererovej, kontajnery a buňky.
+
+**Terén:** laser ÚGKK zachytil stavebnú jamu hlbokú až 12 m (sken počas výkopu). Dnes sú v nej podzemné podlažia
+a prízemie je na úrovni Landererovej. Jama je v `tools/mesto/laser/tunely.json` (záznam s „oblast“) zarovnaná
+`zasyp_tunely.py` plynulo od ulice po park.
+
+**Rozhodnutia pre model** (`tools/blender/vyskove/sky_park_tower.py`):
+- Stav k novembru 2026, výška hrubej stavby je odhad (posledná správa je zo 13. 10.).
+- Obrysy podlaží: 1.–3. NP celý obrys OSM, 4.–7. NP ustupujúce terasy, od 8. NP obrys ~4 m dnu.
+- Plot bez názvov a log.
+- Hotový stav (biely exoskelet, zelené terasy) zatiaľ nie je – ak sa raz bude stav meniť podľa herného dátumu.
+
+**Neisté – vlastné fotky by pomohli:**
+1. z rohu Landererova × Čulenova na SV (počet podlaží, žltá ochranná stena, poloha žeriavov);
+2. z parku Sky Parku od Residence 1 na juh (severná strana podnože).
+
+Zdroje:
+- [ASB 13. 10. 2026](https://www.asb.sk/development/sky-park-tower-je-v-polovici-vystavby)
+- [YIM.BA 12. 10. 2026](https://www.yimba.sk/sky-park-offices/vysoky-standard-nie-je-len-slubom-sky-park-tower-nabera-vysku-a-vypredava-jeden-byt-za-druhym)
+- [YIM.BA 31. 8. 2026](https://www.yimba.sk/sky-park-offices/v-polovici-vysky-a-predsa-uz-je-dominantou-sky-park-tower-ziskava-miestami-finalnu-podobu)
+- [YIM.BA 12. 4. 2026](https://www.yimba.sk/sky-park-offices/novy-pohlad-na-downtown-a-netradicny-sposob-vystavby-sky-park-tower-pokracuje-v-raste-a-ziskava-aj-fasadu)
+- [Liebherr 3. 6. 2025](https://www.liebherr.com/en-kr/n/liebherr-cranes-at-work-constructing-the-final-skypark-tower-in-bratislava-169344-5461608)
+- [skyparktower.sk – fasáda 6. 10. 2026](https://www.skyparktower.sk/blog/sky-park-tower-zacina-s-instalaciou-jedinecnej-fasady-a-otvara-novu-ponuku-4-izbovych-rezidencii/)
+- [stavebnymagazin.sk](https://stavebnymagazin.sk/sky-park-tower-v-bratislave-veza-ma-byt-hotova-v-roku-2027-byty-su-uz-v-predaji/)
+- OSM way 1503417607 (stavba), 902159858 (stavenisko).

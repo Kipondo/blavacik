@@ -134,6 +134,7 @@
     {"model": "vyskova-budova", "subor": "stadion-tehelne-pole", "nazov": "Národný futbalový štadión", "x": 2184.25, "z": -2204.4, "dosah": 160},
     {"model": "vyskova-budova", "subor": "zimny-stadion", "nazov": "Zimný štadión", "x": 3150.16, "z": -1327.89, "dosah": 90},
     {"model": "vyskova-budova", "subor": "istropolis", "nazov": "Stavenisko Istropolis", "x": 1457.77, "z": -1784.57, "dosah": 120},
+    {"model": "vyskova-budova", "subor": "sky_park_tower", "nazov": "Stavenisko Sky Park Tower", "x": 1284.38, "z": 63.86, "dosah": 110},
     {"model": "vyskova-budova", "subor": "mlada-garda", "nazov": "Mladá garda", "x": 1390.54, "z": -3755.73, "dosah": 90},
     {"model": "vyskova-budova", "subor": "mlada-garda-kurty", "x": 1390.54, "z": -3755.73},
     {"model": "vyskova-budova", "subor": "supermarket-racianska", "nazov": "Supermarket na Račianskej", "x": 1598.71, "z": -3811.38, "dosah": 50},
