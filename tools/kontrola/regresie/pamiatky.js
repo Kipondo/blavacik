@@ -75,6 +75,32 @@ export const kontrolyPamiatok = [
     },
   },
   {
+    id: 'sky-park-tower-stavenisko',
+    popis: 'Sky Park Tower je k 11/2026 rozostavaná (hrubá stavba ~17. NP, jadro, žeriavy) – nie hotová 125 m kocka '
+      + 'z obrysu OSM building=construction; model stavby pokrýva celý obrys, takže budova dlaždice sa vyhodí',
+    oprava: 'feature/sky-park-tower (#129) – tools/blender/vyskove/sky_park_tower.py podľa prieskumu',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const zoznam = await (await fetch('data/mapa/pamiatky.json')).json();
+      const zaznam = (zoznam.pamiatky ?? zoznam).find?.((p) => p.subor === 'sky_park_tower');
+      if (!zaznam) chyby.push({ text: 'v data/mapa/pamiatky.json chýba stavenisko Sky Park Tower' });
+      const r = await fetch('assets/pamiatky/sky_park_tower.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [...chyby, { text: 'chýba assets/pamiatky/sky_park_tower.json' }] };
+      const info = await r.json();
+      if (!(info.vyska > 40 && info.vyska < 80)) chyby.push({ text: `výška hrubej stavby ${info.vyska} m (čaká sa ~58 m)` });
+      // stred obrysu OSM (way 1503417607) musí ležať v obryse modelu
+      const o = info.obrysy?.[0] ?? [];
+      const [px, pz] = [1284.4 - info.stred[0], 63.9 - info.stred[1]];
+      let vnutri = false;
+      for (let i = 0, j = o.length - 1; i < o.length; j = i++) {
+        if ((o[i][1] > pz) !== (o[j][1] > pz) && px < (o[j][0] - o[i][0]) * (pz - o[i][1]) / (o[j][1] - o[i][1]) + o[i][0]) vnutri = !vnutri;
+      }
+      if (!vnutri) chyby.push({ text: 'obrys modelu nepokrýva stavbu z OSM' });
+      return { skontrolovane: 1, chyby };
+    },
+  },
+  {
     id: 'nbs-strieska',
     popis: 'Národná banka Slovenska: veľká strieška pred vstupom (OSM 411828074, building:part=roof) je doska na stĺpoch – '
       + 'pod ňou sa dá prejsť (nie plná kamenná krabica), budovy dlaždíc sú tam vyhodené a socha Biatec je súčasťou modelu',

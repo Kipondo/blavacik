@@ -189,6 +189,18 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Sky Park Tower – stavenisko podľa stavu k novembru 2026 (vetva `feature/sky-park-tower`, #129)
+- **Prieskum:** ASB a YIM.BA 10/2026, Liebherr 6/2025, OSM; bez Google. Opis je v `napady/pamiatky-podklady.md`.
+- **Predtým:** hotová 125 m kocka z obrysu OSM `building=construction` v stavebnej jame hlbokej 12 m.
+- **Teraz** (`tools/blender/vyskove/sky_park_tower.py`): rozostavaná hrubá stavba v tvare arašidu.
+  - **Hrubá stavba:** stropy po 17. NP, biele stĺpy, modré siete a zábradlia, oranžové murivo a zasklené 1.–3. NP.
+  - **Vrch:** žltý ochranný pás, jadro so samošplhacím debnením a červeným betónovacím stožiarom.
+  - **Stavenisko:** dva žeriavy (sklopný a flat-top), lešenie, markíza, plot a buňky.
+- **Terén:** stavebná jama z lasera je zarovnaná (`tools/mesto/laser/zasyp_tunely.py` vie zasypať zadanú plochu,
+  záznam v `tunely.json`) – prízemie je na úrovni Landererovej.
+- **Regresná kontrola** `sky-park-tower-stavenisko` (a `tunely-zasypane` pre jamu). **Body trasy** `sky-park-tower`
+  a `sky-park-tower-ulica`.
+
 ### Glória – veža podľa skutočnosti (vetva `feature/gloria`, #128)
 - **Prieskum:** OSM 3D z 12/2025, cenník bytov z archívu predajného webu, Commons 2006–2016, laser; bez Google.
   Opis je v `napady/pamiatky-podklady.md`.

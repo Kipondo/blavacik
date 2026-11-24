@@ -49,6 +49,8 @@
     {"id": "gloria-dialka", "nazov": "Glória z diaľky od Miletičovej", "x": 2292, "z": -1292, "kamera": [1990, 8, -1262], "ciel": [2292, 50, -1292], "pohlady": ["ulica"]},
     {"id": "gloria-vychod", "nazov": "Glória z východu medzi bytovkami", "x": 2292, "z": -1292, "kamera": [2380, 1.7, -1285], "ciel": [2292, 45, -1292], "pohlady": ["ulica"]},
     {"id": "gloria-juh", "nazov": "Glória spoza Záhradníckej", "x": 2292, "z": -1292, "kamera": [2330, 1.7, -1370], "ciel": [2292, 45, -1292], "pohlady": ["ulica"]},
+    {"id": "sky-park-tower", "nazov": "Sky Park Tower z parku Sky Parku", "x": 1285, "z": 62, "kamera": [1310, 1.7, 0], "ciel": [1285, 28, 62], "vzdialenost": 140, "vyska": 100, "azimut": 200, "pohlady": ["ulica", "zhora"]},
+    {"id": "sky-park-tower-ulica", "nazov": "Sky Park Tower z Landererovej pri Čulenovej", "x": 1285, "z": 62, "kamera": [1245, 1.7, 112], "ciel": [1285, 28, 62], "pohlady": ["ulica"]},
     { "id": "hlavna-stanica", "nazov": "Hlavná stanica", "x": -97, "z": -1640, "azimut": 0, "pohlady": ["ulica", "zhora"] },
     { "id": "stanica-hala", "nazov": "Hlavná stanica – historická hala s freskou", "x": -110.5, "z": -1684.6, "azimut": 330, "pohlady": ["ulica"],
       "kamera": [-110.5, 1.7, -1684.6], "ciel": [-102.1, 6.5, -1697.1] },

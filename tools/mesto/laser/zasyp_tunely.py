@@ -8,6 +8,9 @@
 #      sa portálu dotýka (do 5 m) a nie je väčšia ako 3000 m² (väčšia jama je prírodná – údolie, nie zárez),
 #   2) rozšíri sa o 6 m (svahy a múry zárezu),
 #   3) vyplní hladkou plochou z okraja (Laplaceova rovnica) – výška okolitej ulice sa plynulo premostí.
+# Záznam s „oblast“ (mnohouholník v metroch hry) je stavebná jama, ktorá je dnes zastavaná (laser ju zachytil
+# počas výkopu, napr. Sky Park Tower, #129): vyplní sa celá plocha mnohouholníka hladko z jeho okraja – bez hľadania
+# jamy a bez limitu MAX_JAMA (okraj má byť na pôvodnom teréne – ulica, park).
 # Uzly na spoločnej hrane dlaždíc dostanú v oboch dlaždiciach tú istú výšku (šev ostane zošitý).
 # Opakované spustenie už jamu nenájde a nič nemení. Tunely v kopci (Sitina) do zoznamu nepatria – tam cesta ide
 # do svahu, nie do jamy.
@@ -57,11 +60,24 @@ def vypln(M, maska):
     return V
 
 
+def vnutri(XX, ZZ, poly):
+    """Maska uzlov (XX, ZZ) vnútri mnohouholníka [[x, z], …] (lúč doprava)."""
+    m = np.zeros(XX.shape, bool)
+    n = len(poly)
+    for i in range(n):
+        (x0, z0), (x1, z1) = poly[i], poly[(i + 1) % n]
+        if z0 == z1:
+            continue
+        cez = ((z0 > ZZ) != (z1 > ZZ)) & (XX < (x1 - x0) * (ZZ - z0) / (z1 - z0) + x0)
+        m ^= cez
+    return m
+
+
 def main():
     zoznam = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tunely.json'), encoding='utf-8'))
     detail = set(json.load(open(os.path.join(VYSTUP, 'index.json'), encoding='utf-8')).get('terenDetail', {}).get('dlazdice', []))
     for tunel in zoznam['tunely']:
-        P = np.array(tunel['portaly'], float)
+        P = np.array(tunel.get('oblast') or tunel['portaly'], float)
         gx0 = int(np.floor((P[:, 0].min() - OKOLIE) / KROK)); gx1 = int(np.ceil((P[:, 0].max() + OKOLIE) / KROK))
         gz0 = int(np.floor((P[:, 1].min() - OKOLIE) / KROK)); gz1 = int(np.ceil((P[:, 1].max() + OKOLIE) / KROK))
         M = np.full((gz1 - gz0 + 1, gx1 - gx0 + 1), np.nan)
@@ -94,7 +110,14 @@ def main():
         maska = np.zeros(M.shape, bool)
         V = Mv.copy()
         kola = 0
-        for _ in range(KOLA):
+        if tunel.get('oblast'):
+            # zastavaná stavebná jama: celá plocha hladko z okraja (opakované spustenie dá ten istý výsledok)
+            m = vnutri(XX, ZZ, tunel['oblast']) & platne
+            m[0, :] = m[-1, :] = m[:, 0] = m[:, -1] = False
+            V2 = vypln(V, m)
+            if np.abs(V2 - V)[m].max() >= 0.05:
+                V, maska, kola = V2, m, 1
+        for _ in range(0 if tunel.get('oblast') else KOLA):
             R = V - ndimage.median_filter(V, size=OKNO)
             lab, _ = ndimage.label((R < -PRAH) & platne)
             vybrane = set(np.unique(lab[blizko & (lab > 0)]))
