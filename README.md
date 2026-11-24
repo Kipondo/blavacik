@@ -491,6 +491,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
     s oporným múrom. Na Staromestskej pod Hodžovým námestím pri Prezidentskom paláci bola jama hlboká 7 m. Jama pri
     portáloch zo zoznamu `tools/mesto/laser/tunely.json` sa vyplní hladkou plochou z okolitej ulice (Laplaceova
     rovnica), zasypaných je 5 500 m². Regresná kontrola `tunely-zasypane` a bod trasy `hodzovo-tunel`.
+  - **Prehľad všetkých ciest a chodníkov** (odchýlka terénu od okolia 42 m, ako na mape pri paláci):
+    - Väčšina „červených“ pásov sú skutočné úvozy a ulice v záreze do svahu (Hlboká cesta, Partizánska,
+      Urbánkova s oporným múrom). Tie ostávajú.
+    - Slepé jamy boli ešte pri 12 vjazdoch do podzemných garáží pod rovnou ulicou (Mlynské nivy, Mýtna, Cintorínska,
+      Dunajská, Palkovičova, Miletičova…). Ďalšia bola na Žabotovej, ktorá pri stanici končila v jame pod traťou
+      (klesali do nej aj koľaje). Teraz sú v `tunely.json` a zasypané (najviac o 5,2 m). Žabotova teraz na konci
+      vystúpi k trati (26 %, kontrolór mapy `cesta-strma` 164 → 165).
+    - Vjazdy do garáží v svahu (Slávičie údolie, Údolná, Mlynská dolina) sa nezasypávajú, rovnako ako tunel Sitina:
+      zasypanie by z konca cesty urobilo strmý kopec (kontrolór mapy `cesta-strma`).
+    - Kandidátov vypíše `python3 tools/mesto/laser/najdi_slepe_jamy.py`.
+    - `zasyp_tunely.py` zasype jamu, ktorej sa portál dotýka do 5 m (najviac 3 000 m², väčšia je prírodná). Opakuje
+      to, kým jama pri portáli nezmizne, takže ďalšie spustenie nič nemení.
+    - Body trasy `zabotova-trat`, `nivy-rampa`.
 - **Cesty bez prerastania a vnárania** (`js/mapa/cesty/povrch-modul.js`, `cesty.js`): `hra.mapa.vyska` pripočíta
   k terénu výšku vozovky (0,12 m) a chodníka s obrubníkom (0,28 m) z mapy povrchu dlaždice po 1 m – autá, autobusy aj chodci
   stoja na povrchu, nie 12 / 28 cm v ňom (terén bez ciest: `hra.mapa.vyskaZeme`). Pás cesty má 3 rady vrcholov a delenie
