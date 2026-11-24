@@ -26,10 +26,18 @@ function kamen() {
   return texturaKamena;
 }
 
+const BUNKA = 500;   // m – veľkosť kúska múrov a zábradlia
+
 export function vytvorNabrezneMury(voda, vyskopis, KONFIG) {
   const H = KONFIG.HRANICE;
-  const poz = [], uv = [], farby = [];
-  const zabradlie = [];
+  // po štvorcoch BUNKA (#110): múry celého mesta boli jedna sieť (~95 tis. trojuholníkov) a kreslili sa celé
+  // z ktoréhokoľvek miesta; po kúskoch sa tie mimo záberu a za koncom hmly (userData.dohlad) nekreslia
+  const kusy = new Map();
+  const kus = (x, z) => {
+    const k = `${Math.floor(x / BUNKA)},${Math.floor(z / BUNKA)}`;
+    if (!kusy.has(k)) kusy.set(k, { poz: [], uv: [], farby: [], zabradlie: [] });
+    return kusy.get(k);
+  };
 
   for (const v of voda ?? []) {
     if (v.reka === false) continue;
@@ -52,6 +60,7 @@ export function vytvorNabrezneMury(voda, vyskopis, KONFIG) {
         if (h0 < dole + 0.5 && h1 < dole + 0.5) continue;
         // v centre kamenný múr, ďalej od centra prírodný breh (hlina a tráva)
         const priroda = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2 - 300) > 2600 ? 1 : 0;
+        const { poz, uv, farby, zabradlie } = kus((x0 + x1) / 2, (z0 + z1) / 2);
         for (let q = 0; q < 6; q++) farby.push(...(priroda ? [0.55, 0.6, 0.42] : [1, 1, 1]));
         // obojstranný múr (DoubleSide) – netreba riešiť orientáciu
         const u0 = (k * d) / n / 4, u1 = ((k + 1) * d) / n / 4;
@@ -62,22 +71,29 @@ export function vytvorNabrezneMury(voda, vyskopis, KONFIG) {
     }
   }
 
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
-  geo.computeVertexNormals();
-  const mur = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: kamen(), vertexColors: true, roughness: 0.95, side: THREE.DoubleSide }));
-  mur.receiveShadow = true;
-  mur.name = 'nabrezne-mury';
-
-  // zábradlie ako jedna sieť tenkých kvádrov
   const skupina = new THREE.Group();
-  skupina.add(mur);
-  if (zabradlie.length) {
-    const geoZ = new THREE.BoxGeometry(1, 1, 1);
-    const im = new THREE.InstancedMesh(geoZ, new THREE.MeshStandardMaterial({ color: '#3d4144', roughness: 0.6, metalness: 0.5 }), zabradlie.length);
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const matMur = new THREE.MeshStandardMaterial({ map: kamen(), vertexColors: true, roughness: 0.95, side: THREE.DoubleSide });
+  const matZabradlie = new THREE.MeshStandardMaterial({ color: '#3d4144', roughness: 0.6, metalness: 0.5 });
+  const geoZ = new THREE.BoxGeometry(1, 1, 1);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  for (const { poz, uv, farby, zabradlie } of kusy.values()) {
+    if (!poz.length) continue;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(farby, 3));
+    geo.computeVertexNormals();
+    const mur = new THREE.Mesh(geo, matMur);
+    mur.receiveShadow = true;
+    mur.name = 'nabrezne-mury';
+    geo.computeBoundingSphere();
+    const obal = geo.boundingSphere;
+    mur.userData.dohlad = { x: obal.center.x, z: obal.center.z, r: obal.radius };
+    skupina.add(mur);
+
+    // zábradlie ako jedna sieť tenkých kvádrov (na štvorec)
+    if (!zabradlie.length) continue;
+    const im = new THREE.InstancedMesh(geoZ, matZabradlie, zabradlie.length);
     zabradlie.forEach(([x0, h0, z0, x1, h1, z1], i) => {
       const d = Math.hypot(x1 - x0, z1 - z0);
       e.set(0, Math.atan2(x1 - x0, z1 - z0), 0);
@@ -86,6 +102,8 @@ export function vytvorNabrezneMury(voda, vyskopis, KONFIG) {
       im.setMatrixAt(i, m);
     });
     im.computeBoundingSphere();
+    im.name = 'zabradlie-nabrezia';
+    im.userData.dohlad = { x: im.boundingSphere.center.x, z: im.boundingSphere.center.z, r: im.boundingSphere.radius };
     skupina.add(im);
   }
   return skupina;

@@ -63,6 +63,83 @@ function geometriaVikiera() {
   return geometria;
 }
 
+// ---------- jednoduchý vikier zďaleka (#110): len viditeľné plochy – čelo, okno, bočnice, strieška a štít ----------
+// 13 trojuholníkov namiesto 109; rozmery a farby ako podrobný vikier
+let geometriaD = null;
+function geometriaVikieraDaleko() {
+  if (geometriaD) return geometriaD;
+  const kusy = [];
+  const farba = new THREE.Color();
+  const plocha = (sx, sy, uprav, hex) => {
+    const g = new THREE.PlaneGeometry(sx, sy).toNonIndexed();
+    g.deleteAttribute('uv');
+    uprav(g);
+    farba.setHex(hex);
+    const n = g.getAttribute('position').count;
+    g.setAttribute('color', new THREE.BufferAttribute(Float32Array.from({ length: n * 3 }, (_, i) => [farba.r, farba.g, farba.b][i % 3]), 3));
+    kusy.push(g);
+  };
+  const S = 1.5, V = 1.6, H = 3.2, sklon = 0.55, presah = 0.15;
+  plocha(S, V, (g) => g.translate(0, V / 2, 0), 0xefeadf);                       // čelo
+  plocha(0.98, 1.12, (g) => g.translate(0, 0.84, 0.03), 0x3d4954);              // okno (sklo s rámom)
+  for (const s of [-1, 1]) {
+    plocha(H, V, (g) => { g.rotateY(s * Math.PI / 2); g.translate(s * S / 2, V / 2, -H / 2); }, 0x7e3b2b);   // bočnice
+    plocha(S / 2 + 0.2, H + presah, (g) => {                                        // strieška
+      g.rotateX(-Math.PI / 2);
+      g.rotateZ(-s * Math.atan2(sklon, S / 2 + 0.1));
+      g.translate(s * (S / 4 + 0.03), V + sklon / 2 + 0.04, -H / 2 + presah / 2);
+    }, 0x8e3b29);
+  }
+  const stit = new THREE.BufferGeometry();
+  stit.setAttribute('position', new THREE.Float32BufferAttribute([-S / 2, V, 0, S / 2, V, 0, 0, V + sklon, 0], 3));
+  stit.computeVertexNormals();
+  farba.setHex(0xefeadf);
+  stit.setAttribute('color', new THREE.Float32BufferAttribute([farba.r, farba.g, farba.b, farba.r, farba.g, farba.b, farba.r, farba.g, farba.b], 3));
+  kusy.push(stit);
+  geometriaD = mergeGeometries(kusy, false);
+  geometriaD.computeBoundingSphere();
+  geometriaD.userData.zdielane = true;
+  return geometriaD;
+}
+
+const BLIZKO = 90;    // m od kamery – bližšie podrobný vikier, ďalej jednoduchý
+const POSUN = 15;     // m – po takom posune sa vikiere znova rozdelia
+
+/**
+ * Rozdelí vikiere dlaždice podľa vzdialenosti od (x, z): blízke ostanú v podrobnej sieti, vzdialené idú do
+ * jednoduchej siete vedľa nej (vytvorí sa pri prvom volaní, tiež s menom „vikiere“). Volá js/mapa/dlazdice/lod-zeme.js.
+ */
+export function rozdelVikiere(im, x, z) {
+  const ud = im.userData;
+  if (ud.px !== undefined && (x - ud.px) ** 2 + (z - ud.pz) ** 2 < POSUN * POSUN) return;
+  if (!ud.matice) {
+    if (!im.parent) return;
+    ud.matice = im.instanceMatrix.array.slice();
+    ud.pocet = im.count;
+    const d = new THREE.InstancedMesh(geometriaVikieraDaleko(), im.material, ud.pocet);
+    d.castShadow = false;
+    d.receiveShadow = true;
+    d.name = 'vikiere';
+    d.count = 0;
+    im.parent.add(d);
+    ud.daleko = d;
+  }
+  ud.px = x; ud.pz = z;
+  const A = ud.matice, B = im.instanceMatrix.array, D = ud.daleko.instanceMatrix.array, b2 = BLIZKO * BLIZKO;
+  let nb = 0, nd = 0;
+  for (let i = 0; i < ud.pocet; i++) {
+    const o = i * 16, dx = A[o + 12] - x, dz = A[o + 14] - z;
+    if (dx * dx + dz * dz < b2) B.set(A.subarray(o, o + 16), nb++ * 16);
+    else D.set(A.subarray(o, o + 16), nd++ * 16);
+  }
+  im.count = nb; ud.daleko.count = nd;
+  for (const m of [im, ud.daleko]) {
+    m.instanceMatrix.needsUpdate = true;
+    // obal len okolo aktuálnych inštancií – mimo záberu sa nekreslia
+    if (m.count) m.computeBoundingSphere();
+  }
+}
+
 let material = null;
 const ziskajMaterial = () => (material ??= new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0 }));
 
@@ -185,5 +262,7 @@ export function vytvorVikiere(budovy = [], strechy, vyskopis) {
   im.receiveShadow = true;
   im.computeBoundingSphere();
   im.name = 'vikiere';
+  // zďaleka jednoduchý vikier (#110) – rozdelenie podľa polohy hráča robí js/mapa/dlazdice/lod-zeme.js
+  im.userData.podlaKamery = (x, z) => rozdelVikiere(im, x, z);
   return im;
 }

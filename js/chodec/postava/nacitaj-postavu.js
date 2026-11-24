@@ -49,12 +49,14 @@ export function pripravSiet(o) {
     o.material.depthWrite = false;
     o.renderOrder = 1;
   }
-  o.castShadow = true;
-  o.receiveShadow = true;
-  o.frustumCulled = false; // animované kosti menia obrys, orezávanie by postavu občas skrylo
   // objekt z Blendera podľa mena materiálu (mená uzlov sa pri kompresii môžu stratiť):
   // koza_* = telo, <objekt>_ostne / <objekt>_pramene = časť vlasov, inak meno materiálu = meno objektu
   const mm = o.material.name || o.name;
+  // zuby, jazyk a oči sú vnútri obrysu hlavy – tieň by nezmenili, v tieňovej mape boli 5 volaní na postavu (#110)
+  o.userData.bezTiena = /^(zuby|jazyk|oko_)/.test(mm);
+  o.castShadow = !o.userData.bezTiena;
+  o.receiveShadow = true;
+  o.frustumCulled = false; // animované kosti menia obrys, orezávanie by postavu občas skrylo
   o.userData.objekt = mm.startsWith('koza_') ? 'telo' : mm.replace(/_(ostne|pramene)$/, '');
   return o;
 }

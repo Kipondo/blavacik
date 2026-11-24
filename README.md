@@ -189,6 +189,42 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Výkon 3: zem po blokoch, pamiatky zďaleka, vikiere, voda a zastávky (vetva `feature/vykon-3`, #110)
+Nadväzuje na výkon 2 (PR #165).
+- **Zem po blokoch 100 m:** úroveň detailu (sieť 2 / 4 / 10 m) sa volí pre každý blok podľa vzdialenosti hráča
+  (do 100 m / do 320 m / ďalej), nie pre celú dlaždicu 500 × 500 m. Pri rohu dlaždíc mali predtým štyri dlaždice
+  plnú sieť 2 m. Index sa poskladá nanovo len pri zmene a ostáva jedno volanie na dlaždicu. Škáry medzi blokmi
+  s rôznou úrovňou prekryjú zvislé „závesy“ z oboch strán (`js/mapa/teren/zem-dlazdica.js`).
+- **Pamiatky z Blendera zďaleka** (nad 260 m, mosty nad 320 m): farba materiálu je zapečená vo farbách vrcholov
+  a podobné povrchy sú spojené do jednej siete. Napríklad Eurovea 2 tak kreslí pár volaní namiesto 47. Sklo
+  (nočné okná), svetlá a priehľadné materiály ostávajú samostatné (`js/mapa/pamiatky/vzdialena-uroven.js`).
+- **Vikiere:** do 90 m od hráča podrobné, ďalej jednoduchý tvar (13 trojuholníkov namiesto 109).
+- **Drobnosti dlaždíc zďaleka:**
+  - dopravné značky, tabule ulíc, lavičky a trolejové vedenie sa kreslia do 220 m;
+  - semafory a vodorovné značenie do 300 m.
+- **Zastávky MHD:** označník a tabuľa odchodov sa kreslia do 120 m, prístrešok do 220 m.
+- **Voda a nábrežia:**
+  - vodné plochy sú zlúčené po štvorcoch 1 km (predtým ~90 sietí);
+  - nábrežné múry a zábradlie sú po kúskoch 500 m, ktoré sa mimo záberu a za hmlou nekreslia.
+- **Tráva:** vo vonkajšom prstenci (12–30 m) sú jednoduchšie trsy (18 trojuholníkov namiesto 55).
+- **Meranie** (`tools/kontrola/meranie-trasy.py`, kvalita „vysoká“, SwiftShader):
+
+  | miesto | trojuholníky (výkon 2 → 3) | volania (výkon 2 → 3) | čas snímky |
+  |---|---|---|---|
+  | Hlavné nám. | 3,32 → 2,78 mil. | 820 → 766 | 4,39 → 3,71 s |
+  | Šafárikovo nám. | 3,15 → 2,55 mil. | 792 → 665 | 5,18 → 4,07 s |
+  | Karlova Ves | 2,28 → 1,79 mil. | 491 → 476 | 2,90 → 2,42 s |
+
+  Čas snímky je zo SwiftShader (kreslí procesor) – len na porovnanie. Cieľ #110 (pod 2 mil. a 600 volaní) spĺňa
+  Karlova Ves. Na námestiach ostávajú najmä podrobné postavy (koža z 14 častí s vlastnou textúrou – ~25 volaní
+  na postavu, aj v tieni), tieň budov a autá.
+- **Úrovne detailu podľa kamery:** dlaždice a zastávky sa riadia polohou kamery, nie hráča (vyhliadky, voľná kamera).
+- **Tiene postáv:** zuby, jazyk a oči (vnútri hlavy) nevrhajú tieň – o 5 volaní menej na postavu.
+- **Regresné kontroly** (`tools/kontrola/regresie/vykon.js`):
+  - `urovne-detailu-zeme` – bloky, závesy a platnosť indexu;
+  - `pamiatky-zdialky` – spojené siete, sklo, svetlá;
+  - `vikiere-zdialky` – rozdelenie na podrobné a jednoduché.
+
 ### Výkon 2: úrovne detailu zeme, stromov a striech, zlúčené pamiatky (vetva `feature/vykon-2`, #110)
 - **Zem podrobných dlaždíc** má tri úrovne detailu nad tými istými vrcholmi: sieť 2 m do 220 m od hráča, 4 m do 520 m
   a ďalej 10 m (`js/mapa/teren/zem-dlazdica.js`, prepína `js/mapa/dlazdice/lod-zeme.js`). Škáry na hranách prekryje sukňa.

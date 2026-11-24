@@ -2,7 +2,8 @@
 // Kde je tráva, sa zistí z mapy tried povrchu dlaždice (trieda 64) a z mapy pokrývky (zelené plochy parkov
 // a lúk) – obe plátna kreslí js/mapa/teren/textura-zeme.js, mesh zeme ich nesie v materiáli.
 // Trsy sú v pevnej mriežke sveta (pri pohybe neskáču), prepočítajú sa po 4 m pohybu kamery.
-// Dosah podľa kvality grafiky: nízka bez trávy, stredná 18 m, vysoká 30 m.
+// Dosah podľa kvality grafiky: nízka bez trávy, stredná 18 m, vysoká 30 m. Vonkajší redší prstenec má jednoduchšie
+// trsy (vlastný InstancedMesh trsyDaleko, #110).
 
 import * as THREE from 'three';
 import { geometriaTrsu, materialTravy } from './trava.js';
@@ -46,14 +47,19 @@ export default {
     // moduly, ktoré poslali plochy ešte pred týmto modulom, ich nechali aj v hra.stav.bezTravy
     for (const [kluc, polygony] of Object.entries(hra.stav.bezTravy ?? {})) nastav(kluc, polygony);
 
-    this.trsy = new THREE.InstancedMesh(geometriaTrsu(), materialTravy(), MAX);
-    this.trsy.count = 0;
-    this.trsy.frustumCulled = false;
-    this.trsy.receiveShadow = true;
-    this.trsy.castShadow = false;
-    this.trsy.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.trsy.name = 'trava';
-    hra.scena.add(this.trsy);
+    // zblízka podrobné trsy, v redšom vonkajšom prstenci jednoduchšie (18 trojuholníkov namiesto 55, #110)
+    const mat = materialTravy();
+    this.trsy = new THREE.InstancedMesh(geometriaTrsu(), mat, MAX);
+    this.trsyDaleko = new THREE.InstancedMesh(geometriaTrsu(6, 2, 1.6), mat, MAX);
+    for (const im of [this.trsy, this.trsyDaleko]) {
+      im.count = 0;
+      im.frustumCulled = false;
+      im.receiveShadow = true;
+      im.castShadow = false;
+      im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      im.name = 'trava';
+      hra.scena.add(im);
+    }
     this._m = new THREE.Matrix4(); this._q = new THREE.Quaternion(); this._v = new THREE.Vector3(); this._s = new THREE.Vector3();
     this._os = new THREE.Vector3(0, 1, 0);
   },
@@ -101,7 +107,7 @@ export default {
     const k = hra.kamera.position;
     // vysoko nad zemou (vyhliadka, lietanie kamerou) tráva nie je vidieť
     const nadZemou = k.y - hra.mapa.vyska(k.x, k.z);
-    if (!dosah || nadZemou > 40) { this.trsy.count = 0; this.posledna = null; return; }
+    if (!dosah || nadZemou > 40) { this.trsy.count = 0; this.trsyDaleko.count = 0; this.posledna = null; return; }
     if (this.posledna && Math.hypot(k.x - this.posledna.x, k.z - this.posledna.z) < 4 && this.posledna.dosah === dosah) return;
     this.posledna = { x: k.x, z: k.z, dosah };
     this.prepocitaj(hra, k.x, k.z, dosah);
@@ -133,9 +139,11 @@ export default {
     // tráva nerastie v pôdorysoch budov (nepresvitá cez podlahy a nekreslí sa zbytočne pod domami)
     const budovy = this._budovy ??= new Map();
     if (budovy.size > 200000) budovy.clear();
-    let n = 0;
+    const pocty = [0, 0];
     // zblízka hustá mriežka, ďalej dvojnásobný krok, väčšie a redšie trsy (zvyšok dokreslí textúra trávnika)
-    for (const [krok, od, po, mierka] of [[KROK, 0, blizko, 1], [KROK * 2, blizko, dosah, 1.3]]) {
+    for (const [krok, od, po, mierka, u] of [[KROK, 0, blizko, 1, 0], [KROK * 2, blizko, dosah, 1.3, 1]]) {
+      const im = u ? this.trsyDaleko : this.trsy;
+      let n = 0;
       const i0 = Math.floor((cx - po) / krok), i1 = Math.ceil((cx + po) / krok);
       const j0 = Math.floor((cz - po) / krok), j1 = Math.ceil((cz + po) / krok);
       for (let i = i0; i <= i1 && n < MAX; i++) {
@@ -162,11 +170,14 @@ export default {
           this._v.set(x, y - 0.02, z);
           this._s.set(s, s * (0.8 + hash(gx, gz, 6) * 0.5), s);
           this._m.compose(this._v, this._q, this._s);
-          this.trsy.setMatrixAt(n++, this._m);
+          im.setMatrixAt(n++, this._m);
         }
       }
+      pocty[u] = n;
     }
-    this.trsy.count = n;
+    this.trsy.count = pocty[0];
+    this.trsyDaleko.count = pocty[1];
     this.trsy.instanceMatrix.needsUpdate = true;
+    this.trsyDaleko.instanceMatrix.needsUpdate = true;
   },
 };

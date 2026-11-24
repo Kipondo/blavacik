@@ -7,8 +7,12 @@ import * as THREE from 'three';
 const STEBLA = 11;          // stebiel v trse
 const SEGMENTY = 3;
 
-/** Geometria jedného trsu (na výšku ~0,3 m pri mierke 1). */
-export function geometriaTrsu() {
+/**
+ * Geometria jedného trsu (na výšku ~0,3 m pri mierke 1). Zďaleka (#110) stačí menej stebiel s menej segmentmi
+ * a širšími steblami: geometriaTrsu(6, 2, 1.6) má 18 trojuholníkov namiesto 55.
+ */
+export function geometriaTrsu(stebla = STEBLA, segmenty = SEGMENTY, sirka = 1) {
+  const STEBLA = stebla, SEGMENTY = segmenty;
   const poz = [], farby = [], index = [];
   const zakl = new THREE.Color(0.075, 0.115, 0.03), spic = new THREE.Color(0.2, 0.31, 0.07);
   const c = new THREE.Color();
@@ -17,7 +21,7 @@ export function geometriaTrsu() {
   for (let k = 0; k < STEBLA; k++) {
     const uhol = nah() * Math.PI * 2, r = Math.sqrt(nah()) * 0.13;
     const ox = Math.cos(uhol) * r, oz = Math.sin(uhol) * r;
-    const h = 0.2 + nah() * 0.17, w = 0.022 + nah() * 0.012;
+    const h = 0.2 + nah() * 0.17, w = (0.022 + nah() * 0.012) * sirka;
     const naklon = nah() * Math.PI * 2, ohyb = 0.25 + nah() * 0.3;
     const lx = Math.cos(naklon), lz = Math.sin(naklon);
     // šírka stebla kolmo na smer náklonu

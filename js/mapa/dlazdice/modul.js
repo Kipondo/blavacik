@@ -30,6 +30,7 @@ export default {
     const sprava = hra.mapa?.dlazdice;
     if (!sprava) return;
     const { x, z } = hra.stav.pozicia;
-    sprava.update(x, z, performance.now() / 1000);
+    // úrovne detailu dlaždíc podľa kamery (pri voľnej kamere a vyhliadkach môže byť ďaleko od hráča)
+    sprava.update(x, z, performance.now() / 1000, hra.kamera?.position);
   },
 };

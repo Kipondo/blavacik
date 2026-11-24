@@ -507,7 +507,7 @@ export default {
         if (plny.zruseny || c.zruseny) { npc.zrus(); return; }
         npc.nastavLod(0);
         npc.koren.visible = false;
-        npc.koren.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+        npc.koren.traverse((o) => { if (o.isMesh) o.castShadow = !o.userData.bezTiena; });
         this.skupina.add(npc.koren);
         plny.npc = npc;
       }).catch(() => { plny.chyba = true; });

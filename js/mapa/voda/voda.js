@@ -3,6 +3,7 @@
 // Formát: { "nazov": "Dunaj", "reka": true, "body": [[x,z], ...] }
 
 import * as THREE from 'three';
+import { zlucPodlaMaterialu } from '../zluc-siete.js';
 import { materialReky } from './material-reky.js';
 
 /** Opakovateľná normálová mapa vlniek (súčet sínusov – bez švov). */
@@ -114,6 +115,10 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
     mesh.receiveShadow = true;
     skupina.add(mesh);
   }
+
+  // vodné plochy a kamenné okraje s rovnakým materiálom – jedna sieť na štvorec 1 km (#110: Dunaj a jazerá
+  // mali ~90 sietí, každá samostatné volanie kreslenia)
+  zlucPodlaMaterialu(skupina, { bunka: 1000 });
 
   // vlnky tečú po prúde (Dunaj tečie na východ = +x)
   skupina.userData.update = (cas) => {
