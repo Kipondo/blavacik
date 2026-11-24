@@ -189,6 +189,20 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Glória – veža podľa skutočnosti (vetva `feature/gloria`, #128)
+- **Prieskum:** OSM 3D z 12/2025, cenník bytov z archívu predajného webu, Commons 2006–2016, laser; bez Google.
+  Opis je v `napady/pamiatky-podklady.md`.
+- **Predtým:** obrysy OSM s náhodnými balkónmi a presklenými hornými časťami.
+- **Teraz** (`tools/blender/vyskove/gloria.py`):
+  - **podnož** zo strieborných panelov s červenými oknami a nápisom „Gloria“ (meno domu) na zaoblenom nároží;
+    ustúpené 4. NP s terasou;
+  - **veža do 69 m** so zaoblenou SZ stenou, svetlosivou omietkou, červenými oknami a modrošedými pásmi;
+  - **balkóny:** na severe dva stĺpce sýtožltých oblúkových balkónov, na SZ a JZ vlnité bledožlté balkóny;
+  - **vrch:** horná hmota do 96 m a kocka 29. NP do 100 m s vyloženými doskami a žltým vlysom, stožiar s anténami;
+    na terase dva žlté rámy na bielych stĺpoch.
+- **Regresná kontrola** `gloria-tvar`. **Body trasy** `gloria`, `gloria-dialka`, `gloria-vychod` a `gloria-juh` –
+  podľa miest, odkiaľ fotil majiteľ.
+
 ### Pravidlá ulice 3: pruhy, cyklopruhy, ostrovčeky a chodníky v zeleni (vetva `feature/pravidla-ulice-3`, #136)
 - **Ako to vyzerá v skutočnosti a ako to robí hra:** `napady/pravidla-ulice.md`.
 - **Čiary pruhov nejdú krížom:**
