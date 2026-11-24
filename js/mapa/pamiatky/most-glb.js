@@ -10,6 +10,7 @@
 
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
+import { vzdialenaUroven } from './vzdialena-uroven.js';
 import { vytvorMosty } from '../mosty/mosty.js';
 
 const OHYB_DO = 12;     // do tejto výšky nad mostovkou sa časti ohýbajú s nábehom celé
@@ -32,12 +33,8 @@ function ohni(model, posun) {
 }
 
 function sUrovnami(model) {
-  const daleko = new THREE.Group();
-  for (const o of model.children) {
-    const m = Array.isArray(o.material) ? o.material : [o.material];
-    if (!m.every((x) => x.name.startsWith('detail'))) daleko.add(new THREE.Mesh(o.geometry, o.material));
-  }
-  daleko.traverse((o) => { if (o.isMesh) o.castShadow = o.receiveShadow = true; });
+  // zďaleka farby zapečené vo vrcholoch a spojené siete, bez materiálov „detail…“ (#110)
+  const daleko = vzdialenaUroven(model);
   const lod = new THREE.LOD();
   lod.addLevel(model, 0);
   lod.addLevel(daleko, VZDIALENOST_DETAILU);

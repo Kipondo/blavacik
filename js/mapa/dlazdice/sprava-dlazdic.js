@@ -148,7 +148,7 @@ export class SpravaDlazdic {
   }
 
   /** Volá sa každý snímok (modul js/mapa/dlazdice/modul.js). */
-  update(x, z, cas) {
+  update(x, z, cas, kamera = null) {
     this.stred = { x, z };
     if (this.dostavuje) return;
     // 1) pokračuj v rozostavanej dlaždici v rámci časového rozpočtu (väčší, kým pod hráčom chýba podrobná dlaždica)
@@ -179,10 +179,11 @@ export class SpravaDlazdic {
     // úrovne detailu podrobných dlaždíc podľa vzdialenosti (zem 2 / 4 / 10 m, drobnosti) – aj počas stavby ďalšej
     if (cas - (this.poslednyLod ?? -1e9) >= 0.25) {
       this.poslednyLod = cas;
+      const kx = kamera?.x ?? x, kz = kamera?.z ?? z;
       for (const [kluc, a] of this.aktivne) {
         if (a.uroven !== 'detail') continue;
         const [i, j] = kluc.split('_').map(Number);
-        nastavLodDlazdice(a.objekt, this.vzdialenost({ i, j }, x, z));
+        nastavLodDlazdice(a.objekt, this.vzdialenost({ i, j }, kx, kz), kx, kz);
       }
     }
     if (this.uloha) return;

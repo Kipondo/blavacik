@@ -12,6 +12,10 @@ const POLOMER_UVOLNENIA = 460;
 const POLOMER_TABULE = 60;     // tabuľa sa obnovuje len keď je hráč bližšie
 const OBNOVA_TABULE = 20;      // s
 const BUNKA = 250;
+// zďaleka (#110): označník a tabuľa odchodov majú každý vlastnú textúru (samostatné volania kreslenia) a za ~120 m
+// sú menšie ako pár bodov obrazovky; celá zastávka (prístrešok – 4 materiály) sa kreslí do 220 m
+const DOSAH_DETAILOV = 120;
+const DOSAH_ZASTAVKY = 220;
 
 export class SpravaZastavok {
   constructor(hra, data, hodiny) {
@@ -78,9 +82,15 @@ export class SpravaZastavok {
     if (this.kontrola <= 0) {
       this.kontrola = 0.5;
       for (const n of this.vOkoli(x, z, POLOMER_STAVBY)) if (!this.aktivne.has(n.id)) this.postav(n);
+      // čo sa kreslí, podľa kamery (pri voľnej kamere môže byť ďaleko od hráča)
+      const k = this.hra.kamera?.position ?? { x, z };
       for (const [id, a] of this.aktivne) {
         const n = a.objekt.userData.nastupiste;
-        if (Math.hypot(n.x - x, n.z - z) > POLOMER_UVOLNENIA) this.uvolni(id);
+        if (Math.hypot(n.x - x, n.z - z) > POLOMER_UVOLNENIA) { this.uvolni(id); continue; }
+        const d = Math.hypot(n.x - k.x, n.z - k.z);
+        a.objekt.visible = d < DOSAH_ZASTAVKY;
+        a.oznacnik.visible = d < DOSAH_DETAILOV;
+        if (a.tabula) a.tabula.visible = d < DOSAH_DETAILOV;
       }
     }
     this.obnovTabule(x, z);

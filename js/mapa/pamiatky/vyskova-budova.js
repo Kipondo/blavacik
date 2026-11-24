@@ -19,6 +19,7 @@
 
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
+import { vzdialenaUroven } from './vzdialena-uroven.js';
 import { nahradBudovy, nahradSochy } from './nahradene-budovy.js';
 import { pridajPochodzne } from '../mosty/pochodzne-pamiatok.js';
 
@@ -41,16 +42,28 @@ function nacitajModel(subor) {
   return cacheModel.get(subor);
 }
 
-/** Model s dvoma úrovňami: zblízka všetko, zďaleka bez materiálov „detail…“. */
-function sUrovnami(model) {
-  const daleko = model.clone();
-  const zmaz = [];
-  daleko.traverse((o) => {
-    if (!o.isMesh) return;
-    const m = Array.isArray(o.material) ? o.material : [o.material];
-    if (m.every((x) => x.name.startsWith('detail'))) zmaz.push(o);
-  });
-  for (const o of zmaz) o.parent.remove(o);
+/**
+ * Model s dvoma úrovňami: zblízka všetko, zďaleka bez materiálov „detail…“. Pevný model má zďaleka farby
+ * zapečené vo vrcholoch a spojené siete (js/mapa/pamiatky/vzdialena-uroven.js, #110) – pripraví sa raz na model
+ * a kópie (napr. štyri veže Sky Park) ju zdieľajú. Model podľa terénu má zďaleka tie isté siete (ich vrcholy
+ * sa posúvajú s terénom).
+ */
+const cacheDaleko = new Map();
+function sUrovnami(model, subor = null) {
+  let daleko;
+  if (subor) {
+    if (!cacheDaleko.has(subor)) cacheDaleko.set(subor, vzdialenaUroven(model));
+    daleko = cacheDaleko.get(subor).clone();
+  } else {
+    daleko = model.clone();
+    const zmaz = [];
+    daleko.traverse((o) => {
+      if (!o.isMesh) return;
+      const m = Array.isArray(o.material) ? o.material : [o.material];
+      if (m.every((x) => x.name.startsWith('detail'))) zmaz.push(o);
+    });
+    for (const o of zmaz) o.parent.remove(o);
+  }
   const lod = new THREE.LOD();
   lod.addLevel(model, 0);
   lod.addLevel(daleko, VZDIALENOST_DETAILU);
@@ -161,7 +174,7 @@ export default async function postav(p, { vyskopis, kolizie }) {
       g.add(sUrovnami(siete));
       return;
     }
-    g.add(sUrovnami(cacheModel.get(p.subor + '#pouzity') ? model.clone() : model));
+    g.add(sUrovnami(cacheModel.get(p.subor + '#pouzity') ? model.clone() : model, p.subor));
     cacheModel.set(p.subor + '#pouzity', true);
   });
 

@@ -38,8 +38,12 @@ function koliziePreDlazdicu(d) {
 /** Trsy trávy okolo bodu (x, z) – pozície z inštancií modulu. */
 function trsyOkolo(m, x, z) {
   m.prepocitaj(pripravene.hra, x, z, DOSAH);
-  const a = m.trsy.instanceMatrix.array, out = [];
-  for (let i = 0; i < m.trsy.count; i++) out.push([a[i * 16 + 12], a[i * 16 + 14]]);
+  const out = [];
+  // zblízka podrobné trsy a vo vonkajšom prstenci jednoduché (#110)
+  for (const im of [m.trsy, m.trsyDaleko].filter(Boolean)) {
+    const a = im.instanceMatrix.array;
+    for (let i = 0; i < im.count; i++) out.push([a[i * 16 + 12], a[i * 16 + 14]]);
+  }
   return out;
 }
 

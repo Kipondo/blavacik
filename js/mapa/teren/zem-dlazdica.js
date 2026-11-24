@@ -10,10 +10,13 @@ import { materialZeme } from './material-zeme.js';
 const KROK = 5, KROK_DETAIL = 2;
 const RIADKOV_NA_KROK = 30;   // koľko riadkov siete sa spočíta naraz (potom sa vráti riadenie hre)
 const SUKNA = 2;              // m – o koľko nižšie ide „sukňa“ na okraji dlaždice
-// hrubšie úrovne detailu nad tými istými vrcholmi (každý 2. a 5. uzol) pre vzdialené dlaždice (#110):
-// v detailnej dlaždici 4 m a 10 m namiesto 2 m; prepína ich js/mapa/dlazdice/lod-zeme.js, škáry na hranách
-// dlaždíc prekryje sukňa (tá ostáva v plnom rozlíšení)
-const KROKY_LOD = [2, 5];
+// Úrovne detailu po blokoch (#110): dlaždica sa delí na bloky BLOK × BLOK buniek (100 m pri sieti 2 m) a každý blok
+// má tri úrovne nad tými istými vrcholmi – každý 1., 2. a 5. uzol (2 / 4 / 10 m). Úroveň bloku podľa vzdialenosti
+// od hráča nastavuje js/mapa/dlazdice/lod-zeme.js a index siete sa poskladá nanovo (jedno volanie kreslenia
+// na dlaždicu ostáva). Kde susedia bloky s rôznou úrovňou, škáru prekryjú „závesy“ – zvislé pásy o SUKNA nižšie
+// pod hranou z jemnej aj z hrubej strany (ako sukňa na okraji dlaždice).
+const KROKY_LOD = [1, 2, 5];
+const BLOK = 50;
 
 export function vytvorZemDlazdice(d, rect, vyskopis, rieky) {
   return dokonci(krokyZemeDlazdice(d, rect, vyskopis, rieky));
@@ -31,8 +34,12 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
   const n = Math.round(w / (d._detailTerenu ? KROK_DETAIL : KROK));
   const v = n + 1, pocet = v * v;
   const krokX = w / n, krokZ = h / n;
-  // vrcholy siete (riadok j = z, stĺpec i = x) + 4 okraje „sukne“
-  const vsetky = pocet + 4 * v;
+  // bloky úrovní detailu: hranice v uzloch siete (násobky 10 – delia sa krokmi 2 aj 5)
+  const nb = Math.max(1, Math.round(n / BLOK));
+  const hranice = Array.from({ length: nb + 1 }, (_, k) => Math.round((k * n) / nb / 10) * 10);
+  hranice[nb] = n;
+  // vrcholy siete (riadok j = z, stĺpec i = x) + 4 okraje „sukne“ + kópie vnútorných hraníc blokov (závesy)
+  const vsetky = pocet + 4 * v + 2 * (nb - 1) * v;
   const P = new Float32Array(vsetky * 3), N = new Float32Array(vsetky * 3), U = new Float32Array(vsetky * 2);
   const voda = new Uint8Array(pocet), vys = new Float32Array(pocet);
   for (let j = 0; j < v; j++) {
@@ -75,19 +82,17 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
       N[k] = -dx / l; N[k + 1] = 1 / l; N[k + 2] = -dz / l;
     }
   }
-  // trojuholníky siete (lícom nahor)
-  const I = new Uint32Array(n * n * 6 + 4 * (v - 1) * 12);
-  let o = 0;
-  for (let j = 0; j < n; j++) {
-    for (let i = 0; i < n; i++) {
-      const a = j * v + i, b = a + v, c = a + 1, e = b + 1;
-      I[o++] = a; I[o++] = b; I[o++] = c;
-      I[o++] = c; I[o++] = b; I[o++] = e;
+  // sukňa okolo dlaždice (vždy v plnom rozlíšení) a kópie vnútorných hraníc blokov o SUKNA nižšie
+  const sukne = new Uint32Array(4 * (v - 1) * 12);
+  pridajSukne(P, N, U, sukne, 0, v, pocet);
+  const zaciatokHranic = pocet + 4 * v;
+  for (let k = 1; k < nb; k++) {
+    for (let t = 0; t < v; t++) {
+      kopiaNizsie(P, N, U, t * v + hranice[k], zaciatokHranic + (k - 1) * v + t);              // zvislá čiara i = hranice[k]
+      kopiaNizsie(P, N, U, hranice[k] * v + t, zaciatokHranic + (nb - 1 + k - 1) * v + t);    // vodorovná čiara j = hranice[k]
     }
   }
-  o = pridajSukne(P, N, U, I, o, v, pocet);
-  const sukne = I.subarray(n * n * 6, o);
-  const lod = [new THREE.BufferAttribute(I, 1), ...KROKY_LOD.map((s) => new THREE.BufferAttribute(indexyHrubsie(n, v, s, sukne), 1))];
+  const lodBloky = blokyUrovni(v, nb, hranice, pocet, zaciatokHranic, sukne, rect, krokX, krokZ);
   yield;
 
   const geo = new THREE.BufferGeometry();
@@ -95,7 +100,9 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
   geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
   geo.setAttribute('uv', new THREE.BufferAttribute(U, 2));
   geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vsetky * 3).fill(1), 3));
-  geo.setIndex(lod[0]);
+  geo.setIndex(lodBloky.index);
+  geo.setDrawRange(0, lodBloky.dlzka);
+  lodBloky.geo = geo;
   geo.computeBoundingSphere();
   geo.computeBoundingBox();
 
@@ -103,29 +110,136 @@ export function* krokyZemeDlazdice(d, rect, vyskopis, rieky) {
   mesh.receiveShadow = true;
   mesh.name = 'zem';
   mesh.userData.rect = rect;   // pre trávu zblízka (js/mapa/zelen/trava-modul.js číta mapu tried a pokrývky)
-  mesh.userData.lodIndexy = lod;
-  mesh.userData.lod = 0;
+  mesh.userData.lodBloky = lodBloky;   // úrovne detailu po blokoch – nastavuje js/mapa/dlazdice/lod-zeme.js
   return mesh;
 }
 
-/** Trojuholníky siete len cez každý s-tý uzol (posledný rad/stĺpec vždy na okraji) + sukňa v plnom rozlíšení. */
-function indexyHrubsie(n, v, s, sukne) {
-  const ciary = [];
-  for (let k = 0; k < n; k += s) ciary.push(k);
-  ciary.push(n);
-  const m = ciary.length - 1;
-  const I = new Uint32Array(m * m * 6 + sukne.length);
+/** Kópia vrcholu k o SUKNA nižšie na pozíciu ciel (sukne a závesy). */
+function kopiaNizsie(P, N, U, k, ciel) {
+  P[ciel * 3] = P[k * 3]; P[ciel * 3 + 1] = P[k * 3 + 1] - SUKNA; P[ciel * 3 + 2] = P[k * 3 + 2];
+  N[ciel * 3] = N[k * 3]; N[ciel * 3 + 1] = N[k * 3 + 1]; N[ciel * 3 + 2] = N[k * 3 + 2];
+  U[ciel * 2] = U[k * 2]; U[ciel * 2 + 1] = U[k * 2 + 1];
+}
+
+/** Uzly od a po b s krokom s (posledný je vždy b). */
+function ciary(a, b, s) {
+  const c = [];
+  for (let k = a; k < b; k += s) c.push(k);
+  c.push(b);
+  return c;
+}
+
+/** Trojuholníky bloku [i0, i1] × [j0, j1] cez každý s-tý uzol (lícom nahor). */
+function plochaBloku(v, i0, i1, j0, j1, s) {
+  const ci = ciary(i0, i1, s), cj = ciary(j0, j1, s);
+  const I = new Uint32Array((ci.length - 1) * (cj.length - 1) * 6);
   let o = 0;
-  for (let jj = 0; jj < m; jj++) {
-    for (let ii = 0; ii < m; ii++) {
-      const a = ciary[jj] * v + ciary[ii], b = ciary[jj + 1] * v + ciary[ii];
-      const c = ciary[jj] * v + ciary[ii + 1], e = ciary[jj + 1] * v + ciary[ii + 1];
+  for (let jj = 0; jj < cj.length - 1; jj++) {
+    for (let ii = 0; ii < ci.length - 1; ii++) {
+      const a = cj[jj] * v + ci[ii], b = cj[jj + 1] * v + ci[ii];
+      const c = cj[jj] * v + ci[ii + 1], e = cj[jj + 1] * v + ci[ii + 1];
       I[o++] = a; I[o++] = b; I[o++] = c;
       I[o++] = c; I[o++] = b; I[o++] = e;
     }
   }
-  I.set(sukne, o);
   return I;
+}
+
+/** Obojstranný zvislý pás pod čiarou uzlov t0…t1 s krokom s: horny(t) = vrchol na povrchu, dolny(t) = jeho kópia nižšie. */
+function zaves(horny, dolny, t0, t1, s) {
+  const c = ciary(t0, t1, s);
+  const I = new Uint32Array((c.length - 1) * 12);
+  let o = 0;
+  for (let k = 0; k < c.length - 1; k++) {
+    const a = horny(c[k]), b = horny(c[k + 1]), a2 = dolny(c[k]), b2 = dolny(c[k + 1]);
+    I[o++] = a; I[o++] = b; I[o++] = b2; I[o++] = a; I[o++] = b2; I[o++] = a2;
+    I[o++] = a; I[o++] = b2; I[o++] = b; I[o++] = a; I[o++] = a2; I[o++] = b2;
+  }
+  return I;
+}
+
+function spoj(kusy) {
+  const I = new Uint32Array(kusy.reduce((a, k) => a + k.length, 0));
+  let o = 0;
+  for (const k of kusy) { I.set(k, o); o += k.length; }
+  return I;
+}
+
+/**
+ * Kúsky indexu pre úrovne detailu po blokoch a skladanie indexu podľa úrovní blokov:
+ *   – plocha každého bloku v troch úrovniach,
+ *   – sukňa okolo dlaždice v plnom rozlíšení (vždy) a pri hrubšom bloku na okraji aj v jeho kroku,
+ *   – závesy na hranici dvoch blokov s rôznou úrovňou (v kroku oboch) – škára medzi jemnou lomenou čiarou
+ *     a hrubou priamkou je prekrytá z tej strany, ktorá je vyššie.
+ * zostav() zapíše index do spoločného poľa (bez nového bufferu), nastaví rozsah kreslenia a vráti dĺžku.
+ */
+function blokyUrovni(v, nb, hranice, pocet, zaciatokHranic, sukne, rect, krokX, krokZ) {
+  const plochy = [], okraje = [], susedia = [];
+  // okraje dlaždice: [horný vrchol, dolný vrchol] pre okraj (poradie ako v pridajSukne)
+  const okraj = [
+    [(t) => t, (t) => pocet + t],                                 // j = 0
+    [(t) => (v - 1) * v + t, (t) => pocet + v + t],               // j = n
+    [(t) => t * v, (t) => pocet + 2 * v + t],                     // i = 0
+    [(t) => t * v + v - 1, (t) => pocet + 3 * v + t],             // i = n
+  ];
+  for (let bj = 0; bj < nb; bj++) {
+    for (let bi = 0; bi < nb; bi++) {
+      const i0 = hranice[bi], i1 = hranice[bi + 1], j0 = hranice[bj], j1 = hranice[bj + 1];
+      plochy.push(KROKY_LOD.map((s) => plochaBloku(v, i0, i1, j0, j1, s)));
+      // hrubá sukňa na okrajoch dlaždice, ktorých sa blok dotýka (úroveň 0 má len plnú sukňu)
+      okraje.push(KROKY_LOD.map((s, u) => {
+        if (!u) return new Uint32Array(0);
+        const kusy = [];
+        if (bj === 0) kusy.push(zaves(...okraj[0], i0, i1, s));
+        if (bj === nb - 1) kusy.push(zaves(...okraj[1], i0, i1, s));
+        if (bi === 0) kusy.push(zaves(...okraj[2], j0, j1, s));
+        if (bi === nb - 1) kusy.push(zaves(...okraj[3], j0, j1, s));
+        return spoj(kusy);
+      }));
+    }
+  }
+  // vnútorné hranice: zvislá čiara k (medzi blokmi bi = k-1 a k) a vodorovná čiara k (bj = k-1 a k)
+  for (let k = 1; k < nb; k++) {
+    const zv = [(t) => t * v + hranice[k], (t) => zaciatokHranic + (k - 1) * v + t];
+    const vo = [(t) => hranice[k] * v + t, (t) => zaciatokHranic + (nb - 1 + k - 1) * v + t];
+    for (let m = 0; m < nb; m++) {
+      susedia.push({ a: m * nb + k - 1, b: m * nb + k, zavesy: KROKY_LOD.map((s) => zaves(...zv, hranice[m], hranice[m + 1], s)) });
+      susedia.push({ a: (k - 1) * nb + m, b: k * nb + m, zavesy: KROKY_LOD.map((s) => zaves(...vo, hranice[m], hranice[m + 1], s)) });
+    }
+  }
+  let kapacita = sukne.length;
+  for (const p of plochy) kapacita += p[0].length;
+  for (const o of okraje) kapacita += Math.max(...o.map((x) => x.length));
+  for (const s of susedia) kapacita += s.zavesy.reduce((a, z) => a + z.length, 0);
+  const pole = new Uint32Array(kapacita);
+  const index = new THREE.BufferAttribute(pole, 1);
+  index.setUsage(THREE.DynamicDrawUsage);
+  const urovne = new Uint8Array(nb * nb);
+  const vysledok = {
+    nb, urovne, index, dlzka: 0, geo: null,
+    // hranice blokov vo svetových súradniciach (vzdialenosť bloku od hráča)
+    x: hranice.map((k) => rect.minX + k * krokX), z: hranice.map((k) => rect.minZ + k * krokZ),
+    /** Poskladá index podľa urovne[] (0 = 2 m, 1 = 4 m, 2 = 10 m pri sieti 2 m); vráti počet indexov. */
+    zostav() {
+      let o = 0;
+      const daj = (a) => { pole.set(a, o); o += a.length; };
+      for (let b = 0; b < plochy.length; b++) daj(plochy[b][urovne[b]]);
+      daj(sukne);
+      for (let b = 0; b < okraje.length; b++) if (urovne[b]) daj(okraje[b][urovne[b]]);
+      for (const s of susedia) {
+        const ua = urovne[s.a], ub = urovne[s.b];
+        if (ua !== ub) { daj(s.zavesy[ua]); daj(s.zavesy[ub]); }
+      }
+      this.dlzka = o;
+      index.clearUpdateRanges();
+      index.addUpdateRange(0, o);
+      index.needsUpdate = true;
+      this.geo?.setDrawRange(0, o);
+      return o;
+    },
+  };
+  vysledok.zostav();
+  return vysledok;
 }
 
 /**
