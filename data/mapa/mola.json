@@ -1,0 +1,8 @@
+{
+  "popis": "Mólá a vyhliadkové lávky nad nábrežím (js/mapa/mosty/mola.js). V OSM sú to lávky (bridge=yes), ktoré hra stavia ako nadjazdy – mostovka by išla od terénu na brehu k terénu pri vode (do svahu). Mólo má mostovku vodorovne vo výške brehu + nad (m), na brehu schody a na strane vody voľný koniec nad vodou. breh / voda = konce lávky v metroch hry (x, z). Zdroje: napady/pamiatky-podklady.md (Eurovea – nábrežie).",
+  "mola": [
+    { "nazov": "Eurovea – západné mólo (Inessa Hansch)", "breh": [898.3, 407.2], "voda": [894.5, 444.2], "nad": 0.8, "sirka": 3.5 },
+    { "nazov": "Eurovea – stredné mólo (Inessa Hansch)", "breh": [1045.9, 424.4], "voda": [1041.5, 462.4], "nad": 0.8, "sirka": 3.5 },
+    { "nazov": "Eurovea – východné mólo pri Štefánikovom námestí (Inessa Hansch)", "breh": [1179.3, 438.9], "voda": [1175, 478.4], "nad": 0.8, "sirka": 3.5 }
+  ]
+}

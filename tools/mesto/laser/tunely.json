@@ -1,9 +1,147 @@
 {
-  "popis": "Cestné tunely pod rovnou ulicou, pred ktorými sa zasype zárez z lasera (tools/mesto/laser/zasyp_tunely.py). Hra tunely nekreslí – cesta by inak zišla do slepej jamy. Portály = konce nájazdových ciest pri tuneli (x, z v metroch hry). Tunely v kopci (Sitina) sem nepatria.",
+  "popis": "Cestné tunely a vjazdy do podzemných garáží, pred ktorými sa zasype zárez z lasera (tools/mesto/laser/zasyp_tunely.py). Hra tunely ani garáže nekreslí – cesta by inak zišla do slepej jamy. Portály = konce nájazdových ciest pri tuneli / garáži, alebo bod v jame (x, z v metroch hry). Tunely v kopci (Sitina) a cesty pod mostami sem nepatria. Kandidátov hľadá prehľad slepých jám v PR.",
   "tunely": [
     {
       "nazov": "Staromestská pod Hodžovým námestím",
-      "portaly": [[-82.1, -434.4], [-5.6, -490.5]]
+      "portaly": [
+        [
+          -82.1,
+          -434.4
+        ],
+        [
+          -5.6,
+          -490.5
+        ]
+      ]
+    },
+    {
+      "nazov": "Žabotova – podjazd pod traťou pri Hlavnej stanici",
+      "portaly": [
+        [
+          82.5,
+          -1648.9
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Mlynské nivy)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          1423.4,
+          -301
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Mlynské nivy)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          1567.2,
+          -277.9
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Legionárska)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          980.8,
+          -1438.5
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Svetlá)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          -1616.3,
+          -853.6
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Michala Greguša)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          -2918.1,
+          -920.2
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Staré Grunty)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          -3362.7,
+          -1960.6
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Vysoká)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          141.2,
+          -473.6
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Miletičova)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          2492.7,
+          -624.8
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Mýtna)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          457.5,
+          -1101.7
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Palkovičova)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          2176.7,
+          -1554.9
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Cintorínska)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          565.3,
+          -267.6
+        ]
+      ]
+    },
+    {
+      "nazov": "vjazd do podzemnej garáže (Dunajská)",
+      "druh": "garaz",
+      "portaly": [
+        [
+          568.5,
+          -180.8
+        ]
+      ]
     }
   ]
 }
