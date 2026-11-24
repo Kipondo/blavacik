@@ -1,20 +1,18 @@
 // Chodníky s obrubníkmi pozdĺž mestských ciest (zvýšený pás vedľa vozovky).
-// Pri križovatkách a všade, kde by ležal na vozovke (inej cesty – súbežné cesty, cesty bez spoločného bodu – aj
-// vlastnej na vnútornej strane ostrej zákruty), sa chodník preruší (js/mapa/cesty/vozovky.js, #136). Cez vjazdy do
-// dvorov pokračuje. Jednosmerky majú chodník vpravo a vľavo tam, kde vedľa nie je druhý pás rozdelenej cesty.
+// Pri križovatkách chodník obíde oblý roh (pravidlá ulice #136, js/mapa/cesty/rohy-chodnikov.js): rovný chodník končí
+// tam, kde sa obrubník začína zatáčať, a pokračuje rohom po oblúku k chodníku druhej cesty; na rovnej strane
+// priebežnej cesty (T-križovatka) sa neprerušuje. Všade, kde by ležal na vozovke (inej cesty – súbežné cesty, cesty
+// bez spoločného bodu – aj vlastnej na vnútornej strane ostrej zákruty), sa chodník preruší (js/mapa/cesty/vozovky.js).
+// Cez vjazdy do dvorov pokračuje. Jednosmerky majú chodník vpravo a vľavo tam, kde vedľa nie je druhý pás rozdelenej cesty.
 
 import * as THREE from 'three';
 import { pridajStrukturu } from './struktura.js';
 import { pridajOpotrebenie } from './opotrebenie.js';
-import { zjemni } from './cesty.js';
-import { kluc } from './krizovatky.js';
 import { mriezkaVozoviek } from './vozovky.js';
+import { SIRKA, OBRUBNIK, VYSKA, S_CHODNIKOM } from './chodnik-rozmery.js';
+import { rohyChodnikov, preruseniaChodnikov } from './rohy-chodnikov.js';
 
-const SIRKA = 2.6;
-const OBRUBNIK = 0.16;      // šírka vrchu obrubníka (m)
-const VYSKA = 0.28;         // nad terénom (vozovka je na +0.12)
-const S_CHODNIKOM = new Set(['primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'living_street',
-  'primary_link', 'secondary_link', 'tertiary_link']);
+const KROK = 4;             // m – najdlhší úsek chodníka
 
 let textura = null;
 /** Základná farba asfaltového chodníka (štruktúru a opotrebenie pridá shader). */
@@ -29,31 +27,79 @@ function asfaltChodnika() {
   return textura;
 }
 
+/** Body osi po najviac KROK m a navyše v daných vzdialenostiach po osi (presné konce chodníka): [{ x, z, s }]. */
+function vzorkyOsi(body, navyse) {
+  const dl = [0];
+  for (let k = 1; k < body.length; k++) dl.push(dl[k - 1] + Math.hypot(body[k][0] - body[k - 1][0], body[k][1] - body[k - 1][1]));
+  const polohy = new Set(dl);
+  for (let k = 1; k < body.length; k++) {
+    const n = Math.ceil((dl[k] - dl[k - 1]) / KROK);
+    for (let j = 1; j < n; j++) polohy.add(dl[k - 1] + (dl[k] - dl[k - 1]) * j / n);
+  }
+  for (const p of navyse) if (p > 0.05 && p < dl[dl.length - 1] - 0.05) polohy.add(p);
+  const s = [...polohy].sort((a, b) => a - b).filter((p, j, a) => j === 0 || p - a[j - 1] > 0.02);
+  let k = 1;
+  return s.map((p) => {
+    while (k < body.length - 1 && dl[k] < p) k++;
+    const L = dl[k] - dl[k - 1] || 1, t = Math.max(0, Math.min(1, (p - dl[k - 1]) / L));
+    return { x: body[k - 1][0] + (body[k][0] - body[k - 1][0]) * t, z: body[k - 1][1] + (body[k][1] - body[k - 1][1]) * t, s: p };
+  });
+}
+
 export function vytvorChodniky(cesty, krizovatky, vyskopis) {
   const poz = [], uv = [], obrPoz = [];
   const vozovky = mriezkaVozoviek(cesty);
+  const prerusenia = preruseniaChodnikov(cesty, krizovatky);
+  const vrch = (p) => [p[0], p[1] + VYSKA, p[2]];
+  const dol = (p) => [p[0], p[1] + 0.1, p[2]];
+  const zem = (p) => [p[0], p[1] - 0.05, p[2]];
+  /** Úsek chodníka medzi dvoma priečnymi radmi { i: okraj vozovky, k: za obrubníkom, o: vonkajší okraj }. */
+  const usek = (pred, bod) => {
+    const A = pred.k, B = bod.k, C = bod.o, D = pred.o;
+    // vrch chodníka – trojuholníky s normálou nahor (poradie podľa toho, na ktorú stranu chodník ide)
+    // normála (B − A) × (C − A) má y = (Bz − Az)(Cx − Ax) − (Bx − Ax)(Cz − Az); kladná = nahor
+    const hore = (B[2] - A[2]) * (C[0] - A[0]) - (B[0] - A[0]) * (C[2] - A[2]) > 0;
+    const tri = hore ? [A, B, C, A, C, D] : [A, C, B, A, D, C];
+    for (const p of tri) { const q = vrch(p); poz.push(...q); uv.push(q[0] / 2, q[2] / 2); }
+    // obrubník: zvislá stena od vozovky, vrch obrubníka a zadná stena chodníka k terénu
+    const Ai = pred.i, Bi = bod.i;
+    obrPoz.push(...dol(Ai), ...dol(Bi), ...vrch(Bi), ...dol(Ai), ...vrch(Bi), ...vrch(Ai));
+    for (const p of [Ai, Bi, B, Ai, B, A]) obrPoz.push(...vrch(p));
+    obrPoz.push(...zem(D), ...vrch(C), ...zem(C), ...zem(D), ...vrch(D), ...vrch(C));
+  };
+  const rad = (x, z, nx, nz, r0) => {
+    const ix = x + nx * r0, iz = z + nz * r0, kx = x + nx * (r0 + OBRUBNIK), kz = z + nz * (r0 + OBRUBNIK);
+    const ox = x + nx * (r0 + SIRKA), oz = z + nz * (r0 + SIRKA);
+    return { i: [ix, vyskopis.vyska(ix, iz), iz], k: [kx, vyskopis.vyska(kx, kz), kz], o: [ox, vyskopis.vyska(ox, oz), oz] };
+  };
+
   for (const c of cesty) {
     if (!S_CHODNIKOM.has(c.typ) || c.most) continue;
-    // body cesty, pri ktorých chodník končí (križovatky)
-    const prerusenia = c.body.filter(([x, z]) => krizovatky.has(kluc(x, z))).map(([x, z]) => {
-      const k = krizovatky.get(kluc(x, z));
-      return { x, z, r: k.polomer + SIRKA + 1.5 };
-    });
-    const body = zjemni(c.body, 4);
+    // križovatky na ceste: kde rovný chodník končí (podľa strany a smeru od uzla)
+    const uzly = (prerusenia.get(c) ?? []).map((u) => ({ ...u, s: 0 }));
+    const dl = [0];
+    for (let k = 1; k < c.body.length; k++) dl.push(dl[k - 1] + Math.hypot(c.body[k][0] - c.body[k - 1][0], c.body[k][1] - c.body[k - 1][1]));
+    const konce = [];
+    for (const u of uzly) {
+      u.s = dl[u.i];
+      for (const smer of [1, -1]) for (const strana of [1, -1]) if (u.r[smer][strana] > 0) konce.push(u.s + smer * u.r[smer][strana]);
+    }
+    const body = vzorkyOsi(c.body, konce);
     // chodník po oboch stranách; pri jednosmerke vľavo (strana −1) len tam, kde vedľa nie je druhý jazdný pás
     // rozdelenej cesty (stredný pás) – predtým mali jednosmerky chodník len vľavo, teda v strednom páse
-    const strany = [1, -1];
-    for (const strana of strany) {
+    for (const strana of [1, -1]) {
       let pred = null;
       for (let i = 0; i < body.length; i++) {
-        const [x, z] = body[i];
-        const blizko = prerusenia.some((p) => Math.hypot(p.x - x, p.z - z) < p.r);
+        const { x, z, s } = body[i];
+        const blizko = uzly.some((u) => {
+          const r = u.r[s >= u.s ? 1 : -1][strana];
+          return r > 0 && Math.abs(s - u.s) < r - 0.01;
+        });
         const prev = body[Math.max(0, i - 1)], next = body[Math.min(body.length - 1, i + 1)];
-        let dx = next[0] - prev[0], dz = next[1] - prev[1];
+        let dx = next.x - prev.x, dz = next.z - prev.z;
         const d = Math.hypot(dx, dz) || 1; dx /= d; dz /= d;
         const nx = -dz * strana, nz = dx * strana;
-        const r0 = c.sirka / 2, rk = r0 + OBRUBNIK, r1 = r0 + SIRKA;
-        const ix = x + nx * r0, iz = z + nz * r0, kx = x + nx * rk, kz = z + nz * rk, ox = x + nx * r1, oz = z + nz * r1;
+        const r0 = c.sirka / 2, r1 = r0 + SIRKA;
         // chodník by ležal na vozovke (inej cesty alebo vlastnej na vnútornej strane zákruty) – tu sa preruší;
         // vnútorný okraj, stred a vonkajší okraj chodníka
         const bodVo = (r) => [x + nx * r, z + nz * r];
@@ -61,30 +107,34 @@ export function vytvorChodniky(cesty, krizovatky, vyskopis) {
         // jednosmerka vľavo: druhý jazdný pás rozdelenej cesty do ~8 m za chodníkom = stredný pás, chodník nie je
         const strednyPas = c.jednosmerka && strana < 0 && vozovky.naVozovke(...bodVo(r1 + 3), c, -8);
         const prerus = blizko || naVozovke || strednyPas;
-        const bod = {
-          i: [ix, vyskopis.vyska(ix, iz), iz], k: [kx, vyskopis.vyska(kx, kz), kz], o: [ox, vyskopis.vyska(ox, oz), oz],
-        };
-        if (pred && !prerus && !pred.prerus) {
-          const A = pred.k, B = bod.k, C = bod.o, D = pred.o;
-          // vrch chodníka (normála nahor – poradie podľa strany)
-          const vrch = (p) => [p[0], p[1] + VYSKA, p[2]];
-          const tri = strana > 0 ? [A, C, B, A, D, C] : [A, B, C, A, C, D];
-          for (const p of tri) { const q = vrch(p); poz.push(...q); uv.push(q[0] / 2, q[2] / 2); }
-          // obrubník: zvislá stena od vozovky, vrch obrubníka a zadná stena chodníka k terénu
-          const dol = (p) => [p[0], p[1] + 0.1, p[2]];
-          const Ai = pred.i, Bi = bod.i;
-          obrPoz.push(...dol(Ai), ...dol(Bi), ...vrch(Bi), ...dol(Ai), ...vrch(Bi), ...vrch(Ai));
-          const trk = strana > 0 ? [Ai, B, Bi, Ai, A, B] : [Ai, Bi, B, Ai, B, A];
-          for (const p of trk) obrPoz.push(...vrch(p));
-          const zem = (p) => [p[0], p[1] - 0.05, p[2]];
-          obrPoz.push(...zem(D), ...vrch(C), ...zem(C), ...zem(D), ...vrch(D), ...vrch(C));
-        }
-        pred = { ...bod, prerus };
+        const bod = { ...rad(x, z, nx, nz, r0), prerus };
+        if (pred && !prerus && !pred.prerus) usek(pred, bod);
+        pred = bod;
       }
     }
   }
+
+  // rohy chodníkov po oblých rohoch križovatiek a po vonkajšej strane ohybov (rohy-chodnikov.js)
+  let rohy = 0, vhodne = 0;
+  for (const p of rohyChodnikov(cesty, krizovatky)) {
+    vhodne++;
+    const naVozovke = p.vnutro.some(([x, z], j) => {
+      const [nx, nz] = p.normaly[j];
+      return [0.5, SIRKA / 2, SIRKA].some((r) => vozovky.naVozovke(x + nx * r, z + nz * r, null, 0.3));
+    });
+    if (naVozovke) continue;
+    let pred = null;
+    p.vnutro.forEach(([x, z], j) => {
+      const bod = rad(x, z, p.normaly[j][0], p.normaly[j][1], 0);
+      if (pred) usek(pred, bod);
+      pred = bod;
+    });
+    rohy++;
+  }
+
   const skupina = new THREE.Group();
   skupina.name = 'chodniky';
+  skupina.userData.rohy = { postavene: rohy, vhodne };
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(poz, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
