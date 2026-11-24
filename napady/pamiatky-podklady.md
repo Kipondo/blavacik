@@ -1004,3 +1004,67 @@ Zdroje:
 - [Commons – kategória](https://commons.wikimedia.org/wiki/Category:National_Bank_of_Slovakia_(Bratislava))
 - OSM: ways 10158374, 229588344, 411828059/62/65/68/74, 1278278316/17/19/20, uzly 4134276196, 4134276201, 4134276207/08.
 - Laser ÚGKK (DMP − DMR) z dlaždíc hry.
+
+## Obytný dom Glória (#128; 24. 11. 2026)
+
+**Stavba:** Záhradnícka 60 × Ružová dolina (Ružinov); architekti Peter Gál a Juraj Furdík (len Wikipédia), výstavba
+2004–2006, kolaudácia 2007. Výška 100 m (niekde 100,1 m), 29 nadzemných a 1 podzemné podlažie, 79 bytov.
+Konštrukcia je betónová. Okná sú drevo-hliníkové so zvonka komaxitovaným hliníkom. Balkóny majú plný betónový
+parapet s oceľovým madlom.
+
+**Prieskum:**
+- OSM 3D model z 12/2025 (changeset 176590232) – 8 častí `building:part` s výškami.
+- Archív predajného webu (2007–2011): technický štandard a cenník bytov po podlažiach 5.–27. NP s plochami bytov,
+  balkónov a terás; nebytové priestory 1. PP – 4. NP.
+- Fotky z Commons 2006–2016 a laser v dlaždici hry.
+- Google nie. Pôdorysy z predajného webu archív neuložil, výkresy z konaní online nie sú.
+
+**Natočenie:** Záhradnícka je na S, Ružová dolina na Z. Dlhá východná stena smeruje na azimut 350,7°. Na V a J sú
+na Glóriu priamo pristavané domy Záhradnícka 62 (9 NP, mansarda) a Ružová dolina 7 (10 NP) – spoločné steny do ~34 m.
+
+**Hmoty a výšky (podlažia sú z cenníka a OSM, metre odvodené):**
+- **podnož 1.–3. NP:** ~11,5 m, ~30 × 38 m, zaoblené SZ nárožie (r ≈ 15,7 m);
+- **ustúpené 4. NP:** do ~15,3 m, terasy 188 m² na streche podnože;
+- **veža 5.–20. NP:** do 69 m, 604 m²; hlavná doska ~13,3 × 29,4 m a západné krídlo so zaoblenou SZ stenou
+  (r ≈ 10 m) a rovnou JZ stenou (~16 m);
+- **horná hmota 21.–28. NP:** do 96 m, 307 m²; ďalšie terasy na 21. a 26. NP;
+- **kocka 29. NP:** ~10 × 9 m, do 100 m, s vyloženou strešnou doskou; na nej stožiar s anténami (~4–6 m);
+- **dva otvorené rámy na terase nad 20. NP:** žltá doska na bielych okrúhlych stĺpoch. Laser v dlaždici ich ukazuje
+  na 78,6 – 80,1 m, OSM ich má ako plné časti do 86 m.
+
+**Fasády (z fotiek, farby približné):**
+- **Omietka a pásy:** svetlosivá omietka (#c9cbc6), modrošedé zvislé pásy na nárožiach a v zárezoch (#8e9dad).
+- **Okná:** pravidelné okná s červenými rámami (#b3202c).
+- **Sever:** dva stĺpce sýtožltých oblúkových balkónov (#e3c12a, do 2016 vybledli), hlbokých ~2–2,5 m, s plným
+  parapetom 1,1 m, cez 5.–20. NP. Medzi nimi je svetlosivý pilier ~4–5 m.
+- **SZ oblúk a JZ stena:** priebežné vlnité (esovité) bledožlté balkóny (#ece3b8) v dvoch úsekoch, medzi nimi
+  modrošedý zárez.
+- **Strechy:** tenká vyložená doska (presah 1–1,5 m) so žltým vlysom pod ňou.
+
+**Podnož:**
+- strieborné hliníkové panely (#c8cdcb), veľké okná s červenými rámami, prízemie za okrúhlymi stĺpmi;
+- na S/SZ oblúku v úrovni 2. NP plastický nápis „Gloria“ písaným písmom (~1 m). Je to meno domu, nie firmy;
+- emblém ruže z roku 2006 sa nemodeluje.
+
+**Rozhodnutia pre model** (`tools/blender/vyskove/gloria.py`):
+- Hmoty sú z OSM, veža v osiach budovy so zaoblenou SZ stenou. Zuby na severe v OSM sú balkóny, nie stena.
+- Rámy na terase majú hornú hranu 79,8 m (laser).
+- Nápis je obyčajným písmom Blendera, nie písaným (licencia písma).
+- Vchody do bytov a garáže v OSM nie sú, preto ich model zatiaľ nemá.
+
+**Neisté – vlastné fotky by pomohli:**
+1. nárožie podnože kolmo na nápis z chodníka pri zastávke električky;
+2. celé SZ nárožie veže zo stredu križovatky (zaoblenie a počty balkónov);
+3. južná a JV fasáda po celej výške;
+4. strecha z výšky.
+
+Zdroje:
+- [sk-Wikipédia](https://sk.wikipedia.org/wiki/Gl%C3%B3ria_(budova))
+- [en-Wikipedia](https://en.wikipedia.org/wiki/Gl%C3%B3ria_(Bratislava))
+- [CTBUH](https://www.skyscrapercenter.com/building/gloria/11313)
+- [Structurae](https://structurae.net/en/structures/obytny-dom-gloria)
+- [archív predajného webu – štandard](https://web.archive.org/web/20070302234411/http://3xw-design.co.uk/portfolio/sites/gloria/index.html)
+- [archív – byty](https://web.archive.org/web/20110409134633/http://3xw-design.co.uk/portfolio/sites/gloria/bytove_g.html)
+- [archív – nebytové priestory](https://web.archive.org/web/20110408062455/http://3xw-design.co.uk/portfolio/sites/gloria/nebytove_g.html)
+- [Commons – kategória Glória House](https://commons.wikimedia.org/wiki/Category:Gl%C3%B3ria_House)
+- OSM: way 61398274, časti 1462633086–1462633101, [changeset 176590232](https://www.openstreetmap.org/changeset/176590232).

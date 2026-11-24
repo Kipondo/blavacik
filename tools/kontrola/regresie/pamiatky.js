@@ -51,6 +51,30 @@ export const kontrolyPamiatok = [
     },
   },
   {
+    id: 'gloria-tvar',
+    popis: 'Glória: veža podľa prieskumu – podnož, ustúpené 4. NP, veža do 69 m so zaoblenou SZ stenou, horná hmota do 96 m '
+      + 'a kocka 29. NP do 100 m (nie obrysy OSM s presklenými hornými časťami a náhodnými balkónmi)',
+    oprava: 'feature/gloria (#128) – tools/blender/vyskove/gloria.py podľa prieskumu',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/gloria.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/gloria.json' }] };
+      const info = await r.json();
+      const vysky = info.vysky ?? [];
+      for (const [h, nazov] of [[69, 'strecha veže (20. NP)'], [100, 'kocka 29. NP']]) {
+        if (!vysky.some((v) => Math.abs(v - h) < 0.6)) chyby.push({ text: `v modeli chýba ${nazov} ${h} m` });
+      }
+      // veža (obrys so strechou 69 m) má zaoblenú SZ stenu – oblúk z viacerých bodov
+      const i = vysky.findIndex((v) => Math.abs(v - 69) < 0.6);
+      if (i >= 0 && (info.obrysy?.[i]?.length ?? 0) < 12) chyby.push({ text: 'obrys veže nemá zaoblenú SZ stenu' });
+      if (Math.abs((info.vyska ?? 0) - 100) > 0.5) chyby.push({ text: `výška ${info.vyska} m namiesto 100 m` });
+      // časti OSM 1462633086/087 (86 m) sú na fotkách otvorené rámy na terase, nie plné hmoty
+      if (vysky.some((v) => Math.abs(v - 86) < 0.6)) chyby.push({ text: 'rámy na terase 20. NP sú plné hmoty do 86 m' });
+      return { skontrolovane: 1, chyby };
+    },
+  },
+  {
     id: 'nbs-strieska',
     popis: 'Národná banka Slovenska: veľká strieška pred vstupom (OSM 411828074, building:part=roof) je doska na stĺpoch – '
       + 'pod ňou sa dá prejsť (nie plná kamenná krabica), budovy dlaždíc sú tam vyhodené a socha Biatec je súčasťou modelu',
