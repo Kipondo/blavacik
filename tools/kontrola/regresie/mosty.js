@@ -75,7 +75,10 @@ export const kontrolyMostov = [
       if (!blizko(y, 6)) chyby.push({ text: `auto z rampy neprešlo na mostovku (výška ${y.toFixed(2)} namiesto 6)` });
       if (!blizko(vyskaVozidla(hra, 45, 0, 6, false), 6)) chyby.push({ text: 'autobus na mostovke z nej spadol na zem' });
       if (!blizko(vyskaVozidla(hra, 80, 0, 6, true), 0)) chyby.push({ text: 'za koncom mosta vozidlo neostalo na zemi' });
-      return { skontrolovane: 5, chyby };
+      // auto objavené na ceste veľkého mosta 14 m nad zemou (Most Apollo nad nábrežím) – nájde mostovku
+      const hra2 = { mapa: { vyska: () => 0, mostovka: (x, z) => (Math.abs(z) < 8 ? { h: 14 } : null) }, mosty: { vyska: () => null } };
+      if (!blizko(vyskaVozidla(hra2, 30, 0, null, true), 14)) chyby.push({ text: 'auto na vysokom moste ostalo na zemi pod ním' });
+      return { skontrolovane: 6, chyby };
     },
   },
   {
@@ -89,8 +92,9 @@ export const kontrolyMostov = [
     spusti(ctx) {
       const chyby = [];
       let n = 0;
-      const presne = (ctx.index.mosty ?? []).filter((m) => m.profil);
-      for (const meno of ['Most SNP', 'Starý most', 'Most Apollo', 'Prístavný most', 'Most Lanfranconi']) {
+      const PAT = ['Most SNP', 'Starý most', 'Most Apollo', 'Prístavný most', 'Most Lanfranconi'];
+      const presne = (ctx.index.mosty ?? []).filter((m) => m.profil && PAT.includes(m.nazov));
+      for (const meno of PAT) {
         if (!presne.some((m) => m.nazov === meno)) chyby.push({ text: `${meno}: chýba v data/mapa/mosty-dunaj.json` });
       }
       for (const m of presne) {
@@ -127,4 +131,71 @@ export const kontrolyMostov = [
       return { skontrolovane: n + 6, chyby };
     },
   },
+  {
+    id: 'cesty-nad-vodou-na-moste',
+    popis: 'Žiadna cesta pre autá ani koľaj nevedie ponad rieku bez mostovky: každý jej bod vo vodnej ploche je na moste '
+      + '(mosty cez Dunaj, data/mapa/mosty-rieky.json) alebo na nadjazde. Predtým mali most len pomenované mosty s osou '
+      + 'vedľa cesty – na Moste Apollo, D4, mostoch cez Chorvátske rameno a Malý Dunaj autá a električky išli do vody',
+    oprava: 'feature/mosty-dunaj – tools/mesto/mosty-rieky.mjs, js/mapa/mosty/mosty-dunaja.js, js/mapa/mosty/mosty.js',
+    tolerancia: 0,
+    spusti(ctx) {
+      const AUTA = new Set(['motorway', 'motorway_link', 'trunk', 'trunk_link', 'primary', 'primary_link', 'secondary', 'secondary_link',
+        'tertiary', 'tertiary_link', 'unclassified', 'residential', 'service', 'living_street']);
+      const rieky = (ctx.index.voda ?? []).filter((v) => v.reka !== false && v.body?.length > 2).map((v) => ({ body: v.body, ...ohr(v.body) }));
+      const mosty = (ctx.index.mosty ?? []).map((m) => ({ m, os: vytvorOs(m.os ?? [m.od, m.do]) }));
+      const vRieke = (x, z) => rieky.some((r) => x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ && vPolygone(x, z, r.body));
+      const naMoste = (x, z) => mosty.some(({ m, os }) => {
+        const p = najblizsiNaOsi(os, x, z);
+        return p.s >= -2 && p.s <= os.dlzka + 2 && Math.sqrt(p.d2) <= m.sirka / 2 + 0.5;
+      });
+      const chyby = [];
+      let n = 0;
+      for (const [kluc, d] of ctx.dlazdice) {
+        const nadj = (d.nadjazdy ?? []).map((q) => ({ body: q.body, pol: q.sirka / 2 + 1 }));
+        const naNadjazde = (x, z) => nadj.some((q) => vzdialenost(x, z, q.body) < q.pol);
+        const prvky = [...(d.cesty ?? []).filter((c) => AUTA.has(c.typ) && !c.tunel), ...(d.kolajnice ?? [])];
+        for (const c of prvky) {
+          const b = c.body ?? [];
+          for (let i = 1; i < b.length; i++) {
+            const [ax, az] = b[i - 1], [bx, bz] = b[i];
+            const k = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 4));
+            for (let j = 0; j <= k; j++) {
+              const x = ax + (bx - ax) * j / k, z = az + (bz - az) * j / k;
+              if (!vRieke(x, z)) continue;
+              n++;
+              if (naMoste(x, z) || naNadjazde(x, z)) continue;
+              chyby.push({ x: Math.round(x), z: Math.round(z), dlazdica: kluc, text: `${c.nazov || c.typ}: cesta ide do vody (bez mosta)` });
+              j = k; i = b.length;            // jedna chyba na cestu
+            }
+          }
+        }
+      }
+      // výnimka: jeden bod obslužnej cesty v Novom prístave (okraj móla v OSM leží 1 m vo vode)
+      return { skontrolovane: n, chyby: chyby.filter((c) => !(c.dlazdica === '6_2' && c.text.startsWith('service'))) };
+    },
+  },
 ];
+
+function ohr(body) {
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const [x, z] of body) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
+  return { minX, maxX, minZ, maxZ };
+}
+function vPolygone(x, z, b) {
+  let c = false;
+  for (let i = 0, j = b.length - 1; i < b.length; j = i++) {
+    const [xi, zi] = b[i], [xj, zj] = b[j];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) c = !c;
+  }
+  return c;
+}
+function vzdialenost(x, z, body) {
+  let naj = Infinity;
+  for (let i = 1; i < body.length; i++) {
+    const [ax, az] = body[i - 1], [bx, bz] = body[i];
+    const dx = bx - ax, dz = bz - az, l2 = dx * dx + dz * dz || 1;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2));
+    naj = Math.min(naj, Math.hypot(ax + dx * t - x, az + dz * t - z));
+  }
+  return naj;
+}

@@ -182,6 +182,9 @@ export default {
   },
 
   vyska(x, z) {
+    // trať na moste ponad rieku (estakáda Prístavného mosta aj jeho dolné podlažie, most cez Moravu) – mosty-rieky.json
+    const t = this.hra.mapa.mostovka?.(x, z, 0, 'kolaj');
+    if (t) return t.h;
     const y = this.hra.mapa.vyska(x, z);
     const m = this.hra.mosty?.vyska?.(x, z, y + 6);
     return m != null && m > y && m - y < 12 ? m : y;

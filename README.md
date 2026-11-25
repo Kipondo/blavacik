@@ -79,12 +79,29 @@ Podrobný popis každej časti je nižšie v „Čo je hotové“.
   - Autá a MHD na estakáde jazdia hore.
   - Rampy a estakády z OSM sa napoja na výšku mostovky.
   - Na násype medzi múrmi (Apollo) je mostovka povrchom pre všetko.
+- **Všetky ostatné mosty ponad vodu** – 45 mostov.
+  - Mosty cez Malý Dunaj, Chorvátske rameno a prístav, diaľnica D4 (Lužný most), Čunovo, železnica na Prístavnom
+    moste a most cez Moravu.
+  - Predtým mali most len pomenované mosty a os bola často vedľa cesty (Apollo, Dolnozemská). Nepomenované mosty
+    nemali nič, takže autá, električky a vlaky išli do vody.
+  - Teraz ich `node tools/mesto/mosty-rieky.mjs` nájde priamo z ciest a koľají v dlaždiciach a výšku zoberie
+    z laseru. D4 a nová električka cez Chorvátske rameno sú novšie ako laser, ich výšku odhadne zo svetlej výšky
+    nad vodou.
+  - Výsledok je v `data/mapa/mosty-rieky.json`.
+  - Všeobecný model mosta (`js/mapa/mosty/mosty.js`) ide po osi cesty. Má rímsy a zábradlie podľa druhu (cesta,
+    trať, lávka), piliere mimo ciest pod mostom a opory a steny až k zemi na koncoch.
+  - Vlak ide po trati na moste – aj po dolnom podlaží Prístavného mosta.
+  - Cesta po hrádzi cez vodnú plochu je násyp vo výške z laseru.
+  - Auto aj autobus, ktoré sa objavia na moste vysoko nad zemou, sú na mostovke.
 - **Test:**
   1. Prejdi autom po Moste SNP z Petržalky na Staromestskú: rampa pri pylóne nie je, most pokračuje estakádou.
   2. Choď pešo popod most na Tyršovom nábreží a v autobusovom termináli.
   3. Na Moste Apollo choď z Košickej do Petržalky.
   4. Zastav na lávke Mosta SNP alebo Mosta Lafranconi.
-  5. Regresná kontrola: `mosty-cez-dunaj-napojenie`.
+  5. Prejdi autom po D4 cez Dunaj.
+  6. Prejdi električkou cez Chorvátske rameno (Jantárová).
+  7. Regresné kontroly: `mosty-cez-dunaj-napojenie` a `cesty-nad-vodou-na-moste`. Tá druhá overí, že žiadna cesta
+     ani koľaj nevedie do vody.
 
 ### Poriadok pri zlučovaní (vetva `fix/poriadok-zlucovania`)
 - **Prehľad strát:** všetkých 120 zlúčení v histórii `main` som prešiel skriptom – kde sa súbor zmenený na oboch

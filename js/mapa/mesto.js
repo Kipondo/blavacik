@@ -37,7 +37,8 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
   // mosty s podrobným modelom z Blendera (pamiatka „nahradzaMost“) stavia js/mapa/pamiatky/most-glb.js
   const sModelom = new Set((data.pamiatky ?? []).map((p) => p.nahradzaMost).filter(Boolean));
-  svet.add(vytvorMosty((data.mosty ?? []).filter((m) => !sModelom.has(m.nazov)), vyskopis, KONFIG));
+  // ostatné mosty ponad rieky (data/mapa/mosty-rieky.json): všeobecný model po osi a profile z výškopisu
+  svet.add(vytvorMosty((vyskopis.mosty ?? []).filter((m) => !sModelom.has(m.nazov)), vyskopis, KONFIG, kolizie));
 
   priebeh('Staviam pamiatky…');
   const pamiatky = await nacitajPamiatky(data.pamiatky ?? [], { vyskopis, kolizie, KONFIG });

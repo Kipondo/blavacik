@@ -96,9 +96,13 @@ export function vytvorMostyVyskopisu(zoznam, { vyskaTerenu, jeVRieke }) {
     return odKonca >= m.nabeh ? m.vrch : hKonca + (m.vrch - hKonca) * plynulo(odKonca / m.nabeh);
   }
 
-  /** Mostovka pod bodom bez ohľadu na výšku: { m, h, s, okraj } alebo null. rezerva = širší pás (napojenie rámp). */
-  function mostovka(x, z, rezerva = 0) {
+  /**
+   * Mostovka pod bodom bez ohľadu na výšku: { m, h, s, okraj } alebo null. rezerva = širší pás (napojenie rámp),
+   * druh = len mosty daného druhu ('kolaj' – vlak pod Prístavným mostom ide po trati, nie po diaľnici nad ním).
+   */
+  function mostovka(x, z, rezerva = 0, druh = null) {
     for (const m of mosty) {
+      if (druh && m.druh !== druh) continue;
       if (x < m.ohr.minX - rezerva || x > m.ohr.maxX + rezerva || z < m.ohr.minZ - rezerva || z > m.ohr.maxZ + rezerva) continue;
       const n = naOsi(m, x, z);
       const pol = m.sirka / 2 + rezerva;
