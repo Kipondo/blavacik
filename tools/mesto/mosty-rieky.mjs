@@ -197,16 +197,24 @@ for (const m of mostyRieky) {
   } else {
     // odhad (most je novší ako laser – D4, nová električka): svetlá výška nad vodou podľa dĺžky premostenia vody
     // (≥ 200 m = splavný Dunaj 17 m, ≥ 60 m 6 m, inak 2,5 m) + konštrukcia, rampy so sklonom; konce na zemi
-    const sklon = m.druh === 'kolaj' ? 0.015 : 0.04;
+    const sklon = m.druh === 'kolaj' ? 0.015 : o.L > 300 ? 0.03 : 0.04;
     const dlzkaVody = iVoda.length * KROK;
     const svetla = dlzkaVody >= 200 ? 17 : dlzkaVody >= 60 ? 6 : 2.5;
     const konstr = m.druh === 'chodnik' ? 0.6 : m.druh === 'kolaj' ? 1.5 : 1.2;
-    const potreba = sy.map((s, i) => (voda[i] ? zem[i] + svetla + konstr : zem[i] + 0.3));
+    // dlhý most (D4 Lužný most – estakády ponad lužný les) ide aj nad zemou na pilieroch ~8 m vysoko; konce na zemi
+    // pre oba jazdné pásy rovnako (napojený koniec by inak dal pásom rôznu výšku)
+    const dlhy = o.L > 300;
+    if (o.L > 1000) konce[0] = konce[1] = false;
+    const potreba = sy.map((s, i) => (voda[i] ? zem[i] + svetla + konstr : zem[i] + (dlhy ? 8 : 0.3)));
     const hA = konce[0] ? null : zem[0], hB = konce[1] ? null : zem.at(-1);
+    // krátky most nad úzkym tokom ostane takmer v rovine brehov: od konca na zemi stúpa najviac sklonom
+    // (rampa 4 %, trať 1,5 %) – predtým mal 30 m mostík električky hrb 4 m
+    const strop = (s) => Math.min(hA !== null ? hA + sklon * s : Infinity, hB !== null ? hB + sklon * (o.L - s) : Infinity);
     profil = sy.map((s, i) => {
-      let h = hA !== null && hB !== null ? hA + (hB - hA) * s / o.L : hA ?? hB ?? Math.max(...potreba);
+      const zaklad = hA !== null && hB !== null ? hA + (hB - hA) * s / o.L : hA ?? hB ?? Math.max(...potreba);
+      let h = zaklad;
       for (let j = 0; j < sy.length; j++) h = Math.max(h, potreba[j] - sklon * Math.abs(s - sy[j]));
-      return [r1(s), r2(h)];
+      return [r1(s), r2(Math.max(zaklad, Math.min(h, strop(s))))];
     });
   }
   // koniec na zemi: výška terénu (hra ju vezme z podrobného terénu); napojený koniec drží výšku z profilu
