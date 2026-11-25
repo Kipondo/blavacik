@@ -12,6 +12,8 @@
 // "nahraditSochy": [[[x, z], …]] = pôdorysy, v ktorých socha z OSM (sochy-modul) ustúpi soche z modelu.
 // "bezKoliziiObrysov": true = z obrysov sa nerobia kolízie (stavbu s terasami a lávkami rieši vlastný modul s výškami).
 // "kolizie": [[[x, z], …]] = vlastné kolízne pôdorysy (napr. krídla okolo átria – do dvora sa dá vojsť).
+// "vyskyKolizii": [m, …] = výška každej kolízie nad terénom (napr. nádrž fontány 1,6 m) – kamera nad nízkou prekážkou
+//   prejde (js/kamera/kolizia-kamery.js); bez nej má výšku len model podľa terénu (výška modelu + 0,5 m).
 // "plochy": [{ body: [[x, z, h], …], sirka }] = pochôdzne plochy (schodisko pred vstupom), h nad základňou modelu
 //   (js/mapa/mosty/pochodzne-pamiatok.js). "vchody": [{ id, bod: [x, z], vyska }] = dvere na neskorší interiér.
 // "zakladnaBod": [x, z] = model sa položí na terén v tomto bode (inak na najnižší terén pod obrysmi).
@@ -115,9 +117,10 @@ export default async function postav(p, { vyskopis, kolizie }) {
   for (const w of info.nahraditSochy ?? []) nahradSochy(svet(w));
   // ďalšie kolízie bez nahrádzania budov (hradby, múry). Model podľa terénu (ploty, živé ploty) je nízky:
   // kolízia dostane vrch (terén + výška modelu), aby nad ním kamera prešla (js/kamera/kolizia-kamery.js)
-  for (const k of info.kolizie ?? []) {
+  for (const [i, k] of (info.kolizie ?? []).entries()) {
     const w = svet(k);
-    const vrch = info.podlaTerenu ? Math.max(...w.map(([x, z]) => vyskopis.vyskaTerenu(x, z))) + (info.vyska ?? 3) + 0.5 : undefined;
+    const nad = info.vyskyKolizii?.[i] ?? (info.podlaTerenu ? (info.vyska ?? 3) + 0.5 : undefined);
+    const vrch = nad === undefined ? undefined : Math.max(...w.map(([x, z]) => vyskopis.vyskaTerenu(x, z))) + nad;
     kolizie.pridajPolygon(w, vrch === undefined ? { typ: 'pamiatka', nazov: p.nazov } : { typ: 'pamiatka', nazov: p.nazov, vrch });
   }
   const ohr = obrysy.length ? obrysy.flat().reduce((o, [x, z]) => ({

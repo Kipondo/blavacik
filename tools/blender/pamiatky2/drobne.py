@@ -102,7 +102,12 @@ def fontana():
     G.kvader(kamen, c, (1, 0), 0.8, 0.8, 4.95, 5.1)
     postava_rytiera(G, socha, c, 5.1, vyska=2.1, smer=-math.pi / 2)
     print('fontána: polomer', round(r, 2))
-    return G, [], 7.8, 'fontana-maximilianova', {'stred': [round(stred[0], 2), round(stred[1], 2)]}
+    # kolízie (v lokálnych metroch hry, z = −y Blendera): nádrž s balustrádou (1,6 m – kamera nad ňou prejde) a stredný
+    # podstavec so stĺpom a sochou (7,8 m). Do nádrže predtým vošli hráč aj chodci – model nemal žiadnu kolíziu.
+    def kruh(rk, n=24):
+        return [[round(c[0] + rk * math.cos(2 * math.pi * k / n), 2), round(-(c[1] + rk * math.sin(2 * math.pi * k / n)), 2)] for k in range(n)]
+    kolizie = [kruh(r + 0.15), kruh(1.4, 12)]
+    return G, [], 7.8, 'fontana-maximilianova', {'stred': [round(stred[0], 2), round(stred[1], 2)], 'kolizie': kolizie, 'vyskyKolizii': [1.6, 7.8]}
 
 
 def brana_slobody():

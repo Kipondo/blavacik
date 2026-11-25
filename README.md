@@ -189,6 +189,13 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Maximiliánova fontána s kolíziou (vetva `fix/fontana-kolizia`)
+- **Fontána na Hlavnom nám.** nemala kolíziu – do nádrže vošiel hráč aj chodci. Teraz má dve kolízie: nádrž
+  s balustrádou (1,6 m) a stredný stĺp so sochou (7,8 m). Generátor je `tools/blender/pamiatky2/drobne.py`.
+- **Výšky kolízií:** modely z Blendera môžu mať v JSON `vyskyKolizii` – výšku každej kolízie nad terénom.
+  Kamera nad nízkou prekážkou prejde (`js/mapa/pamiatky/vyskova-budova.js`).
+- **Regresná kontrola** `fontana-maximilianova-kolizia`.
+
 ### Spoločná kostra postáv (vetva `fix/spolocna-kostra`, #110)
 - **Kostra:**
   - `SkeletonUtils.clone` dal každej časti postavy (koža, oblečenie, vlasy, oči…) vlastnú kostru, hoci majú tie isté kosti;

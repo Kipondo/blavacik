@@ -125,4 +125,24 @@ export const kontrolyPamiatok = [
       return { skontrolovane: podStrieskou.length + 1, chyby };
     },
   },
+  {
+    id: 'fontana-maximilianova-kolizia',
+    popis: 'Maximiliánova fontána na Hlavnom nám. má kolíziu nádrže s balustrádou (nízka – kamera nad ňou prejde) '
+      + 'a stredného stĺpa – predtým model nemal žiadnu kolíziu a do nádrže vošli hráč aj chodci',
+    oprava: 'fix/fontana-kolizia – tools/blender/pamiatky2/drobne.py (kolizie, vyskyKolizii), js/mapa/pamiatky/vyskova-budova.js',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/fontana-maximilianova.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/fontana-maximilianova.json' }] };
+      const info = await r.json();
+      const k = info.kolizie ?? [];
+      const nadrz = k.find((o) => vnutri(0, 0, o) && Math.min(...o.map(([x, z]) => Math.hypot(x, z))) > 3);
+      if (!nadrz) chyby.push({ text: 'chýba kolízia nádrže (kruh s polomerom aspoň 3 m okolo stredu)' });
+      const vyska = info.vyskyKolizii?.[k.indexOf(nadrz)];
+      if (nadrz && !(vyska > 1 && vyska < 2.5)) chyby.push({ text: `výška kolízie nádrže ${vyska} m – kamera by nad balustrádou neprešla` });
+      if (!k.some((o) => o !== nadrz && vnutri(0, 0, o))) chyby.push({ text: 'chýba kolízia stredného stĺpa so sochou' });
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
