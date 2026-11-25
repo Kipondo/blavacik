@@ -65,6 +65,8 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
     pamiatky: data.pamiatky ?? [],
     vyska: vyskopis.vyska,
     vyskaTerenu: vyskopis.vyskaTerenu,
+    // mostovka veľkých mostov cez rieky bez ohľadu na výšku (js/mapa/teren/mosty-vyskopisu.js) – hra.mosty.vyska
+    mostovka: vyskopis.mostovka,
     jeVoVode: vyskopis.jeVoVode,
     hladina: vyskopis.hladina,
     jeMimo: (x, z) => x < H.minX + 2 || x > H.maxX - 2 || z < H.minZ + 2 || z > H.maxZ - 2,

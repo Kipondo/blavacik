@@ -1,6 +1,7 @@
 // Načítanie dát mapy: ručná mapa (data/mapa/*.json) + voliteľne OSM (data/osm/bratislava.geojson).
 
 import { rozmiestniAuta } from './spawn-aut.js';
+import { nacitajMostyDunaja, zlucMosty } from './mosty/mosty-dunaja.js';
 
 async function nacitajJson(cesta, povinny = true) {
   try {
@@ -44,6 +45,8 @@ export async function nacitajDataMapy(KONFIG, priebeh = () => {}) {
     priebeh('Načítavam výškový model…');
     const r = await fetch('data/mapa/mesto/teren.bin');
     const vysky = new Int16Array(await r.arrayBuffer());
+    // mosty cez Dunaj podľa skutočnosti (celá dĺžka s estakádami a výškový profil – tools/mesto/mosty-dunaj.mjs)
+    const dunaj = await nacitajMostyDunaja();
     KONFIG.HRANICE = index.hranice; // hracia plocha = celé mesto
     return {
       ...data,
@@ -51,7 +54,7 @@ export async function nacitajDataMapy(KONFIG, priebeh = () => {}) {
       mestoIndex: index,
       teren: { meta, vysky },
       voda: index.voda,
-      mosty: index.mosty,
+      mosty: zlucMosty(index.mosty, dunaj),
       budovy: [], cesty: [], stromy: [], plochy: [], zony: [], kopce: [], svahy: [],
       licencia: index.licencia,
     };

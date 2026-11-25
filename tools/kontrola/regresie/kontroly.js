@@ -23,7 +23,7 @@ const cacheStromov = new WeakMap();
 function stromyHry(ctx, d) {
   if (!cacheStromov.has(d)) {
     // mosty v tvare vyskopis.mosty (js/mapa/teren/vyska-mesto.js), voda = všetky vodné plochy mesta
-    const mosty = (ctx.index.mosty ?? []).map((m) => ({ ax: m.od[0], az: m.od[1], bx: m.do[0], bz: m.do[1], sirka: m.sirka }));
+    const mosty = (ctx.index.mosty ?? []).map((m) => ({ ax: m.od[0], az: m.od[1], bx: m.do[0], bz: m.do[1], sirka: m.sirka, os: m.os ? { body: m.os } : null }));
     cacheStromov.set(d, stromyDlazdice(d, { mosty, voda: ctx.index.voda ?? [] }));
   }
   return cacheStromov.get(d);
@@ -42,7 +42,7 @@ export const KONTROLY = [
     popis: 'Žiadny strom na mostovke mosta ani nadjazdu (koruna by prerástla cez most – napr. Most SNP)',
     oprava: 'fix/poriadok-zlucovania – js/mapa/zelen/miesto-stromu.js (laser bral mostovku Mosta SNP a nájazdov za koruny)',
     spusti(ctx) {
-      const mosty = (ctx.index.mosty ?? []).map((m) => pas([m.od, m.do], (m.sirka ?? 20) / 2));
+      const mosty = (ctx.index.mosty ?? []).map((m) => pas(m.os ?? [m.od, m.do], (m.sirka ?? 20) / 2));
       const chyby = [];
       let n = 0;
       for (const [kluc, d] of ctx.dlazdice) {

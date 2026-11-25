@@ -42,6 +42,7 @@ function materialPrazcov() {
 export function vytvorKolajnice(kolajnice, vyskopis) {
   const poz = [];
   const prazce = [], uv = [];
+  let vyska = (x, z) => vyskopis.vyska(x, z);
   const kolajnica = (body, rozchod, nad, hrubka) => {
     for (const strana of [1, -1]) {
       for (let i = 0; i < body.length - 1; i++) {
@@ -49,7 +50,7 @@ export function vytvorKolajnice(kolajnice, vyskopis) {
         const d = Math.hypot(bx - ax, bz - az) || 1;
         const nx = -(bz - az) / d * strana * rozchod / 2, nz = (bx - ax) / d * strana * rozchod / 2;
         const ox = -(bz - az) / d * hrubka, oz = (bx - ax) / d * hrubka;
-        const ya = vyskopis.vyska(ax + nx, az + nz) + nad, yb = vyskopis.vyska(bx + nx, bz + nz) + nad;
+        const ya = vyska(ax + nx, az + nz) + nad, yb = vyska(bx + nx, bz + nz) + nad;
         const A = [ax + nx - ox, ya, az + nz - oz], Bv = [bx + nx - ox, yb, bz + nz - oz];
         const C = [bx + nx + ox, yb, bz + nz + oz], D = [ax + nx + ox, ya, az + nz + oz];
         poz.push(...A, ...Bv, ...C, ...A, ...C, ...D);
@@ -64,10 +65,13 @@ export function vytvorKolajnice(kolajnice, vyskopis) {
   };
   for (const k of kolajnice ?? []) {
     if (k.typ === 'elektricka') {
+      // električka na moste cez Dunaj (Starý most) ide po mostovke aj nad brehom (výška „zhora“)
+      vyska = k.most ? (x, z) => vyskopis.vyska(x, z, 1e9) : (x, z) => vyskopis.vyska(x, z);
       kolajnica(zjemni(k.body, 3), ROZCHOD, 0.24, 0.04);
     } else if (k.typ === 'zeleznica') {
       // mosty: koľajnice na nadjazdoch kreslí js/mapa/mosty/nadjazdy.js; veľké mosty (Dunaj) by tu boli vo výške vody
       if (k.most) continue;
+      vyska = (x, z) => vyskopis.vyska(x, z);
       const body = zjemni(k.body, 5);
       kolajnica(body, ROZCHOD_ZELEZNICE, TEMENO_ZELEZNICE, 0.035);
       // pás pražcov

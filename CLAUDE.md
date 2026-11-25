@@ -92,6 +92,7 @@ preto platí:
    | výšky, strechy a stromy v dlaždiciach, `data/mapa/mesto/strechy/*` | `python3 tools/mesto/laser/vysky.py`, `budovy.py`, `casti.py`, `stromy.py` (návod a výber dlaždíc v `data/lidar/README.md`) |
    | `data/mapa/mesto/teren.bin`, `teren.json` (terén mesta) | `cd tools/mesto && npm run teren`, potom `python3 tools/mesto/laser/teren.py --len-detail` a `python3 tools/mesto/laser/cesty_teren_hruby.py` (vyhladenie pod rýchlymi cestami) |
    | `data/mapa/mesto/t/*.bin` (terén 2 m z lasera) | `python3 tools/mesto/laser/teren.py …`, `python3 tools/mesto/laser/zasyp_tunely.py` (zárezy pred tunelmi) a **vždy po nich** `python3 tools/mesto/laser/cesty_teren.py …` (vyhladenie pod cestami) a `python3 tools/mesto/laser/svy_terenu.py` (zošitie švov medzi dlaždicami) |
+   | `data/mapa/mosty-dunaj.json` (mosty cez Dunaj – celá dĺžka, výškový profil) | `node tools/mesto/mosty-dunaj.mjs` (údaje z prieskumu v `tools/mesto/mosty-dunaj-data.mjs`; po zmene dlaždíc alebo terénu spustiť znova a potom modely mostov `tools/blender/mosty_blender.py`) |
    | `data/mapa/cyklopruhy.json`, `ihriska.json`, `sluzby.json`, `podniky.json`, `sochy.json`, `zastavba.json` | `tools/mesto/cyklopruhy.mjs`, `ihriska.mjs`, `sluzby.mjs`, `podniky.mjs`, `sochy.mjs`, `zastavba.mjs` |
    | `data/mapa/osm.json` (záložná mapa centra) | `node tools/osm/stiahni.mjs && node tools/osm/prevod.mjs` |
    | `data/mhd/*` | `node tools/mhd/stiahni.mjs && node --max-old-space-size=4000 tools/mhd/spracuj.mjs` |

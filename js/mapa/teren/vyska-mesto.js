@@ -1,7 +1,8 @@
 // Výškopis celej Bratislavy: výškový model (Copernicus DEM, data/mapa/mesto/teren.bin)
 // + vyrezané koryto riek + mosty. Rovnaké rozhranie ako js/mapa/teren/vyska.js.
 
-import { bodVPolygone, ohranicenie, najblizsiNaUsecke } from '../geometria.js';
+import { bodVPolygone, ohranicenie } from '../geometria.js';
+import { vytvorMostyVyskopisu } from './mosty-vyskopisu.js';
 
 const plynulo = (t) => t * t * (3 - 2 * t);
 const KROK_MASKY = 6; // m – rozlíšenie masky koryta
@@ -149,41 +150,9 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
     return h * (1 - k) + Math.min(dno, h) * k;
   }
 
-  // --- mosty ---
-  const OKRAJ_RAMPY = 1.5;   // m – šírka plynulého prechodu na bočnom okraji nájazdu
-  const mosty = (data.mosty ?? []).map((m) => {
-    const [ax, az] = m.od, [bx, bz] = m.do;
-    const p = { ...m, ax, az, bx, bz, dlzka: Math.hypot(bx - ax, bz - az), polSirka2: (m.sirka / 2) ** 2, nabeh: m.nabeh ?? 30 };
-    p.hA = vyskaTerenu(ax, az);
-    p.hB = vyskaTerenu(bx, bz);
-    // mostovka je o m.vyska nad vyšším koncom
-    p.vrch = Math.max(p.hA, p.hB) + (m.vyska ?? 4);
-    p.ohr = { minX: Math.min(ax, bx) - m.sirka, maxX: Math.max(ax, bx) + m.sirka, minZ: Math.min(az, bz) - m.sirka, maxZ: Math.max(az, bz) + m.sirka };
-    return p;
-  });
-
-  // y = výška objektu (auto, chodec): kto je hlboko pod mostovkou (cesta popod most), ide po teréne.
-  // Na okraji nájazdovej rampy (mostovka tesne nad terénom) sa výška do strán plynulo zlieva s terénom,
-  // aby auto pri vjazde z boku neskočilo o pol metra (issue #54).
-  function vyskaMostu(x, z, y) {
-    for (const m of mosty) {
-      if (x < m.ohr.minX || x > m.ohr.maxX || z < m.ohr.minZ || z > m.ohr.maxZ) continue;
-      const n = najblizsiNaUsecke(x, z, m.ax, m.az, m.bx, m.bz);
-      if (n.d2 > m.polSirka2) continue;
-      const s = n.t * m.dlzka;
-      const odKonca = Math.min(s, m.dlzka - s);
-      const hKonca = s < m.dlzka / 2 ? m.hA : m.hB;
-      let h = odKonca >= m.nabeh ? m.vrch : hKonca + (m.vrch - hKonca) * plynulo(odKonca / m.nabeh);
-      if (y !== undefined && y < h - 3) continue;
-      const okraj = m.sirka / 2 - Math.sqrt(n.d2);
-      if (okraj < OKRAJ_RAMPY) {
-        const t = vyskaTerenu(x, z);
-        if (h - t < 1.5) h = t + (h - t) * plynulo(Math.max(0, okraj) / OKRAJ_RAMPY);
-      }
-      return h;
-    }
-    return null;
-  }
+  // --- mosty (js/mapa/teren/mosty-vyskopisu.js) ---
+  const jeVRieke = (x, z) => hlbkaKoryta(x, z) > 0.5;
+  const { mosty, vyskaMostu, vyskaNaOsi, mostovka, naPodoryse } = vytvorMostyVyskopisu(data.mosty, { vyskaTerenu, jeVRieke });
 
   function vyska(x, z, y) {
     const hm = vyskaMostu(x, z, y);
@@ -191,7 +160,7 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
   }
 
   function jeVoVode(x, z) {
-    if (vyskaMostu(x, z) !== null) return false;
+    if (naPodoryse(x, z)) return false;
     for (const v of rieky) {
       if (x < v.ohr.minX || x > v.ohr.maxX || z < v.ohr.minZ || z > v.ohr.maxZ) continue;
       if (bodVPolygone(x, z, v.body)) return true;
@@ -199,7 +168,7 @@ export function vytvorVyskopisMesta(teren, data, KONFIG) {
     return false;
   }
 
-  return { vyska, vyskaTerenu, vyskaMostu, jeVoVode, hladina, mosty, voda: rieky, pridajDetail, odoberDetail, maDetail: (i, j) => detaily.has(klucD(i, j)) };
+  return { vyska, vyskaTerenu, vyskaMostu, vyskaNaOsi, mostovka, jeVoVode, hladina, mosty, voda: rieky, pridajDetail, odoberDetail, maDetail: (i, j) => detaily.has(klucD(i, j)) };
 }
 
 function vyplnPolygon(maska, w, d, body, x0, z0, krok) {

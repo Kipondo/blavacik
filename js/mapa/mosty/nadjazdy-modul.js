@@ -37,6 +37,7 @@ export default {
       this.preindexuj();
     });
     hra.mosty = { vyska: (x, z, y) => this.vyska(x, z, y) };
+    this.hra = hra;
   },
 
   /** Mriežka profilov podľa obálky osi (rýchle hľadanie mosta pod bodom). */
@@ -60,7 +61,7 @@ export default {
 
   vyska(x, z, y) {
     const zoznam = this.mriezka.get(`${Math.floor(x / BUNKA)},${Math.floor(z / BUNKA)}`);
-    if (!zoznam) return null;
+    if (!zoznam) return this.vyskaVelkehoMosta(x, z, y);
     let naj = null;
     for (const pr of zoznam) {
       const h = vyskaNaMoste(pr, x, z);
@@ -69,6 +70,13 @@ export default {
       if (y < h - 1.6 || y > h + 4) continue;
       if (naj === null || Math.abs(h - y) < Math.abs(naj - y)) naj = h;
     }
-    return naj;
+    return naj ?? this.vyskaVelkehoMosta(x, z, y);
+  },
+
+  /** Mostovka veľkého mosta cez rieku (Dunaj – aj estakády na brehoch, js/mapa/teren/mosty-vyskopisu.js) v rovnakom okne výšok. */
+  vyskaVelkehoMosta(x, z, y) {
+    const r = this.hra?.mapa?.mostovka?.(x, z);
+    if (!r || y < r.h - 1.6 || y > r.h + 4) return null;
+    return r.h;
   },
 };

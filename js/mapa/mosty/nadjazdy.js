@@ -18,8 +18,12 @@ const DRUHY = {
 // voľná výška pod mostom: nad cestou, nad koľajou (trakčné vedenie), nad vodou
 const PODJAZD = { 1: 4.8, 2: 6.0, 3: 1.6 };
 
-/** Os mosta po 2 m s výškou mostovky: [{ x, z, s, ux, uz, h, teren }]. */
-export function profilMosta(m, vyskaTerenu) {
+/**
+ * Os mosta po 2 m s výškou mostovky: [{ x, z, s, ux, uz, h, teren }].
+ * kotvy = [hA, hB] – koniec, ktorý sa napája na mostovku veľkého mosta (Dunaj, js/mapa/teren/mosty-vyskopisu.js),
+ * má jej výšku, nie výšku terénu (rampy a estakády pri Moste SNP, Apollo, Prístavnom moste…).
+ */
+export function profilMosta(m, vyskaTerenu, kotvy = null) {
   const D = DRUHY[m.druh] ?? DRUHY.chodnik;
   const body = [];
   let s = 0;
@@ -52,6 +56,8 @@ export function profilMosta(m, vyskaTerenu) {
   });
   // kotvy: koniec na zemi = výška terénu, voľný koniec (napája sa na iný most) sa riadi len podjazdmi
   let hA = volne[0] ? null : body[0].teren, hB = volne[1] ? null : body.at(-1).teren;
+  if (kotvy?.[0] != null) hA = kotvy[0];
+  if (kotvy?.[1] != null) hB = kotvy[1];
   // mólo (js/mapa/mosty/mola.js): vodorovne vo výške brehu + nad, koniec pri vode visí nad vodou
   const molo = m.molo;
   if (molo) hA = hB = (molo.brehNaKonci ? body.at(-1).teren : body[0].teren) + molo.nad;
@@ -65,7 +71,7 @@ export function profilMosta(m, vyskaTerenu) {
   // koniec na zemi, ktorý ostal vysoko (nad cestou hneď pri konci): rampa (cesta) alebo schody (lávka) za koniec
   const predlz = (naKonci) => {
     const kraj = naKonci ? body.at(-1) : body[0];
-    if (volne[naKonci ? 1 : 0] || m.druh === 'kolaj' || kraj.h - kraj.teren < 0.7) return [];
+    if (volne[naKonci ? 1 : 0] || kotvy?.[naKonci ? 1 : 0] != null || m.druh === 'kolaj' || kraj.h - kraj.teren < 0.7) return [];
     if (molo && naKonci !== molo.brehNaKonci) return [];      // mólo: schody len na brehu
     const ux = naKonci ? kraj.ux : -kraj.ux, uz = naKonci ? kraj.uz : -kraj.uz;
     const sklon = m.druh === 'cesta' ? D.sklon : 0.55;
@@ -157,6 +163,24 @@ function materialy() {
   return MAT;
 }
 
+/**
+ * Konce nadjazdu, ktoré ležia na mostovke veľkého mosta vysoko nad terénom (rampa križovatky pri Moste SNP, estakáda
+ * Staromestskej…): výška mostovky. OSM úseky s menom mosta cez Dunaj v nadjazdoch nie sú (tools/mesto/nadjazdy.mjs),
+ * preto by sa inak koniec rampy prilepil na zem pod mostom a medzi rampou a mostom by bola diera.
+ */
+function kotvyNaVelkyMost(m, vyskopis) {
+  if (!vyskopis.mostovka || m.molo || !(m.body?.length > 1)) return null;
+  const kotva = (b) => {
+    const r = vyskopis.mostovka(b[0], b[1], 3);
+    if (!r?.m.profil) return null;
+    // chodník, schody a rampa pre peších pri moste s lávkami pod mostovkou (Most SNP) vedú na lávku, nie na vozovku
+    const h = m.druh === 'chodnik' && r.m.lavky ? r.h - r.m.lavky.pod : r.h;
+    return h - vyskopis.vyskaTerenu(b[0], b[1]) > 0.5 ? h : null;
+  };
+  const k = [kotva(m.body[0]), kotva(m.body.at(-1))];
+  return k[0] === null && k[1] === null ? null : k;
+}
+
 /** Postaví mosty dlaždice. Vracia { skupina, profily } – profily použije modul na chôdzu a jazdu. */
 export function vytvorNadjazdy(nadjazdy, vyskopis, kolizie) {
   const skupina = new THREE.Group();
@@ -165,7 +189,7 @@ export function vytvorNadjazdy(nadjazdy, vyskopis, kolizie) {
   if (!nadjazdy?.length) return { skupina, profily };
   const Z = { vrch: { cesta: new Zberac(), chodnik: new Zberac(), kolaj: new Zberac(), drevo: new Zberac() }, beton: new Zberac(), kov: new Zberac(), kolajnica: new Zberac(), ocel: new Zberac() };
   for (const m of nadjazdy) {
-    const pr = profilMosta(m, vyskopis.vyskaTerenu);
+    const pr = profilMosta(m, vyskopis.vyskaTerenu, kotvyNaVelkyMost(m, vyskopis));
     if (!pr) continue;
     profily.push(pr);
     postavMost(pr, Z, kolizie);

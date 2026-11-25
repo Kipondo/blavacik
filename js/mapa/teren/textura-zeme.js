@@ -300,7 +300,8 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   }
   triedyZahrad(g, d, rect, px, vJadre);
   for (const c_ of d.cesty ?? []) {
-    if (c_.nadjazd) continue;
+    // cesty na mostoch sa na zem nekreslia – nadjazdy aj mosty cez Dunaj (pod estakádou je tráva alebo cesta pod mostom)
+    if (c_.nadjazd || c_.most) continue;
     // pri cestách s 3D chodníkom (js/mapa/cesty/chodniky.js, 2,6 m) len pod chodník – za obrubníkom a chodníkom
     // nesmie pokračovať druhý pás asfaltu (pravidlá ulice #136: cesta – obrubník – chodník – tráva/dlažba)
     const lem = CESTY_S_CHODNIKOM.has(c_.typ) && !c_.most ? 5.2 : 7;
@@ -348,7 +349,7 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
   g.lineCap = g.lineJoin = 'round';
   const vJadreDlazba = new Set(cestyVJadre(d.cesty));
   for (const c_ of d.cesty ?? []) {
-    if (c_.nadjazd || vJadreDlazba.has(c_)) continue;
+    if (c_.nadjazd || c_.most || vJadreDlazba.has(c_)) continue;
     g.lineWidth = ((c_.sirka ?? 6) + (CESTY_S_CHODNIKOM.has(c_.typ) && !c_.most ? 5.6 : 0.3)) * mierka;
     cesta(c_.body, false);
     g.stroke();
@@ -360,7 +361,7 @@ export function* krokyTriedDlazdice(d, rect, px = 1024, vyskopis = null) {
     g.fillStyle = seda(TRIEDA_POKRYVKY.trava);
     for (const o of ostrovceky) { cesta(o.body, true); g.fill(); maska(o.body, true, false); }
     for (const c_ of d.cesty ?? []) {
-      if (c_.nadjazd || vJadreDlazba.has(c_)) continue;
+      if (c_.nadjazd || c_.most || vJadreDlazba.has(c_)) continue;
       g.lineWidth = ((c_.sirka ?? 6) + 0.6) * mierka;
       cesta(c_.body, false);
       g.stroke();

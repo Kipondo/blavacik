@@ -40,6 +40,52 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Mosty cez Dunaj podľa skutočnosti (vetva `feature/mosty-dunaj`)
+- **Všetkých päť mostov cez Dunaj** – SNP, Starý most, Apollo, Prístavný a Lafranconi – je teraz v celej dĺžke aj
+  s estakádami a nájazdmi na brehoch.
+  - Predtým most končil 45 m za brehom a mostovka bola vodorovne 4 m nad brehom.
+  - Na koncoch zostávali veľké medzery: rampa padala k zemi, diaľnica išla po zemi pod úrovňou mosta a rampy
+    križovatiek sa nenapájali.
+- **Výška mostovky** je z laserového skenovania ÚGKK (DMP – povrch aj s mostmi). Body sme brali cez verejnú mapovú
+  službu po 10 m.
+
+  | most | dĺžka v hre | vrchol mostovky |
+  |---|---|---|
+  | SNP | 728 m | 152,2 m n. m. |
+  | Starý most | 481 m | 148,6 m n. m. |
+  | Apollo | 891 m | 150,5 m n. m. |
+  | Prístavný | 1 032 m | 159,5 m n. m. |
+  | Lafranconi | 1 163 m | 157,1 m n. m. |
+
+  Konce mostov ležia na násype z laserového terénu.
+- **Prieskum** (rozpätia, piliere, prierezy, farby, čo je pod mostom) so zdrojmi je v
+  [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md), časť „Mosty cez Dunaj“.
+  - Údaje sú v `tools/mesto/mosty-dunaj-data.mjs`.
+  - Generátor `node tools/mesto/mosty-dunaj.mjs` z nich vyrobí `data/mapa/mosty-dunaj.json`.
+  - Modely sa pregenerujú cez `tools/blender/mosty_blender.py`.
+- **Modely z Blendera** sú prerobené podľa prieskumu:
+  - **SNP:** severná estakáda nad nábrežím a autobusovým terminálom; laná v jednej strednej rovine; pylón
+    naklonený o 17°; lávky pre peších pod konzolami, po ktorých sa dá chodiť.
+  - **Starý most:** rombická priehrada 11,3 m, zelená zvonka a sivá zvnútra; terasy nad pilierom v rieke;
+    kamenné piliere.
+  - **Apollo:** os v oblúku; oblúkové rebrá, ktoré sa vo vrchole dotýkajú; jediný pilier v rieke; rampa medzi
+    múrmi do Košickej.
+  - **Prístavný:** priehrada Warren 9,5 m; železnica a chodníky na dolnom podlaží.
+  - **Lafranconi:** dva nosníky s výškou 11 m nad riečnou podperou; lávky pod konzolami 4,7 m pod vozovkou.
+  - Mosty majú piliere estakád mimo ciest pod nimi a opory a steny násypov na koncoch.
+- **Pod mostom zostáva zem.**
+  - Cesty, električka, lampy a stromy pod estakádou sú dole.
+  - Cesty a koľaje na moste idú po mostovke.
+  - Autá a MHD na estakáde jazdia hore.
+  - Rampy a estakády z OSM sa napoja na výšku mostovky.
+  - Na násype medzi múrmi (Apollo) je mostovka povrchom pre všetko.
+- **Test:**
+  1. Prejdi autom po Moste SNP z Petržalky na Staromestskú: rampa pri pylóne nie je, most pokračuje estakádou.
+  2. Choď pešo popod most na Tyršovom nábreží a v autobusovom termináli.
+  3. Na Moste Apollo choď z Košickej do Petržalky.
+  4. Zastav na lávke Mosta SNP alebo Mosta Lafranconi.
+  5. Regresná kontrola: `mosty-cez-dunaj-napojenie`.
+
 ### Poriadok pri zlučovaní (vetva `fix/poriadok-zlucovania`)
 - **Prehľad strát:** všetkých 120 zlúčení v histórii `main` som prešiel skriptom – kde sa súbor zmenený na oboch
   stranách vzal celý z jednej strany. Stratilo sa: pravidlo „Úlohy pre dvoch Claudov (issues so štítkami)“ v CLAUDE.md
@@ -1302,7 +1348,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
-  takmer chýba – zatiaľ len ostrovčeky), mosty z lasera, NPC autá po nadjazdoch.
+  takmer chýba – zatiaľ len ostrovčeky).
+- Mosty: D4 (Lužný most) a mosty na Čunove, vlaky po dolnom podlaží Prístavného mosta, schodiská a cyklošpirály
+  k lávkam Mosta SNP a Mosta Apollo ako modely (dnes len chodníky z OSM).
 - MHD: c) ľudia v MHD, d) jazda hráča (lístky a revízor neskôr), trolejové vedenie nad traťami.
 - Vlaky: kolízie s hráčom (dnes sa dá prejsť cez súpravu), nastupovanie do vlaku, tabuľky na nástupištiach,
   nákladné vlaky; po decembrovej zmene poriadku spustiť `tools/vlaky/gtfs_vlaky.py`.
