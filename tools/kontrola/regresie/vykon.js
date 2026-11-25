@@ -12,6 +12,7 @@ import { vrstvaTienaPriKresleni } from '../../../js/grafika/dosah-tienov.js';
 import { VRSTVA_TIENA } from '../../../js/mapa/zelen/stromy.js';
 import { geometrieNpc } from '../../../js/doprava/premavka/model.js';
 import { TYPY } from '../../../js/auto/typy-aut.js';
+import { zdielajKostru, uvolniKostry } from '../../../js/chodec/postava/nacitaj-postavu.js';
 
 export const kontrolyVykonu = [
   {
@@ -254,6 +255,45 @@ export const kontrolyVykonu = [
       }
       for (const t of typy) for (const g of Object.values(geo[t])) g?.dispose?.();
       return { skontrolovane: typy.length, chyby };
+    },
+  },
+  {
+    id: 'spolocna-kostra-postavy',
+    popis: 'Časti postavy (koža, oblečenie, vlasy, oči) s tými istými kosťami majú jednu spoločnú kostru – three.js '
+      + 'potom prepočíta a nahrá matice kostí raz na postavu, nie pre každú časť (predtým 181 kostier a 43 prepočtov '
+      + 'za snímok na Hlavnom nám.); pri zrušení chodca sa kostra uvoľní',
+    oprava: 'fix/spolocna-kostra (#110) – js/chodec/postava/nacitaj-postavu.js (zdielajKostru, uvolniKostry), npc/model-npc.js',
+    tolerancia: 0,
+    spusti() {
+      const chyby = [];
+      const kosti = [new THREE.Bone(), new THREE.Bone()];
+      kosti[0].add(kosti[1]);
+      const koren = new THREE.Group();
+      koren.add(kosti[0]);
+      const geo = new THREE.BoxGeometry(1, 1, 1);
+      geo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(new Array(geo.attributes.position.count * 4).fill(0), 4));
+      geo.setAttribute('skinWeight', new THREE.Float32BufferAttribute(new Array(geo.attributes.position.count * 4).fill(0).map((_, i) => (i % 4 ? 0 : 1)), 4));
+      // ako SkeletonUtils.clone: každá časť má vlastný objekt Skeleton s tými istými kosťami
+      const casti = [0, 1, 2].map(() => {
+        const m = new THREE.SkinnedMesh(geo, new THREE.MeshBasicMaterial());
+        m.bind(new THREE.Skeleton(kosti));
+        koren.add(m);
+        return m;
+      });
+      // iná postava (iné kosti) – svoju kostru si musí nechať
+      const ine = new THREE.SkinnedMesh(geo, new THREE.MeshBasicMaterial());
+      ine.bind(new THREE.Skeleton([new THREE.Bone(), new THREE.Bone()]));
+      koren.add(ine);
+      const n = zdielajKostru(koren);
+      if (n !== 2) chyby.push({ text: `na spoločnú kostru prešlo ${n} častí namiesto 2` });
+      if (!casti.every((m) => m.skeleton === casti[0].skeleton)) chyby.push({ text: 'časti s rovnakými kosťami nemajú jednu kostru' });
+      if (ine.skeleton === casti[0].skeleton) chyby.push({ text: 'časť s inými kosťami dostala cudziu kostru' });
+      let uvolnene = 0;
+      for (const k of new Set([casti[0].skeleton, ine.skeleton])) k.dispose = () => { uvolnene++; };
+      uvolniKostry(koren);
+      if (uvolnene !== 2) chyby.push({ text: `pri zrušení sa uvoľnilo ${uvolnene} kostier namiesto 2` });
+      geo.dispose();
+      return { skontrolovane: 4, chyby };
     },
   },
 ];

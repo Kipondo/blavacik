@@ -196,6 +196,15 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   Kamera nad nízkou prekážkou prejde (`js/mapa/pamiatky/vyskova-budova.js`).
 - **Regresná kontrola** `fontana-maximilianova-kolizia`.
 
+### Spoločná kostra postáv (vetva `fix/spolocna-kostra`, #110)
+- **Kostra:**
+  - `SkeletonUtils.clone` dal každej časti postavy (koža, oblečenie, vlasy, oči…) vlastnú kostru, hoci majú tie isté kosti;
+  - teraz má postava jednu (`zdielajKostru` v `js/chodec/postava/nacitaj-postavu.js`) – pre hráča aj chodcov s plným modelom;
+  - na Hlavnom nám. je to 5 kostier namiesto 181 a 2 prepočty matíc kostí za snímok namiesto 43; každý prepočet
+    nahrával textúru kostí na grafickú kartu.
+- **Rušenie chodca** uvoľní aj kostru (predtým tam ostávali textúry kostí).
+- **Regresná kontrola** `spolocna-kostra-postavy`.
+
 ### Autá a MHD po mostovke nadjazdov (vetva `fix/najazdy-nadjazdov`, #54)
 - **NPC autá, autobusy a trolejbusy** brali výšku len z terénu. Na nadjazdoch tak išli po zemi pod mostovkou
   (cez cestu pod mostom). Teraz idú po mostovke ako auto hráča (`js/mapa/mosty/vyska-vozidla.js`).
