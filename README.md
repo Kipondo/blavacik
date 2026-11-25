@@ -189,6 +189,16 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Autá a MHD po mostovke nadjazdov (vetva `fix/najazdy-nadjazdov`, #54)
+- **NPC autá, autobusy a trolejbusy** brali výšku len z terénu. Na nadjazdoch tak išli po zemi pod mostovkou
+  (cez cestu pod mostom). Teraz idú po mostovke ako auto hráča (`js/mapa/mosty/vyska-vozidla.js`).
+  - auto na ceste, ktorá leží na nadjazde, si mostovku nájde aj hneď po objavení (príznak `nadjazd` v sieti premávky);
+  - z rampy na mostovku prejde plynule a ostane na nej, auto pod mostom ostane dole.
+- **Zvyšných 13 „strmých miest“ diaľnic** (#54) je asfalt pod rampou pri konci mosta. Most z OSM začína až za
+  oporou a mostovka jamu pred koncom už preklenuje rampou. Hráč išiel po mostovke plynulo, NPC autá zapadali do
+  jamy – to rieši táto oprava.
+- **Regresná kontrola** `vozidla-na-nadjazde`.
+
 ### Veľkosť repozitára: strážca a plán pre veľké súbory (vetva `fix/velkost-repozitara`, #137)
 - **Strážca veľkosti:**
   - repozitár má 141,5 MB v gite a súbory v strome 155 MB (limit GitHubu je 1 GB);

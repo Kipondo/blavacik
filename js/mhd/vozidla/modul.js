@@ -20,6 +20,7 @@ import { Displeje } from './displeje.js';
 import { riesKolizie } from './kolizie.js';
 import { prekazkaPred } from './prekazky.js';
 import { spojeVOkne } from './okno-spojov.js';
+import { vyskaVozidla } from '../../mapa/mosty/vyska-vozidla.js';
 
 const OKOLIE_LINIEK = 1600;  // m – linky so zastávkou v tomto okolí sa sledujú
 const VIDITELNOST = 1200;    // m – vozidlá ďalej sa nekreslia
@@ -203,7 +204,9 @@ export default {
         rychlost: st.rychlost, stoji: st.stoji, sirka: t.sirka, dlzka: 0, clanky: [] };
       let km = st.km;
       const matice = [];
-      for (const c of t.clanky) {
+      // výška náprav z predošlého snímku – vozidlo na mostovke nadjazdu po nej pokračuje (vyska-vozidla.js, #54)
+      const yKolies = (s.yKolies ??= []);
+      for (const [ci, c] of t.clanky.entries()) {
         bodTrasy(s.tr, km, bod);
         bodTrasy(s.tr, km - c.d, bodZ);
         // posun do pravého pruhu (autobusy idú po osi cesty)
@@ -212,7 +215,9 @@ export default {
         const rx = bodZ.x - bodZ.dz * o, rz = bodZ.z + bodZ.dx * o;
         const dl = Math.hypot(fx - rx, fz - rz) || 1;
         const sx = (fx - rx) / dl, sz = (fz - rz) / dl;
-        const yF = hra.mapa.vyska(fx, fz), yR = hra.mapa.vyska(rx, rz);
+        const pred = yKolies[ci] ?? [];
+        const yF = vyskaVozidla(hra, fx, fz, pred[0]), yR = vyskaVozidla(hra, rx, rz, pred[1]);
+        yKolies[ci] = [yF, yR];
         const cx = (fx + rx) / 2, cz = (fz + rz) / 2, cy = (yF + yR) / 2;
         _e.set(-Math.atan2(yF - yR, dl), Math.atan2(sx, sz), 0);
         _q.setFromEuler(_e);
