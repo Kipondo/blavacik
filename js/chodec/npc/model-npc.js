@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { clone as klonujSKostrou } from 'three/addons/utils/SkeletonUtils.js';
-import { nacitajGlb, pripravSiet } from '../postava/nacitaj-postavu.js';
+import { nacitajGlb, pripravSiet, zdielajKostru, uvolniKostry } from '../postava/nacitaj-postavu.js';
 import { URL_DODO } from '../postava/realisticka-postava.js';
 import { Animacie } from '../postava/animacie.js';
 import { oblec } from '../postava/satnik.js';
@@ -107,6 +107,7 @@ export async function vytvorNpc(spec, data) {
   const gltf = await nacitajGlb(url);
   const animKlipy = await klipyPreModel(url, gltf);
   const kopia = klonujSKostrou(gltf.scene);
+  zdielajKostru(kopia);   // jedna kostra na chodca, nie na každú časť (#110)
   const potrebne = potrebneObjekty(spec, data.satnik);
 
   const siete0 = [], odstran = [];
@@ -192,6 +193,7 @@ export async function vytvorNpc(spec, data) {
       koren.removeFromParent();
       matLod.dispose();
       for (const o of siete0) o.material.dispose();
+      uvolniKostry(koren);   // textúra kostí na grafickej karte
     },
   };
   npc.nastavLod(0);
