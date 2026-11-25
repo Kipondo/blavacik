@@ -20,6 +20,7 @@
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
 import { vzdialenaUroven } from './vzdialena-uroven.js';
+import { pridajTienovehoZastupcu } from '../../grafika/tienovy-zastupca.js';
 import { nahradBudovy, nahradSochy } from './nahradene-budovy.js';
 import { pridajPochodzne } from '../mosty/pochodzne-pamiatok.js';
 
@@ -54,6 +55,8 @@ function sUrovnami(model, subor = null) {
   if (subor) {
     if (!cacheDaleko.has(subor)) cacheDaleko.set(subor, vzdialenaUroven(model));
     daleko = cacheDaleko.get(subor).clone();
+    // zblízka vrhá tieň jedna zlúčená sieť (#110) – kópie modelu ju zdedia
+    if (!model.userData.maZastupcu) { pridajTienovehoZastupcu(model); model.userData.maZastupcu = true; }
   } else {
     daleko = model.clone();
     const zmaz = [];

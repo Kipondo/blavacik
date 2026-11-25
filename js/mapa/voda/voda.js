@@ -116,9 +116,9 @@ export function vytvorVodu(voda, KONFIG, vyskopis) {
     skupina.add(mesh);
   }
 
-  // vodné plochy a kamenné okraje s rovnakým materiálom – jedna sieť na štvorec 1 km (#110: Dunaj a jazerá
-  // mali ~90 sietí, každá samostatné volanie kreslenia)
-  zlucPodlaMaterialu(skupina, { bunka: 1000 });
+  // vodné plochy a kamenné okraje s rovnakým materiálom – jedna sieť na štvorec 2,5 km (#110: Dunaj a jazerá
+  // mali ~90 sietí, každá samostatné volanie kreslenia; hladiny majú málo trojuholníkov, väčší kus nevadí)
+  zlucPodlaMaterialu(skupina, { bunka: 2500 });
 
   // vlnky tečú po prúde (Dunaj tečie na východ = +x)
   skupina.userData.update = (cas) => {

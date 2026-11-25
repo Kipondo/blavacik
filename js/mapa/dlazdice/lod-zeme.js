@@ -14,6 +14,8 @@ const DOSAHY = [
   ['obrubniky-chodnikov', 220], ['hroby', 220], ['znacky', 220], ['tabule-ulic', 220], ['lavicky', 220], ['trakcia', 220],
   ['semafory', 300], ['znacenie', 300], ['vikiere', 300], ['kominy', 300],
 ];
+/** Mená skupín, ktoré sa zďaleka skrývajú (nepatria do tieňového zástupcu dlaždice – postav-dlazdicu.js). */
+export const DOSAHY_LOD = new Set(DOSAHY.map(([meno]) => meno));
 
 /**
  * Nastaví úroveň detailu jednej dlaždice (objekt = skupina dlaždice, vzd = vzdialenosť hráča od jej okraja,

@@ -4,7 +4,8 @@
 // držia odstup (model inteligentného vodiča – IDM), zastavujú na červenú (hra.doprava.semafor),
 // na križovatkách bez semaforov sa striedajú (rezervácia križovatky), brzdia pred električkou,
 // autobusom, chodcom aj autom hráča. Hustota podľa typu cesty (HUSTOTA v siet.js).
-// Kreslia sa cez InstancedMesh (pár volaní kreslenia pre stovky áut).
+// Kreslia sa cez BatchedMesh: všetky typy áut v jednej sieti na materiál (lak, sklo, ostatné, svetlá), orezávanie
+// mimo záberu po autách (#110 – predtým 4 InstancedMesh na typ auta, ~30 volaní kreslenia aj mimo záberu).
 // Klávesou E sa dá do NPC auta nastúpiť – zmení sa na obyčajné auto (hra.pridajAuto).
 //
 // Pre ostatné moduly: hra.doprava.npcAuta = [{ x, z, uhol, v, dlzka }]
@@ -13,7 +14,7 @@ import * as THREE from 'three';
 import { KONFIG } from '../../config.js';
 import { SietCiest, jeKrizovatka } from './siet.js';
 import { geometrieNpc, prislusenstvoNpc } from './model.js';
-import { nahodnyTyp, nahodnaFarba, nahodnaSluzba } from '../../auto/typy-aut.js';
+import { nahodnyTyp, nahodnaFarba, nahodnaSluzba, TYPY } from '../../auto/typy-aut.js';
 
 
 const R = 380;            // m – v tomto okruhu okolo hráča jazdia autá
@@ -28,6 +29,8 @@ const DOHLAD = 70;        // m – ako ďaleko dopredu vodič sleduje autá a kr
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(0, 0, 0, 'YXZ');
 const _p = new THREE.Vector3(), _j = new THREE.Vector3(1, 1, 1), _c = new THREE.Color();
+const CASTI = ['lak', 'sklo', 'ostatne', 'svetla'];
+const TIEN_CASTI = { lak: true, sklo: false, ostatne: true, svetla: false };
 
 /** Je v hre noc (viac taxíkov a kuriérov, menej dodávok)? */
 function jeNoc(hra) {
@@ -86,15 +89,41 @@ export default {
     return m;
   },
 
-  /** Siete typu auta (lak, sklo, ostatné, svetlá). */
+  /**
+   * Siete áut: pre každú časť (lak, sklo, ostatné, svetlá) jedna BatchedMesh so všetkými typmi áut a zásobou
+   * MAX_AUT inštancií (auto = inštancia; typ sa mení cez setGeometryIdAt). Pripraví sa raz pri prvom aute.
+   */
+  _davky() {
+    if (this.davky) return this.davky;
+    const geo = {};
+    for (const typ of Object.keys(TYPY)) geo[typ] = geometrieNpc(typ);
+    const mat = { lak: this.mat.lak, sklo: this.mat.sklo, ostatne: this.mat.ost, svetla: this.mat.svetla };
+    this.davky = {};
+    for (const c of CASTI) {
+      let v = 0, ix = 0;
+      for (const typ in geo) { v += geo[typ][c].attributes.position.count; ix += geo[typ][c].index?.count ?? 0; }
+      const b = new THREE.BatchedMesh(MAX_AUT, v, ix, mat[c]);
+      // obal celej siete by sa s jazdou áut nemenil – oreže sa po autách (perObjectFrustumCulled)
+      b.frustumCulled = false;
+      b.castShadow = TIEN_CASTI[c]; b.receiveShadow = TIEN_CASTI[c];
+      b.name = 'auta-' + c;
+      const idy = {};
+      for (const typ in geo) idy[typ] = b.addGeometry(geo[typ][c]);
+      const prvy = idy[Object.keys(geo)[0]];
+      for (let i = 0; i < MAX_AUT; i++) { b.addInstance(prvy); b.setVisibleAt(i, false); }
+      this.davky[c] = { siet: b, idy };
+      this.skupina.add(b);
+    }
+    for (const typ in geo) this.typy[typ] = { dlzka: geo[typ].dlzka };
+    this.typSlotu = new Array(MAX_AUT).fill(null);
+    this.pocetSlotov = 0;
+    return this.davky;
+  },
+
+  /** Údaje typu auta (dĺžka). */
   _typ(typ) {
-    if (this.typy[typ]) return this.typy[typ];
-    const g = geometrieNpc(typ);
-    const lak = this._siet(g.lak, this.mat.lak, true);
-    lak.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_AUT * 3), 3);
-    lak.instanceColor.setUsage(THREE.DynamicDrawUsage);
-    this.typy[typ] = { casti: [lak, this._siet(g.sklo, this.mat.sklo, false), this._siet(g.ostatne, this.mat.ost, true), this._siet(g.svetla, this.mat.svetla, false)], dlzka: g.dlzka, pocet: 0 };
-    return this.typy[typ];
+    this._davky();
+    return this.typy[typ] ?? (this.typy[typ] = { dlzka: geometrieNpc(typ).dlzka });
   },
 
   /** Svetlo na streche a pruhy taxíka / kuriéra (jedna sieť na variant). */
@@ -437,10 +466,11 @@ export default {
   // ---------- vykreslenie ----------
   _vykresli(hra) {
     const p = hra.stav.pozicia;
-    for (const t of Object.values(this.typy)) t.pocet = 0;
+    const davky = this._davky();
+    let i = 0;
     for (const sl of Object.values(this.sluzby)) if (sl) sl.pocet = 0;
     for (const a of this.auta) {
-      const t = this._typ(a.typ);
+      if (i >= MAX_AUT) break;
       const d = Math.hypot(a.x - p.x, a.z - p.z);
       const y = hra.mapa.vyska(a.x, a.z);
       a.y = Math.abs(y - a.y) > 2 ? y : a.y + (y - a.y) * 0.3;
@@ -452,18 +482,24 @@ export default {
       _e.set(a.sklon, a.uhol, 0);
       _q.setFromEuler(_e);
       _m.compose(_p.set(a.x, a.y, a.z), _q, _j);
-      const i = t.pocet++;
-      for (const c of t.casti) c.setMatrixAt(i, _m);
-      t.casti[0].setColorAt(i, _c.set(a.farba));
+      const novyTyp = this.typSlotu[i] !== a.typ && davky.lak.idy[a.typ] !== undefined;
+      for (const c of CASTI) {
+        const { siet, idy } = davky[c];
+        if (novyTyp) siet.setGeometryIdAt(i, idy[a.typ]);
+        siet.setMatrixAt(i, _m);
+        if (i >= this.pocetSlotov) siet.setVisibleAt(i, true);
+      }
+      if (novyTyp) this.typSlotu[i] = a.typ;
+      davky.lak.siet.setColorAt(i, _c.set(a.farba));
+      i++;
       if (a.sluzba) {
         const sl = this._sluzba(a.sluzba);
         if (sl) sl.siet.setMatrixAt(sl.pocet++, _m);
       }
     }
-    for (const t of Object.values(this.typy)) {
-      for (const c of t.casti) { c.count = t.pocet; c.instanceMatrix.needsUpdate = true; }
-      t.casti[0].instanceColor.needsUpdate = true;
-    }
+    // nepoužité miesta v zásobe sa nekreslia
+    for (let k = i; k < this.pocetSlotov; k++) for (const c of CASTI) davky[c].siet.setVisibleAt(k, false);
+    this.pocetSlotov = i;
     for (const sl of Object.values(this.sluzby)) {
       if (!sl) continue;
       sl.siet.count = sl.pocet;

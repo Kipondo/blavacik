@@ -189,6 +189,30 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Výkon 4: tieňoví zástupcovia, autá v dávke a oprava tieňovej vrstvy (vetva `feature/vykon-4`, #110)
+- **Oprava tieňa:** three.js pri kreslení tieňa testuje vrstvy objektu voči hlavnej kamere. Zástupné koruny stromov
+  na vrstve „len pre tieň“ (výkon 1) sa preto do tieňa nekreslili vôbec. Teraz má kamera počas kreslenia tieňových
+  máp túto vrstvu zapnutú (`js/grafika/dosah-tienov.js`) a stromy 35–100 m vrhajú tieň jednoduchou korunou.
+- **Tieňoví zástupcovia** (`js/grafika/tienovy-zastupca.js`): statický objekt z mnohých sietí vrhá tieň jednou
+  zlúčenou sieťou na vrstve tieňa.
+  - budovy, strechy, nadjazdy, podchody a chodníky dlaždice (budovy mali pole 3 materiálov = 3 volania na sieť);
+  - pamiatky z kódu aj z Blendera, mosty (napr. Pálffyho palác 15 → 1 volanie).
+- **Podrobní chodci:** tieň vrhá ich zlúčená sieť LOD1 (jedno volanie namiesto ~20).
+- **Autá premávky** (`js/doprava/premavka/modul.js`): všetky typy áut v jednej `BatchedMesh` na materiál (lak,
+  sklo, ostatné, svetlá) s orezaním po autách. Predtým boli 4 siete na typ (~30 volaní), kreslili sa aj mimo záberu.
+- **Kruhy svetla pod lampami** sa cez deň nekreslia.
+- **Meranie** (`tools/kontrola/meranie-trasy.py`, kvalita „vysoká“, SwiftShader):
+
+  | miesto | volania (výkon 3 → 4) | trojuholníky |
+  |---|---|---|
+  | Hlavné nám. | 766 → 657 | 2,78 → 2,71 mil. |
+  | Šafárikovo nám. | 665 → 568 | 2,55 → 2,32 mil. |
+  | Karlova Ves | 476 → 373 | 1,79 → 1,63 mil. |
+
+  Trojuholníkov ubudlo málo, lebo tiene stromov 35–100 m a tieňových zástupcov sa teraz naozaj kreslia (predtým chýbali).
+  Cieľ #110 spĺňa Karlova Ves; Šafárikovo nám. spĺňa počet volaní.
+- **Regresné kontroly:** `vrstva-tiena-v-tieni`, `tienovy-zastupca`, `auta-v-davke`.
+
 ### Výkon 3: zem po blokoch, pamiatky zďaleka, vikiere, voda a zastávky (vetva `feature/vykon-3`, #110)
 Nadväzuje na výkon 2 (PR #165).
 - **Zem po blokoch 100 m:** úroveň detailu (sieť 2 / 4 / 10 m) sa volí pre každý blok podľa vzdialenosti hráča

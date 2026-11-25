@@ -20,6 +20,7 @@
 
 import * as THREE from 'three';
 import { zlucPodlaMaterialu } from '../zluc-siete.js';
+import { pridajTienovehoZastupcu } from '../../grafika/tienovy-zastupca.js';
 
 export async function nacitajPamiatky(pamiatky, kontext) {
   const skupina = new THREE.Group();
@@ -46,6 +47,8 @@ export async function nacitajPamiatky(pamiatky, kontext) {
     if (!vysledok.update && !vysledok.objekt.userData.nezlucovat) zlucPodlaMaterialu(vysledok.objekt);
     if (!vysledok.objekt.userData.bezTiena) {
       vysledok.objekt.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      // statická pamiatka vrhá tieň jednou sieťou (#110); modely z Blendera dostanú zástupcu po načítaní
+      if (!vysledok.update && !vysledok.objekt.userData.nezlucovat) pridajTienovehoZastupcu(vysledok.objekt);
     }
     // za hmlou sa pamiatka nekreslí (js/kamera/dohlad.js): stred a polomer celej stavby
     const gula = new THREE.Box3().setFromObject(vysledok.objekt).getBoundingSphere(new THREE.Sphere());

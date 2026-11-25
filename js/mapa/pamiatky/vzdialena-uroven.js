@@ -79,7 +79,7 @@ export function vzdialenaUroven(model) {
   vystup.name = 'zdiaľky';
   const skupiny = new Map();
   model.traverse((o) => {
-    if (!o.isMesh || !o.geometry?.getAttribute('position')) return;
+    if (!o.isMesh || !o.geometry?.getAttribute('position') || o.userData.tienovyZastupca) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     if (mats.every(jeDetail)) return;
     const matica = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);

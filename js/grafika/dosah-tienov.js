@@ -2,9 +2,14 @@
 // (Šafárikovo nám., kvalita vysoká: 310 volaní, 1,45 mil. △). Bez viditeľnej zmeny:
 //   – malé objekty (sochy, autá, chodci, kolobežky, semafory…) vrhajú tieň len do DOSAH_MALE metrov od hráča –
 //     ďalej je ich tieň na pár pixeloch a v opare; vracajú sa len tie, ktorým tieň vypol tento modul,
-//   – kamera tieňa kreslí aj vrstvu VRSTVA_TIENA: zástupné koruny stromov (js/mapa/zelen/stromy.js), ktoré sa do
-//     obrazu nekreslia – podrobné listy stromov vrhajú tieň len zblízka.
-// Žiadne rozhranie pre iné moduly.
+//   – do tieňa sa kreslí aj vrstva VRSTVA_TIENA: zástupné koruny stromov (js/mapa/zelen/stromy.js), ktoré sa do
+//     obrazu nekreslia – podrobné listy stromov vrhajú tieň len zblízka; aj tieňoví zástupcovia pamiatok, dlaždíc
+//     a postáv (js/grafika/tienovy-zastupca.js) – ich pôvodné siete (userData.tienCezZastupcu) tento modul nezapína.
+//     Three.js (r170) pri kreslení tieňa testuje vrstvy objektu voči HLAVNEJ kamere, nie kamere tieňa – preto sa
+//     hlavnej kamere vrstva tieňa zapne len na čas kreslenia tieňových máp (vrstvaTienaPriKresleni). Zoznam toho,
+//     čo sa kreslí do obrazu, sa zostaví ešte pred tieňmi, takže zástupcovia do obrazu nepreniknú. Predtým sa
+//     zástupné koruny stromov do tieňa nekreslili vôbec (#110).
+// Pre iné moduly: len vrstvaTienaPriKresleni (regresná kontrola).
 
 import { VRSTVA_TIENA } from '../mapa/zelen/stromy.js';
 
@@ -12,11 +17,29 @@ const DOSAH_MALE = 45;     // m – malé objekty ďalej nevrhajú tieň
 const MALY = 12;           // m – polomer, do ktorého je objekt „malý“ (budovy a celé dlaždice sú väčšie)
 const KAZDYCH = 0.5;       // s
 
+/**
+ * Obalí renderer.shadowMap.render: počas kreslenia tieňových máp má kamera zapnutú vrstvu VRSTVA_TIENA
+ * (three.js testuje vrstvy objektov voči hlavnej kamere). Volá sa raz; vráti true, ak sa obalilo.
+ */
+export function vrstvaTienaPriKresleni(renderer) {
+  const sm = renderer?.shadowMap;
+  if (!sm || sm.userData?.vrstvaTiena) return false;
+  const povodne = sm.render;
+  sm.render = function (svetla, scena, kamera) {
+    const maska = kamera.layers.mask;
+    kamera.layers.enable(VRSTVA_TIENA);
+    try { return povodne.call(this, svetla, scena, kamera); } finally { kamera.layers.mask = maska; }
+  };
+  sm.userData = { ...(sm.userData ?? {}), vrstvaTiena: true };
+  return true;
+}
+
 export default {
   nazov: 'dosah-tienov',
   poradie: 59,   // pred dohľadom (60) a kreslením
 
-  init() {
+  init(hra) {
+    vrstvaTienaPriKresleni(hra?.renderer);
     this.cas = 0;
     this.vypnute = new Set();     // objekty, ktorým tieň vypol tento modul
     this.svetla = new WeakSet();
@@ -34,7 +57,7 @@ export default {
         this.svetla.add(o);
         return;
       }
-      if (!o.isMesh || o.isInstancedMesh) return;
+      if (!o.isMesh || o.isInstancedMesh || o.isBatchedMesh || o.userData.tienCezZastupcu) return;
       const vypnuty = this.vypnute.has(o);
       if (!o.castShadow && !vypnuty) return;
       const g = o.geometry;

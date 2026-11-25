@@ -60,6 +60,9 @@ function kruhySvetla(body, vyskopis, farba) {
   m.computeBoundingSphere();
   m.renderOrder = 2;
   m.name = 'kruhy-svetla';
+  // cez deň (NOC = 0) sa kruhy vôbec nekreslia – shader by ich aj tak zahodil, ale každá dlaždica by mala
+  // o 1–2 volania kreslenia viac (#110); viditeľnosť sa číta pri každom kreslení
+  Object.defineProperty(m, 'visible', { get: () => NOC.value >= 0.01, set: () => {} });
   return m;
 }
 
