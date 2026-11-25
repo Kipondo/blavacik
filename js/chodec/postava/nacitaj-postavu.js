@@ -21,9 +21,40 @@ export function nacitajGlb(url) {
  * Vytvorí novú inštanciu postavy z .glb.
  * Vráti { koren, siete, kosti, animacie } – siete sú SkinnedMesh-e podľa mena (telo_*, odev_*, vlasy_* …).
  */
+/**
+ * Spoločná kostra pre všetky časti postavy (#110): SkeletonUtils.clone dá každej kostrovej sieti vlastný objekt
+ * Skeleton, hoci majú tie isté kosti – three.js potom každý snímok prepočíta matice kostí (53) a nahrá textúru kostí
+ * pre každú viditeľnú časť zvlášť (~12–20 na postavu, aj do tieňa). Časti s rovnakými kosťami a inverznými maticami
+ * dostanú jednu kostru. Vráti počet častí, ktoré prešli na spoločnú kostru.
+ */
+export function zdielajKostru(koren) {
+  let spolocna = null, n = 0;
+  koren.traverse((o) => {
+    if (!o.isSkinnedMesh) return;
+    const k = o.skeleton;
+    if (!spolocna) { spolocna = k; return; }
+    if (k === spolocna) return;
+    const rovnake = k.bones.length === spolocna.bones.length && k.bones.every((b, i) => b === spolocna.bones[i])
+      && k.boneInverses.every((m, i) => m.equals(spolocna.boneInverses[i]));
+    if (!rovnake) return;
+    k.dispose();
+    o.skeleton = spolocna;
+    n++;
+  });
+  return n;
+}
+
+/** Uvoľní textúry kostier postavy (pri zrušení NPC). */
+export function uvolniKostry(koren) {
+  const kostry = new Set();
+  koren.traverse((o) => { if (o.isSkinnedMesh) kostry.add(o.skeleton); });
+  for (const k of kostry) k.dispose();
+}
+
 export async function vytvorInstanciu(url) {
   const gltf = await nacitajGlb(url);
   const koren = klonujSKostrou(gltf.scene);
+  zdielajKostru(koren);
   const siete = [];
   const kosti = {};
   koren.traverse((o) => {
