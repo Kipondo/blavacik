@@ -189,6 +189,16 @@ je v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md). Eurovea Tower o
   - plávajú na hladine Dunaja, bez nápisov a čísel kotvísk.
 - **Testovacia trasa:** body `eurovea-molo` (mólo z dolného chodníka) a `eurovea-ponton`.
 
+### Veľkosť repozitára: strážca a plán pre veľké súbory (vetva `fix/velkost-repozitara`, #137)
+- **Strážca veľkosti:**
+  - repozitár má 141,5 MB v gite a súbory v strome 155 MB (limit GitHubu je 1 GB);
+  - `tools/kontrola/velke-subory.py` v GitHub Actions nepustí súbor nad 25 MB;
+  - `--prehlad` vypíše najväčšie priečinky a súbory.
+- **Snímky testovacej trasy** (`docs/kontrola/<beh>/`) sa už nedávajú do gitu (`.gitignore`). Do PR idú cez vetvu
+  `hlasenia`.
+- **Pravidlá v CLAUDE.md** (sekcia „Veľkosť repozitára“) a **plán presunu veľkých dát na Cloudflare R2**
+  (`napady/velke-subory-r2.md`): LOD2 celého mesta, interiéry, podrobné modely.
+
 ### Výkon 4: tieňoví zástupcovia, autá v dávke a oprava tieňovej vrstvy (vetva `feature/vykon-4`, #110)
 - **Oprava tieňa:** three.js pri kreslení tieňa testuje vrstvy objektu voči hlavnej kamere. Zástupné koruny stromov
   na vrstve „len pre tieň“ (výkon 1) sa preto do tieňa nekreslili vôbec. Teraz má kamera počas kreslenia tieňových

@@ -1,4 +1,7 @@
 .osm-cache/
+# snímky testovacej trasy (tools/kontrola/trasa.py) sa do gitu nedávajú (#137) – do PR idú cez vetvu hlasenia;
+# staršie behy, ktoré už v gite sú, ostávajú
+docs/kontrola/*/
 
 # bez lomky na konci – aby sa nezachytili ani symbolické odkazy (GitHub Pages na nich padá)
 node_modules
