@@ -1165,3 +1165,146 @@ Zdroje:
 - [Kiacek 2023, ALFA](https://alfa.stuba.sk/wp-content/uploads/2023/06/02_2023_Kiacek.pdf) – regulácia bloku Špitálska–Dunajská
 - kataster: [INSPIRE WFS parcely](https://inspirews.skgeodesy.sk/geoserver/cp/ows)
 - OSM ways 386574223, 74739754, 1388864526, 74740002.
+
+## Mosty cez Dunaj – SNP, Starý most, Apollo, Prístavný, Lafranconi (25. 11. 2026)
+
+Spracované do `tools/mesto/mosty-dunaj-data.mjs` → `data/mapa/mosty-dunaj.json` a modelov `tools/blender/mosty/*.py`.
+Výšky sú v m n. m. Bpv (hra: y = výška − 139).
+
+**Spoločný zdroj výšok – laser ÚGKK.**
+- Povrch mostovky je z DMP 2.0 a terén z DMR 6.0 (© ÚGKK SR, CC BY 4.0).
+- Body sa vzorkovali cez verejnú službu INSPIRE WMS, GetFeatureInfo:
+  [el_dsm](https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows) a [el](https://inspirews.skgeodesy.sk/geoserver/el/ows).
+  Os mosta sa brala po 10 m, v jazdných pruhoch.
+- Služba vracia elipsoidické výšky. Prepočet na Bpv: **−43,8 m**, kalibrované proti lokálnemu DMR (±0,2 m).
+- Autá, stožiare, laná a oblúky sa z profilu vyhodili (medián alebo dolná obálka pruhov).
+- Polohy mostov sú z OSM (`man_made=bridge`, úseky ciest s menom mosta, `bridge:support=pier`) a ODbL.
+- Nič z Google Maps, Earth ani Street View. Fotky z Wikimedia Commons sme len prezreli a neukladali.
+
+### Most SNP (1972)
+- **Dĺžky:** celá stavba 688 m, OSM obrys 238810163 (685 m). Skladá sa takto:
+  - severná betónová estakáda ~130 m;
+  - oceľový spojitý nosník 74,8 + 303 + 54 m: pilier hlavného poľa na staromestskej promenáde, potom pylón, potom koncová podpera na hrádzi;
+  - južná betónová estakáda ~124 m. Zdroje: [sk.wiki](https://sk.wikipedia.org/wiki/Most_SNP), [SITA](https://sita.sk/most-snp-je-v-prevadzke-uz-50-rokov-vyrocie-si-v-bratislave-pripomenu-viacerymi-podujatiami/).
+- **Prierez:** šírka 21 m.
+  - Dvojkomorový oceľový nosník 4,6 m, steny ±6,3 m, konzoly 4,2 m. Zdroj: [Ároch a kol. 2026](https://doi.org/10.2478/cee-2026-0048).
+  - Vozovky 2 + 2 pruhy. Na severnej estakáde je pravý pruh pre autobusy.
+- **Lávky pre peších a cyklistov:** pod konzolami, ~3 m široké, ~3,6 m pod vozovkou.
+  - Západná sa volá „Viedenská lávka“ (OSM 26668549), východná „Budapeštianska lávka“ (OSM 39533757).
+  - Na Starom Meste vedie hore schodisko s 34 schodmi z Rybného nám. (OSM 228408096).
+- **Laná:** jedna stredná rovina. Hlavné pole visí v troch bodoch, zadné laná kotvia ~75–80 m za pylónom.
+  Body uchytenia v hlavnom poli sú odhad (~48, 98, 150 m od pylóna).
+  Zdroje: [cs.wiki](https://cs.wikipedia.org/wiki/Most_Slovenského_národního_povstání), [register architektúry](https://register-architektury.sk/en/objekt/291-most-snp).
+- **Pylón:** tvar A, 84,6 m nad terénom, sklon 17° k Petržalke. Nohy majú ~5,5 × 11 m (OSM 123233334/5) a sú ~28,5 m od seba.
+- **Vozovka podľa DMP:**
+
+  | miesto | m n. m. |
+  |---|---|
+  | Staromestská (na teréne) | 147,3 |
+  | severná estakáda | 146,6–147,5 |
+  | nad nábrežím | 148,4–149,5 |
+  | vrchol nad riekou | **152,2** |
+  | pri pylóne | ~150 |
+  | násyp Panónskej cesty | 143,5 |
+
+- **Pod mostom – sever:**
+  - promenáda a pilier hlavného poľa;
+  - Rázusovo nábrežie: 3 + 2 pruhy a električka v strede;
+  - autobusový terminál s nástupišťami, stánkami a pamätníkom SNP;
+  - Podchod pamäti.
+- **Pod mostom – juh:**
+  - Tyršovo nábrežie medzi nohami pylóna;
+  - parkoviská a protipovodňový múr s priechodom;
+  - EuroVelo 6 a Viedenská cesta na hrádzi;
+  - park so skateparkom a fitnes ihriskom.
+- **Neisté:** presné body lán a tvar stĺpov estakád. Pomohla by fotka z boku kolmo na most (z Eurovey alebo z Petržalky).
+
+### Starý most (1890, nová oceľová konštrukcia 2016)
+- **Dĺžky:** 465,4 m, polia 32,56 + 106,68 + 137,16 + 75,60 + 75,92 + 32,56 m.
+  Zdroje: [Silnice železnice 2016](http://old.silnice-zeleznice.cz/clanek/vystavba-noveho-stareho-mostu-v-bratislave/), [ASB 2016](https://www.asb.sk/stavebnictvo/stary-most-v-bratislave), [Konstrukce 2017](http://old.konstrukce.cz/clanek/cinnost-geodeta-pri-montazi-a-vysuve-novej-ocelovej-konstrukcie-stareho-mosta-v-bratislave/).
+- **Podpery:** opora 1, P2 (dolné nábrežie), P34 (nový, v rieke), P5 (v rieke), P6 (petržalský breh), P7 (Tyršovo nábrežie), opora 8.
+  Kamenné piliere a opory sú z roku 1890 (žula, vápenec) a sú pamiatkovo chránené.
+- **Nosníky:** hlavné nosníky 11,0 m od seba, rombická priehrada konštantnej výšky 11,285 m od P2 po P7.
+  - Panely 7,56–8,14 m, horný pás 0,9 m, dolný 0,75 m.
+  - Krajné polia majú nosník len 2,4–2,6 m vysoký. Nad P2 a P7 sú portály.
+- **Prierez:**
+  - Koľajisko je 8,0 m medzi zvodidlami: dve koľaje so 4 koľajnicami (1000 a 1435 mm), autá nie.
+  - Mimo nosníkov sú konzoly 5 m: cyklopruh a chodník 3 m. Zábradlie má 1,3 m.
+  - Nad P34 a P5 sú terasy, most je tam široký 33,25 m.
+- **Farba:** zeleno-sivá podľa hlasovania z roku 2014. Zvonka zelená ~#5A9450, zvnútra svetlosivá ~#C0C0C4 (odhad z fotiek).
+- **Niveleta:** oblúk R = 5600 m, vrchol ~148,6, pri oporách 4,16 %. Konce na laseri: sever ~143,0–143,5, juh 143,8.
+  - Na severe je rampa na násype k Šafárikovmu nám.
+  - Na juhu je násyp so zastávkou Sad Janka Kráľa, potom estakáda Artmedia (~200 m, v hre je to nadjazd z OSM).
+- **Plavba:** 100 × 10 m nad hladinou 134,66.
+- **Neisté:** tvar čiel pilierov proti prúdu. Pomohla by fotka čela piliera 5 alebo 34 z nábrežia.
+
+### Most Apollo (2005)
+- **Dĺžky:** 854 m.
+  - Estakáda Petržalka ~110–143 m.
+  - Oceľový spojitý nosník 52,5 + 61 + 61 + 63 + **231 (oblúk)** + 49 m. Piliere P6 … P12; P10 je jediný v rieke, P11 na ľavom brehu pri vode.
+  - Estakáda Bratislava 195 m, za ňou ~120 m rampa medzi múrmi do Košickej. Laser ju nemá – v hre je to „násyp“.
+  - Zdroje: [FIG 2011](https://www.fig.net/resources/proceedings/fig_proceedings/fig2011/papers/ts01e/ts01e_kopacik_kyrinovic_et_al_4845.pdf), [Doprastav](https://www.doprastav.sk/referencia/most-apollo/), [Dopravoprojekt](https://dopravoprojekt.sk/projekt/most-apollo-cez-dunaj-v-bratislave/), [noviny.sk](https://www.noviny.sk/zaujimavosti/150712-most-apollo-bude-mat-desat-rokov).
+- **Os:** v pôdoryse je most v oblúku. V hre je os stred medzi oboma jazdnými pásmi z OSM (ways 59577497, 46689592, 1147196265, 1194096017/8).
+- **Prierez:** šírka 32 m, 2 + 2 pruhy a stredný pás. Chodníky pre peších a cyklistov sú mimo rovín závesov (modré zábradlie). Estakády ~21–22 m.
+- **Oblúk:** dve biele rebrá naklonené k sebe (~13°). Pri pätách ±10,5 m, vo vrchole sa dotýkajú.
+  - Vrch rebier je **187,8** (DMP), ~37 m nad vozovkou.
+  - 66 závesov do vejára. Zdroj: [Paulík, SME 2008](https://blog.sme.sk/peterpaulik/veda-a-technika/vystavba-mosta-apollo-cast-2-ocelova-konstrukcia).
+- **Vozovka podľa DMP:**
+
+  | miesto | m n. m. |
+  |---|---|
+  | Petržalka (násyp) | 141,4 |
+  | vrchol pod oblúkom | 150,5 |
+  | koniec estakády | 145,6 |
+  | Košická (koniec rampy) | ~141,5 |
+
+- **Plavba:** 11,75 m nad najvyššou plavebnou hladinou ([viaDonau 2023](https://www.viadonau.org/fileadmin/content/viadonau/05Wirtschaft/Dokumente/2023/20230921_Danube_bridges_int..pdf)).
+- **Pod mostom – sever:** Pribinova (~4,5–5 m pod mostom), promenáda, prístav. Na most vedú schodiská a cyklošpirála.
+- **Pod mostom – juh:** lužný les, hrádza s Klokočovou, Nové Lido.
+
+### Prístavný most (1985)
+- **Dĺžky:**
+  - Cestný komplex D1 ~2,6 km.
+  - Oceľový dvojpodlažný hlavný most ~461 m. Zdroj: [brožúra knižnice Petržalka](https://www.kniznicapetrzalka.sk/wp-content/uploads/2019/12/petrzalka-70x160-mosty-final.pdf).
+  - Železnica km 12,965–15,263 (TTP 127 C).
+- **Podlažia:** hore D1, ~30 m: 2 + 2 pruhy s odstavnými a stredný pás so stožiarmi. Dole dve koľaje, chodník (proti prúdu) a cyklotrasa (po prúde).
+- **Nosníky:** Warren bez zvislíc, ~9,5 m vysoký, panely ~12,75 m (odhad z fotiek).
+  - Jediný pilier v Dunaji je ~140 m od petržalského brehu. Polia ~140 + 240 + 85 m sú odhad.
+  - Náter neutrálne sivý ~#9A9C9A.
+- **Estakády:** dva samostatné betónové komorové nosníky na osemhranných stĺpoch.
+- **Vozovka podľa DMP:** 157,3 (Petržalka) → **159,5** nad riekou → 154,6 (sever). Koľaj je ~148–150 m n. m.
+- V hre je mostom len priamy úsek s menom mosta. Estakády v oblúkoch sú nadjazdy z OSM a výškou sa napoja na mostovku.
+- **Neisté:** rozpätia a plavebná výška. Majú ich v albume mostov Dunajskej komisie (PDF nad 10 MB, otvoriť ručne).
+
+### Most Lafranconi (1991)
+- **Hlavný most:** 4 × 83 + 172 + 174 + 83 m (od Petržalky), 769 a 762 m. Severná estakáda ~370 m, spolu 1 134 m (OSM 282404783).
+  Zdroj: [Dopravoprojekt](https://dopravoprojekt.sk/projekt/most-lafranconi-cez-dunaj-v-bratislave/).
+- **Nosníky:** dva samostatné predpäté jednokomorové nosníky.
+  - Rámová podpera v Dunaji, nad ňou je nosník 11 m vysoký, na 2 × 100 m sa parabolicky zníži na 4,7 m.
+  - Ostatné podpery sú obdĺžnikové, jedna pod každým nosníkom.
+- **Šírka:** 29,74 m medzi zábradliami, 3 + 3 pruhy (od roku 2020). Chodníky sú pod konzolami 4,7 m pod vozovkou. Zábradlie je tyrkysové.
+- **Vozovka podľa DMP:**
+
+  | miesto | m n. m. |
+  |---|---|
+  | násyp v Petržalke | 150,4 |
+  | nad hrádzou | 151,4 |
+  | vrchol nad riečnou podperou | **157,1** |
+  | nad nábrežím a električkou | 154,1 |
+  | severná opora | 152,3 |
+
+- **Plavba:** 135 × 10 m.
+- **Pod mostom:**
+  - Pečniansky lužný les, hrádza s EuroVelo 6;
+  - na severe Dvořákovo nábrežie, FTVŠ, P+R a Nábrežie arm. gen. L. Svobodu s električkou.
+
+### Ďalšie mosty v Bratislave (zatiaľ nie v hre)
+- **D4 Lužný most** (2021): ~2 933 m betónových komorových mostov. Zo západu sú to:
+  - estakáda 782 m;
+  - most nad Zemníkom 130 + 210 + 130 m;
+  - most cez Dunaj 130 + 170 + 130 m;
+  - estakáda 1 250,5 m.
+
+  Šírka 35 m. Laser je starší ako most. Celý most leží v Bratislave (Jarovce, Podunajské Biskupice).
+- **Čunovo:** cez vodné dielo vedie len cesta III. triedy po hrádzi k Danubiane, s mostmi cez prepady.
+  Cez zdrž Hrušov ani cez derivačný kanál v Bratislave cesta nevedie.

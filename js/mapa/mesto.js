@@ -37,7 +37,8 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
   svet.add(vytvorNabrezneMury(data.voda, vyskopis, KONFIG));
   // mosty s podrobným modelom z Blendera (pamiatka „nahradzaMost“) stavia js/mapa/pamiatky/most-glb.js
   const sModelom = new Set((data.pamiatky ?? []).map((p) => p.nahradzaMost).filter(Boolean));
-  svet.add(vytvorMosty((data.mosty ?? []).filter((m) => !sModelom.has(m.nazov)), vyskopis, KONFIG));
+  // ostatné mosty ponad rieky (data/mapa/mosty-rieky.json): všeobecný model po osi a profile z výškopisu
+  svet.add(vytvorMosty((vyskopis.mosty ?? []).filter((m) => !sModelom.has(m.nazov)), vyskopis, KONFIG, kolizie));
 
   priebeh('Staviam pamiatky…');
   const pamiatky = await nacitajPamiatky(data.pamiatky ?? [], { vyskopis, kolizie, KONFIG });
@@ -65,6 +66,8 @@ export async function postavMesto(data, scena, KONFIG, priebeh = () => {}, posli
     pamiatky: data.pamiatky ?? [],
     vyska: vyskopis.vyska,
     vyskaTerenu: vyskopis.vyskaTerenu,
+    // mostovka veľkých mostov cez rieky bez ohľadu na výšku (js/mapa/teren/mosty-vyskopisu.js) – hra.mosty.vyska
+    mostovka: vyskopis.mostovka,
     jeVoVode: vyskopis.jeVoVode,
     hladina: vyskopis.hladina,
     jeMimo: (x, z) => x < H.minX + 2 || x > H.maxX - 2 || z < H.minZ + 2 || z > H.maxZ - 2,

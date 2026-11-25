@@ -216,7 +216,8 @@ export default {
         const dl = Math.hypot(fx - rx, fz - rz) || 1;
         const sx = (fx - rx) / dl, sz = (fz - rz) / dl;
         const pred = yKolies[ci] ?? [];
-        const yF = vyskaVozidla(hra, fx, fz, pred[0]), yR = vyskaVozidla(hra, rx, rz, pred[1]);
+        const smer = [sx, sz];   // pri objavení na moste ponad rieku: ide pozdĺž neho → mostovka (vyska-vozidla.js)
+        const yF = vyskaVozidla(hra, fx, fz, pred[0], false, smer), yR = vyskaVozidla(hra, rx, rz, pred[1], false, smer);
         yKolies[ci] = [yF, yR];
         const cx = (fx + rx) / 2, cz = (fz + rz) / 2, cy = (yF + yR) / 2;
         _e.set(-Math.atan2(yF - yR, dl), Math.atan2(sx, sz), 0);

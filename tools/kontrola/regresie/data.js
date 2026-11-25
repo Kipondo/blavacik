@@ -6,9 +6,13 @@ import { nacitajDoplnky } from '../../../js/mapa/dlazdice/doplnky.js';
 import { KONFIG } from '../../../js/config.js';
 import { upravOsiCiest } from '../../../js/mapa/cesty/upravy-osi.js';
 import { upravSirkyPasov } from '../../../js/mapa/cesty/sirky-pasov.js';
+import { nacitajMostyDunaja, zlucMosty } from '../../../js/mapa/mosty/mosty-dunaja.js';
 
 export async function nacitajIndex() {
-  return (await fetch('data/mapa/mesto/index.json')).json();
+  const index = await (await fetch('data/mapa/mesto/index.json')).json();
+  // mosty cez Dunaj ako v hre (celá dĺžka s estakádami, profil, os v oblúku – js/mapa/mosty/mosty-dunaja.js)
+  index.mosty = zlucMosty(index.mosty, await nacitajMostyDunaja());
+  return index;
 }
 
 /** Všetky dlaždice mesta (Map kluc → dáta), po dávkach; stav = funkcia na hlásenie priebehu. */

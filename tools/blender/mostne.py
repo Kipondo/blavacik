@@ -12,16 +12,36 @@ import os
 from veze import Geo, KOREN
 
 KROK = 5.0          # dĺžka úseku pozdĺžnych prvkov (kvôli ohnutiu v nábehu)
+OHYB_DO, OHYB_NAD = 12.0, 22.0   # ako js/mapa/pamiatky/most-glb.js: časti pri mostovke sa ohnú s profilom celé, vysoké nie
 
 
 def data_mosta(nazov):
-    """Os mosta z index.json + úseky nad riekou [(s0, s1), …] (s = metre od „od“)."""
-    with open(os.path.join(KOREN, 'data', 'mapa', 'mesto', 'index.json')) as f:
+    """Os mosta z index.json (+ celá dĺžka a výškový profil z data/mapa/mosty-dunaj.json, tools/mesto/mosty-dunaj.mjs)
+    + úseky nad riekou [(s0, s1), …] (s = metre od „od“)."""
+    with open(os.path.join(KOREN, 'data', 'mapa', 'mesto', 'index.json'), encoding='utf8') as f:
         idx = json.load(f)
     m = next(x for x in idx['mosty'] if x['nazov'] == nazov)
+    cesta = os.path.join(KOREN, 'data', 'mapa', 'mosty-dunaj.json')
+    if os.path.exists(cesta):
+        with open(cesta, encoding='utf8') as f:
+            presne = {x['nazov']: x for x in json.load(f)['mosty']}
+        m = {**m, **presne.get(nazov, {})}
     (ax, az), (bx, bz) = m['od'], m['do']
-    L = math.hypot(bx - ax, bz - az)
-    ux, uz = (bx - ax) / L, (bz - az) / L
+    # os: lomená čiara (most v oblúku – Most Apollo; model sa stavia rovno pozdĺž x a hra ho ohne podľa osi) alebo úsečka
+    body_osi = m.get('os') or [m['od'], m['do']]
+    S = [0.0]
+    for p, q in zip(body_osi[:-1], body_osi[1:]):
+        S.append(S[-1] + math.hypot(q[0] - p[0], q[1] - p[1]))
+    L = S[-1]
+    ux, uz = (bx - ax) / math.hypot(bx - ax, bz - az), (bz - az) / math.hypot(bx - ax, bz - az)
+
+    def bod(s):
+        i = 1
+        while i < len(body_osi) - 1 and s > S[i]:
+            i += 1
+        t = (s - S[i - 1]) / max(1e-9, S[i] - S[i - 1])
+        p, q = body_osi[i - 1], body_osi[i]
+        return p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t
     rieky = [v['body'] for v in idx['voda'] if v.get('reka')]
 
     def vo_vode(x, z):
@@ -38,7 +58,7 @@ def data_mosta(nazov):
         return False
     useky, zac = [], None
     for s in range(0, int(L) + 1):
-        v = vo_vode(ax + ux * s, az + uz * s)
+        v = vo_vode(*bod(s))
         if v and zac is None:
             zac = s
         if not v and zac is not None:
@@ -46,16 +66,136 @@ def data_mosta(nazov):
             zac = None
     if zac is not None:
         useky.append((zac, int(L)))
-    return {**m, 'L': L, 'ux': ux, 'uz': uz, 'voda': useky}
+    d = {**m, 'L': L, 'ux': ux, 'uz': uz, 'voda': useky, 'os_body': body_osi, 'os_s': S}
+    body = m.get('profil')
+    d['vrch'] = m.get('vrch', max(b[1] for b in body) if body else 0.0)
+    d['zm'] = (lambda x: vyska_profilu(body, x) - d['vrch']) if body else (lambda x: 0.0)
+    teren = m.get('teren')
+    d['teren'] = (lambda x: _linearne(teren, x) - d['vrch']) if teren else (lambda x: -30.0)
+    return d
+
+
+def _linearne(body, x):
+    """Lineárna interpolácia v zozname [(s, y), …] zoradenom podľa s."""
+    if x <= body[0][0]:
+        return body[0][1]
+    for (s0, y0), (s1, y1) in zip(body[:-1], body[1:]):
+        if x <= s1:
+            return y0 + (y1 - y0) * (x - s0) / max(1e-9, s1 - s0)
+    return body[-1][1]
+
+
+def vyska_profilu(body, s):
+    """Výška mostovky (hra) v polohe s – rovnaká krivka ako js/mapa/teren/mosty-vyskopisu.js (bod na zemi = odhad y)."""
+    B = [(b[0], b[1]) for b in body]
+    n = len(B)
+    if s <= B[0][0]:
+        return B[0][1]
+    if s >= B[-1][0]:
+        return B[-1][1]
+    k = 0
+    while k < n - 2 and s > B[k + 1][0]:
+        k += 1
+    ix = [max(0, k - 1), k, k + 1, min(n - 1, k + 2)]
+    P = [B[i] for i in ix]
+    y = [p[1] for p in P]
+    h = P[2][0] - P[1][0]
+    d = (y[2] - y[1]) / h if h > 0 else 0.0
+
+    def dot(ya, yb, yc, sa, sb, sc):
+        d0 = (yb - ya) / (sb - sa) if sb > sa else 0.0
+        d1 = (yc - yb) / (sc - sb) if sc > sb else 0.0
+        return 0.0 if d0 * d1 <= 0 else 2 * d0 * d1 / (d0 + d1)
+    t1 = d if ix[0] == ix[1] else dot(y[0], y[1], y[2], P[0][0], P[1][0], P[2][0])
+    t2 = d if ix[3] == ix[2] else dot(y[1], y[2], y[3], P[1][0], P[2][0], P[3][0])
+    t = (s - P[1][0]) / h
+    t2_, t3 = t * t, t * t * t
+    return (2 * t3 - 3 * t2_ + 1) * y[1] + (t3 - 2 * t2_ + t) * h * t1 + (-2 * t3 + 3 * t2_) * y[2] + (t3 - t2_) * h * t2
+
+
+def ohni_podla_profilu(G, d):
+    """Model postavený vodorovne (mostovka z = 0) ohne podľa výškového profilu: časti pri mostovke celé, vysoké
+    (pylón, oblúk) nie – ako ohýbanie v hre. V hre sa potom ohýba už len na koncoch (rozdiel terénu)."""
+    zm = d['zm']
+    d['ohnute'] = True
+    out = []
+    for x, y, z in G.v:
+        w = 1.0 if z <= OHYB_DO else 0.0 if z >= OHYB_NAD else (OHYB_NAD - z) / (OHYB_NAD - OHYB_DO)
+        out.append((x, y, z + w * zm(x)) if w > 0 else (x, y, z))
+    G.v = out
+
+
+def zem_modelu(d, x):
+    """Terén pod osou vo vodorovnom modeli (mostovka z = 0 – pred ohnutím podľa profilu)."""
+    return d['teren'](x) - d['zm'](x)
+
+
+def piliere_estakady(G, mat, mat_hlava, d, x0, x1, rozostup, sirka, hrubka=1.6, stlpy=2, vynechaj=(), hlbka=2.0,
+                     nad_zemou=4.0, okruhle=True, kolizie=None):
+    """Piliere estakády na brehu (stĺpy s hlavicou) každých ~rozostup m tam, kde je mostovka vyššie ako nad_zemou nad
+    terénom; nie nad riekou a v podjazdoch (vynechaj = [(s0, s1)]). Päta 2 m pod terénom (odhad z
+    data/mapa/mosty-dunaj.json). Súradnice sú vo vodorovnom modeli (pred ohnutím). Vracia zoznam polôh."""
+    out = []
+    n = max(1, round((x1 - x0) / rozostup))
+    for i in range(0, n + 1):
+        x = x0 + (x1 - x0) * i / n
+        if any(a - 3 <= x <= b + 3 for a, b in vynechaj) or any(a - 2 <= x <= b + 2 for a, b in d['voda']):
+            continue
+        zem = zem_modelu(d, x)
+        if -zem < nad_zemou:
+            continue
+        for k in range(stlpy):
+            yy = 0.0 if stlpy == 1 else (k / (stlpy - 1) - 0.5) * sirka * 0.6
+            if okruhle:
+                G.valec(mat, (x, yy), hrubka / 2, zem - 2.0, -hlbka - 0.8, seg=12)
+            else:
+                G.hranol(mat, obdlznik_xy(x, yy, hrubka, hrubka * 1.6), zem - 2.0, -hlbka - 0.8)
+            if kolizie is not None:
+                kolizie.append(obdlznik_xy(x, yy, hrubka + 0.2, hrubka * (1.6 if not okruhle else 1.0) + 0.2))
+        G.hranol(mat_hlava, obdlznik_xy(x, 0, hrubka + 0.6, sirka * (0.8 if stlpy > 1 else 0.5)), -hlbka - 0.9, -hlbka + 0.02)
+        out.append(x)
+    return out
+
+
+def opora(G, mat, d, x, smer, sirka, hlbka=2.0):
+    """Opora na konci mosta: čelná stena od mostovky pod terén a krídla do strán (smer = +1 most pokračuje k +x)."""
+    dno = min(zem_modelu(d, x) - 1.5, -hlbka - 1.0)
+    G.hranol(mat, obdlznik_xy(x - smer * 1.0, 0, 2.0, sirka + 1.2), dno, -0.05)
+    for s in (1, -1):
+        y = s * (sirka / 2 + 0.3)
+        a, b = sorted((x - smer * 1.8, x + smer * 6.0))
+        G.hranol(mat, [(a, y - 0.3), (b, y - 0.3), (b, y + 0.3), (a, y + 0.3)], dno, 0.6)
+
+
+def bocne_steny_nasypu(G, mat, d, x0, x1, sirka, krok=KROK):
+    """Násyp pod nájazdom: betónové steny od okraja mostovky do terénu (zakryjú medzeru pod rampou)."""
+    xs = delenie(x0, x1, krok)
+    for a, b in zip(xs[:-1], xs[1:]):
+        za, zb = zem_modelu(d, a) - 1.0, zem_modelu(d, b) - 1.0
+        for s in (1, -1):
+            y = s * sirka / 2
+            if s > 0:
+                G.plocha(mat, [(b, y, zb), (a, y, za), (a, y, -0.05), (b, y, -0.05)])
+            else:
+                G.plocha(mat, [(a, y, za), (b, y, zb), (b, y, -0.05), (a, y, -0.05)])
 
 
 def lokalne(d, x, z):
-    """Bod hry (x, z) → poloha pozdĺž osi s a bočne y (doľava kladné) v lokálnych súradniciach mosta."""
-    ax, az = d['od']
-    dx, dz = x - ax, z - az
-    s = dx * d['ux'] + dz * d['uz']
-    n = dx * (-d['uz']) + dz * d['ux']      # n = smer (−uz, ux) v hre = −Y v Blenderi
-    return s, -n
+    """Bod hry (x, z) → poloha pozdĺž osi s a bočne y (doľava kladné) v lokálnych súradniciach mosta (aj lomená os)."""
+    B, S = d['os_body'], d['os_s']
+    naj = None
+    for i in range(1, len(B)):
+        (ax, az), (bx, bz) = B[i - 1], B[i]
+        l = S[i] - S[i - 1] or 1e-9
+        ux, uz = (bx - ax) / l, (bz - az) / l
+        dx, dz = x - ax, z - az
+        t = dx * ux + dz * uz
+        tt = min(max(t, 0 if i > 1 else -1e9), l if i < len(B) - 1 else 1e9)
+        n = dx * (-uz) + dz * ux      # n = smer (−uz, ux) v hre = −Y v Blenderi
+        d2 = (t - tt) ** 2 + n * n
+        if naj is None or d2 < naj[0]:
+            naj = (d2, S[i - 1] + t, -n)
+    return naj[1], naj[2]
 
 
 def delenie(x0, x1, krok=KROK):
@@ -166,11 +306,13 @@ def lano(G, mat, a, b, r=0.15):
     nosnik(G, mat, a, b, r * 2, r * 2)
 
 
-def uloz_most(G, meno, d, kolizie=(), ao=True):
+def uloz_most(G, meno, d, kolizie=(), ao=True, lavky=()):
     """Objekt → AO vo vrcholoch → assets/pamiatky/<meno>.glb.gz + <meno>.json (dĺžka, kolízie v lokálnych X, Y)."""
     import gzip
     from spolocne import zapec_ao_vrcholy, exportuj
     from veze import GLTFPACK
+    if d.get('profil') and not d.get('ohnute'):
+        ohni_podla_profilu(G, d)
     print(f'{meno}: {G.trojuholniky} trojuholníkov, {len(G.mat)} materiálov')
     ob = G.objekt(meno)
     if ao:
@@ -182,6 +324,14 @@ def uloz_most(G, meno, d, kolizie=(), ao=True):
     os.remove(ciel)
     info = {'most': d['nazov'], 'dlzka': round(d['L'], 2),
             'kolizie': [[[round(x, 2), round(y, 2)] for x, y in k] for k in kolizie]}
+    if d.get('profil'):
+        # model je už ohnutý podľa profilu – hra ohýba len o rozdiel (terén na koncoch, js/mapa/pamiatky/most-glb.js)
+        info['vrch'] = round(d['vrch'], 2)
+        info['profil'] = [[round(x, 1), round(d['zm'](x), 3)] for x in delenie(0.0, d['L'], 5.0)]
+    if lavky:
+        # pochôdzne lávky pod mostovkou: { y (os lávky v lokálnom Y), sirka, od, do, pod (m pod vozovkou) } –
+        # hra z nich urobí pochôdzne plochy (js/mapa/pamiatky/most-glb.js → js/mapa/mosty/pochodzne-pamiatok.js)
+        info['lavky'] = [{k: round(v, 2) for k, v in l.items()} for l in lavky]
     with open(os.path.join(KOREN, 'assets', 'pamiatky', f'{meno}.json'), 'w') as f:
         json.dump(info, f, separators=(',', ':'))
     print(f'{meno}.glb.gz: {os.path.getsize(ciel + ".gz") // 1024} kB')

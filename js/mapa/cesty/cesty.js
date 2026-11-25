@@ -71,10 +71,14 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null)
 
   const vozovky = mriezkaVozoviek(cesty);
   const poradie = new Map(cesty.map((c, i) => [c, prednostZnacenia(c) - i * 1e-9]));
+  // cesta na veľkom moste (OSM bridge=*) ide po mostovke aj na estakáde nad brehom – výška „zhora“;
+  // ostatné cesty sa pýtajú povrchu (pod estakádou mosta cez Dunaj je zem – js/mapa/teren/mosty-vyskopisu.js)
+  const naMoste = { vyska: (x, z) => vyskopis.vyska(x, z, 1e9) };
   for (const c of cesty) {
     const body = zjemni(c.body, KROK);
     if (body.length < 2) continue;
-    pridajPas(asfalt, body, c.sirka / 2, NAD_TERENOM, vyskopis, { svet: true });
+    const vp = c.most ? naMoste : vyskopis;
+    pridajPas(asfalt, body, c.sirka / 2, NAD_TERENOM, vp, { svet: true });
     // biela plná čiara pri oboch okrajoch – všetky cesty okrem obslužných (pravidlá ulice)
     const okraje = !DROBNE.has(c.typ);
     const pruhy = c.typ === 'service' || c.typ === 'living_street' ? 1 : Math.max(1, Math.min(6, (c.pruhy ?? 2) | 0));
@@ -84,7 +88,7 @@ export function vytvorCesty(cesty, vyskopis, krizovatky = null, prechody = null)
     // značenie na tých istých bodoch ako asfalt (rovnaké trojuholníky → nikde nezapadne pod asfalt)
     const rozsahy = bezPrekryvu(rozsahyZnacenia(c.body, body, krizovatky, c.typ, zebry.get(c)), body, c, vozovky, poradie);
     for (const [od, po] of rozsahy) {
-      pridajPas(s, body, c.sirka / 2, NAD_TERENOM, vyskopis, { od, po });
+      pridajPas(s, body, c.sirka / 2, NAD_TERENOM, vp, { od, po });
     }
   }
 
