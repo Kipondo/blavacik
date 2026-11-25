@@ -106,7 +106,9 @@ export const kontrolyMostov = [
             for (const [x, z] of c.body ?? []) {
               n++;
               const p = najblizsiNaOsi(os, x, z);
-              const mimo = p.s < -3 || p.s > os.dlzka + 3 || Math.sqrt(p.d2) > m.sirka / 2 + 1;
+              // za koncom na zemi (opora, násyp) pokračuje cesta po teréne – tam medzera nevzniká (do 15 m)
+              const zaA = m.profil[0][2] ? 15 : 3, zaB = m.profil.at(-1)[2] ? 15 : 3;
+              const mimo = p.s < -zaA || p.s > os.dlzka + zaB || Math.sqrt(p.d2) > m.sirka / 2 + 1;
               if (mimo) chyby.push({ x, z, text: `${m.nazov}: cesta mosta mimo jeho pôdorysu (s ${p.s.toFixed(0)}, bočne ${Math.sqrt(p.d2).toFixed(0)} m)` });
             }
           }
