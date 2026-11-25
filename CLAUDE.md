@@ -117,6 +117,14 @@ preto platí:
    s odkazom na commit/PR opravy). Kontroly bežia v GitHub Actions pri každom PR (`.github/workflows/regresie.yml`);
    **PR, v ktorom kontrola zlyhá, sa nezlučuje.**
 
+## Veľkosť repozitára (#137)
+- **Žiadny súbor v gite nad 25 MB** – stráži `tools/kontrola/velke-subory.py` v GitHub Actions (PR s väčším súborom
+  sa nezlučuje). Veľké binárne súbory (modely, textúry, interiéry nad ~5 MB) len po dohode s majiteľom.
+- **Snímky testovacej trasy** (`docs/kontrola/<beh>/`) sa nedávajú do gitu (`.gitignore`) – do PR a issues cez vetvu
+  `hlasenia`.
+- **Generované dáta mapy** commituj len keď sa naozaj zmenili (pred commitom `git diff --stat data/mapa`).
+- Veľké dáta (LOD2 celého mesta, interiéry) pôjdu na úložisko mimo gitu – plán v `napady/velke-subory-r2.md`.
+
 ## Úlohy pre dvoch Claudov (issues so štítkami)
 Úlohy sa zadávajú ako GitHub issues so štítkom podľa toho, kto ich robí:
 - `pre-kamosa` – úloha pre druhého Clauda (kamoša),

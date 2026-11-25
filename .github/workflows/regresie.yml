@@ -31,7 +31,10 @@ jobs:
         run: |
           pip install playwright==1.49.1
           python -m playwright install --with-deps chromium
+      - name: Veľké súbory (žiadny nad 25 MB, #137)
+        run: python tools/kontrola/velke-subory.py --prehlad
       - name: Kontroly
+        if: always()
         run: python tools/kontrola/regresie.py --json regresie.json
       - name: Kontrolór mapy (viac chýb ako v základe = chyba)
         if: always()
