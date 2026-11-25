@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
 import { vzdialenaUroven } from './vzdialena-uroven.js';
+import { pridajTienovehoZastupcu } from '../../grafika/tienovy-zastupca.js';
 import { vytvorMosty } from '../mosty/mosty.js';
 
 const OHYB_DO = 12;     // do tejto výšky nad mostovkou sa časti ohýbajú s nábehom celé
@@ -35,6 +36,8 @@ function ohni(model, posun) {
 function sUrovnami(model) {
   // zďaleka farby zapečené vo vrcholoch a spojené siete, bez materiálov „detail…“ (#110)
   const daleko = vzdialenaUroven(model);
+  // zblízka vrhá tieň jedna zlúčená sieť (#110)
+  pridajTienovehoZastupcu(model);
   const lod = new THREE.LOD();
   lod.addLevel(model, 0);
   lod.addLevel(daleko, VZDIALENOST_DETAILU);

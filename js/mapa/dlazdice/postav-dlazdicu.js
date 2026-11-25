@@ -8,6 +8,8 @@
 import * as THREE from 'three';
 import { bodVPolygone } from '../geometria.js';
 import { krokyZemeDlazdice } from '../teren/zem-dlazdica.js';
+import { krokyTienovehoZastupcu } from '../../grafika/tienovy-zastupca.js';
+import { DOSAHY_LOD } from './lod-zeme.js';
 import { vytvorCesty } from '../cesty/cesty.js';
 import { najdiKrizovatky } from '../cesty/krizovatky.js';
 import { vytvorPlochyKrizovatiek } from '../cesty/plochy-krizovatiek.js';
@@ -119,7 +121,19 @@ export function* postavDlazdicu(kluc, d, rect, uroven, { vyskopis, kolizie, riek
   g.add(vytvorLavicky(d.prvky?.lavicky, [...(d.chodniky ?? []), ...cesty], vyskopis, k));
   g.add(vytvorHroby(d, vyskopis));
   g.userData.krizovatky = krizovatky;
+  yield;
+  // budovy, strechy, nadjazdy, podchody a chodníky dlaždice vrhajú tieň jednou sieťou (#110: ~15 volaní do tieňovej
+  // mapy na dlaždicu); 3D fasády a schody pribúdajú neskôr a drobnosti sa zďaleka skrývajú – tie ostávajú samostatné
+  yield* krokyTienovehoZastupcu(g, { vynechat: (o) => !doZastupcuTiena(o, g) });
   return g;
+}
+
+const SKUPINY_ZASTUPCU = new Set(['budovy', 'strechy-lod2', 'nadjazdy', 'podchody', 'chodniky', 'krizovatky', 'kolajnice']);
+/** Patrí sieť do tieňového zástupcu dlaždice? (len statické skupiny, nič z toho, čo sa zďaleka skrýva) */
+function doZastupcuTiena(o, g) {
+  let p = o;
+  for (; p.parent && p.parent !== g; p = p.parent) if (DOSAHY_LOD.has(p.name)) return false;
+  return p.parent === g && SKUPINY_ZASTUPCU.has(p.name) && !DOSAHY_LOD.has(o.name);
 }
 
 /** Uvoľní pamäť grafickej karty (geometrie a textúry dlaždice). */

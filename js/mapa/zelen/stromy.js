@@ -139,9 +139,10 @@ export function vytvorStromy(stromy, vyskopis, kolizie) {
         chunk.add(im);
       }
     }
-    // zástupné koruny pre tieň stromov TIEN_DETAIL…BLIZKO (len vrstva tieňa)
-    const tienKoruny = new THREE.InstancedMesh(blob, materialKorunyDaleko(), Math.max(1, n - pocetIhl));
-    const tienIhlice = new THREE.InstancedMesh(kuzele, materialKorunyDaleko(), Math.max(1, pocetIhl));
+    // zástupné koruny pre tieň stromov TIEN_DETAIL…BLIZKO (len vrstva tieňa) – jednoduchý tvar (100 △ namiesto 400):
+    // v tieni na zemi rozdiel nevidno (#110; do tieňa sa reálne kreslia až od výkonu 4 – js/grafika/dosah-tienov.js)
+    const tienKoruny = new THREE.InstancedMesh(blobJednoduchy, materialKorunyDaleko(), Math.max(1, n - pocetIhl));
+    const tienIhlice = new THREE.InstancedMesh(kuzeleJednoduche, materialKorunyDaleko(), Math.max(1, pocetIhl));
     for (const im of [tienKoruny, tienIhlice]) {
       im.count = 0; im.visible = false; im.castShadow = true; im.receiveShadow = false;
       im.layers.set(VRSTVA_TIENA);

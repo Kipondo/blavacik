@@ -7,6 +7,11 @@ import { nastavLodDlazdice, HRANICE_LOD } from '../../../js/mapa/dlazdice/lod-ze
 import { zlucPodlaMaterialu } from '../../../js/mapa/zluc-siete.js';
 import { vzdialenaUroven } from '../../../js/mapa/pamiatky/vzdialena-uroven.js';
 import { rozdelVikiere } from '../../../js/mapa/budovy/vikiere.js';
+import { pridajTienovehoZastupcu } from '../../../js/grafika/tienovy-zastupca.js';
+import { vrstvaTienaPriKresleni } from '../../../js/grafika/dosah-tienov.js';
+import { VRSTVA_TIENA } from '../../../js/mapa/zelen/stromy.js';
+import { geometrieNpc } from '../../../js/doprava/premavka/model.js';
+import { TYPY } from '../../../js/auto/typy-aut.js';
 
 export const kontrolyVykonu = [
   {
@@ -174,6 +179,81 @@ export const kontrolyVykonu = [
       }
       im.geometry.dispose(); im.material.dispose();
       return { skontrolovane: 1, chyby };
+    },
+  },
+  {
+    id: 'vrstva-tiena-v-tieni',
+    popis: 'Objekty na vrstve len pre tieň (zástupné koruny stromov, tieňoví zástupcovia) sa naozaj kreslia do tieňovej '
+      + 'mapy: three.js testuje vrstvy voči hlavnej kamere, preto má kamera počas kreslenia tieňov vrstvu tieňa zapnutú '
+      + '(predtým sa nekreslili vôbec a tieň budov mal diery)',
+    oprava: 'feature/vykon-4 (#110) – js/grafika/dosah-tienov.js (vrstvaTienaPriKresleni)',
+    tolerancia: 0,
+    spusti() {
+      const chyby = [];
+      let pocas = null, volani = 0;
+      const renderer = { shadowMap: { render(sv, sc, kam) { pocas = kam.layers.mask; volani++; } } };
+      vrstvaTienaPriKresleni(renderer);
+      vrstvaTienaPriKresleni(renderer);   // druhé volanie nesmie obaliť znova
+      const kam = new THREE.PerspectiveCamera();
+      renderer.shadowMap.render([], null, kam);
+      if (volani !== 1) chyby.push({ text: `pôvodné kreslenie tieňov sa zavolalo ${volani}×` });
+      if (!(pocas & (1 << VRSTVA_TIENA))) chyby.push({ text: 'počas kreslenia tieňov kamera nemá vrstvu tieňa' });
+      if (kam.layers.mask !== 1) chyby.push({ text: `po kreslení tieňov ostala kamere maska ${kam.layers.mask} (do obrazu by sa kreslili zástupcovia)` });
+      return { skontrolovane: 1, chyby };
+    },
+  },
+  {
+    id: 'tienovy-zastupca',
+    popis: 'Tieňový zástupca: siete pamiatky alebo dlaždice (aj s poľom materiálov) vrhajú tieň jednou zlúčenou sieťou '
+      + 'na vrstve tieňa; priehľadné a skryté siete ostávajú, ako sú; trojuholníky sa nestratia',
+    oprava: 'feature/vykon-4 (#110) – js/grafika/tienovy-zastupca.js',
+    tolerancia: 0,
+    spusti() {
+      const chyby = [];
+      const g = new THREE.Group();
+      const box = new THREE.BoxGeometry(1, 1, 1);
+      const m = () => new THREE.MeshStandardMaterial();
+      const a = new THREE.Mesh(box, m()); a.position.set(5, 0, 0);
+      const viac = box.clone();   // pole materiálov (ako budovy dlaždice)
+      const b = new THREE.Mesh(viac, [m(), m(), m(), m(), m(), m()]); b.position.set(0, 0, 5);
+      const sklo = new THREE.Mesh(box, new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.4 }));
+      const skryta = new THREE.Mesh(box, m()); skryta.visible = false;
+      for (const o of [a, b, sklo, skryta]) { o.castShadow = true; g.add(o); }
+      const n = pridajTienovehoZastupcu(g);
+      const z = g.children.find((o) => o.userData.tienovyZastupca);
+      if (!z) chyby.push({ text: 'zástupca sa nevytvoril' });
+      else {
+        if (n !== 2) chyby.push({ text: `nahradených sietí ${n} namiesto 2` });
+        if (z.layers.mask !== 1 << VRSTVA_TIENA) chyby.push({ text: 'zástupca nie je len na vrstve tieňa' });
+        if (!z.castShadow) chyby.push({ text: 'zástupca nevrhá tieň' });
+        if (z.geometry.index.count !== 2 * 36) chyby.push({ text: `zástupca má ${z.geometry.index.count / 3} trojuholníkov namiesto ${2 * 12}` });
+        if (a.castShadow || b.castShadow) chyby.push({ text: 'pôvodné siete stále vrhajú tieň (dvojitý tieň)' });
+        if (!sklo.castShadow) chyby.push({ text: 'priehľadná sieť prestala vrhať tieň' });
+        const bb = new THREE.Box3().setFromBufferAttribute(z.geometry.attributes.position);
+        if (Math.abs(bb.max.x - 5.5) > 1e-3 || Math.abs(bb.max.z - 5.5) > 1e-3) chyby.push({ text: 'zástupca nemá polohy dielov' });
+        z.geometry.dispose();
+      }
+      box.dispose(); viac.dispose();
+      return { skontrolovane: 1, chyby };
+    },
+  },
+  {
+    id: 'auta-v-davke',
+    popis: 'Diely áut premávky (lak, sklo, ostatné, svetlá) majú pri všetkých typoch rovnaké atribúty – inak by sa nedali '
+      + 'kresliť jednou BatchedMesh na materiál (js/doprava/premavka/modul.js)',
+    oprava: 'feature/vykon-4 (#110) – js/doprava/premavka/modul.js',
+    tolerancia: 0,
+    spusti() {
+      const chyby = [];
+      const typy = Object.keys(TYPY);
+      const geo = Object.fromEntries(typy.map((t) => [t, geometrieNpc(t)]));
+      for (const c of ['lak', 'sklo', 'ostatne', 'svetla']) {
+        const podpis = (g) => Object.keys(g.attributes).sort().join(',') + (g.index ? '|i' : '|n');
+        const vzor = podpis(geo[typy[0]][c]);
+        for (const t of typy) if (podpis(geo[t][c]) !== vzor) chyby.push({ text: `${c}: typ ${t} má atribúty ${podpis(geo[t][c])}, iné ako ${vzor}` });
+      }
+      for (const t of typy) for (const g of Object.values(geo[t])) g?.dispose?.();
+      return { skontrolovane: typy.length, chyby };
     },
   },
 ];

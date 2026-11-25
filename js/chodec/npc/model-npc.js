@@ -11,6 +11,7 @@ import { Animacie } from '../postava/animacie.js';
 import { oblec } from '../postava/satnik.js';
 import { nastavVzhlad, nastavMorph, Mimika, ZAKLAD_PLETE } from '../postava/vzhlad.js';
 import { vytvorMaterialLod, MAX_SLOTOV } from './material-lod.js';
+import { VRSTVA_TIENA } from '../../mapa/zelen/stromy.js';
 
 const KOREN_WEBU = new URL('../../../', import.meta.url);
 const klipy = new Map();
@@ -141,6 +142,12 @@ export async function vytvorNpc(spec, data) {
     o.receiveShadow = false;
     o.frustumCulled = false;
   }
+  // tieň plného modelu (~25 sietí: koža po častiach, oblečenie, vlasy) vrhá zlúčená sieť LOD1 na vrstve len pre tieň –
+  // jedno volanie do tieňovej mapy namiesto ~20 (#110); kostru jej pred kreslením tieňa treba aktualizovať
+  if (lod1) {
+    for (const o of siete0) { o.castShadow = false; o.userData.bezTiena = true; }
+    lod1.onBeforeShadow = () => { if (npc.lod === 0) lod1.skeleton?.update(); };
+  }
 
   const koren = new THREE.Group();
   koren.name = 'npc_' + spec.profil;
@@ -164,7 +171,11 @@ export async function vytvorNpc(spec, data) {
       npc.lod = n;
       koren.visible = n >= 0;
       skupina0.visible = n === 0;
-      if (lod1) lod1.visible = n === 1 || (n === 2 && !lod2);
+      if (lod1) {
+        // pri plnom modeli kreslí LOD1 len tieň (vrstva tieňa), inak sa kreslí normálne
+        lod1.visible = n === 0 || n === 1 || (n === 2 && !lod2);
+        lod1.layers.set(n === 0 ? VRSTVA_TIENA : 0);
+      }
       if (lod2) lod2.visible = n === 2;
     },
     animuj(dt) {
