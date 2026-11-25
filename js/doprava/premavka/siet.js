@@ -49,7 +49,8 @@ export class SietCiest {
         A.ramena++; B.ramena++;
         A.polomer = Math.max(A.polomer, (c.sirka ?? 7) / 2);
         B.polomer = Math.max(B.polomer, (c.sirka ?? 7) / 2);
-        const spolocne = { typ: c.typ, hustota, pruhy, posuny, max, dlazdica: kluc, sirka: c.sirka ?? 7 };
+        // nadjazd = cesta leží na mostovke nadjazdu (tools/mesto/nadjazdy.mjs) – auto ide po mostovke (vyska-vozidla.js)
+        const spolocne = { typ: c.typ, hustota, pruhy, posuny, max, dlazdica: kluc, sirka: c.sirka ?? 7, nadjazd: !!c.nadjazd };
         const smery = c.jednosmerka ? [[A, B]] : [[A, B], [B, A]];
         for (const [u, v] of smery) {
           const h = {

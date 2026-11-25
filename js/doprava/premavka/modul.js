@@ -15,6 +15,7 @@ import { KONFIG } from '../../config.js';
 import { SietCiest, jeKrizovatka } from './siet.js';
 import { geometrieNpc, prislusenstvoNpc } from './model.js';
 import { nahodnyTyp, nahodnaFarba, nahodnaSluzba, TYPY } from '../../auto/typy-aut.js';
+import { vyskaVozidla } from '../../mapa/mosty/vyska-vozidla.js';
 
 
 const R = 380;            // m – v tomto okruhu okolo hráča jazdia autá
@@ -472,11 +473,14 @@ export default {
     for (const a of this.auta) {
       if (i >= MAX_AUT) break;
       const d = Math.hypot(a.x - p.x, a.z - p.z);
-      const y = hra.mapa.vyska(a.x, a.z);
+      // na nadjazde po mostovke, inak po teréne (#54 – predtým autá na nadjazde išli po zemi pod mostom)
+      const naNadjazde = !!a.hrana?.nadjazd;
+      const y = vyskaVozidla(hra, a.x, a.z, a.y, naNadjazde);
       a.y = Math.abs(y - a.y) > 2 ? y : a.y + (y - a.y) * 0.3;
       if (d < 140) {
         const sx = Math.sin(a.uhol), sz = Math.cos(a.uhol);
-        const yP = hra.mapa.vyska(a.x + sx * 1.4, a.z + sz * 1.4), yZ = hra.mapa.vyska(a.x - sx * 1.4, a.z - sz * 1.4);
+        const yP = vyskaVozidla(hra, a.x + sx * 1.4, a.z + sz * 1.4, a.y, naNadjazde);
+        const yZ = vyskaVozidla(hra, a.x - sx * 1.4, a.z - sz * 1.4, a.y, naNadjazde);
         a.sklon += (-Math.atan2(yP - yZ, 2.8) - a.sklon) * 0.3;
       } else a.sklon = 0;
       _e.set(a.sklon, a.uhol, 0);
