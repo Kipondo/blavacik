@@ -30,7 +30,7 @@ def main():
   way["barrier"~"wall|retaining_wall|city_wall"]({bb});
   node["natural"="tree"]({bb});
 );
-out tags geom;"""
+out geom;"""
     data = None
     for url in SERVERY * 2:
         try:
