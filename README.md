@@ -40,6 +40,25 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Nový model mesta – skúšobné územie (vetva `feature/model-mesta`, samostatne mimo hry)
+- **Čo to je:** nový model mesta postavený odznova po vrstvách, oddelený od hry. Hra sa nemení.
+  - **Prezerač:** [model/index.html](model/index.html), na stránke `…/blavacik/model/?v=1` až `?v=4`.
+  - **Územie:** ~2,5 × 2 km – Staré Mesto s Hradným kopcom, nábrežie, Most SNP, Starý most, Apollo a kus Petržalky.
+- **Varianty:**
+  1. len terén – laserové skenovanie ÚGKK, DMR 6.0, 0,5 m;
+  2. terén + budovy ako jednoduché sivé hranoly – obrys z OSM, výška z lasera;
+  3. terén + budovy + cesty, chodníky a plochy nalepené na terén;
+  4. všetko vrátane mostov, vody a stromov.
+- **Skripty** sú v `tools/model/`, poradie spúšťania:
+  1. `teren.py`
+  2. `osm.py`
+  3. `budovy.py`
+  4. `plochy.py`
+  5. `mosty.py`
+  6. `stromy.py`
+
+  Výstup je v `model/data/` (terén 8,6 MB).
+
 ### Interiér galérie Eurovea (vetva `feature/eurovea-interier`, #131 časť 5)
 - **Pasáže Eurovea 1 a Eurovea 2:** do pasáží pod presklenými klenbami sa dá vojsť.
   - **Eurovea 1:** západná pasáž od rotundy pri vajci po hlavné námestie, ~175 m.
@@ -48,7 +67,7 @@ Podrobný popis každej časti je nižšie v „Čo je hotové“.
   klinmi. V strede sú kvetináče a lavičky.
 - **Poschodie:** ~5,5 m (E1) a 6 m (E2) nad prízemím.
   - Ochodza 3,5 m pri výkladoch okolo átria, biele zaoblené hrany s teplým LED pásom.
-  - Sklenené zábradlie s drevenou madlom, stĺpy, lávky cez átrium a pár eskalátorov.
+  - Sklenené zábradlie s dreveným madlom, stĺpy, lávky cez átrium a pár eskalátorov.
   - Po poschodí, lávkach aj eskalátoroch sa dá chodiť.
 - **Obchody:** neutrálne výklady na oboch podlažiach – tmavé sklo, biele rámy, svetlý pás bez nápisov a bez značiek.
 - **Klenba je priehľadná:** zvnútra vidno oblohu a do pasáže svieti slnko. V pasáži nerastie tráva.
