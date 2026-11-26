@@ -1,8 +1,9 @@
 # Presné modely vybraných pamiatok (noc 22. 11.): Slavín, Modrý kostolík; 26. 11.: historická budova SND, Reduta,
-# Dóm sv. Martina. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz,
+# Dóm sv. Martina, Stará radnica. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz,
 # záznamy v data/mapa/pamiatky.json aj obrysy (kolízie) ostávajú. Postup a zdroje sú v hlavičke každého súboru
 # v tools/blender/presne/.
 # Spustenie: python3 tools/blender/presne_blender.py [slavin] [modry-kostolik] [snd] [reduta] [dom-sv-martina]
+#             [stara-radnica]
 
 import json
 import os
@@ -13,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from veze import uloz, z_hry, ccw  # noqa: E402
 from historicke.budova import nacitaj  # noqa: E402
-from presne import slavin, modry_kostolik, snd, reduta, dom  # noqa: E402
+from presne import slavin, modry_kostolik, snd, reduta, dom, radnica  # noqa: E402
 
 KOREN = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -29,7 +30,7 @@ def bez_konca(b):
 
 # argumenty za „--“ (blender -b -P presne_blender.py -- snd) alebo priamo (python3 s modulom bpy)
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
-for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martina']:
+for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martina', 'stara-radnica']:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     subor = f'sm-{kluc}'
     i = info(subor)
@@ -56,6 +57,10 @@ for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martin
         # celý pôdorys z OSM (relácia 16609274); model sa kladie na dlažbu pred južnou predsieňou
         G, H = dom.postav()
         i['zakladnaBod'] = dom.ZAKLADNA_BOD
+    elif kluc == 'stara-radnica':
+        # obrys z OSM (relácia 146009) ostáva pre kolízie; model sa kladie na dlažbu Hlavného nám. pred priečelím
+        G, H = radnica.postav()
+        i['zakladnaBod'] = radnica.ZAKLADNA_BOD
     else:
         raise SystemExit(f'neznáma pamiatka {kluc}')
     uloz(G, subor, obrysy, H, info={k: v for k, v in i.items() if k not in ('obrysy', 'vyska')}, minimum=0.72, vzdialenost=2.5)

@@ -1894,3 +1894,106 @@ pred južnou predsieňou (≈ 145,8 m v hodnotách služby po odčítaní 43,8);
 4. Spodok západného priečelia a veže – kolmý záber zo Staromestskej.
 5. Sakristia a východná časť kaplnky sv. Jána – záber zo severovýchodu (Kapitulská).
 6. Východná strana veže nad strechou lode – záber z Kapitulskej.
+
+## Stará radnica (26. 11. 2026)
+
+Model: `tools/blender/presne/radnica.py` (spustenie cez `tools/blender/presne_blender.py -- stara-radnica`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Bez Google Maps/Earth/Street View.
+
+### Poloha, skladba, lokálna sústava
+- OSM: **relácia 146009** (https://www.openstreetmap.org/relation/146009) – vonkajší obrys a nádvorie (way 34930904);
+  susedia Apponyiho palác (relácia 21996513), Primaciálny palác (relácia 189440), Jezuitský kostol cez Kostolnú.
+  OSM nemá časti budovy, výšky sú z lasera. **V**
+- Lokálna sústava modelu: začiatok = SZ nárožie pri Kostolnej, **u** pozdĺž priečelia na Hlavnom nám. (azimut 151,5°,
+  na juh), **v** do bloku (azimut 61,5°). Priečelie na Hlavné nám. má ~41 m, severná strana v Kostolnej ~47 m,
+  priečelie na Primaciálne nám. ~24 m (zvyšok východnej strany prilieha k Primaciálnemu palácu). **V**
+- Skladba (Š. Holčík, https://www.bratislavskenoviny.sk/historia/4689-na-nadvori-radnice-je-cela-historia-mesta ,
+  https://www.bratislavskenoviny.sk/historia/2963-staru-radnicu-postavil-asi-richtar-jakub-ii ,
+  https://pl.wikipedia.org/wiki/Stary_ratusz_w_Bratys%C5%82awie):
+  - **veža** na SZ nároží (nie v strede priečelia) – jadro Jakubovho domu, severné krídlo okolo 1370 pozdĺž Kostolnej; **V**
+  - na Hlavné nám. od veže na juh: gotický portál prejazdu (1442/43) s arkierom, biely dom (u 8–23), sivý Pawerov dom
+    s gotickou fasádou (u 23–31), Ungerov dom s vlastnou strechou (u 31–41), potom Apponyiho palác; **S** (priradenie
+    mien domov **N**)
+  - novogotické **východné krídlo** na Primaciálnom nám. a **južné krídlo** (1911–1912, J. Hübner a S. Mészner):
+    https://www.bratislavskenoviny.sk/historia/4594-architekti-navrhovali-postavit-novu-radnicu ; **V**
+  - nádvorie ~16 × 24 m s renesančnými arkádami na severnej strane (2. pol. 16. stor.), na východnej strane ich kópia
+    z roku 1912. **V**
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (4 800 bodov) a terén po 2,5 m; laser je voči OSM posunutý ~0,5–1 m na západ. Nula modelu = dlažba
+Hlavného nám. pred priečelím (≈ 138,85 m v hodnotách služby po odčítaní 43,8); Kostolná je o 0,5 m vyššie, nádvorie
+a Primaciálne nám. ±0,1 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| veža – najvyšší bod lasera (helmica) / hrot | 44,4 / ~44,8 m | V / S |
+| veža – galéria s balustrádou / rímsa barokového poschodia s vázami | 24–25,4 / 33–35 m | V |
+| dom s arkierom a Pawerov dom: odkvap / hrebeň (~6,8 m za priečelím) | 10,5 / 20,7 m, predná strana ~57° | V |
+| Ungerov dom: odkvap / hrebeň | 11,2 / 20,0–20,5 m | V |
+| severné krídlo (Kostolná): odkvap / hrebeň pri atike | 8–9,5 / 13,4 m | V |
+| východné krídlo: odkvap / atika | 8,1–8,5 / 13,7 m | V |
+| pultové striešky nad arkádami (odkvap → pri atike) | 9,5 → 12 m | S |
+| južné krídlo: odkvap mansardy / plochý vrch | ~17,5 / 22,6 m | S |
+| juhovýchodná časť pri Primaciálnom paláci | 22–25 m | S |
+
+### Veža (fotky https://commons.wikimedia.org/wiki/File:Antiguo_ayuntamiento,_Bratislava,_Eslovaquia,_2020-02-01,_DD_36.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_Altes_Rathaus_570.jpg , https://commons.wikimedia.org/wiki/File:Bratislava_Altes_Rathaus_569.jpg)
+- Driek ~8 × 8 m, západná stena o ~0,6 m pred priečelím. Okrová omietka (#E3D09E) so svetlejšími nárožnými lizénami
+  (#EFE6CC), kamenný sokel (#978672), rímsa v ~15,9 m. **V** (rozmery **S**)
+- Západ: gotické dvojdielne okno pod vimpergom (5–11 m), nad ním polkruhové okno a štukový erb mesta; sever: gotické
+  okno a oválne okienko; vyššie polkruhové okno a okulus so štukovým rámom. Na SZ nároží **Madona (1676)** na konzole
+  pod červenou kužeľovou striežkou s pozláteným krížikom. **V**
+- Galéria: kamenná balustráda na rade konzol okolo všetkých 4 strán (vyloženie ~0,65 m), kované svietniky. **V**
+- Barokové poschodie (1733, po požiari) ustúpené na ~6,4 m: nárožné pilastre, na každej strane biela doska hodín
+  ~2,4 × 2,5 m s čiernymi rímskymi číslicami (obnova 2016,
+  https://www.teraz.sk/bratislavsky-kraj/hodiny-na-vezi-starej-radnice-v-bratisl/201839-clanok.html ) a nad ňou polkruhové
+  žalúziové okno; vlnitá rímsa s oblúkom nad každou stranou, kamenné vázy na nárožiach. **V** (hodiny na 4 stranách **S**)
+- Helmica: medená patina (#7FA697), zvonovitá so štvorcovým pôdorysom, nad ňou menšia zvlnená cibuľka, guľa a hrot,
+  bez otvorenej lucerny. Výška 45 m (https://trekhunt.com/hu/article/pozsony-latnivalok/); údaj 51 m je zámena
+  s Michalskou vežou. **V**
+
+### Priečelie na Hlavné námestie (https://commons.wikimedia.org/wiki/File:Bratislava_-_Star%C3%A1_radnica_20180510-03.jpg ,
+https://commons.wikimedia.org/wiki/File:Franziskanerplatz_Bratislava_9913.jpg)
+- Gotický portál prejazdu tesne vedľa veže: stlačený lomený oblúk v profilovanom pieskovcovom ostení, tmavé drevené
+  vráta. Prejazd ~13,4 m dlhý, 5,6 m široký, s kaplnkou na poschodí
+  (https://www.bratislavskenoviny.sk/historia/39935-zahadny-kamen-v-starej-radnici , https://apsida.sk/c/13799/bratislava-radnicna-kaplnka ). **V**
+- **Arkier** nad portálom: pravouhlá kamenná skriňa ~3 m široká, vyložená ~1 m, na konzolách; trojdielne okno
+  s olovenými sklami, pod ním maľovaný tehlový parapet (#E3A585), dve sošky svätých na nárožiach; pultová striežka
+  z **mozaiky glazovaných škridiel** (biela, žltá, zelená, tmavomodrá, hnedá, čierna). **V**
+- Biely dom (#ECEAE4): na poschodí 4 okná v ťažkých tmavosivých kamenných šambránach (#6E6867), v prízemí menšie okná
+  s mrežami. Pawerov dom: sivý kameň (#C1BDB5), na poschodí 4 lomené okná pod oslím chrbtom s kružbovým vlysom,
+  v prízemí zamurované lomené dvere. Ungerov dom: biely, 3 okná na podlažie. Medené žľaby a zvody. **V**
+- Strecha: **obyčajná pálená bobrovka** (#A35A44) – farebná glazúra je len na **troch vikieroch** (bielo-červeno-modrá
+  šachovnica, #D0505E / #4F62C0 / #F2EFEA), na striežke arkiera a na streche východného krídla. Na Ungerovom dome jeden
+  biely vikier. **V**
+
+### Východné krídlo na Primaciálnom nám. (1911–1912; https://commons.wikimedia.org/wiki/File:Antiguo_ayuntamiento,_Bratislava,_Eslovaquia,_2020-02-01,_DD_34.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_-_Star%C3%A1_radnica_20180510-01.jpg)
+- Vápencové kvádre (#C9C0AE), dve podlažia, krížové okná s kamennými priečkami. Rizalit so strmým štítom s krabmi
+  a fialou (~15 m), v prízemí brána so stlačeným oblúkom a kovanou mrežou, nad ňou kamenný arkier so šesťdielnym oknom,
+  kružbovým parapetom a medenou valbovou strieškou. **V**
+- Strecha: pultová, ~33–35°, **zelená glazovaná bobrovka** (#3F7A5E), v hornej polovici reťaz kosoštvorcov
+  (hnedočervené #6E3B2A s okrovým lemom #C47A35 a krémovým stredom); tri kamenné vikiere so štítom a fialou,
+  novogotické komíny; za strechou oblúčková atika nádvoria. **V**
+
+### Nádvorie (https://commons.wikimedia.org/wiki/File:Bratislava_-_Star%C3%A1_radnica_20180510-07.jpg ,
+https://commons.wikimedia.org/wiki/File:2019-03-17_in_Bratislava_37.jpg)
+- Severná a východná strana: dvojpodlažné arkády – prízemie s polkruhovými oblúkmi na toskánskych stĺpoch, lodžia
+  s plným parapetom a užšími oblúkmi (model: sever 6 + 7, východ 4 + 5 oblúkov); smotanová omietka (#EFE8D8), nad
+  nimi pultové striešky z tmavej škridly (#6E3A30) s drevenými vikiermi a biela **oblúčková atika** (polkruhové zuby
+  s okrúhlym otvorom, ~13,7 m). **V** (počty oblúkov **S**)
+- Západná strana: trojpodlažný dom so štítom do nádvoria, dvoma okulmi a pozláteným slnkom na vrchole; okná
+  s renesančnými mrežami; dvorový gotický portál prejazdu. **V**
+- Južné krídlo (1912): päť podlaží a mansarda, kamenné prízemie so zasklenými oblúkmi a erbom mesta. **S**
+- Obnova 2008–2011 (strecha na strane Hlavného nám. a dvorové fasády,
+  https://www.obnova.sk/opravia-staru-radnicu-aponyiho-palac/ , https://www.asb.sk/architektura/historicke-stavby/stara-radnica-dostane-novy-vzhlad );
+  glazované vikiere a striežka arkiera sú na fotkách už v roku 2007. **V**
+
+### Čo chýba (aké fotky by pomohli)
+1. Severná strana v Kostolnej (úzka ulica, málo fotiek) – počet a rozmiestnenie okien, zvyšky cimburia – zábery
+   z Kostolnej smerom na východ aj na západ.
+2. Presné počty oblúkov arkád – kolmý záber na severnú a východnú stranu nádvoria.
+3. Fasády a strecha južného krídla (1912) – záber z nádvoria na juh a z veže radnice na juhovýchod.
+4. Presný pôdorys veže a to, či vystupuje pred priečelie – kolmý záber z Hlavného nám. a z Kostolnej.
+5. Strana hodín do nádvoria (sú hodiny na všetkých 4 stranách?) – záber z nádvoria na vežu.

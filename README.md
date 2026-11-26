@@ -775,6 +775,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   so sukňou, zvonom so 16 pozlátenými rebrami, otvorenou lucernou a ihlou a **pozlátená koruna na vankúši** (86 m).
   Model sa kladie na dlažbu pred južnou predsieňou (terén pod vežou je o 5,6 m nižšie). Podklady:
   `napady/pamiatky-podklady.md` („Dóm sv. Martina“), kontrola `dom-presny-model`.
+- **Stará radnica – presný model** (26. 11.; `tools/blender/presne/radnica.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- stara-radnica`): pôdorys z OSM (obrys a nádvorie),
+  výšky z laserového skenovania ÚGKK. **Veža je na SZ nároží pri Kostolnej** (predtým stála v strede priečelia):
+  okrová s lizénami, gotické okno s vimpergom, erb mesta, galéria s balustrádou na konzolách (24 m), ustúpené barokové
+  poschodie s hodinami a žalúziovým oknom na každej strane, vázy na nárožiach, medená zvonovitá helmica s cibuľkou,
+  guľou a hrotom (44,8 m), Madona pod červenou striežkou na nároží. Priečelie na Hlavné námestie: gotický portál
+  prejazdu s kamenným arkierom (mozaiková glazovaná striežka), biely dom so 4 oknami v tmavých šambránach, sivý Pawerov
+  dom so 4 lomenými oknami, Ungerov dom; strmá strecha z pálenej škridly (odkvap 10,5 m, hrebeň 20,7 m) s tromi
+  vikiermi v bielo-červeno-modrej glazovanej šachovnici. Novogotické východné krídlo (1912) na Primaciálnom nám.
+  s bránou, arkierom, štítom a **zelenou glazovanou strechou s reťazou kosoštvorcov**; nádvorie s dvojpodlažnými
+  arkádami, pultovými strieškami a oblúčkovou atikou, dom so štítom a pozláteným slnkom, päťpodlažné južné krídlo
+  s mansardou. Model sa kladie na dlažbu Hlavného námestia. Podklady: `napady/pamiatky-podklady.md` („Stará radnica“),
+  kontrola `radnica-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1435,8 +1448,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 - Átriaky (#91): chodby a terasy všetkých domov podľa fotiek, viac izieb a blokov s interiérom.
 - Presné pamiatky: ďalšie dávky podľa `tools/blender/presne/`; pri SND ešte presný počet okenných osí bokov a tvar
   vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
-  sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice (chýbajú fotky –
-  `napady/pamiatky-podklady.md`).
+  sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice, pri Starej radnici počty
+  oblúkov arkád, fasády južného krídla a severná strana v Kostolnej (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
