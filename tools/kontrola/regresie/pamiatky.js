@@ -180,4 +180,37 @@ export const kontrolyPamiatok = [
       return { skontrolovane: (d.styly ?? []).length + 1, chyby };
     },
   },
+  {
+    id: 'eurovea-interier',
+    popis: 'Interiér galérie Eurovea: v pasážach Eurovea 1 a 2 je podlaha podľa terénu (bez trávy cez ňu), poschodie '
+      + 's ochodzou ~5,5–6 m, lávky a eskalátor ako pochôdzne plochy, stĺpy s kolíziou; klenba je priehľadná',
+    oprava: 'feature/eurovea-interier (#131 časť 5) – tools/blender/vyskove/eurovea_interier.py, js/mapa/pamiatky/model-glb.js, '
+      + 'js/mapa/pamiatky/nahradene-budovy.js (bezTravy)',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const zoznam = (await (await fetch('data/mapa/pamiatky.json')).json()).pamiatky ?? [];
+      for (const n of [1, 2]) {
+        for (const subor of [`eurovea-${n}-interier`, `eurovea-${n}-podlaha`]) {
+          if (!zoznam.some((p) => p.subor === subor)) chyby.push({ text: `${subor} nie je v data/mapa/pamiatky.json` });
+          const r = await fetch(`assets/pamiatky/${subor}.json`);
+          if (!r.ok) { chyby.push({ text: `chýba assets/pamiatky/${subor}.json` }); continue; }
+          const info = await r.json();
+          if (!info.bezTravy?.length) chyby.push({ text: `${subor}: chýba pôdorys bez trávy` });
+          if (subor.endsWith('podlaha') && !info.podlaTerenu) chyby.push({ text: `${subor}: podlaha nekopíruje terén` });
+          if (subor.endsWith('interier')) {
+            const h = (info.plochy ?? []).flatMap((p) => p.body.map((b) => b[2]));
+            if (!h.some((v) => v > 5 && v < 7)) chyby.push({ text: `${subor}: chýba pochôdzna ochodza poschodia (~5,5–6 m)` });
+            if (!(info.plochy ?? []).some((p) => Math.max(...p.body.map((b) => b[2])) - Math.min(...p.body.map((b) => b[2])) > 4)) {
+              chyby.push({ text: `${subor}: chýba eskalátor (pochôdzna plocha z prízemia na poschodie)` });
+            }
+            if (!(info.kolizie?.length > 5)) chyby.push({ text: `${subor}: stĺpy nemajú kolízie` });
+          }
+        }
+      }
+      const kod = await (await fetch('js/mapa/pamiatky/model-glb.js')).text();
+      if (!kod.includes("endsWith('-klenba')")) chyby.push({ text: 'presklená klenba nie je priehľadná (model-glb.js)' });
+      return { skontrolovane: 4, chyby };
+    },
+  },
 ];

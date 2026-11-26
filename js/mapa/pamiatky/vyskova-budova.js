@@ -15,6 +15,7 @@
 // "vyskyKolizii": [m, …] = výška každej kolízie nad terénom (napr. nádrž fontány 1,6 m) – kamera nad nízkou prekážkou
 //   prejde (js/kamera/kolizia-kamery.js); bez nej má výšku len model podľa terénu (výška modelu + 0,5 m).
 // "plochy": [{ body: [[x, z, h], …], sirka }] = pochôdzne plochy (schodisko pred vstupom), h nad základňou modelu
+// "bezTravy": [[[x, z], …]] = pôdorysy s vlastnou podlahou, kde nerastie tráva (pasáž galérie Eurovey)
 //   (js/mapa/mosty/pochodzne-pamiatok.js). "vchody": [{ id, bod: [x, z], vyska }] = dvere na neskorší interiér.
 // "zakladnaBod": [x, z] = model sa položí na terén v tomto bode (inak na najnižší terén pod obrysmi).
 // Keď sa pod stavbou načíta alebo uvoľní podrobný terén z lasera, výšky sa prepočítajú.
@@ -23,7 +24,7 @@ import * as THREE from 'three';
 import { nacitajModelPamiatky, rozbalModel } from './model-glb.js';
 import { vzdialenaUroven } from './vzdialena-uroven.js';
 import { pridajTienovehoZastupcu } from '../../grafika/tienovy-zastupca.js';
-import { nahradBudovy, nahradSochy } from './nahradene-budovy.js';
+import { nahradBudovy, nahradSochy, pridajBezTravy } from './nahradene-budovy.js';
 import { pridajPochodzne } from '../mosty/pochodzne-pamiatok.js';
 
 // Drobné prvky (stĺpiky, priečky – materiály „detail…“) sa z diaľky nekreslia: na pár pixeloch
@@ -115,6 +116,8 @@ export default async function postav(p, { vyskopis, kolizie }) {
   for (const w of info.nahradit ?? []) nahradBudovy(svet(w), 0.5);
   // socha je súčasťou modelu (napr. socha z gúľ pri Eurovea 2) – všeobecná socha z OSM sa na tom mieste nestavia
   for (const w of info.nahraditSochy ?? []) nahradSochy(svet(w));
+  // pôdorysy bez trávy (vlastná podlaha – pasáž galérie Eurovey)
+  for (const w of info.bezTravy ?? []) pridajBezTravy(svet(w));
   // ďalšie kolízie bez nahrádzania budov (hradby, múry). Model podľa terénu (ploty, živé ploty) je nízky:
   // kolízia dostane vrch (terén + výška modelu), aby nad ním kamera prešla (js/kamera/kolizia-kamery.js)
   for (const [i, k] of (info.kolizie ?? []).entries()) {
