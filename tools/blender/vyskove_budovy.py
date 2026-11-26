@@ -30,7 +30,7 @@ VSETKY = ['nivy_tower', 'twin_city_tower', 'eurovea_tower', 'panorama_city', 'sk
           # Stavebná fakulta STU (#127)
           'stavebna_fakulta', 'eurovea_1',
           # Eurovea 2 s hadou strechou a sochou v parku (#131, časť 2)
-          'eurovea_2',
+          'eurovea_2', 'eurovea_1_interier', 'eurovea_2_interier', 'eurovea_1_podlaha', 'eurovea_2_podlaha',
           # stavenisko Sky Park Tower (#129, stav k 11/2026)
           'sky_park_tower']
 

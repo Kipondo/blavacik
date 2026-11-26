@@ -43,6 +43,16 @@ export async function nacitajModelPamiatky(meno, { ao: sAo = true, gz = false } 
         m.envMapIntensity = m.name.startsWith('sklo') ? 1.3 : 0.8;
         if (jeKamen(m)) kamenNaMaterial(m);
         if (jeSklo(m)) nocneSkloModelu(m);
+        // priehľadné sklo (zábradlia v interiéri Eurovey – materiál „priehladne-…“): vidno cez neho, tieň nevrhá
+        if (m.name.startsWith('priehladne')) {
+          m.transparent = true; m.opacity = 0.22; m.depthWrite = false;
+          o.castShadow = false;
+        }
+        // presklená klenba nad pasážou galérie (Eurovea): zvnútra vidno oblohu, do pasáže svieti slnko
+        if (m.name.endsWith('-klenba')) {
+          m.transparent = true; m.opacity = 0.35; m.depthWrite = false;
+          o.castShadow = false;
+        }
         m.needsUpdate = true;
       }
     });

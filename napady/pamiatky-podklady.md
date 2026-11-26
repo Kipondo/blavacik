@@ -1308,3 +1308,326 @@ Výšky sú v m n. m. Bpv (hra: y = výška − 139).
   Šírka 35 m. Laser je starší ako most. Celý most leží v Bratislave (Jarovce, Podunajské Biskupice).
 - **Čunovo:** cez vodné dielo vedie len cesta III. triedy po hrádzi k Danubiane, s mostmi cez prepady.
   Cez zdrž Hrušov ani cez derivačný kanál v Bratislave cesta nevedie.
+
+## Eurovea – interiér galérie (#131, časť 5; 26. 11. 2026)
+
+Spracované v `tools/blender/vyskove/eurovea_interier.py` (podlažia 0 a +1 pasáží E1 a E2).
+
+
+Prieskum 26. 11. 2026. Bez Google Maps/Earth/Street View. Výkresy ani fotky sa nikam neukladali do repozitára –
+z oficiálnej mapy centra (inline SVG na eurovea.sk) sa len **odmerali rozmery** (v scratchpade), fotky z Commons sa
+len prezreli. **Žiadne názvy obchodov/značiek** – prevádzky sú opísané všeobecne.
+
+Istota: **V** = vysoká, **S** = stredná, **N** = nízka.
+
+---
+
+#### 0. Súradnice a metóda
+
+- **Lokálne súradnice (x, y) v metroch:** počiatok = stred sklenenej kupoly pri vajci (OSM way 762656643, 48.140452 N,
+  17.120515 E), x na východ, y na sever. Prepočet: `lat = 48.140452 + y/110574`, `lon = 17.120515 + x/74302`.
+- **Súradnice hry** (rovnaké ako `tools/blender/osm_eurovea.py`): `x = (lon − 17.1077)·111320·cos(48.1435°)`,
+  `z = −(lat − 48.1435)·111132` (z rastie na juh). Kontrola: južný vstup pri kupole vychádza (949,7; 317,8) a
+  otočné dvere haly E2 (1402,0; 388,5) – presne `ZAKLADNA` v `osm_eurovea.py` (V).
+- **Oficiálna mapa centra** (https://eurovea.sk/mapa-centra) obsahuje 3 inline SVG plány (6000 × 1640 jednotiek):
+  `FLOOR_LGF` (−1), `FLOOR_GF` (0), `FLOOR_FF` (+1), vrstvy SHOPS, PRIVATE, ESKALATORY, VYTAHY, WC, otvory
+  `DIERY` (FF) a `CUTOUTS` (GF). Plán je **schematický a anizotropný**: kalibrácia afinnou transformáciou na
+  9 vstupov z OSM dala ~0,121–0,127 m/jedn. v smere V–Z a ~0,09–0,10 m/jedn. v smere S–J (rezíduá ±2–5 m).
+  Plán −1 je v tej istej sústave ako GF (posun ~+38/+53 jedn., overené 5 výťahmi, rezíduá ≤1 m).
+  **Šírky z mapy majú neistotu ~±15 %**, dĺžky ~±5 %. Kde to šlo, overené OSM (indoor footways) a fotkami.
+- **OSM (Overpass, 26. 11. 2026, ODbL):** 23 ciest `conveying=yes` (19 eskalátorov + 4 pohyblivé chodníky),
+  1 výťah, ~60 vnútorných chodníkov s `level` −2…1, 85 prvkov `indoor=yes`, ~115 POI s úrovňou (neúplné).
+
+---
+
+#### 1. Celková schéma (najdôležitejšie)
+
+1. **Tri nákupné podlažia: −1 (LGF, „suterén“), 0 (GF, prízemie), +1 (FF, 1. poschodie)** – oficiálna mapa
+   (FLOOR_LGF/GF/FF), Wikipedia „floors 3“, EIA E2: „navrhnutý cez 3 podlažia … 1.PP, 1.NP a 2.NP“ (V).
+   Podlažie +2 nie je verejné (len kino má vlastné vyššie úrovne – N). Parkovanie −2 (a v E2 aj −3) (V).
+2. **Nad zemou sú to dve oddelené budovy**, medzi nimi je **otvorené hlavné námestie** (so Štefánikovým pamätníkom
+   pri Dunaji, OSM node 915661112) široké ~57 m (x 172 → 229) (V – OSM vnútorné chodníky na GF končia vstupmi
+   988555525 a 1779065491; mapa má medzi budovami medzeru):
+   - **E1-západ („hlavná pasáž“ 2010):** od rotundy pod kupolou pri vajci po hlavné námestie, ~175 m.
+   - **E1-východ + E2:** od hlavného námestia (eskalátorová hala, kino) cez napojenie pri Sklade č. 7 do hadej
+     pasáže E2 (2023) až po vstupnú halu pri Eurovea Tower, ~225 m po osi + hala ~25 m.
+   - **Podzemím (−1) je pasáž súvislá** po celej dĺžke ~485 m, aj pod hlavným námestím (OSM area 762656627 na
+     úrovni −1 od x −9 po x 277; mapa LGF bez prerušenia) (V).
+3. **Prierez pasáže E1-západ je trojpodlažné átrium**: otvory v podlahe GF (do −1) aj FF (do GF), nad nimi
+   presklená valená klenba. Galérie na GF aj FF po oboch stranách, mosty cez otvory (V – OSM `bridge=yes` na
+   úrovni 0 aj 1, fotky 2010/2014/2019 ukazujú 3 úrovne s eskalátormi do −1).
+   Otvory na FF sú širšie (~10 m) ako na GF (~6–7 m) → **odstupňovaný prierez** (S).
+4. **E2 má otvory len v podlahe FF** (GF podlaha je plná, nad ňou oválne otvory v strope) (S – fotka GF 2025,
+   v OSM žiadne mosty na úrovni 0 v E2; mapa GF kreslí otvory E2 rovnako ako FF, čo je asi len priemet). Úroveň −1
+   v E2 je samostatná užšia pasáž (6–8 m) napojená eskalátorom pri x≈311 a výťahmi (S).
+
+---
+
+#### 2. Pasáže – trasy, dĺžky, šírky
+
+Šírky: „celkom“ = od výkladu po výklad; „otvor“ = void; „galéria“ = chodník medzi výkladom a zábradlím.
+
+#### 2.1 E1-západ – hlavná pasáž (2010)
+
+| úsek | poloha (lokálne → hra) | dĺžka | GF | FF | −1 | istota |
+|---|---|---|---|---|---|---|
+| os pasáže | (0,−2) → (172,−34); hra (951,9; 340,7) → (1123,9; 372,9); azimut ~100° (mierne na JV) | ~175 m | celkom **13–13,5 m** (19 m pri x 65–80, 15,5–16 m pri x 130–160); otvory **6–7,5 m** š., 17–28 m dlhé (6 ks); galérie **3–4,5 m** | celkom **16–17 m** (19 m pri x 64–80); otvory **9,5–10,5 m** (12–13 m pri x 64–80); galérie **3–4 m** (S ~3,5–4, J ~3) | ~12–14 m s ostrovčekmi kioskov v osi (kiosky 2–7 m š.) | S (mapa), OSM: osi galérií FF vzdialené 14–15 m, GF 11 m |
+| rotunda pod kupolou (pri vajci) | stred (0,−2), 48.140434, 17.120515 | – | otvor ~14 × 12 m (do −1) | otvor ~15 × 13 m; okolo kruhová galéria ~5–6 m | – | S; kupola nad ňou ⌀ ~26–27 m (OSM 762656643) V |
+| východná rotunda | (148,−31), hra (1099,9; 369,9) | – | otvor ~11 × 7 m | oválny otvor ~21 × 13 m | – | S |
+| priečna pasáž S–J | x ≈ 80–100, od vstupu Pribinova (99,7) po vstup promenáda (79,−47) | ~55 m | **~11,5 m** | ~11–12 m (galéria/most nad ňou) | – | S |
+| vstupná chodba od vajca (SZ) | (−32,12) → rotunda | ~25 m | 9,5–11,5 m | 9–11 m | – | S |
+| chodba z rotundy na juh (park) | (−8,−34) → rotunda | ~30 m | ~6,5 m | ~6,5 m | – | S |
+| chodba z rotundy na sever (Pribinova) | (−2,21) → rotunda | ~20 m | 5,5–9 m | 5,5–9 m | – | S |
+
+Presklená klenba E1 (OSM way 762656642): ~165 m od kupoly po námestie, šírka v pôdoryse **16–22 m** (pri kupole
+22 m, pri námestí 16 m) + vetvy nad priečnou pasážou (S aj J, ~20 m). Developer 2010: 2 300 sklenených
+trojuholníkov na 5 500 m², hlavná časť 235 m (320 m s bočnými vstupmi), **šírka 16–25 m, výška 14–16 m** (V,
+europe-re.com). MERO-TSK: plocha ~5 900 m², vlastný „hviezdicový“ uzol, trojuholníkové izolačné sklá vysoké ~3,5 m
+(S – podľa výňatku vo vyhľadávaní, stránka 404).
+
+#### 2.2 Hlavné námestie (vonku) a podzemné spojenie
+- Medzera nad zemou x 172 → 229 = **~57 m** (V). Vstup E1-západ z námestia: presklená klenba na bielych
+  „stromových“ stĺpoch (rel 21708453) (V, fotka 2010).
+- Na −1 pod námestím: pasáž **~12 m** široká, 57 m dlhá, obchody po oboch stranách (OSM POI úroveň −1 pri x 172–207)
+  a **pár pohyblivých chodníkov do garáže −2** pri x ≈ 193–210 (OSM 765260802/803, 14–15 m) (V/S).
+
+#### 2.3 E1-východ (eskalátorová hala pri námestí) a napojenie na E2
+
+| úsek | poloha | dĺžka | GF | FF | −1 | istota |
+|---|---|---|---|---|---|---|
+| eskalátorová hala | x 229–260, stred (242,−47); hra (1193,8; 386,0) | ~30 m | otvorená hala **~15 m** (bez otvoru v podlahe) | ~15–18 m, otvor ~14 × 10 m | ~12–13 m | S |
+| chodba na sever (k S vstupu 7126212303) | (233,−7) → (235,−43) | ~36 m | ~6–8 m | – | – | S (OSM 762656623) |
+| napojenie pri Sklade č. 7 | x 260–300 | ~40 m | **9–10 m**, 2 malé otvory ~7,7 × 5,3 m | 9–10,5 m, otvor ~24 × 5,3 m, galérie 2–3 m | 9–12 m | S |
+| foyer kina (FF) | (298,−31) a vetva na sever pri x ≈ 250–270 | – | – | foyer ~2 000 m² | – | S |
+
+#### 2.4 E2 – hadia pasáž (2023)
+
+| úsek | poloha | dĺžka | GF | FF | −1 | istota |
+|---|---|---|---|---|---|---|
+| rovný západný úsek | x 300–345 (y ≈ −55) | ~45 m | **9–11 m** | 9–11 m; otvory ~25 × 6 m a 14 × 6 m; galérie 2,2–3 m | 6–8 m | S |
+| koleno s „bublinou“ | stred (369,−48); hra (1320,8; 387,0) | ~25 m | ~16 m | 20–26 m, **oválny otvor ~21 × 10,5 m** | ~8–11 m | S |
+| stredný úsek (food court na FF) | x 385–425 | ~45 m | ~12 m | 13–23 m (širšie na S strane); otvory ~15–17 × 5,5–7 m | ~6 m | S |
+| vstupná hala | stred (447,−66); hra (1398,8; 405,1) | ~35 m | ~25 m | 25–37 m, **oválny otvor ~30 × 13 m** | ~11–13 m | S |
+
+Hadia strecha (OSM 1164819251): **165 m dlhá, 11–20 m široká** (V – SCIA UC2020), voľná forma, oceľová
+trojuholníková sieť. GFI: vstupná hala má **svetlú výšku 12 m**, presklenú fasádu na štíhlych oceľových stĺpoch a
+kupolu („katedrálová hala“); vnútorná dispozícia je zámerne **vyosená**, s uzlovými bodmi pri kotvových nájomcoch (V).
+
+#### 2.5 Vstupy (pozície z OSM)
+
+| vstup | OSM | lat, lon | hra x, z | odkiaľ | istota |
+|---|---|---|---|---|---|
+| SZ hlavný pri vajci | node/5325819022 (entrance=main) | 48.140558, 17.120079 | 919,5; 326,9 | priestranstvo pri vajci/Pribinova → chodba do rotundy | V |
+| S pri kupole | node/988555520 | 48.140640, 17.120485 | 949,7; 317,8 | Pribinova | V |
+| J pri kupole | node/988555518 | 48.140148, 17.120407 | 943,9; 372,5 | park/promenáda | V |
+| S priečnej pasáže | node/988555510 | 48.140517, 17.121854 | 1051,4; 331,5 | Pribinova | V |
+| J priečnej pasáže | node/988555512 | 48.140031, 17.121578 | 1030,9; 385,5 | promenáda (sklenená strieška way 762971078) | V |
+| V koniec E1-západ | node/988555525 | 48.140143, 17.122824 | 1123,4; 373,1 | hlavné námestie | V |
+| Z vstup E1-východ | node/1779065491 | 48.140074, 17.123597 | 1180,8; 380,8 | hlavné námestie | V |
+| S vstup E1-východ | node/7126212303 | 48.140389, 17.123649 | 1184,7; 345,8 | sever (Pribinova / SND) | S |
+| S vstup haly E2 (otočné dvere) | node/9893972368 | 48.140004, 17.126575 | 1402,0; 388,5 | námestie pri Pribinovej/Čulenovej | V |
+| J vstup haly E2 | node/9893972375 | 48.139652, 17.126842 | 1421,9; 427,6 | predpolie veže, park | V |
+| V vstup E2 | node/11331964864 | 48.140180, 17.127600 | 1478,2; 368,9 | pri veži (asi lobby) | N |
+
+Oficiálna mapa GF má presne 9 značiek vstupov (prvých 9 riadkov okrem S vstupu E1-východ) (V).
+Zádverie (fotka 2010): automatické posuvné sklenené dvere v bielych/strieborných rámoch, vzduchové clony nad nimi,
+čierne vstupné rohože ~3 m, stena z lakovaného mätovozeleného skla (S).
+
+#### 2.6 Parkovanie (vjazdy autom a peší prístup)
+- Vjazdy (oficiálne): **Pribinova** 48.1409722, 17.12025; **Ružinov** 48.14156, 17.12494; **Prístav** 48.14047,
+  17.12836 (V, eurovea.sk/parkovanie). OSM: rampy 988555513 „vjazd Pribinova“, 10985258749 „vjazd Ružinov“,
+  10985258721 „vjazd Prístav“, max. výška 2,1–2,3 m (V).
+- Garáž: E1 −2 (OSM), E2 2.PP a 3.PP s 1 906 miestami (EIA 2017); spolu „až 4 000 miest“ (oficiálne);
+  Wikipedia 1 324 (stará E1), 2010 developer 1 729 (S – čísla sa líšia podľa etapy).
+- Peší prístup z garáže: výťahy (5 skupín, nižšie), pohyblivé chodníky −2↔−1 pri kupole (OSM 765260825/826) a pod
+  námestím (765260802/803), eskalátory −2↔−1 pri x≈65 (765260815/816) (V/S).
+
+---
+
+#### 3. Podlažia a výšky
+
+| úroveň | výška (± 0 = podlaha GF ≈ terén) | zdroj / úvaha | istota |
+|---|---|---|---|
+| ±0 GF | E2: ±0,000 = **139,75 m n. m. Bpv** | EIA 2017 rozhodnutie | V |
+| −1 LGF | **≈ −5,5 až −6,0 m** | 3 podlažia NC; eskalátory −1↔0 v OSM 11–15 m dlhé (zodpovedá prevýšeniu 5–6 m pri 30°) | N–S |
+| +1 FF | E1 **≈ +5,5 m**, E2 **≈ +6,0 m** | EIA: „na výšku jedného poschodia NC sú riešené dve obytné poschodia“ (~2 × 3,0–3,1 m); laser podnože E1 10,6–11,5 m | S |
+| strecha podnože / päta klenby | E1 **~11 m** (laser 10,6–11,5), E2 **12,4 m** (atika +12,425 EIA, laser 12,4) | `napady/pamiatky-podklady.md` | V |
+| vrchol klenby E1 | **14–16 m** | developer 2010 („14 to 16 m high“) | V (predpoklad, že od GF: S) |
+| vrchol hadej strechy E2 | ~16 m (úzke časti), ~17 m (kupola nad halou) | odhad z exteriérového modelu | N |
+| strop vstupnej haly E2 | **12 m** svetlá výška | GFI | V |
+| garáž −2 / −3 (E2) | ≈ −9,5 / −12,5 m | dno stavebnej jamy −14,600 (EIA) | N |
+| podhľad pod galériou GF | ~4,3–4,5 m svetlá výška | fotky (výklady ~2 podlažia obchodu) | N |
+| hrana stropnej dosky (fasáda galérie) | biely oblý pás ~1,0–1,2 m | fotky 2010/2014 | N |
+| zábradlie | ~1,1 m sklo + madlo | fotky | S |
+
+Klenba E1 začína hneď nad výkladmi FF (biely zaoblený podhľad pozdĺž výkladov, potom sklo) – fotky 2010 (S).
+Exteriérový model (`eurovea_1.py`: hrana 11,0 m, vznos 3,5 m) je s tým v súlade.
+
+---
+
+#### 4. Vertikálna doprava
+
+Oficiálna mapa (ikony = skupiny, nie kusy): **eskalátory LGF 2, GF 7, FF 8; výťahy 5 skupín na každom podlaží;
+WC 2 na podlažie** (V). OSM: 19 eskalátorov + 4 pohyblivé chodníky + 1 výťah (V, ale neúplné).
+
+| miesto | čo | OSM / mapa | hra (x, z) | istota |
+|---|---|---|---|---|
+| rotunda pri kupole | pár −1↔0 (15 a 14 m), pár 0↔1 (21 m), pár pohyblivých chodníkov −2↔−1 (8 m) | 166457631 / 765260828; 166457623 / 765260824; 765260825/826; mapa GF+FF+LGF | ~944–962; 337–345 | V |
+| x ≈ 55–75 (E1-západ) | pár −1↔0 (13 m), 0→1 (10 m), pár −2↔−1 (8 m) | 166457622 / 765260823; 765260820; 765260815/816; mapa GF/FF | ~1005–1028; 351–361 | V |
+| x ≈ 100–112 | 1→0 (12 m) | 166457632; mapa FF ikona pri x≈104 | ~1052–1064; 356–358 | S |
+| x ≈ 133–145 | pár 0↔1 (10 m) | 765260806/807; mapa GF (138,−29), FF (145,−31) | ~1085–1095; 366–370 | V |
+| x ≈ 148–163 (východná rotunda) | pár −1↔0 (14 m) | 166457630 / 166457635; mapa GF (155,−33) | ~1100–1115; 367–374 | V |
+| pod námestím | pár pohyblivých chodníkov −2↔−1 (14–15 m) | 765260802/803 | ~1145–1162; 375–382 | V |
+| eskalátorová hala E1-východ | pár −1↔0 (11–12 m) + pár 0↔1 (14 m) za sebou v osi; výťah −1/0/1 | 166457624/629; 166457625/628; node 7147511857 | 1180–1207; 382–390; výťah 1186,3; 376,0 | V |
+| FF pri kine | eskalátor smerom ku kinu (x≈264) | len mapa FF (eskalator_09) | ~1216; 360 | N |
+| E2 západ | eskalátor −1↔0 | len mapa LGF (eskalator_2) | ~1263; 396 | S |
+| vstupná hala E2 | eskalátory 0↔1 v oválnom otvore (OSM má zmapovaný len smer hore, 12 m) | 1184319679; mapa GF/FF | 1389–1400; 400 | V (pár: S) |
+
+Výťahy (stredy skupín z mapy): E1-západ sever pri WC (46,9 → hra 997,9; 329,7), E1-západ severovýchod
+(134,−9 → 1085,9; 347,8), E1-východ (235,−37 → 1186; 376), E2 sever (337,−44 → 1288,8; 383,0), E2 juh pri hale
+(430,−82 → 1381,8; 421,1) (S). Po 22:00 sa do garáže chodí „2 výťahmi vedľa vnútorného vchodu“ do jednej
+z kotvových predajní (oficiálne) (V).
+Pevné schodiská vo verejnej časti nie sú zmapované ani na mape (len únikové) – pre hru stačia eskalátory a výťahy (S).
+
+WC: GF sever E1-západ (x≈46) a E1-východ/E2 (x≈284); FF x≈125 sever a x≈334 sever; LGF x≈46 sever a pri hale E2
+(S, mapa).
+
+---
+
+#### 5. Materiály a farby (odhady z fotiek na Commons; HEX = odhad)
+
+### E1 (2010, stav 2014–2019)
+- **Podlaha:** leštený svetlý béžový kameň (mramor/vápenec), veľké obdĺžnikové dlaždice (~60 × 60 až 60 × 120 cm,
+  odhad), jemné žilkovanie, lesk s odrazmi. Základ **#D8CFC0**, svetlejšie **#E6DFD2**, žilky **#C5B9A7** (S).
+- **Zábradlia:** bezrámové číre sklo ~1,1 m (hrana so zelenkavým nádychom **#CFE3E0**), navrchu **oblé drevené madlo**
+  medovej farby **#C29A6B** (⌀ ~6–8 cm) (S).
+- **Hrany stropných dosiek / mosty:** biele až krémové zaoblené pásy ~1 m (**#F1EDE5**), pod nimi a pozdĺž nich
+  súvislé teplé nepriame LED svetlo (zlatistá žiara **#FFD9A0**, ~3000 K). Mosty cez otvor sú krátke, s oblými
+  bielymi bokmi a rovnakým zábradlím (V – výrazný prvok na všetkých fotkách).
+- **Podhľady:** biely sadrokartón **#F4F2EE** s bodovými svietidlami (S).
+- **Stĺpy:** štíhle biele okrúhle stĺpy ⌀ ~0,5–0,6 m (**#ECEAE5**) v rotundách a pri otvoroch; hranolové piliere
+  medzi výkladmi obložené béžovými kamennými doskami (**#CDC3B3**) (S).
+- **Klenba:** oceľová trojuholníková sieť, prúty biele/svetlosivé **#E6E8EA**, číre sklo (zvnútra vidno oblohu);
+  trojuholníky pretiahnuté, priemerne ~2,4 m² na tabuľu (2 300 tabúľ / 5 500 m²), výška tabule ~3,5 m (S).
+  Kupola pri vajci: vysoká sklenená kupola z rovnakej siete nad kruhovým otvorom (V, fotka 2019).
+- **Výklady:** presklené na celú výšku podlažia v tmavých grafitových rámoch **#3B3E42**, nad nimi pás na nápis
+  (v hre bez nápisov) (S).
+- **Kiosky (−1):** biele ostrovčeky **#F3F2EE** ~2–3 × 4–6 m v osi pasáže (S – fotka 2014, mapa: 42 malých jednotiek
+  7–44 m² na −1).
+- **Kvetináče:** veľké biele valcové kvetináče ⌀ ~0,9 m, v ~1,1 m (**#F2F2F0**) so zelenými rastlinami (**#3E6B35**) (S).
+- **Sedenie:** v rozšírenom priestore pod klenbou lounge pohovky oranžové **#D9683A** a petrolejové **#3D7A7E**
+  (fotka 2010, mohlo sa zmeniť – N).
+- **Závesné sochy** (akrobati na lanách pod klenbou, OSM artwork uzly pri x≈70 a x≈235) – diela žijúceho autora,
+  nemodelovať (rozhodnutie z #131).
+- **Vstup z námestia:** bodovo kotvené sklo s krížovými („X“) držiakmi, štíhly biely oceľový „stromový“ stĺp (S).
+
+### E2 (2023)
+- **Podlaha:** veľkoformátové dosky ako teraco v dynamickom vzore klinov a pásov: krémová **#E7E0D4**,
+  terakotová s bodkovaním **#A35B4C**, sivá **#A8A49E** (S – fotka 12/2025).
+- **Strop GF:** biely sadrokartón **#F2F2F0** s lineárnymi LED pásmi v náhodných šikmých smeroch („škrty“) (S).
+- **Okraje otvorov:** biely fazetovaný (skladaný trojuholníkový) obklad **#EDECE8** so svetelným prstencom, nad ním
+  sklenené zábradlie (S).
+- **Strecha:** svetlá oceľová trojuholníková sieť (**#E2E4E6**), číre sklo (V/S).
+- **Food hall:** drevo, betónové dlaždice, kamenná podlaha, „urbánny industriálny“ dizajn (V – TASR, startitup).
+- **Hala:** presklený valec na štíhlych stĺpoch, kupola, strop 12 m (V – GFI).
+
+---
+
+#### 6. Veľké priestory (všeobecne, bez značiek)
+
+Plochy z mapy (anizotropná kalibrácia, ±20 %):
+- **Supermarket:** −1, západný koniec pod budovou Central 1 (~2 700 m², stred ~(−41,−3)) (S; OSM shop=supermarket
+  na −1 pri (−28,−1)).
+- **Veľká predajňa na západnom konci** pod oblúkovou budovou Central 1: GF ~1 000 m² + FF ~1 200 m² (S).
+- **Dvojpodlažná módna kotva:** E2 západ, severná strana, **−1 + 0** (~3 000 + 1 800 m², výklad do pasáže ~40 m)
+  (S – OSM level „−1;0“, oficiálne „dvojpodlažná predajňa“).
+- **Veľká predajňa na −1 pod halou E2:** ~2 800 m² (S).
+- **Veľká predajňa na GF pri námestí (E1-východ, sever):** ~1 400 m² (S).
+- **Kino (17 sál):** foyer na FF pri napojení E1/E2 (~2 000 m², stred (298,−31)), sály v bezokenných „kinových
+  škatuliach“ severne (OSM rel 21708455 so 7 podlažiami, rel 21708456) (S). OSM node 1286316408 level 1, screen 17.
+  V roku 2010 to bol 9-sálový multiplex (europe-re).
+- **Food court + food hall:** FF v E2 medzi bublinou a halou (x ≈ 375–430), **3 700 m², 1 156 miest, ~35 prevádzok**,
+  viditeľný z nižších podlaží, oddychová zóna s výhľadom na Dunaj (juh) (V – TASR 2020, eurovea.sk). Na mape FF
+  35 malých jednotiek < 45 m² (kiosky) a nápis FOODCOURT v tejto časti (V). OSM: 15 × fast_food na úrovni 1 (V).
+  Pôvodný food court E1 mal 1 600 m² a v 2023 sa celý presunul do E2 (V).
+- **Služby / voľný čas ~1 500 m²:** FF na východnom konci E1-západ, južná strana (asi fitnes) (N).
+- **Neverejné časti (PRIVATE):** hotel a kancelárie na severe E1, byty Riverside „vsunuté“ do výšky FF na južnej
+  strane E2 (EIA) (S).
+- **Typická malá jednotka:** výklad **7,5–10,5 m** (medián ~8,3 m), hĺbka 7–19 m (medián GF ~9 m, −1 ~14 m),
+  plocha 40–250 m² (S, mapa). Kiosky 7–44 m².
+
+---
+
+#### 7. Plocha a počty
+
+- **85 000 m²**, 300–320 obchodov, reštaurácií, barov a kaviarní (V – eurovea.sk, Wikipedia, startitup).
+- 2010: **> 55 000 m² GLA**, 150 obchodov + 30 kaviarní/barov/reštaurácií (V – europe-re); Wikipedia: 59 000 m² +
+  26 000 m² (E2) = 85 000 m².
+- Oficiálna mapa 2026: **285 nájomcov** (−1: 117, GF: 84, FF: 84; podľa typu 161 obchodov, 61 služieb, 63 gastro;
+  gastro je hlavne na FF v E2) + 12 bankomatov; v SVG **335 polygónov jednotiek** (−1: 129, GF: 115, FF: 91) vrátane voľných (V).
+- Odmerané z mapy: pôdorys GF aj FF ~30 000 m² (obe budovy), verejná plocha GF ~7 900 m² (s otvormi), FF ~9 900 m²;
+  −1 je kreslený ako celý obdĺžnik podzemia (~36 000 m²) (S).
+- Klenba E1 2 300 sklenených trojuholníkov / 5 500 m²; zelená strecha E2 3 942 m² (V).
+
+---
+
+#### 8. Zjednodušený model – odporúčanie (odvodené)
+
+- Tri podlažné dosky −5,5 / 0 / +5,5 (E2 +6,0) m, strecha podnože +11 (E2 +12,4) m, klenba do +14,5…16 m.
+- E1-západ: os (951,9; 340,7) → (1123,9; 372,9) v hre; pás 13 m (GF) / 16,5 m (FF) / 12 m (−1), otvory 6,5 m (GF)
+  a 10 m (FF) po úsekoch ~20–28 m, mosty 3–4 m široké medzi nimi (6 mostov), rotunda ⌀ ~25 m s otvorom ⌀ ~13 m.
+- Námestie vonku 57 m; pod ním na −1 pasáž 12 m + pohyblivé chodníky do garáže.
+- E1-východ + E2: os (1180,8; 380,8) → (1238,8; 394,0) → (1297,5; 395,0) → (1320,8; 387,0) → (1353,4; 398,0) →
+  (1398,8; 405,1); šírka 9–11 m, bubliny 16–25 m, hala ⌀ ~25–35 m s otvorom 30 × 13 m.
+- Eskalátory: pár na ~14 m pôdorysu (30°, 5,5 m prevýšenie), šírka páru ~3,5 m.
+
+---
+
+#### 9. Neisté – čo by pomohlo (vlastné fotky)
+
+1. **Prierez E1 s mierkou:** fotka z FF cez otvor dole (s človekom na −1), aby sa overili výšky podlaží (5,5 m?).
+2. **E2 na GF:** je v podlahe GF pod oválnymi otvormi aj otvor do −1, alebo nie? (fotka z bubliny dole).
+3. **Podlahy:** detail dlažby E1 (rozmer a farba dosiek) a vzor E2 zhora z FF.
+4. **Madlo zábradlia** (drevo vs. kov) v E2 a v rotundách.
+5. **Hala E2:** pohľad hore na kupolu a celé schodisko/eskalátory v nej.
+6. Kino: kde presne sú eskalátory do sál a či má foyer druhú úroveň.
+
+---
+
+#### 10. Zdroje
+
+- OSM (ODbL), Overpass 26. 11. 2026, bbox 48.1390,17.1180,48.1425,17.1290: vnútorné chodníky (napr.
+  [166457620](https://www.openstreetmap.org/way/166457620), [166457643](https://www.openstreetmap.org/way/166457643),
+  [765260808](https://www.openstreetmap.org/way/765260808), [765260811](https://www.openstreetmap.org/way/765260811),
+  [762656627](https://www.openstreetmap.org/way/762656627) úroveň −1, [1184319677](https://www.openstreetmap.org/way/1184319677),
+  [1184319681](https://www.openstreetmap.org/way/1184319681)), eskalátory (zoznam v kap. 4), klenby
+  [762656642](https://www.openstreetmap.org/way/762656642), [762656643](https://www.openstreetmap.org/way/762656643),
+  [1164819251](https://www.openstreetmap.org/way/1164819251), mall [relation 4778411](https://www.openstreetmap.org/relation/4778411),
+  vstupy (kap. 2.5).
+- Oficiálne: [mapa centra](https://eurovea.sk/mapa-centra) (inline SVG – len odmerané), [o Eurovea](https://eurovea.sk/o-eurovea),
+  [parkovanie](https://eurovea.sk/parkovanie).
+- EIA Eurovea 2: [rozhodnutie 2017 (PDF)](https://www.enviroportal.sk/eia/dokument/263084) – 3 podlažia NC (1.PP, 1.NP,
+  2.NP), ±0,000 = 139,75 m Bpv, garáž 2.PP–3.PP 1 906 miest, „jedno poschodie NC = dve obytné“, napojenie na E1 vo
+  všetkých úrovniach; [detail konania](https://www.enviroportal.sk/eia/detail/polyfunkcny-subor-eurovea-2).
+- [europe-re.com (2010)](https://europe-re.com/eurovea-galleria-welcomes-its-first-visitors-sk/26623) – GLA, klenba
+  2 300 trojuholníkov, 5 500 m², 235/320 m, 16–25 m, 14–16 m, 9 sál, 1 729 miest.
+- [MERO-TSK referencia](https://mero-tsk.de/en/construction-systems-hidden/32-references/46-facade-roof-projects/151-international-trade-center-eurovea-2.html)
+  – 5 900 m², hviezdicový uzol, sklá ~3,5 m (stránka teraz 404, údaj z výňatku).
+- [SCIA User Contest 2020](https://books.scia.net/UC2020/184/) – strecha E2 165 m, 11–20 m.
+- [GFI – Eurovea 2](https://www.gfi.sk/en/realisations/eurovea-2) – hala 12 m, kupola, vyosená dispozícia.
+- [TASR – food hall (2020)](https://www.teraz.sk/regiony/novy-food-hall-v-eurovea-prinesie-viac/444916-clanok.html) – 3 700 m²,
+  1 156 miest, 35 prevádzok, materiály.
+- [Startitup – otvorenie 2023](https://www.startitup.sk/nova-eurovea-uz-zajtra-otvara-svoje-brany/),
+  [Startitup – dokončovanie](https://www.startitup.sk/eurovea-sa-dokoncuje-a-pripravuje-na-otvorenie/).
+- [Wikipedia – Eurovea Galleria](https://en.wikipedia.org/wiki/Eurovea_Galleria) – 85 000 m², 3 podlažia, 59 000 + 26 000 m².
+- Wikimedia Commons (len prezreté): [interiér 2010 a](https://commons.wikimedia.org/wiki/File:Bratislava10Slovakia15.JPG),
+  [b](https://commons.wikimedia.org/wiki/File:Bratislava10Slovakia16.JPG), [c](https://commons.wikimedia.org/wiki/File:Bratislava10Slovakia17.JPG),
+  [FF 2014 a](https://commons.wikimedia.org/wiki/File:Eurovea_Shopping_Centre,_Bratislava.JPG),
+  [b](https://commons.wikimedia.org/wiki/File:Eurovea_mall,_Bratislava_(Slovak_Republic).JPG),
+  [c](https://commons.wikimedia.org/wiki/File:Eurovea_shopping_centre,_Bratislava_(Slovak_Republic).JPG),
+  [rotunda 2019 a](https://commons.wikimedia.org/wiki/File:Bratislava,_8.jpg), [kupola 2019](https://commons.wikimedia.org/wiki/File:Bratislava,_9.jpg),
+  [kupola 2013](https://commons.wikimedia.org/wiki/File:POVRAZOLEZKY%C5%87A_POD_STROPOM_-_panoramio.jpg),
+  [presklený vstup 2012](https://commons.wikimedia.org/wiki/File:Oddych_v_eurovei_-_panoramio.jpg),
+  [zádverie 2010](https://commons.wikimedia.org/wiki/File:Air_curtains_in_the_shopingcenter_Eurovea,_Slovakia.jpg),
+  [E2 GF 2025](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea.jpg), [kategória](https://commons.wikimedia.org/wiki/Category:Interior_of_Eurovea).
+- Repozitár: `napady/pamiatky-podklady.md` (Eurovea 1/2 exteriér), `tools/blender/osm_eurovea.py` (súradnice hry).

@@ -6,6 +6,7 @@
 // trsy (vlastný InstancedMesh trsyDaleko, #110).
 
 import * as THREE from 'three';
+import { jeBezTravy } from '../pamiatky/nahradene-budovy.js';
 import { geometriaTrsu, materialTravy } from './trava.js';
 import { nacitajKvalitu } from '../../ui/nastavenia-grafiky.js';
 import { bodVPolygone, ohranicenie } from '../geometria.js';
@@ -154,7 +155,7 @@ export default {
           if (d > po || d <= od) continue;
           if (od > 0 && hash(gx, gz, 3) > 1 - (d - od) / (po - od) * 0.6) continue;
           if (!this.jeTrava(x, z)) continue;
-          if (this.vBudove(hra, x, z, budovy)) continue;
+          if (this.vBudove(hra, x, z, budovy) || jeBezTravy(x, z)) continue;
           // nie na strmom zreze ani múre (tam je kameň)
           const y = vyska(x, z);
           // nie pod hladinou (dno Dunaja a jazier môže mať v mape pokrývky zelenú farbu)
