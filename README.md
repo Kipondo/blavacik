@@ -751,6 +751,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   štýlov budov) a v jej strede rástol strom z lasera – teraz je podľa prieskumu: nádrž ⌀ 7 m, horná misa vo výške 3,2 m,
   bronzové deti s rybami a Ganymedes na orlovi (≈ 6,6 m). Podklady: `napady/pamiatky-podklady.md` („SND – historická
   budova“), kontroly `snd-presny-model` a `pamiatky-model-mimo-stylov`.
+- **Reduta (Slovenská filharmónia) – presný model** (26. 11.; `tools/blender/presne/reduta.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- reduta`): pôdorys z OSM, výšky z laserového
+  skenovania ÚGKK – severné a západné krídlo s rímsou 16,2 m a strechou do 22,4–23,1 m, pavilón za severným štítom
+  s hrotom ~29 m, juhozápadný blok s rímsou 20,5 m, strmou strechou s plošinou 32,3 m, tamburom s 12 oválnymi oknami
+  a rebrovanou kupolou 37,4 m, blok koncertnej siene s rímsou 20,2 m, plochou strechou a svetlíkom, sklená strecha
+  nádvoria 13,5 m. Fasády podľa fotiek: pásová bosáž prízemia s oblúkovými otvormi, lizény, okná s nadokennými
+  rímsami a oválnymi oknami vo vlyse; **severný rizalit** s portálom, edikulou s oválnym oknom, frontónom, atikou
+  so zlatým nápisom (v hre len pásiky, bez textu) a urnami; **stredný pavilón na Mostovej** s bočným portálom,
+  oblým arkierom, zakriveným štítom a čepcovou kupolou; **južný luk** s obrovským portálom kaviarne, trojdielnym
+  oknom a štítom s erbom mesta; dlhý balkón a vlnitý hrebeň JZ bloku, balkón so zástavami a arkier na severe,
+  zvonové vežičky na nárožiach. Farby po obnove 2009–2011 (svetlá krémová omietka, nie okrová) a strechy z novej
+  medi 2022–2023 (tmavohnedé, nie zelené). Podklady: `napady/pamiatky-podklady.md` („Reduta“), kontrola
+  `reduta-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1409,8 +1422,9 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   stromy ako billboardy, na nízkej Lambert namiesto PBR a textúry v polovičnom rozlíšení; zmerať na integrovanej
   grafike a RTX 2060 cez `?meranie` a doladiť hodnoty predvolieb.
 - Átriaky (#91): chodby a terasy všetkých domov podľa fotiek, viac izieb a blokov s interiérom.
-- Presné pamiatky: ďalšie dávky (Reduta a ďalšie podľa `tools/blender/presne/`); pri SND ešte presný počet okenných
-  osí bokov a tvar vetracej vežičky (chýbajú fotky – `napady/pamiatky-podklady.md`).
+- Presné pamiatky: ďalšie dávky podľa `tools/blender/presne/`; pri SND ešte presný počet okenných osí bokov a tvar
+  vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
+  sieňou (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave

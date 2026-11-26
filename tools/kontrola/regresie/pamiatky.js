@@ -213,4 +213,24 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 4, chyby };
     },
   },
+  {
+    id: 'reduta-presny-model',
+    popis: 'Reduta: presný model podľa prieskumu (tambur a kupola nad JZ blokom do 37,4 m, hrot ~39 m) nahrádza aj sklenú '
+      + 'strechu nádvoria (OSM building=roof, z dlaždíc by sa inak zdvojila) a leží na chodníku Mostovej',
+    oprava: 'feature/reduta-presne – tools/blender/presne/reduta.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-reduta.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-reduta.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 37 && info.vyska < 41)) chyby.push({ text: `výška ${info.vyska} m – kupola s hrotom má mať ~39 m` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'ťažisko Reduty nie je v obryse modelu' });
+      // stred zastrešeného nádvoria (u = −14, v = 12 m v osiach budovy, azimut 166,5°) v lokálnych metroch hry
+      if (!o.some((b) => vnutri(8.4, -16.41, b))) chyby.push({ text: 'sklená strecha nádvoria nie je v obrysoch modelu (zdvojí sa z dlaždíc)' });
+      if (!Array.isArray(info.zakladnaBod)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod (Medená)' });
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];

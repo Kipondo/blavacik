@@ -1719,3 +1719,99 @@ Plochy z mapy (anizotropná kalibrácia, ±20 %):
   [zádverie 2010](https://commons.wikimedia.org/wiki/File:Air_curtains_in_the_shopingcenter_Eurovea,_Slovakia.jpg),
   [E2 GF 2025](https://commons.wikimedia.org/wiki/File:Bratislava,_Eurovea.jpg), [kategória](https://commons.wikimedia.org/wiki/Category:Interior_of_Eurovea).
 - Repozitár: `napady/pamiatky-podklady.md` (Eurovea 1/2 exteriér), `tools/blender/osm_eurovea.py` (súradnice hry).
+
+## Reduta – Slovenská filharmónia (26. 11. 2026)
+
+Model: `tools/blender/presne/reduta.py` (spustenie cez `tools/blender/presne_blender.py -- reduta`). Spoľahlivosť:
+**V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára nejdú.
+Bez Google Maps/Earth/Street View.
+
+### Poloha, pôdorys, lokálna sústava
+- OSM **way 56305202** (https://www.openstreetmap.org/way/56305202) – `building=yes`, `building:levels=3`,
+  `roof:shape=pyramidal` (zjednodušené); zastrešené nádvorie **way 779745499** (`building=roof`). Adresy Medená 3,
+  Mostová 1, Palackého 2, Nám. E. Suchoňa 1. **V**
+- Ťažisko pôdorysu = stred záznamu v `data/mapa/pamiatky.json` (x 171,22, z 281,42; 48,14097 N, 17,11001 E). **V**
+- Lokálna sústava modelu: **u** = dlhá os (azimut 166,5°, od Nám. E. Suchoňa k Medenej), **v** = priečna (azimut 76,5°,
+  od Mostovej do vnútra bloku). Pôdorys ~86 × 42 m, ~2 770 m². **V**
+- Strany: **sever** – Nám. E. Suchoňa (hlavný vstup, štít s atikou); **západ** – Mostová (85,8 m, električka);
+  **juh** – Medená a Nám. Ľ. Štúra (luk s portálom kaviarne, štít s erbom mesta); **východ** – štítové múry k susedom
+  (Medená 5, Palackého 6) a nádvorie. **V**
+- Hmota (podľa https://filharmonia.sk/o-nas/rekonstrukcia-reduty/priebeh-rekonstrukcie-2 „trojkrídlová dispozícia
+  s vnútorným nádvorím“ + laser + ortofoto ZBGIS): severné krídlo (hĺbka ~17,5 m), západné krídlo pri Mostovej
+  (hĺbka 18–23 m, dvorová strana zvlnená), juhozápadný blok (u 2–41, v −18…+1,5) a blok koncertnej siene pri Medenej
+  (u −1…39, v 1,5…22). Nádvorie (~26 × 14 m) je od rekonštrukcie zastrešené sklom. **V/S**
+- Výstupky: stredný pavilón na Mostovej (u −19,9…−9,9) vystupuje ~2,5–3 m so skosenými bokmi; SZ nárožný arkier
+  (u −45…−32) vystupuje ~2 m a je zaoblený; JZ nárožie zaoblené (R ~3 m); južný luk (tetiva ~14 m) vypuklý ~1 m;
+  pri Medenej ešte konvexné nárožie s vežičkou (v 8–17). **S**
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows), m nad chodníkom
+Terén je rovný: 138,0–138,5 m n. m. (Bpv), pri Nám. E. Suchoňa ~138,4, pri Medenej ~138,0. Nula modelu = chodník
+Mostovej (≈ 138,25 m). Mriežka 1 m (4 600 bodov) a 2 m, profily po 0,5 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| hlavná rímsa severného a západného krídla | 16,2 m | V |
+| strecha severného krídla: krátka strmšia časť, potom ~30°, hrebeň (~9,5 m za fasádou) | 22,2–22,4 m | V |
+| strecha západného krídla: hrebeň ~10 m za fasádou Mostovej | 23,1 m | V |
+| pavilón za severným štítom (valba nad strechou krídla), vrchol / hrot | ~25,8–26,4 / 27,8 (fotka: ~29) m | S |
+| atika severného štítu / veľká urna navrchu | ~22 / 24,9 m | S |
+| edikula nad hlavným portálom (vystupuje ~1 m) | 9,2 m | V |
+| čepcová kupola stredného pavilónu na Mostovej | 26,9 m | S |
+| rímsa JZ bloku (Mostová juh a južný luk), nad ňou vlnitý hrebeň | 20,5 m (+ ~0,8 m) | V |
+| strmá strecha JZ bloku – spodok (~74°) / plošina (u 8–24, v −11…−4) | 20,5 → 25,3 / 32,3 m | V |
+| tambur (Ø ~6,7 m, 12 elipsových okien – TASR 2024) a kupola, vrchol | 34,6 / 37,4 m (+ hrot ~1,5 m) | V |
+| mansarda nad južným lukom | 20,5 → 25,5 m | S |
+| štít južného luku, urna navrchu | ~24,6 / 26,6 m | S |
+| rímsa bloku koncertnej siene / plochá strecha | 20,2 / 25,7–26,1 m | V |
+| svetlík na plochej streche (u 8–28, v 8–15) | laser vidí cez sklo ~19,7 m | N |
+| zastrešené nádvorie (sklo na oceľovej mriežke) | 13,3–13,9 m | V |
+| vežička schodiska na strane nádvoria (u −15, v 6,5) | ~26,2 m | S |
+
+### Fasády (fotky z Commons, kategória https://commons.wikimedia.org/wiki/Category:Reduta,_Bratislava)
+- **Spoločné:** neobarok s prvkami rokoka a secesie (https://filharmonia.sk/o-nas/historia-reduty,
+  https://sk.wikipedia.org/wiki/Reduta_(Bratislava)); prízemie s pásovou bosážou a polkruhovými otvormi, sivý kamenný
+  sokel; dve poschodia s lizénami, okná 1. poschodia s parapetnými reliéfmi a nadokennými rímsami s kartušou,
+  2. poschodie s rovnou rímsičkou; vo vlyse pod rímsou ležaté oválne okná (krídla) alebo okrúhle okulusy (bloky pri
+  Medenej); hlavná rímsa s konzolami. **V**
+- **Sever (Nám. E. Suchoňa):** SZ zaoblený nárožný arkier so zakriveným štítom a medenou figúrkou + 1 os +
+  **rizalit so štítom v západnej tretine** (v −10,5…−0,5; nie v strede): polkruhový portál s kovanou bránou
+  a lampami, **edikula s oválnym oknom s lúčovou priečkou** a medenou strieškou, okno 2. poschodia, ovál vo vlyse,
+  trojuholníkový frontón s kartušou, **atika s pozláteným nápisom** (v hre len zlaté pásiky – nápis je meno inštitúcie),
+  volúty, 2 urny po bokoch a veľká urna navrchu; za štítom vysoká valba s hrotom. Východná časť **6 osí**: v strede
+  druhý portál pod **kamenným balkónom na konzolách** so zástavami, nad balkónom dvojosový arkier s medenou strieškou
+  (https://commons.wikimedia.org/wiki/File:Reduta,_Bratislava.jpg,
+  https://commons.wikimedia.org/wiki/File:Bratislava_-_Reduta_20180510-01.jpg). **S**
+- **Západ (Mostová):** SZ arkier – ~3 osi – **stredný pavilón** (bočný portál so schodmi a puttami na podstavcoch,
+  oblý arkier cez obe poschodia, ovál vo vlyse, zakrivený štít s mušľou, **čepcová kupola** na osemuholníku) – ~3 osi –
+  **JZ blok** (~7 osí): vysoké oblúkové zasklené otvory kaviarne v prízemí, **dlhý balkón na konzolách** cez 5 osí,
+  okulusy vo vlyse, vlnitý štukový hrebeň nad rímsou, volské oká na strmej streche
+  (https://commons.wikimedia.org/wiki/File:Bratislava_Slovensk%C3%A1_filharm%C3%B3nia_(52055080970).jpg,
+  https://commons.wikimedia.org/wiki/File:Reduta_-_panoramio.jpg). Počty osí **N** – ulica je úzka, kolmý záber chýba.
+- **Juh (Medená / Nám. Ľ. Štúra):** **luk JZ bloku** – obrovský polkruhový portál kaviarne (svetlosť ~4,6 m)
+  s kvádrovaným oblúkom a vejárovým zasklením, po bokoch menšie oblúkové dvere s okulusmi; na 1. poschodí
+  **trojdielne oblúkové okno** v rokokovom ráme, nad ním ležaté oválne okno; boky luku bez okien, len medailóny;
+  nad rímsou **zakrivený štít s erbom mesta** (brána s tromi vežami), urna navrchu a 2 vázy. Východne od luku ustúpená
+  časť bloku koncertnej siene (~5 osí) s **konvexným nárožím a zvonovou vežičkou**
+  (https://commons.wikimedia.org/wiki/File:Bratislava,_the_square_%22N%C3%A1mestie_%C4%BDudov%C3%ADta_%C5%A0t%C3%BAra.JPG,
+  https://commons.wikimedia.org/wiki/File:Slovensk%C3%A1_filharm%C3%B3nia_(43633856064).jpg). **V**
+- Mozaika ani nápis „REDUTA“ na fasáde nie sú; otvorené arkády nie sú. **S**
+
+### Strechy a farby
+- **Celá krytina je medená** – kompletná výmena 6/2022–12/2023 (tašky, ploché plechy, šesťuholníkové šablóny),
+  repasovaná kupola s medenými figúrami a tambur s 12 elipsovými oknami
+  (https://www.teraz.sk/bratislavsky-kraj/na-rekonstrukciu-strechy-bratislavskej/790449-clanok.html). **V**
+  Dnes je teda **tmavohnedá nová meď**, nie zelená patina ani čiernosivá stará meď z fotiek 2009–2019. V hre #544640
+  (v teplom svetle hry by svetlejší odtieň pôsobil ako pálená škridla). Odtieň **N** – fotka po roku 2023 chýba.
+- Tvary: krídla – strecha so strmšou spodnou časťou a ~30°, vikiere s oválnymi oknami; pavilón za severným štítom –
+  vysoká valba s hrotom; JZ blok – strmá strecha (spodok ~74°, potom ~60°) s nárožnými lemami, volskými okami,
+  plošinou, tamburom a rebrovanou kupolou; luk – mansarda; koncertná sieň – mansardový okraj a plochá strecha so
+  svetlíkom; sklená strecha nádvoria. **S**
+- **Omietka** po obnove 2009–2011 svetlá krémová #DCCBB0 (predtým okrovo žltá – pozor na staré fotky), štuky #E9E0CF,
+  sokel #9E978A, biele okenné rámy, tmavé drevené dvere #3A2A20, kované brány a lampy #1F2422, zlátenie #C8A44A. **S**
+
+### Čo chýba (aké fotky by pomohli)
+1. Farba striech po roku 2023 – záber z vyhliadky UFO (Most SNP) alebo z hradu teleobjektívom, za slnka.
+2. Presný počet a rozostup osí na Mostovej – séria kolmých záberov z protiľahlého chodníka (pred hotelom) každých ~10 m.
+3. Hrot nad kupolou a „medené figúry“ – teleobjektív z Nám. Ľ. Štúra a od fontány pred SND.
+4. Svetlík nad koncertnou sieňou a sklená strecha nádvoria – len zhora.
+5. Presná šírka severného rizalitu a výšky frontónu a urien – kolmý záber zo stredu Nám. E. Suchoňa.
