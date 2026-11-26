@@ -14,9 +14,12 @@ from veze import uloz  # noqa: E402
 from historicke.budova import nacitaj, postav_zaznam  # noqa: E402
 from historicke.zoznam import SPEC  # noqa: E402
 
+# pamiatky s presným modelom (tools/blender/presne_blender.py) – bez výslovného kľúča sa neprepisujú
+PRESNE = {'slavin', 'modry-kostolik', 'snd'}
+
 data = nacitaj()
 zaznamy_hry = []
-for kluc in sys.argv[1:] or list(SPEC):
+for kluc in sys.argv[1:] or [k for k in SPEC if k not in PRESNE]:
     spec = SPEC[kluc]
     vyber = data.get(kluc, [])
     if spec.get('zaznamy'):

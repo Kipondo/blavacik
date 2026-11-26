@@ -1308,3 +1308,91 @@ Výšky sú v m n. m. Bpv (hra: y = výška − 139).
   Šírka 35 m. Laser je starší ako most. Celý most leží v Bratislave (Jarovce, Podunajské Biskupice).
 - **Čunovo:** cez vodné dielo vedie len cesta III. triedy po hrádzi k Danubiane, s mostmi cez prepady.
   Cez zdrž Hrušov ani cez derivačný kanál v Bratislave cesta nevedie.
+
+## SND – historická budova a Ganymedova fontána (26. 11. 2026)
+
+Model: `tools/blender/presne/snd.py` (spustenie cez `tools/blender/presne_blender.py -- snd`), fontána
+`js/mapa/pamiatky/fontana-ganymedes.js`. Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky sa len
+prezreli (farby ako priemer pixelov), výkresy ani fotky nie sú v repozitári.
+
+### Poloha a pôdorys (OSM) – V
+
+- Budova: OSM way 34571529 (https://www.openstreetmap.org/way/34571529) – `building=civic`, `building:levels=4`,
+  architekti Fellner & Helmer, Gorkého 2. Bez `building:part` a `height`; `roof:shape=pyramidal` nesedí (strechy nižšie).
+- Ťažisko 48.1423962 N, 17.1102176 E = v hre x 187,0 / z 122,7 (záznam v `data/mapa/pamiatky.json`). Plocha 1 876 m².
+- Dlhá os má azimut 59,3° (dozadu ku Komenského nám.); **hlavné priečelie hľadí na ZJZ (≈ 239°)** k Hviezdoslavovmu
+  nám. a fontáne. V modeli lokálna sústava u (po osi dozadu) a v (k ulici Gorkého).
+- Hlavný kváder u −24,8 … +27,8 (52,6 m) × ≈ 34,4 m. Nárožné pavilóny priečelia vystupujú do bokov o ≈ 0,65 m
+  (u −24,8 … −14,2), bočné rizality u 3,8 … 8,4 a 18,7 … 23,2 (predstup 0,3–0,5 m).
+- Stredný rizalit priečelia: 16,4 m pri lícach krídel, zaoblené nárožia (štvrťkruh r ≈ 3,1 m) do čela širokého 10 m.
+- Vstupný portikus 10 m široký, siaha ≈ 5,6 m pred rizalit (čelo u −33,6); celé priečelie je ≈ 8,8 m pred krídlami.
+- Prístavba z rokov 1969–72: OSM way 294997446 (https://www.openstreetmap.org/way/294997446), u 27,8 … 45,1,
+  šírka ≈ 33 m. Medzi ňou a historickou budovou je na bokoch úzka medzera (laser).
+
+### Výšky – laser ÚGKK (DMP/DMR, INSPIRE WMS, https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows) – V
+
+Nula = chodník pri bokoch 138,9 m n. m. (Gorkého vozovka 138,2–138,4, predpolie 139,0–139,3).
+
+| prvok | výška nad chodníkom |
+|---|---|
+| terasa na portiku / jej balustráda | 6,8 / 7,7 m |
+| hlavná rímsa (vyloženie ≈ 0,8 m) | 15,4 m |
+| plochá strecha obvodových krídel = vrch balustrády | 16,8–17,1 m (pás ≈ 6 m po obvode) |
+| atika nad lodžiou / súsošie Tálie | 17,4 / ≈ 20,7 m |
+| kupola nad priečelím: pätka / plošina / mreža | ≈ 17,5 / 22,7–23,3 (okraj 23,8) / ≈ 24,6–25 m |
+| mansarda stredného traktu (≈ 21–24 m široká): päta / zlom / vrch | ≈ 17 / 21,7 / 22,3–23,1 m |
+| vetracia vežička nad hľadiskom (≈ 3 × 5 m) | 28,4 m |
+| javisková veža (u ≈ 7 … 20, šírka ≈ 21 m): odkvap / plošina / max. | ≈ 24–25,5 / 28,0–28,8 / **29,7 m** |
+| zadný trakt za javiskom | 22,7 m, vyšší stred 23,7 m |
+| prístavba: boky / stred | 16,8 / 19,2–19,7 m |
+
+Javisko podľa sk Wikipédie 18 × 17,5 × 21,3 m, portál 10,5 × 7 m, točňa ⌀ 13 m. Laserové hrany ležia ≈ 1 m ďalej
+k námestiu ako OSM – pôdorys z OSM, výšky z lasera.
+
+### Fasády (fotky Wikimedia Commons, len prezreté) – V/S
+
+- Zdroje: https://commons.wikimedia.org/wiki/File:Slovensk%C3%A9_n%C3%A1rodn%C3%A9_divadlo,_20210727_1149_0355.jpg
+  (čelný pohľad), https://commons.wikimedia.org/wiki/File:Bratislava_Slovak_National_Theatre_Old-05.jpg,
+  https://commons.wikimedia.org/wiki/File:Bratislava_Slovak_National_Theatre_Old-02.jpg (atika a kupola),
+  https://commons.wikimedia.org/wiki/File:Slovak_National_Theatre_in_2019.09.jpg (strana Gorkého),
+  https://commons.wikimedia.org/wiki/File:Tatra_T2_215_H1_Jesenskeho_ul.jpg (prístavba),
+  https://sk.wikipedia.org/wiki/Historick%C3%A1_budova_Slovensk%C3%A9ho_n%C3%A1rodn%C3%A9ho_divadla,
+  https://de.wikipedia.org/wiki/Slowakisches_Nationaltheater, https://snd.sk/en/node/45.
+- Novorenesancia/neobarok, 1884–1886 (staviteľ I. Feigler ml.), NKP. Priečelie **11 osí (3 + 5 + 3)**.
+- Členenie výšky: sokel 0–0,6 m; rustikované prízemie s mezanínom do 5,8 m (okná 0,7–2,5 a 3,8–4,8 m); kordónová
+  rímsa; veľký pilastrový rád cez dve poschodia (korintské hlavice 13,0–13,5 m); okná 1. poschodia 7,0–9,3 m so
+  segmentovou suprafenestrou do 10,5 m, okná 2. poschodia 11,3–12,9 m s rovnou rímsičkou; kladie 13,5–15,4 m
+  s modiliónmi; balustráda 15,4–16,9 m s podstavcami a vázami. Rozpon osí ≈ 3,1 m.
+- Rizalit: portikus so 4 podporami (krajné piliere s polstĺpmi, 2 toskánske stĺpy, os ≈ 3 m), za ním arkáda
+  s 3 polkruhovými vchodmi, v zaoblených stenách po jednom polkruhovom vchode; nad tým lodžia so 4 stĺpmi veľkého rádu
+  v čele a po 1 v nárožiach, 3 balkónové dvere s trojuholníkovými frontónmi, 5 horizontálne oválnych nik s bustami,
+  v nárožiach malé balkóny; atika so zaoblenými koncami, nápisová doska s pozlátenými písmenami a rozetami, súsošie
+  múzy Tálie s dvoma putti a dve sochy géniov na nárožiach atiky.
+- Kupola: nízka, „prilba“ na zaoblenom obdĺžniku ≈ 11 × 16 m, zvislé lemy plechu, 2 oválne vikiere v kartušiach,
+  plochý vrch s kovanou mrežou a dvoma vyššími stĺpikmi.
+- Boky: rovnaké členenie, odhad **15–17 osí** (N – na Commons nie je kolmý záber boku), v bočných rizalitoch
+  polkruhové vchody, nástenné lucerny na konzolách.
+- Prístavba: svetlý travertínový obklad s pásmi tmavých okien (koncepcia V. Hazucha, projekt R. Hirth).
+
+### Farby (odporúčané) – S
+
+Omietka #E6DBBC, detaily #EFEBE2, rustika #C9B396 (škáry #8E7E6A), sokel #A9A497, plech na fotkách #A9B0B6 (v modeli
+#86919C, lebo v teplom svetle hry svetlejšia sivá pôsobí béžovo), sochy #655C50, písmená #B8963E, rámy okien #3E352C.
+
+### Ganymedova fontána – S
+
+- OSM way 39993548 (https://www.openstreetmap.org/way/39993548), https://sk.wikipedia.org/wiki/Ganymedova_font%C3%A1na.
+- Viktor Tilgner, 1888 (bronz odliala firma Beschorner, Budapešť). Ganymedes na orlovi so zdvihnutou miskou, na sokli
+  4 deti s dunajskými rybami, na okraji misy 3 páry vodných zvierat.
+- Stred 48.1422000 N, 17.1097207 E (hra x 150,1 / z 144,5), na osi divadla ≈ 9 m pred portikom.
+- Dolná nádrž ⌀ ≈ 7 m so zaobleným obrubníkom 0,4–0,6 m; horná plytká misa ⌀ ≈ 4–4,5 m s okrajom ≈ 3,1–3,2 m;
+  orol ≈ 5,8–6,0 m, vrchol ≈ 6,6 m. Kameň ≈ #CFC6B4, bronz ≈ #4A4A3C.
+- Záznam fontány bol omylom v `styly` (štýly OSM budov) v `data/mapa/pamiatky.json`, takže sa nestavala a laser
+  zo súsošia spravil strom – opravené, kontrola `pamiatky-model-mimo-stylov`.
+
+### Čo chýba – vlastné fotky od majiteľa
+
+1. Bočné fasády kolmo (z protiľahlého chodníka Gorkého a Jesenského, 2–3 zábery pri rizalitoch) – presný počet osí.
+2. Strechy z výšky (z hradu alebo z vyššieho poschodia pri Hviezdoslavovom nám.) – tvar vetracej vežičky a vrch
+   javiskovej veže.
+3. Zadná horná časť nad prístavbou z Komenského nám. (okná a materiál zadného traktu).

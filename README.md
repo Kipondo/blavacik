@@ -703,6 +703,19 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   portikom a tympanónom (`tools/blender/historicke/zoznam.py`). **Náhľad pamiatky bez mesta:**
   `nahlad-pamiatky.html?m=sm-slavin&az=200&el=14&d=1.6` (m = súbor v `assets/pamiatky/`, az/el = smer a výška
   kamery v stupňoch, d = vzdialenosť). Snímky: `docs/snimky/pamiatky-presne/`.
+- **Historická budova SND – presný model** (26. 11.; `tools/blender/presne/snd.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- snd`): pôdorys z OSM, výšky z laserového skenovania
+  ÚGKK – rímsa 15,4 m, balustráda s vázami 16,9 m, mansarda stredného traktu 21,7–22,6 m, nízka kupola nad priečelím
+  s plošinou 23 m, kovanou mrežou a dvoma oválnymi vikiermi, vetracia vežička nad hľadiskom 28,4 m, javisková veža
+  s plošinou 28,4 m a vetraním 29,7 m, zadný trakt 22,7–23,7 m. Priečelie 3 + 5 + 3 osí: rustikované prízemie
+  s mezanínom, veľký pilastrový rád, okná so segmentovými suprafenestrami, stredný rizalit so zaoblenými nárožiami –
+  portikus so 4 podporami a terasou, lodžia so 6 stĺpmi, 3 balkónové dvere s frontónmi, 5 oválnych nik s bustami,
+  atika s nápisovou doskou a súsoším múzy s putti. Boky s 15 osami, bočnými vchodmi a lucernami; prístavba z rokov
+  1969–72 (travertín, pásové okná) je súčasťou modelu a nahrádza bežnú budovu z dlaždíc. Strecha je svetlosivý plech
+  (nie medená patina). **Ganymedova fontána** pred divadlom sa predtým vôbec nestavala (záznam bol omylom v zozname
+  štýlov budov) a v jej strede rástol strom z lasera – teraz je podľa prieskumu: nádrž ⌀ 7 m, horná misa vo výške 3,2 m,
+  bronzové deti s rybami a Ganymedes na orlovi (≈ 6,6 m). Podklady: `napady/pamiatky-podklady.md` („SND – historická
+  budova“), kontroly `snd-presny-model` a `pamiatky-model-mimo-stylov`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1361,7 +1374,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   stromy ako billboardy, na nízkej Lambert namiesto PBR a textúry v polovičnom rozlíšení; zmerať na integrovanej
   grafike a RTX 2060 cez `?meranie` a doladiť hodnoty predvolieb.
 - Átriaky (#91): chodby a terasy všetkých domov podľa fotiek, viac izieb a blokov s interiérom.
-- Presné pamiatky: ďalšie dávky (SND, Reduta a ďalšie podľa `tools/blender/presne/`).
+- Presné pamiatky: ďalšie dávky (Reduta a ďalšie podľa `tools/blender/presne/`); pri SND ešte presný počet okenných
+  osí bokov a tvar vetracej vežičky (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
