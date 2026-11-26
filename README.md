@@ -764,6 +764,17 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   zvonové vežičky na nárožiach. Farby po obnove 2009–2011 (svetlá krémová omietka, nie okrová) a strechy z novej
   medi 2022–2023 (tmavohnedé, nie zelené). Podklady: `napady/pamiatky-podklady.md` („Reduta“), kontrola
   `reduta-presny-model`.
+- **Dóm sv. Martina – presný model** (26. 11.; `tools/blender/presne/dom.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- dom-sv-martina`): pôdorys z OSM (loď, presbytérium,
+  veža, kaplnky, predsieň), výšky z laserového skenovania ÚGKK – loď s odkvapom 15,4 m a strmou sedlovou strechou
+  so štítmi do 39,1 m, presbytérium s vyšším odkvapom 21,4 m, hrebeňom 34,2 m, polygonálnou valbou nad apsidou
+  a sanktusníkom, veža s rímsou 52 m. Podľa fotiek: biela loď s pieskovcovými piliermi, ružicou a severným portálom
+  so strieškou, presbytérium zo zvetraného kameňa s 9 vysokými oknami s kružbou a fialami, južná predsieň
+  s renesančným portálom, kaplnka sv. Anny a biela kaplnka sv. Jána Almužníka s medenou kupolou a lucernou,
+  schodisková vežička na SZ nároží; veža s ružicou, oknom zvonice a hodinami na štvorcovej doske, **medená helmica**
+  so sukňou, zvonom so 16 pozlátenými rebrami, otvorenou lucernou a ihlou a **pozlátená koruna na vankúši** (86 m).
+  Model sa kladie na dlažbu pred južnou predsieňou (terén pod vežou je o 5,6 m nižšie). Podklady:
+  `napady/pamiatky-podklady.md` („Dóm sv. Martina“), kontrola `dom-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1424,7 +1435,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 - Átriaky (#91): chodby a terasy všetkých domov podľa fotiek, viac izieb a blokov s interiérom.
 - Presné pamiatky: ďalšie dávky podľa `tools/blender/presne/`; pri SND ešte presný počet okenných osí bokov a tvar
   vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
-  sieňou (chýbajú fotky – `napady/pamiatky-podklady.md`).
+  sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice (chýbajú fotky –
+  `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
