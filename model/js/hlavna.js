@@ -54,9 +54,15 @@ async function nastavVariant(v) {
   const u = new URL(location.href); u.searchParams.set('v', v); history.replaceState(null, '', u);
   legenda();
   teren.nastavPlochy(v >= 3);
-  if (v >= 2 && !vrstvy.budovy) { stav.textContent = 'Načítavam budovy…'; vrstvy.budovy = await nacitajBudovy(scena, teren); }
-  if (v >= 4 && !vrstvy.mosty) { stav.textContent = 'Načítavam mosty…'; vrstvy.mosty = await nacitajMosty(scena, teren); }
-  if (v >= 4 && !vrstvy.stromy) { stav.textContent = 'Načítavam stromy…'; vrstvy.stromy = await nacitajStromy(scena, teren); }
+  // vrstva bez dát (ešte nevygenerovaná) sa preskočí – ostatné sa ukážu
+  const nacitaj = async (meno, fn, text) => {
+    if (vrstvy[meno]) return;
+    stav.textContent = text;
+    try { vrstvy[meno] = await fn(scena, teren); } catch (e) { console.warn(`vrstva ${meno}:`, e); vrstvy[meno] = new THREE.Group(); }
+  };
+  if (v >= 2) await nacitaj('budovy', nacitajBudovy, 'Načítavam budovy…');
+  if (v >= 4) await nacitaj('mosty', nacitajMosty, 'Načítavam mosty…');
+  if (v >= 4) await nacitaj('stromy', nacitajStromy, 'Načítavam stromy…');
   if (vrstvy.budovy) vrstvy.budovy.visible = v >= 2;
   if (vrstvy.mosty) vrstvy.mosty.visible = v >= 4;
   if (vrstvy.stromy) vrstvy.stromy.visible = v >= 4;
