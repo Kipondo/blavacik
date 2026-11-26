@@ -15,6 +15,7 @@
     {"model": "vyskova-budova", "subor": "sm-grasalkovicov-palac", "nazov": "Grasalkovičov palác", "x": 4.32, "z": -634.22, "dosah": 60},
     {"model": "vyskova-budova", "subor": "sm-letny-arcibiskupsky-palac", "nazov": "Letný arcibiskupský palác", "x": 126.91, "z": -995.59, "dosah": 35},
     {"model": "vyskova-budova", "subor": "sm-snd", "nazov": "Slovenské národné divadlo", "x": 187.01, "z": 122.67, "dosah": 50},
+    {"model": "fontana-ganymedes", "nazov": "Ganymedova fontána", "x": 150.2, "z": 144.5, "dosah": 30, "zaber": {"kruh": 3.6}},
     {"model": "vyskova-budova", "subor": "sm-reduta", "nazov": "Reduta", "x": 171.22, "z": 281.42, "dosah": 45},
     {"model": "vyskova-budova", "subor": "sm-modry-kostolik", "nazov": "Modrý kostolík", "x": 671.44, "z": 17.1, "dosah": 50},
     {"model": "vyskova-budova", "subor": "sm-frantiskansky-kostol", "nazov": "Františkánsky kostol", "x": 47.12, "z": -155.32, "dosah": 35},
@@ -166,7 +167,6 @@
     {"nazov": "Nivy Tower", "farba": "#9db1bd", "sklo": true},
     {"nazov": "Panorama City - Tower 1", "farba": "#d9dcd8"},
     {"nazov": "Panorama City - Tower 2", "farba": "#d9dcd8"},
-    {"nazov": "Národná banka Slovenska", "farba": "#aab9c2", "sklo": true},
-    {"model": "fontana-ganymedes", "nazov": "Ganymedova fontána", "x": 150.2, "z": 144.5, "dosah": 30, "zaber": {"kruh": 3.6}}
+    {"nazov": "Národná banka Slovenska", "farba": "#aab9c2", "sklo": true}
   ]
 }

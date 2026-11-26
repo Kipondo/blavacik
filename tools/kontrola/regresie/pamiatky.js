@@ -146,6 +146,41 @@ export const kontrolyPamiatok = [
     },
   },
   {
+    id: 'snd-presny-model',
+    popis: 'Historická budova SND: presný model podľa prieskumu (javisková veža do 29,7 m) nahrádza aj prístavbu z r. 1969–72 '
+      + 'na Komenského nám. (bežná budova z dlaždíc by sa inak zdvojila) a leží na chodníku pri boku, nie na vozovke',
+    oprava: 'feature/snd-presne – tools/blender/presne/snd.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-snd.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-snd.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 29 && info.vyska < 31)) chyby.push({ text: `výška ${info.vyska} m – javisková veža má mať 29,7 m` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'ťažisko historickej budovy nie je v obryse modelu' });
+      // stred prístavby (u = 36 m za ťažiskom po osi budovy, azimut 59,3°) v lokálnych metroch hry
+      if (!o.some((b) => vnutri(30.96, -18.38, b))) chyby.push({ text: 'prístavba z r. 1969–72 nie je v obrysoch modelu (zdvojí sa z dlaždíc)' });
+      if (!Array.isArray(info.zakladnaBod)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod (vozovka Gorkého)' });
+      return { skontrolovane: 1, chyby };
+    },
+  },
+  {
+    id: 'pamiatky-model-mimo-stylov',
+    popis: 'Záznam s modelom je v zozname „pamiatky“, nie v „styly“ (štýly OSM budov) – Ganymedova fontána tam omylom '
+      + 'bola a nikdy sa nepostavila (pred SND bol namiesto nej len strom z lasera)',
+    oprava: 'feature/snd-presne – data/mapa/pamiatky.json, js/mapa/pamiatky/fontana-ganymedes.js',
+    tolerancia: 0,
+    async spusti() {
+      const r = await fetch('data/mapa/pamiatky.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba data/mapa/pamiatky.json' }] };
+      const d = await r.json();
+      const chyby = (d.styly ?? []).filter((s) => s.model).map((s) => ({ text: `model „${s.model}“ (${s.nazov}) je v zozname štýlov – nepostaví sa` }));
+      if (!(d.pamiatky ?? []).some((p) => p.model === 'fontana-ganymedes')) chyby.push({ text: 'Ganymedova fontána nie je v zozname pamiatok' });
+      return { skontrolovane: (d.styly ?? []).length + 1, chyby };
+    },
+  },
+  {
     id: 'eurovea-interier',
     popis: 'Interiér galérie Eurovea: v pasážach Eurovea 1 a 2 je podlaha podľa terénu (bez trávy cez ňu), poschodie '
       + 's ochodzou ~5,5–6 m, lávky a eskalátor ako pochôdzne plochy, stĺpy s kolíziou; klenba je priehľadná',
