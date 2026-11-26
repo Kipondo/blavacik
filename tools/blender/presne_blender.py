@@ -1,7 +1,7 @@
-# Presné modely vybraných pamiatok (noc 22. 11.): Slavín, Modrý kostolík; 26. 11.: historická budova SND. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz,
+# Presné modely vybraných pamiatok (noc 22. 11.): Slavín, Modrý kostolík; 26. 11.: historická budova SND, Reduta. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz,
 # záznamy v data/mapa/pamiatky.json aj obrysy (kolízie) ostávajú. Postup a zdroje sú v hlavičke každého súboru
 # v tools/blender/presne/.
-# Spustenie: python3 tools/blender/presne_blender.py [slavin] [modry-kostolik] [snd]
+# Spustenie: python3 tools/blender/presne_blender.py [slavin] [modry-kostolik] [snd] [reduta]
 
 import json
 import os
@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from veze import uloz, z_hry, ccw  # noqa: E402
 from historicke.budova import nacitaj  # noqa: E402
-from presne import slavin, modry_kostolik, snd  # noqa: E402
+from presne import slavin, modry_kostolik, snd, reduta  # noqa: E402
 
 KOREN = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -28,7 +28,7 @@ def bez_konca(b):
 
 # argumenty za „--“ (blender -b -P presne_blender.py -- snd) alebo priamo (python3 s modulom bpy)
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
-for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd']:
+for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta']:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     subor = f'sm-{kluc}'
     i = info(subor)
@@ -45,6 +45,12 @@ for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd']:
         G, H, pristavba = snd.postav()
         obrysy = [obrysy[0], pristavba]
         i['zakladnaBod'] = [-9.19, -15.48]
+    elif kluc == 'reduta':
+        # budova z OSM + sklená strecha nádvoria (bežná „strecha“ z dlaždíc ustúpi modelu); model sa kladie
+        # na chodník Mostovej (pri Medenej je terén o 0,3 m nižší, pri Nám. E. Suchoňa o 0,2 m vyšší)
+        G, H, nadvorie = reduta.postav()
+        obrysy = [obrysy[0], nadvorie]
+        i['zakladnaBod'] = reduta.ZAKLADNA_BOD
     else:
         raise SystemExit(f'neznáma pamiatka {kluc}')
     uloz(G, subor, obrysy, H, info={k: v for k, v in i.items() if k not in ('obrysy', 'vyska')}, minimum=0.72, vzdialenost=2.5)
