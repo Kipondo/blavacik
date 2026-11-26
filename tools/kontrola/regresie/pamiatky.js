@@ -255,4 +255,27 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'radnica-presny-model',
+    popis: 'Stará radnica: presný model podľa prieskumu a lasera (veža na SZ nároží pri Kostolnej, 44,8 m) sa kladie '
+      + 'na dlažbu Hlavného námestia pred priečelím, nie na najnižší bod pod obrysom',
+    oprava: 'feature/radnica-presne – tools/blender/presne/radnica.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-stara-radnica.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-stara-radnica.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 44 && info.vyska < 45.6)) chyby.push({ text: `výška ${info.vyska} m – hrot veže má byť ~44,8 m nad dlažbou` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred radnice nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom' });
+      // dlažba pred priečelím leží západne od stredu bloku (na strane Hlavného námestia), mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[0] > -10 || Math.hypot(zb[0], zb[1]) > 35) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe Hlavného námestia pred priečelím` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
