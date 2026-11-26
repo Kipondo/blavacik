@@ -40,6 +40,22 @@ stav projektu a ako pokračovať v [napady/POKRACOVANIE.md](napady/POKRACOVANIE.
 ## Čo je v `main` (zlúčené PR)
 Podrobný popis každej časti je nižšie v „Čo je hotové“.
 
+### Interiér galérie Eurovea (vetva `feature/eurovea-interier`, #131 časť 5)
+- **Pasáže Eurovea 1 a Eurovea 2:** do pasáží pod presklenými klenbami sa dá vojsť.
+  - **Eurovea 1:** západná pasáž od rotundy pri vajci po hlavné námestie, ~175 m.
+  - **Eurovea 2:** pasáž pod hadou strechou, ~165 m.
+- **Prízemie:** leštená kamenná podlaha, ktorá kopíruje terén. V Eurovei 2 je krémové terrazzo s terakotovými
+  klinmi. V strede sú kvetináče a lavičky.
+- **Poschodie:** ~5,5 m (E1) a 6 m (E2) nad prízemím.
+  - Ochodza 3,5 m pri výkladoch okolo átria, biele zaoblené hrany s teplým LED pásom.
+  - Sklenené zábradlie s drevenou madlom, stĺpy, lávky cez átrium a pár eskalátorov.
+  - Po poschodí, lávkach aj eskalátoroch sa dá chodiť.
+- **Obchody:** neutrálne výklady na oboch podlažiach – tmavé sklo, biele rámy, svetlý pás bez nápisov a bez značiek.
+- **Klenba je priehľadná:** zvnútra vidno oblohu a do pasáže svieti slnko. V pasáži nerastie tráva.
+- **Prieskum:** oficiálna mapa centra, OSM indoor, EIA Eurovea 2 a texty architektov. Rozmery a zdroje sú
+  v [napady/pamiatky-podklady.md](napady/pamiatky-podklady.md).
+- **Ešte nie je:** podlažie −1 (supermarket, spojenie oboch častí pod námestím) a vnútro obchodov.
+
 ### Mosty cez Dunaj podľa skutočnosti (vetva `feature/mosty-dunaj`)
 - **Všetkých päť mostov cez Dunaj** – SNP, Starý most, Apollo, Prístavný a Lafranconi – je teraz v celej dĺžke aj
   s estakádami a nájazdmi na brehoch.

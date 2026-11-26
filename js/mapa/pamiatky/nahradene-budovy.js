@@ -96,3 +96,22 @@ export function bezStromovVNahradenych(stromy) {
     return true;
   });
 }
+
+// Zóny bez trávy (pasáž galérie s vlastnou podlahou – interiér Eurovey): tráva z dlaždíc by prerastala cez podlahu.
+const bezTravy = [];
+
+/** Zaregistruje pôdorys [[x, z], …] (svet hry), v ktorom nerastie tráva. */
+export function pridajBezTravy(body) {
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const [x, z] of body) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
+  bezTravy.push({ body, minX, maxX, minZ, maxZ });
+}
+
+/** Je bod v zóne bez trávy? */
+export function jeBezTravy(x, z) {
+  for (const n of bezTravy) {
+    if (x < n.minX || x > n.maxX || z < n.minZ || z > n.maxZ) continue;
+    if (vPolygone(x, z, n.body)) return true;
+  }
+  return false;
+}
