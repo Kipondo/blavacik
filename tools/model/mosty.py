@@ -36,6 +36,14 @@ def cislo(v):
 
 
 pamat = json.load(open(PAMAT, encoding='utf8')) if os.path.exists(PAMAT) else {}
+import threading  # noqa: E402
+ZAMOK = threading.Lock()
+
+
+def uloz_pamat():
+    with ZAMOK:
+        kopia = dict(pamat)
+    json.dump(kopia, open(PAMAT, 'w', encoding='utf8'))
 
 
 def laser(x, z):
@@ -52,7 +60,8 @@ def laser(x, z):
                 f = json.load(r).get('features') or []
             v = f[0]['properties'].get('GRAY_INDEX') if f else None
             y = None if v is None or v < -1000 else round(v - POSUN_WMS - NULA, 2)
-            pamat[kluc] = y
+            with ZAMOK:
+                pamat[kluc] = y
             return y
         except Exception:
             time.sleep(2 + 2 * k)
@@ -75,6 +84,12 @@ def main():
             continue
         b = p['b']
         if not any(X0 <= x <= xmax and Z0 <= z <= zmax for x, z in b):
+            continue
+        # len časť na území (mimo neho nie je terén – mostovka by visela vo vzduchu)
+        vnutri = [X0 <= x <= xmax and Z0 <= z <= zmax for x, z in b]
+        i0 = vnutri.index(True); i1 = len(vnutri) - 1 - vnutri[::-1].index(True)
+        b = b[i0:i1 + 1]
+        if len(b) < 2:
             continue
         if r:
             druh, w = 'kolaj', (cislo(t.get('width')) or 5.0)
@@ -112,8 +127,8 @@ def main():
         for k, _ in enumerate(ex.map(lambda q: laser(*q), chyba)):
             if k % 500 == 499:
                 print(f'  {k + 1} / {len(chyba)} ({time.time() - t0:.0f} s)', flush=True)
-                json.dump(pamat, open(PAMAT, 'w', encoding='utf8'))
-    json.dump(pamat, open(PAMAT, 'w', encoding='utf8'))
+                uloz_pamat()
+    uloz_pamat()
 
     vystup = []
     for m in mosty:

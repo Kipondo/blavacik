@@ -40,6 +40,21 @@ def main():
                          for a in (-1, 0, 1) for c in (-1, 0, 1) for k in mriezka.get((int(x // 5) + a, int(z // 5) + c), []))
             if not blizko:
                 stromy.append([x, z, 9.0, 3.0]); pridane += 1
+    # bez stromov na mostoch a pod nimi (laser bral mostovku za korunu; pod mostom by koruna prerástla cez mostovku)
+    mosty = json.load(open(os.path.join(VYSTUP, 'mosty.json'), encoding='utf8'))['mosty'] if os.path.exists(os.path.join(VYSTUP, 'mosty.json')) else []
+    pas = {}
+    for m in mosty:
+        for (x, z, y, t), (x2, z2, y2, t2) in zip(m['b'][:-1], m['b'][1:]):
+            if max(y - t, y2 - t2) < 0.5:
+                continue
+            for k in range(4):
+                xx, zz = x + (x2 - x) * k / 4, z + (z2 - z) * k / 4
+                pas.setdefault((int(xx // 5), int(zz // 5)), []).append((xx, zz, m['w'] / 2 + 2.5))
+    pred = len(stromy)
+    stromy = [s for s in stromy if not any(math.hypot(px - s[0], pz - s[1]) < r
+                                         for a in (-1, 0, 1) for c in (-1, 0, 1)
+                                         for px, pz, r in pas.get((int(s[0] // 5) + a, int(s[1] // 5) + c), []))]
+    print(f'na mostoch a pod nimi odstránených {pred - len(stromy)} stromov')
     xs = np.array([s[0] for s in stromy]); zs = np.array([s[1] for s in stromy])
     pata = teren.vyska(xs, zs)
     vystup = [[round(s[0], 1), round(s[1], 1), round(float(y), 2), round(s[2], 1), round(s[3], 1)] for s, y in zip(stromy, pata) if np.isfinite(y)]
