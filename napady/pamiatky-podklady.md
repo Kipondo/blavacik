@@ -1815,3 +1815,82 @@ Mostovej (≈ 138,25 m). Mriežka 1 m (4 600 bodov) a 2 m, profily po 0,5 m.
 3. Hrot nad kupolou a „medené figúry“ – teleobjektív z Nám. Ľ. Štúra a od fontány pred SND.
 4. Svetlík nad koncertnou sieňou a sklená strecha nádvoria – len zhora.
 5. Presná šírka severného rizalitu a výšky frontónu a urien – kolmý záber zo stredu Nám. E. Suchoňa.
+
+## Dóm sv. Martina – Katedrála sv. Martina (26. 11. 2026)
+
+Model: `tools/blender/presne/dom.py` (spustenie cez `tools/blender/presne_blender.py -- dom-sv-martina`). Spoľahlivosť:
+**V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára nejdú.
+Bez Google Maps/Earth/Street View.
+
+### Poloha, pôdorys, lokálna sústava
+- OSM: celok **relácia 16609274** (https://www.openstreetmap.org/relation/16609274, `building=cathedral`), časti – loď
+  16609266, presbytérium 16609268, veža way 243293986, kaplnka sv. Anny 16609265, kaplnka sv. Jána Almužníka 16609267,
+  južná predsieň 16609269, schodisková vežička 16609273. **V**
+- Stred = záznam v `data/mapa/pamiatky.json` (x −201,79, z 167,27; 48,14199 N, 17,10499 E). Os kostola smeruje na
+  **azimut 71,9°** (od veže k apside), nie presne na východ. Lokálna sústava modelu: **u** = os (na východ),
+  **v** = naprieč (na sever). **V**
+- Loď ~45 × 28 m (trojloďový halový kostol), presbytérium ~28 × 12,7 m s polygonálnym záverom (3 strany osemuholníka),
+  hranolová veža ~10 × 12 m vstavaná do západného konca lode. Vnútorné rozmery 69,37 × 22,85 m
+  (https://sk.wikipedia.org/wiki/Katedrála_svätého_Martina_(Bratislava)). **V**
+- Severná stena lode je v OSM mierne zošikmená (v 13,2 → 14,8 m); hrebeň strechy je podľa lasera vodorovný, preto ju model
+  vyrovnáva. **S**
+- Okolie: na severe Rudnayovo nám. (dlažba ≈ podlaha kostola), na juhu Dómske nám. so záhonom a terasou, na
+  juhozápade terén klesá o ~5,6 m k Rybnému nám. (schody), na západe Staromestská v záreze a mestské hradby. **V**
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (4 600 bodov) a terén po 2,5 m. Laser je voči OSM posunutý o ~0,9 m na juh (os ihly). Nula modelu = dlažba
+pred južnou predsieňou (≈ 145,8 m v hodnotách služby po odčítaní 43,8); sever je o 0,6 m vyššie, roh pod vežou o 5,6 m nižšie.
+
+| prvok | výška | istota |
+|---|---|---|
+| odkvap lode (juh / sever) | 15,4–16,5 m | V |
+| hrebeň lode (vodorovný, štíty na západe aj východe – nie valby) | 39,1 m, sklon ~60° | V |
+| odkvap presbytéria (vyšší než pri lodi) | 21,4 m | V |
+| hrebeň presbytéria, polygonálna valba nad apsidou | 34,2 m, sklon ~64° | V |
+| sanktusník na hrebeni presbytéria (nad začiatkom apsidy) | ~40,2 m | S |
+| hlavná rímsa veže | 52,0 m | V |
+| sukňa helmice (~12,5 m pri odkvape) / zvon helmice (⌀ ~9,5 m) | 52–55 / 55–63 m | S |
+| otvorená osemboká lucerna (⌀ ~4 m) | 63–69,4 m | S |
+| ihla (pri päte ⌀ ~3,3 m), vankúš a koruna | 69,4–83,9 / do 86,0 m | S |
+| južná predsieň (takmer plochá plechová strecha) | 7,4 m | V |
+| kaplnka sv. Anny (pultová strecha k lodi) | 9,5 → 14,3 m | V |
+| kaplnka sv. Jána Almužníka: rímsa / kupola / lucerna s krížom | 11,2 / 18,5 / ~22 m | S |
+
+### Fasády (fotky z Commons, kategória https://commons.wikimedia.org/wiki/Category:Exterior_of_the_St._Martin%27s_Cathedral,_Bratislava)
+- **Loď:** biela omietka, pieskovcové ostenia, sokel a oporné piliere; na juhu štíhle piliere so strieškami vo výške
+  ~12 m (bez fiál), dvojdielne lomené okná, ružica v poli pri veži; na severe hlavný portál v 2. poli (1893–1895: lomený
+  oblúk v kamennom ráme, kovaná brána, strieška zo škridly, schodíky) a pieskovcová kaplnka sv. Anny medzi 3. a 4. pilierom
+  s tromi lomenými oknami; na SZ nároží polygonálna schodisková vežička s kamennou ihlou (~13 m)
+  (https://commons.wikimedia.org/wiki/File:Bratislava_Saint_Martin%27s_Cathedral_S_01.jpg,
+  https://commons.wikimedia.org/wiki/File:Martinsdom_Nordfassade.JPG). **V**
+- **Presbytérium:** pohľadový zvetraný kameň, 9 vysokých lomených okien s kružbou (4 na juhu, 2 na severe, 3 v apside),
+  stupňovité oporné piliere s fialami (~19 m), sanktusník z tmavého plechu s cibuľkou a krížom
+  (https://commons.wikimedia.org/wiki/File:Cathedral_of_St_Martin,_Bratislava_01.jpg). **V**
+- **Veža:** biela omietka, pieskovcové nárožia; na každej strane zdola ružica (⌀ ~2,6 m, ~34 m), kordónová rímsa, vysoké
+  trojdielne lomené okno zvonice (~3,3 × 7,9 m, 37,6–45,5 m) a hodiny – biela štvorcová doska ~2,5 m, čierne rímske
+  číslice, pozlátené ručičky (~48 m). Západné priečelie bez portálu (veža bola súčasťou hradieb), dva stupňovité piliere
+  do ~25 m. Helmica nie je ihlan, ale **neobaroková vlnitá medená helmica** so sukňou, zvonom s pozlátenými rebrami,
+  otvorenou lucernou a ihlou so zlatými krúžkami; navrchu **pozlátená replika uhorskej koruny na vankúši**
+  (vankúš 1,2 × 1,2 × 0,5 m, koruna ~1 m, spolu 1,64 m a 300 kg) (https://sk.wikipedia.org/wiki/Katedrála_svätého_Martina_(Bratislava),
+  https://commons.wikimedia.org/wiki/File:D%C3%B3m_sv%C3%A4t%C3%A9ho_Martina_z_Bratislavsk%C3%A9ho_hradu_-_panoramio.jpg). **V/S**
+- **Kaplnka sv. Jána Almužníka** (G. R. Donner, 1729–1732): biela, skosené nárožia s párovými pilastrami, jedno oblúkové
+  okno, nízka medená kupola a biela okrúhla lucerna s medenou čiapkou a pozláteným krížom
+  (https://commons.wikimedia.org/wiki/File:Pozsony-2014-3-26-_(114).jpg). **S**
+- **Južná predsieň:** pieskovec, renesančný portál s trojuholníkovým štítom a sochou, okrúhle okienko, schody z Dómskeho
+  nám. **S**
+
+### Strechy a farby
+- Krytina lode aj presbytéria: jednofarebná pálená škridla bobrovka, bez glazovaného vzoru (#B8653F); malé vetracie
+  vikiere, snehové zábrany pri odkvape. Medené plechy veže (>350 m²) vymenené v rokoch 2010–2011 s umelou zelenou patinou
+  (https://www.obnova.sk/rekonstrukcia-veze-domu-sv-martina-stala-vyse-860-000-eur/) – patina #7FA597, zlátenie #D4AA55. **V**
+- Omietka lode #E8E5DE, veže a západného priečelia #E3DCCE, pieskovec #CFC3AA, kameň presbytéria #A0977F (na fotkách
+  ~#8C8270 so šmuhami – v hre o niečo svetlejší, aby nepôsobil ako tieň), kaplnka sv. Jána #F1EFE9. Farby sú vzorky
+  z fotiek na Commons. **S**
+
+### Čo chýba (aké fotky by pomohli)
+1. Presný pôdorys hranola veže (je štvorcový?) – kolmé zábery na každú stranu veže.
+2. Počet a šírky okien na južnej strane lode (zakrýva ich strom) – zimný kolmý záber z Dómskeho nám.
+3. Počet rebier zvona helmice – teleobjektív z vyhliadky UFO alebo z hradu.
+4. Spodok západného priečelia a veže – kolmý záber zo Staromestskej.
+5. Sakristia a východná časť kaplnky sv. Jána – záber zo severovýchodu (Kapitulská).
+6. Východná strana veže nad strechou lode – záber z Kapitulskej.

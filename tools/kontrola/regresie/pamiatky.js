@@ -233,4 +233,26 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'dom-presny-model',
+    popis: 'Dóm sv. Martina: presný model podľa prieskumu a lasera (veža s korunou 86 m nad dlažbou pri južnej predsieni) '
+      + 'sa kladie na dlažbu pred predsieňou, nie na najnižší bod pod obrysom (terén pod vežou je o 5,6 m nižší)',
+    oprava: 'feature/dom-presne – tools/blender/presne/dom.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-dom-sv-martina.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-dom-sv-martina.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 85.5 && info.vyska < 87)) chyby.push({ text: `výška ${info.vyska} m – vrchol koruny má byť ~86 m nad dlažbou` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred Dómu nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod vežou' });
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || Math.hypot(zb[0], zb[1]) > 30) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe pred južnou predsieňou` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
