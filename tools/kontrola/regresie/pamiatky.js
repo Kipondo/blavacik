@@ -278,4 +278,27 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'primacialny-presny-model',
+    popis: 'Primaciálny palác: presný model podľa prieskumu a lasera (kardinálsky klobúk na štíte 27,7 m nad námestím) '
+      + 'sa kladie na dlažbu Primaciálneho námestia pred portikom, nie na najnižší bod pod obrysom (juh je o 0,6 m nižšie)',
+    oprava: 'feature/primacialny-presne – tools/blender/presne/primacialny.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-primacialny-palac.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-primacialny-palac.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 27 && info.vyska < 28.5)) chyby.push({ text: `výška ${info.vyska} m – vrch klobúka má byť ~27,7 m nad námestím` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred paláca nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom' });
+      // námestie leží severne od paláca (záporné z), bod je mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[1] > -10 || Math.hypot(zb[0], zb[1]) > 35) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe Primaciálneho námestia pred portikom` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];

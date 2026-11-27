@@ -1997,3 +1997,72 @@ https://commons.wikimedia.org/wiki/File:2019-03-17_in_Bratislava_37.jpg)
 3. Fasády a strecha južného krídla (1912) – záber z nádvoria na juh a z veže radnice na juhovýchod.
 4. Presný pôdorys veže a to, či vystupuje pred priečelie – kolmý záber z Hlavného nám. a z Kostolnej.
 5. Strana hodín do nádvoria (sú hodiny na všetkých 4 stranách?) – záber z nádvoria na vežu.
+
+## Primaciálny palác (27. 11. 2026)
+
+Model: `tools/blender/presne/primacialny.py` (spustenie cez `tools/blender/presne_blender.py -- primacialny-palac`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Bez Google Maps/Earth/Street View.
+
+### Poloha, skladba, lokálna sústava
+- OSM: **relácia 189440** (https://www.openstreetmap.org/relation/189440) – obrys (77 bodov, sleduje aj pilastre)
+  a nádvorie (way 38530565, ~19 × 23 m); bez častí budovy, výšky sú z lasera. **V**
+- Lokálna sústava modelu: začiatok = východné nárožie hlavného priečelia, **u** pozdĺž priečelia na západ
+  (azimut 244,5°), **v** do bloku (azimut 154,5°). Priečelie paláca u 0–46,15 m, jednoosová koncová časť pri Starej
+  radnici u 46,15–52,35 m (odsadená 0,85 m). **V**
+- Štyri krídla okolo nádvoria (sk-wiki „štvorkrídlová stavba“, https://sk.wikipedia.org/wiki/Primaci%C3%A1lny_pal%C3%A1c):
+  hlavné severné krídlo ~15 m hlboké, východné so Zrkadlovou sieňou, južné s prejazdom do zadného dvora, západné
+  pri Starej radnici; za východným nárožím prístavba do Uršulínskej odsadená ~9 m za čiaru priečelia. **V/S**
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (6 500 bodov) a terén po 2,5 m. Nula modelu = dlažba Primaciálneho nám. pred portikom (≈ 138,85 m
+v hodnotách služby po odčítaní 43,8, rovnako ako pri Starej radnici); nádvorie −0,3, Uršulínska −0,5, juh −0,6 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| vrch kardinálskeho klobúka | 27,7 m | V |
+| šikmá rímsa štítu 4,3 m od osi / vrchol štítu (sklon 21°) | ~21,9 / 24,2 m | S |
+| balustráda atiky / hlavná rímsa | ~21,0 / ~20,2 m | S |
+| hrebene všetkých štyroch krídel (hlavné ~7,5 m za priečelím) | ~26,4 m | V |
+| odkvapy do nádvoria | ~19 m | S |
+| západné krídlo – pultová strecha k radnici | 19 → 26,8 m | S |
+| koncová časť pri radnici (rímsa ~1 m pod hlavnou) | odkvap ~19,6, hrebeň ~24 m | S |
+| súsošie Minervy na atike / súsošie Božej múdrosti | ~25,5 / ~24 m | S |
+
+Odhady výšok z čelných fotiek (pinhole, mierka z obrysu OSM) vychádzali o ~10 % nižšie (rímsa 18,3 m, klobúk
+26,9 m); podlažia priečelia sú preto zväčšené o 10 % podľa lasera.
+
+### Hlavné priečelie (fotky https://commons.wikimedia.org/wiki/File:Palacio_primacial,_Bratislava,_Eslovaquia,_2020-02-01,_DD_30.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_Primacialny_Palac_R01.jpg , https://commons.wikimedia.org/wiki/File:Bratyslawa_palac_prymasowski_(fronton).JPG)
+- **11 osí** (3 + 5 + 3) a jednoosová koncová časť; stredný rizalit 21 m s **6 obrovskými korintskými pilastrami**
+  cez dve poschodia (stredné pole širšie ~4,8 m), bočné úseky po 4 pilastre; spolu 14 hlavíc. **V**
+- Prízemie s mezanínom (nebosované, ploché lizény), kordónová rímsa; okná piano nobile s **trojuholníkovými frontónmi**
+  v bočných úsekoch a rovnými rímsami v rizalite; 2. poschodie bez nadokenných ríms. **V**
+- **Portikus** zo 4 toskánskych stĺpov (13,1 m, predstupuje ~2 m) s balkónom a kamennou balustrádou; za ním
+  polkruhová brána s nadsvetlíkom. Stredná os: balkónové dvere, doska z ružového mramoru so zlatým nápisom a dvaja
+  putti s písmenami I a C. Obnova portika 2012
+  (https://www.pamiatky.sk/fileadmin/documents/pamiatkovy_urad/vyrocna_sprava/PUSR-vyroc-sprava2013.pdf ). **V**
+- **Štít:** mozaika E. Zmetáka (1956–1958) – alegórie Dunaja a Tisy a postavy okolo piliera so zákonom, svetlé
+  postavy na okrovosivom pozadí. Na vrchole erb arcibiskupa J. Batthyányho (pelikán, lev), kniežacia čiapka,
+  pozlátený patriarchálny kríž a strapce, navrchu **čierny železný kardinálsky klobúk** (150 kg, krempa ⌀ ~1,9 m)
+  (https://de.wikipedia.org/wiki/Primatialpalais ). Za štítom krížová strieška z medeného plechu. **V**
+- **Atika:** balustráda, 4 vázy (J. A. Messerschmidt), 4 sochy pri štíte (M. Kögler), súsošia Minervy a Božej múdrosti
+  (F. J. Prokop) v strede bočných úsekov; obnova 2019–2020
+  (https://bratislava.sk/spravy/atika-primacialneho-palaca-a-jej-socharska-vyzdoba-sa-dockali-obnovy ). **V**
+- Farby (vzorky z fotiek, na tienistej severnej fasáde treba ignorovať fialkastý nádych): stena bledoružová
+  (#E8CDCB, v hre #EBCAC4), pieskovcové detaily béžové (#D9C6A2), rámy okien #D2BA8C, sokel #B39A6A, sochy
+  zvetraný pieskovec #B5AD9E, zlátenie #C9A23E, klobúk #15171C, meď #5E8C86, krytina červenohnedá bobrovka #8A5240. **S**
+
+### Bočné strany a nádvorie (https://commons.wikimedia.org/wiki/File:Primate%27s_Palace_Bratislava_2019_2.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava15Slovakia13.JPG , https://commons.wikimedia.org/wiki/File:Bratislava,_Ur%C5%A1ul%C3%ADnska.JPG)
+- Nádvorie: slepé arkády s lunetami v prízemí, dva rady okien, na východnom krídle dlhý balkón na konzolách
+  s kovaným zábradlím, prejazdy v strede severnej a južnej strany; takmer biela ružová omietka. **V/S**
+- **Fontána sv. Juraja:** osemuholníková pieskovcová nádrž ⌀ ~4,5 m, podstavec a jazdec na koni s kopijou nad drakom
+  (na nádvorí od roku 1930). **V** (rozmery **S**)
+- Strana do Uršulínskej: ružová, okná v rámoch s uškami, kordónová rímsa, vysoký okrový sokel. **S** (počty osí **N**)
+
+### Čo chýba (aké fotky by pomohli)
+1. Strana do Uršulínskej – počet osí a výška prístavby: zábery z rohu námestia do Uršulínskej na juh a späť na sever.
+2. Zadné (južné) a západné fasády – zo zadného dvora pri súsoší sv. Jána Nepomuckého.
+3. Presná ružová – vlastná fotka steny prízemia so sivou kartou (fasáda je na severe, fotky sú v tieni).
+4. Počet strešných okien a komínov – záber z veže Starej radnice.
