@@ -347,4 +347,28 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'mirbach-presny-model',
+    popis: 'Mirbachov palác: presný model podľa prieskumu a lasera (hrebeň 19,6 m, komíny ~21,4 m, tympanón s erbom, '
+      + 'nádvorie s pavlačami) sa kladie na dlažbu Františkánskeho nám. pred stredom fasády, nie na najnižší bod pod '
+      + 'obrysom (námestie klesá pozdĺž fasády o 1,6 m)',
+    oprava: 'feature/mirbachov-palac-presne – tools/blender/presne/mirbach.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-mirbachov-palac.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-mirbachov-palac.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 21 && info.vyska < 22.5)) chyby.push({ text: `výška ${info.vyska} m – komíny majú byť ~21,4 m nad dlažbou` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred paláca nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom' });
+      // fasáda sa obracia na východ do Františkánskeho nám.: bod je východne od fasády, mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[0] < 20 || Math.hypot(zb[0], zb[1]) > 35) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe pred fasádou` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
