@@ -2066,3 +2066,62 @@ https://commons.wikimedia.org/wiki/File:Bratislava15Slovakia13.JPG , https://com
 2. Zadné (južné) a západné fasády – zo zadného dvora pri súsoší sv. Jána Nepomuckého.
 3. Presná ružová – vlastná fotka steny prízemia so sivou kartou (fasáda je na severe, fotky sú v tieni).
 4. Počet strešných okien a komínov – záber z veže Starej radnice.
+
+## Jezuitský kostol – Kostol Najsvätejšieho Spasiteľa (27. 11. 2026)
+
+Model: `tools/blender/presne/jezuiti.py` (spustenie cez `tools/blender/presne_blender.py -- jezuitsky-kostol`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Bez Google Maps/Earth/Street View.
+
+### Poloha a tvar
+- OSM: **way 38539535** (https://www.openstreetmap.org/way/38539535), jednoduchý obdĺžnik ~27 × 34 m; na severe
+  prilieha dom jezuitov, na východe Kostolná 1 (Teologická fakulta), na juhu ~4–5 m široká Kostolná oproti Starej
+  radnici. Postavený 1636–1638 ako evanjelický kostol bez veže, od roku 1672 jezuitský
+  (https://sk.wikipedia.org/wiki/Kostol_Najsv%C3%A4tej%C5%A1ieho_Spasite%C4%BEa_(Bratislava)). **V**
+- Lokálna sústava: začiatok = západné nárožie, **u** pozdĺž západného priečelia (azimut 149°), **v** pozdĺž osi
+  kostola k presbytériu (azimut 59°). Západné priečelie sa obracia do rozhrania Hlavného a Františkánskeho nám. **V**
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (3 200 bodov) a terén po 2,5 m. Nula = dlažba pred priečelím (≈ 139,1 m v hodnotách služby po odčítaní
+43,8); Františkánske nám. +0,5, Kostolná ±0,1 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| odkvap dlhých strán | 16,35 m | V |
+| hrebeň (sklon ~44°) | 29,15 m | V |
+| vodorovná rímsa štítu = päta valby | ~20 m | S |
+| strmá valba nad štítom (vrchol 2,7 m za priečelím), kríž na nej | do ~32 m | S |
+| sanktusník na hrebeni ~4 m pred východným koncom (s krížom) | 39,95 m | V |
+| Mariánsky stĺp 17 m pred portálom | ~10–11 m | S |
+
+### Fasády (fotky https://commons.wikimedia.org/wiki/File:Bratislava_Franti%C5%A1k%C3%A1nsk%C3%A9_n%C3%A1m%C4%9Bst%C3%AD_jezuitsk%C3%BD_kostel_2.jpg ,
+https://commons.wikimedia.org/wiki/File:Iglesia_de_los_Jesuitas,_Bratislava,_Eslovaquia,_2020-02-01,_DD_27.jpg ,
+https://commons.wikimedia.org/wiki/File:Jezuitsky02.jpg)
+- **Západné priečelie:** široká stena s **lichobežníkovým štítom** – od nároží šikmé rímsy pod ~45° do vodorovnej
+  korunnej rímsy, nad ňou strmá valba s malým vetracím vikierom a **kovaným krížom s hviezdou**. 5 súmerných osí:
+  4 vysoké polkruhové okná v sivých kamenných rámoch s nadokennými rímsami, 2 dolné polkruhové okná s mrežou,
+  2 bočné obdĺžnikové portály, v strede sivý pilastrový portál s polkruhovým otvorom a vyrezávanými vrátami,
+  nad ním **pozlátená jezuitská kartuša** (IHS, plamenné srdce, „SIC DEVS DILEXIT MVNDVM“); tri okuly. Bez pilastrov
+  a lizén. **V**
+- **Kostolná:** hladká stena s korunnou rímsou, 5 osí v dvoch radoch (dole polkruhové okná s mrežou, hore vysoké
+  polkruhové okná), pri presbytériu menšie obdĺžnikové okná. **S** (osi pri presbytériu **N**)
+- **Sever:** dole dom jezuitov, nad ním hladká stena; **východ** nadväzuje na Kostolnú 1 (záber chýba). **S/N**
+
+### Sanktusník a strecha
+- **Sanktusník** (1673, https://de.wikipedia.org/wiki/Jesuitenkirche_(Bratislava) ): štíhly tmavosivý štvorhranný
+  hranol, zvonové poschodie s hnedými žalúziami, vysunutá rímsa, ihlanová helmica, gulička a kríž; nie je to cibuľa. **S**
+- Krytina: červenohnedá bobrovka (#83473A), malé vetracie vikiere na dlhých stranách. **V**
+
+### Mariánsky stĺp (https://hunektar.sk/en/records/maria-oszlop )
+- Leopold I., 1675: schody, piedestál s reliéfmi a erbom, štíhly driek z ružového mramoru (#BB9A80), kompozitná
+  hlavica, korunovaná Panna Mária s dieťaťom z bieleho kameňa. V dátach sôch z OSM nie je, preto je súčasťou modelu
+  kostola. **V** (výška z lasera **S**)
+
+### Farby
+- Omietka lomená biela #E6E0D0, rámy okien sivý kameň #B8B6AC, portál #9E9C92, sokel a stupne #D3C6A6, dvere #6A4A30,
+  sanktusník #505150 so žalúziami #6B5040. Obnova exteriéru po roku 2000 nie je doložená; fotky 2007–2023 sú rovnaké. **S**
+
+### Čo chýba (aké fotky by pomohli)
+1. Východný koniec kostola a sanktusník zblízka – záber z dvora Teologickej fakulty alebo z veže Starej radnice.
+2. Južná plocha strechy (vikiere) a okná pri presbytériu – zábery z Kostolnej z oboch koncov uličky.
+3. Presná výška Mariánskeho stĺpa – kolmý záber s mierkou (napr. človek pri piedestáli).
