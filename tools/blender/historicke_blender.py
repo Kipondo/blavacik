@@ -16,7 +16,7 @@ from historicke.zoznam import SPEC  # noqa: E402
 
 # pamiatky s presným modelom (tools/blender/presne_blender.py) – bez výslovného kľúča sa neprepisujú
 PRESNE = {'slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martina', 'stara-radnica', 'primacialny-palac',
-          'jezuitsky-kostol'}
+          'jezuitsky-kostol', 'frantiskansky-kostol'}
 
 data = nacitaj()
 zaznamy_hry = []

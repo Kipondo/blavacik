@@ -2125,3 +2125,59 @@ https://commons.wikimedia.org/wiki/File:Jezuitsky02.jpg)
 1. Východný koniec kostola a sanktusník zblízka – záber z dvora Teologickej fakulty alebo z veže Starej radnice.
 2. Južná plocha strechy (vikiere) a okná pri presbytériu – zábery z Kostolnej z oboch koncov uličky.
 3. Presná výška Mariánskeho stĺpa – kolmý záber s mierkou (napr. človek pri piedestáli).
+
+## Františkánsky kostol – Kostol Zvestovania Pána (27. 11. 2026)
+
+Model: `tools/blender/presne/frantiskani.py` (spustenie cez `tools/blender/presne_blender.py -- frantiskansky-kostol`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Bez Google Maps/Earth/Street View.
+
+### Poloha a skladba
+- OSM: **way 38539540** (https://www.openstreetmap.org/way/38539540), obrys ~56 × 36 m s kaplnkami; way 104359771
+  „Gotická veža“ je pôvodný vrchol veže prenesený v roku 1897 do Sadu Janka Kráľa, s kostolom nesúvisí. Na juhu
+  prilieha kláštor (way 38539541). **V**
+- Orientácia západ – východ: barokové priečelie do severnej časti Františkánskeho nám. oproti Mirbachovmu palácu,
+  na severe Františkánska ul. s Loretánskou kaplnkou a kaplnkou sv. Jána Evanjelistu, na východe gotické presbytérium
+  pri Uršulínskej, na juhu veža a kláštor (https://sk.wikipedia.org/wiki/Kostol_Zvestovania_P%C3%A1na_(Bratislava),
+  https://de.wikipedia.org/wiki/Franziskanerkirche_(Bratislava)). **V**
+- Lokálna sústava: začiatok = JZ nárožie priečelia, **u** pozdĺž osi (azimut 65,4°), **v** na sever (azimut 335,4°).
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (2 900 bodov) a terén po 2,5 m. Nula = dlažba pred priečelím (≈ 141,4 m v hodnotách služby po odčítaní
+43,8); Františkánska ul. +0,8, Uršulínska −0,7 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| hrebeň lode (jedna strecha nad trojloďou, sklon ~45°) | 22,9 m | V |
+| odkvap lode juh / sever | 15,9 / 14,9 m | S |
+| pultová strecha nad severnými kaplnkami | 14,9 → 8,9 m | S |
+| kaplnka sv. Jána – hrebeň (veľmi strmá strecha ~66°) | 23,9 m | V |
+| presbytérium – hrebeň | 18,9 m | S |
+| vrchol barokového štítu (bez kríža) | ~24,9 m | S |
+| veža – vrchol kamenného ihlana s hrotom | 42,7 m | V |
+
+### Fasády a veža (fotky https://commons.wikimedia.org/wiki/File:Bratislava_kostel_sv._Franti%C5%A1ka_%C4%8Delo.jpg ,
+https://commons.wikimedia.org/wiki/File:Ko%C5%9Bci%C3%B3%C5%82_franciszka%C5%84ski_Zwiastowania_Pa%C5%84skiego_w_Bratys%C5%82awie,_20210727_1313_0383.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_049.jpg , https://commons.wikimedia.org/wiki/File:Bratislava_Franziskanerkirche_573.jpg)
+- **Barokové priečelie** (L. de Schramm, 1745–1746): dve podlažia a vlnitý štít, stredný rizalit, zdvojené pilastre
+  na nárožiach s korintskými hlavicami, portál s uchami a kartušou VIRGINI DEIPARAE SACRUM, dve oválne okná, nika
+  s Immaculatou a dvoma anjelmi, dve vysoké polkruhové okná, okulus, trojuholníkový fronton nad rizalitom; v štíte
+  dva okuly a plastický kríž, štyri vázy, kovaný kríž; vpravo rokokový kovaný kríž na podstavci. Farby po obnove
+  2024–2026: plochy #EEEEEA, hlavice, portál a vázy #5C5C5A, nika #D9A68E
+  (https://frantiskani.sk/14338/zrestaurovana-fasada-kostola-frantiskanov-a-jej-nalezy/ ). **V**
+- **Loretánska kaplnka** (1708–1709): obrovské korintské stĺpy (4 na západe, 6 na severe), kladie, fronton na západ,
+  erb Pavla Esterházyho; po obnove 2026 koralové stĺpy #D27A57 a žlté plochy #F2D48A. Strecha podľa lasera pultová.
+  **V/S**
+- **Kaplnka sv. Jána Evanjelistu** (1360–1380): neomietnutý kameň #C9BBA0, strmý západný štít s krabmi, kvetinou
+  a veľkým kružbovým oknom, opory s fialami, polygonálny chór, veľmi strmá tmavá škridlová strecha #3E302A. **V**
+- **Presbytérium:** gotické, užšie a nižšie ako loď, polygonálny záver, stupňovité omietnuté opory, vysoké lomené
+  okná, červenohnedá škridla #9A5B48; na juhu nízka polygonálna sakristia s medenou strechou. **V** (polygón záveru **S**)
+- **Veža** (kópia z 1895–1896 podľa F. Schuleka, https://dejum.sav.sk/docs/mag/ARS_2015_1.pdf ): omietnutý štvorhranný
+  driek, šesťboké kamenné podlažie s úzkymi oknami, zvonica s dvojdielnymi lomenými oknami a chrličmi, koruna šiestich
+  vimpergov a fiál, plný šesťboký kamenný ihlan s krabmi, kvetina a hrot; kameň po očistení #CFC6B5. **V** (výška z lasera)
+- Loď: tmavohnedá škridla #6E4E42, bez sanktusníka. **S**
+
+### Čo chýba (aké fotky by pomohli)
+1. Spodná časť veže (prechod zo štvorca do šesťuholníka) – záber z rajského dvora kláštora.
+2. Presný polygón záveru presbytéria a počet opôr – záber zo záhrady pri Uršulínskej.
+3. Strecha Loretánskej kaplnky – záber z Františkánskej ulice smerom na juhozápad.
