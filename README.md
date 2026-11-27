@@ -788,6 +788,17 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   arkádami, pultovými strieškami a oblúčkovou atikou, dom so štítom a pozláteným slnkom, päťpodlažné južné krídlo
   s mansardou. Model sa kladie na dlažbu Hlavného námestia. Podklady: `napady/pamiatky-podklady.md` („Stará radnica“),
   kontrola `radnica-presny-model`.
+- **Primaciálny palác – presný model** (27. 11.; `tools/blender/presne/primacialny.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- primacialny-palac`): pôdorys z OSM (obrys
+  a nádvorie), výšky z laserového skenovania ÚGKK – štyri krídla okolo nádvoria so strmou valbovou strechou z pálenej
+  bobrovky (hrebene 26,4 m), západné krídlo s pultovou strechou k radnici, prístavba do Uršulínskej a jednoosová koncová
+  časť pri Starej radnici. Hlavné priečelie podľa fotiek: bledoružová omietka s béžovými pieskovcovými detailmi,
+  11 osí (3 + 5 + 3), prízemie s mezanínom, obrovské korintské pilastre, okná s frontónmi a rímsami, stredný rizalit
+  s **portikom zo 4 stĺpov s balkónom**, balkónové dvere s mramorovou doskou a puttami, **štít s mozaikou**, erb
+  s kniežacou čiapkou, pozlátenými strapcami a čiernym **kardinálskym klobúkom** (27,7 m), na atike balustráda,
+  4 vázy, 4 sochy a súsošia Minervy a Božej múdrosti, medená krížová strieška za štítom. Nádvorie so slepými arkádami,
+  balkónom východného krídla a fontánou sv. Juraja. Model sa kladie na dlažbu námestia pred portikom. Podklady:
+  `napady/pamiatky-podklady.md` („Primaciálny palác“), kontrola `primacialny-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1449,7 +1460,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
 - Presné pamiatky: ďalšie dávky podľa `tools/blender/presne/`; pri SND ešte presný počet okenných osí bokov a tvar
   vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
   sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice, pri Starej radnici počty
-  oblúkov arkád, fasády južného krídla a severná strana v Kostolnej (chýbajú fotky – `napady/pamiatky-podklady.md`).
+  oblúkov arkád, fasády južného krídla a severná strana v Kostolnej, pri Primaciálnom paláci strana do Uršulínskej,
+  zadné fasády a presná ružová (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
