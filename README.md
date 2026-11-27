@@ -807,6 +807,17 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   pilastrový portál s pozlátenou jezuitskou kartušou (IHS), bočné portály, tri okuly; strana do Kostolnej s dvoma radmi
   okien. Pred priečelím **Mariánsky stĺp** (1675) z ružového mramoru so sochou Panny Márie. Model sa kladie na dlažbu
   pred portálom. Podklady: `napady/pamiatky-podklady.md` („Jezuitský kostol“), kontrola `jezuiti-presny-model`.
+- **Františkánsky kostol – presný model** (27. 11.; `tools/blender/presne/frantiskani.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- frantiskansky-kostol`): pôdorys z OSM, výšky
+  z laserového skenovania ÚGKK – loď pod jednou strechou (hrebeň 22,9 m), nižšie gotické presbytérium s polygonálnym
+  záverom, stupňovitými oporami a lomenými oknami, **šesťboká kamenná gotická veža** na juhu (zvonica s dvojdielnymi
+  oknami, chrliče, vimpergy, fiály, plný ihlan s krabmi, 42,7 m – predtým model vežu nemal), na severe Loretánska
+  kaplnka s koralovými stĺpmi a žltými plochami (farby po obnove 2026) a neomietnutá gotická **kaplnka sv. Jána
+  Evanjelistu** s veľmi strmou tmavou strechou, kraby a kružbovým oknom v štíte, sakristia s medenou strechou.
+  Barokové priečelie: dve podlažia s pilastrami a tmavosivými hlavicami, portál, oválne okná, nika s Immaculatou,
+  vlnitý štít s okulmi, vázami a krížom, rokokový kovaný kríž pred vchodom. Model sa kladie na dlažbu Františkánskeho
+  nám. pred priečelím. Podklady: `napady/pamiatky-podklady.md` („Františkánsky kostol“), kontrola
+  `frantiskani-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1469,8 +1480,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
   sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice, pri Starej radnici počty
   oblúkov arkád, fasády južného krídla a severná strana v Kostolnej, pri Primaciálnom paláci strana do Uršulínskej,
-  zadné fasády a presná ružová, pri Jezuitskom kostole východný koniec a južná strana strechy (chýbajú fotky –
-  `napady/pamiatky-podklady.md`).
+  zadné fasády a presná ružová, pri Jezuitskom kostole východný koniec a južná strana strechy, pri Františkánskom
+  kostole spodná časť veže a presný polygón záveru (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave

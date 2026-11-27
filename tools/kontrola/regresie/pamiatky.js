@@ -324,4 +324,27 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'frantiskani-presny-model',
+    popis: 'Františkánsky kostol: presný model podľa prieskumu a lasera (kamenný ihlan veže 42,7 m nad Františkánskym '
+      + 'nám.) sa kladie na dlažbu pred barokovým priečelím, nie na najnižší bod pod obrysom (Uršulínska je o 0,7 m nižšie)',
+    oprava: 'feature/frantiskansky-kostol-presne – tools/blender/presne/frantiskani.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-frantiskansky-kostol.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-frantiskansky-kostol.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 41.5 && info.vyska < 44)) chyby.push({ text: `výška ${info.vyska} m – ihlan veže má byť ~42,7 m nad dlažbou` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred kostola nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom' });
+      // priečelie sa obracia na západ do Františkánskeho nám.: bod je západne od stredu, mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[0] > -15 || Math.hypot(zb[0], zb[1]) > 35) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe pred priečelím` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
