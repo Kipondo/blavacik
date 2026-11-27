@@ -301,4 +301,27 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'jezuiti-presny-model',
+    popis: 'Jezuitský kostol: presný model podľa prieskumu a lasera (sanktusník na hrebeni do 40 m, strmá valba nad '
+      + 'lichobežníkovým štítom, Mariánsky stĺp) sa kladie na dlažbu pred portálom, nie na najnižší bod pod obrysom',
+    oprava: 'feature/jezuitsky-kostol-presne – tools/blender/presne/jezuiti.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-jezuitsky-kostol.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-jezuitsky-kostol.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 39 && info.vyska < 41)) chyby.push({ text: `výška ${info.vyska} m – kríž sanktusníka má byť ~40 m nad dlažbou` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred kostola nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom' });
+      // priečelie sa obracia na západ (Hlavné a Františkánske nám.): bod je západne od stredu, mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[0] > -10 || Math.hypot(zb[0], zb[1]) > 30) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe pred portálom` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];

@@ -799,6 +799,14 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   4 vázy, 4 sochy a súsošia Minervy a Božej múdrosti, medená krížová strieška za štítom. Nádvorie so slepými arkádami,
   balkónom východného krídla a fontánou sv. Juraja. Model sa kladie na dlažbu námestia pred portikom. Podklady:
   `napady/pamiatky-podklady.md` („Primaciálny palác“), kontrola `primacialny-presny-model`.
+- **Jezuitský kostol – presný model** (27. 11.; `tools/blender/presne/jezuiti.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- jezuitsky-kostol`): pôdorys z OSM, výšky
+  z laserového skenovania ÚGKK – odkvap 16,35 m, hrebeň 29,15 m, strmá valba nad lichobežníkovým štítom západného
+  priečelia s kovaným krížom, tmavý **sanktusník** so žalúziami a ihlanovou helmicou na hrebeni pri presbytériu (40 m).
+  Podľa fotiek: lomená biela omietka, 5 osí so 4 vysokými polkruhovými oknami v sivých kamenných rámoch, sivý
+  pilastrový portál s pozlátenou jezuitskou kartušou (IHS), bočné portály, tri okuly; strana do Kostolnej s dvoma radmi
+  okien. Pred priečelím **Mariánsky stĺp** (1675) z ružového mramoru so sochou Panny Márie. Model sa kladie na dlažbu
+  pred portálom. Podklady: `napady/pamiatky-podklady.md` („Jezuitský kostol“), kontrola `jezuiti-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1461,7 +1469,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   vetracej vežičky, pri Redute počet osí na Mostovej, farba striech po roku 2023 a tvar svetlíka nad koncertnou
   sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice, pri Starej radnici počty
   oblúkov arkád, fasády južného krídla a severná strana v Kostolnej, pri Primaciálnom paláci strana do Uršulínskej,
-  zadné fasády a presná ružová (chýbajú fotky – `napady/pamiatky-podklady.md`).
+  zadné fasády a presná ružová, pri Jezuitskom kostole východný koniec a južná strana strechy (chýbajú fotky –
+  `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
