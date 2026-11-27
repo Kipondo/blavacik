@@ -2181,3 +2181,74 @@ https://commons.wikimedia.org/wiki/File:Bratislava_049.jpg , https://commons.wik
 1. Spodná časť veže (prechod zo štvorca do šesťuholníka) – záber z rajského dvora kláštora.
 2. Presný polygón záveru presbytéria a počet opôr – záber zo záhrady pri Uršulínskej.
 3. Strecha Loretánskej kaplnky – záber z Františkánskej ulice smerom na juhozápad.
+
+## Mirbachov palác – Františkánske nám. 11 (27. 11. 2026)
+
+Model: `tools/blender/presne/mirbach.py` (spustenie cez `tools/blender/presne_blender.py -- mirbachov-palac`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Výkres ateliéru n-1 (kaviareň Emil, 2021, zverejnený na archiweb.cz) sa použil len na odmeranie podlaží – do
+repozitára nejde. Bez Google Maps/Earth/Street View.
+
+### História a orientácia
+- Rokokový palác 1768–1770 pre pivovarníka J. M. Specha, staviteľ M. Höllrigl, architekt neznámy; neskôr Csákyovci,
+  Nyáryovci (ich erb v tympanóne), od 1917 E. Mirbach; od 1975 Galéria mesta Bratislavy
+  (https://sk.wikipedia.org/wiki/Mirbachov_pal%C3%A1c, https://gmb.sk/detail/mirbachov-palac). **V**
+- Obnova uličnej fasády 2016 – odvtedy teplá biela (predtým okrová), polychrómovaný erb, biele mreže a zábradlie
+  balkóna so zlatom (https://www.teraz.sk/regiony/bratislava-mesto-restauruje-mirbachov/212616-clanok.html); obnova
+  dvorných fasád a pavlačí 2026 (https://gmb.sk/en/detail/renovation-of-the-courtyard-of-the-mirbach-palace). **V**
+- OSM: relácia **207207** (obrys s nádvorím). Jediná uličná fasáda (≈ 31 m) sa obracia na východ do severného cípu
+  Františkánskeho nám. oproti Františkánskemu kostolu; na juhu nižší dom č. 10, na severe nárožný dom so Zámočníckou
+  (priamo nadväzuje), na západe dvory domov na Michalskej. **V**
+- Lokálna sústava: začiatok = južné nárožie fasády, **u** pozdĺž fasády na sever (azimut 1,8°), **v** do bloku.
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (3 100 bodov) a terén po 2,5 m. Nula = dlažba námestia pred stredom fasády (≈ 141,8 m v hodnotách služby
+po odčítaní 43,8); námestie klesá od severného nárožia (+0,9) k južnému (−0,7 m), nádvorie +0,3 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| korunná rímsa uličnej fasády (okraj oplechovania) | ~13,4 m | V |
+| hrebeň uličného krídla (7,3 m za fasádou; sklon do ulice ~38°, do dvora ~45°) | 19,6 m | V |
+| odkvapy do nádvoria | ~13,6 m | V |
+| pultové strechy dvorných krídel – vysoká strana pri susedoch (sever, juh, západ) | ~19,5–20,3 m | S |
+| prístavba na SZ – sedlová strecha, hrebeň | ~18,9 m | S |
+| tympanón (vrchol, bez koruny) | ~15,5 m | S |
+| komíny | ~21,3 m | S |
+
+Podlažia z výkresu n-1 (dvor): 1. poschodie +4,0 m, 2. poschodie +8,9 m, odkvap ~13,7 m nad dvorom. **V**
+
+### Uličná fasáda (fotky https://commons.wikimedia.org/wiki/File:Bratislava_Mirbachov_pal%C3%A1c_01.jpg ,
+https://commons.wikimedia.org/wiki/File:Mirbach_Palace_in_Bratislava_(1).jpg ,
+https://commons.wikimedia.org/wiki/File:Mirbach_Palace_in_Bratislava_(2).jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_Mirbach_Palace.jpg ,
+https://commons.wikimedia.org/wiki/File:Bratislava_Old_Town_Hall_View_NW.jpg)
+- **11 osí** (3 + brána + 3 + brána + 3), rozostup ~2,6–2,8 m; prízemie + 2 poschodia, kordónová rímsa ~5 m. **V**
+- Osi 1–3 a 9–11: pásová bosáž, nárožné lizény, na prízemí obdĺžnikové okná s bielymi kovanými mrežami, na
+  1. poschodí okná s uchami, vlysom a rovnou rímsou a parapetným poľom, na 2. poschodí jednoduché šambrány. **V**
+- Osi 4 a 8: dve rovnaké kamenné brány (~2,2 × 3,7 m) s pilastrami na pätkách, volútovými hlavicami, plamennými vázami
+  a rokajovou kartušou, vyrezávané drevené vráta (#6B4630); nad nimi okná s trojuholníkovým frontónom. Hlavná je južná
+  (os 4), severná vedie od 2022 do kaviarne. **V**
+- Osi 5–7: plytký rizalit s **trojuholníkovým tympanónom** (~2 m nad rímsou), pod ním dvojice vysokých volútových
+  konzol; okná s oblúkovým záverom na všetkých podlažiach, na 1. poschodí rokajový štuk a segmentová rímsa; v osi 6
+  balkónové dvere a **balkón** (~3 × 0,95 m) na dvoch esovitých konzolách s bielym zábradlím s pozlátenými rokajmi. **V**
+- **Erb Nyáryovcov** v tympanóne: kartuša s girlandami, dva oválne štíty (modrý a červený so zlatými figúrami), grófska
+  koruna s perlami vyčnievajúca nad vrchol štítu (https://commons.wikimedia.org/wiki/File:COA_Nyary_Kalman.jpg). **V**
+- Farby: plocha #E9E3D6, štuky #F3EFE6, kamenný sokel #DDD6C8; meď s patinou #8FB3A0 (oplechovanie rímsy a hrán
+  tympanónu, priečna strieška za tympanónom, žľaby a zvody), škridla #9E5B45. **S**
+- Strecha uličného krídla sedlová so **4 vikiermi** v dolnej tretine svahu nad osami 2, 4, 8 a 10 (biele čelo, sedlová
+  strieška); na južnom konci hladká biela štítová stena s malým okienkom nad nižším domom č. 10. **V**
+
+### Nádvorie (https://commons.wikimedia.org/wiki/File:Gal%C3%A9ria_mesta_Bratislavy13.jpg ,
+https://commons.wikimedia.org/wiki/File:Gal%C3%A9ria_mesta_Bratislavy14.jpg)
+- ~18 × 14 m, kamenná dlažba (#B9B2A5); **kamenné pavlače** na konzolách na 1. a 2. poschodí pozdĺž západného
+  a južného krídla (spolu 55 m, kované zábradlie s vypuklými prútmi); severné krídlo má na prízemí **arkádu zo 4
+  oblúkov** (dnes zasklenú); v SV rohu oblá stena **oválneho hlavného schodiska**. **V**
+- Fontána uprostred: kruhová nádrž ⌀ ~3,5 m s bronzovým súsoším **Tritón a nymfa** (V. Tilgner, odliatok 1981,
+  https://sk.wikipedia.org/wiki/Trit%C3%B3n_a_nymfa). **V**
+- Farba dvorných fasád: 2012 okrová, 2022 svetlá krémovobéžová (#E6D3BF) – model používa stav 2022, farba po obnove
+  2026 nie je známa. **N**
+
+### Čo chýba (aké fotky by pomohli)
+1. Severná štítová stena nad nárožným domom – fotka zo Zámočníckej alebo od kostola smerom na JZ.
+2. Farba nádvoria po obnove 2026 a poloha tympanónu v dvore – fotky nádvoria zo všetkých štyroch rohov.
+3. Predstup rizalitu a presné rozmery okien – kolmá fotka fasády od františkánov s mierkou (človek pri bráne).

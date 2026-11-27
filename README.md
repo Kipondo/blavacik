@@ -818,6 +818,17 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   vlnitý štít s okulmi, vázami a krížom, rokokový kovaný kríž pred vchodom. Model sa kladie na dlažbu Františkánskeho
   nám. pred priečelím. Podklady: `napady/pamiatky-podklady.md` („Františkánsky kostol“), kontrola
   `frantiskani-presny-model`.
+- **Mirbachov palác – presný model** (27. 11.; `tools/blender/presne/mirbach.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- mirbachov-palac`): pôdorys z OSM s nádvorím,
+  výšky z laserového skenovania ÚGKK – uličné krídlo so sedlovou strechou (hrebeň 19,6 m), dvorné krídlá s pultovými
+  strechami stúpajúcimi k susedom, južná štítová stena nad susedným domom. Rokoková fasáda do Františkánskeho nám.
+  v bielej farbe po obnove 2016: **11 osí**, plytký rizalit troch stredných osí s **tympanónom** (erb s dvoma
+  farebnými štítmi a grófskou korunou, za ním medená strieška), dve kamenné **brány** s pilastrami, plamennými vázami
+  a rokajovými kartušami, vyrezávané drevené vráta, stredný **balkón** na volútových konzolách s bielym zábradlím
+  s pozlátenými rokajmi, okná s oblúkovým záverom a rokajovým štukom, bočné časti s pásovou bosážou, biele kované mreže,
+  medené oplechovanie rímsy a 4 vikiere. Okrové **nádvorie** s pavlačami na konzolách, arkádou severného krídla, oblou
+  stenou schodiska a fontánou s bronzovým súsoším. Model sa kladie na dlažbu námestia pred stredom fasády. Podklady:
+  `napady/pamiatky-podklady.md` („Mirbachov palác“), kontrola `mirbach-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1481,7 +1492,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   sieňou, pri Dóme pôdorys hranola veže, okná južnej strany lode a počet rebier helmice, pri Starej radnici počty
   oblúkov arkád, fasády južného krídla a severná strana v Kostolnej, pri Primaciálnom paláci strana do Uršulínskej,
   zadné fasády a presná ružová, pri Jezuitskom kostole východný koniec a južná strana strechy, pri Františkánskom
-  kostole spodná časť veže a presný polygón záveru (chýbajú fotky – `napady/pamiatky-podklady.md`).
+  kostole spodná časť veže a presný polygón záveru, pri Mirbachovom paláci severná štítová stena a farba nádvoria po
+  obnove 2026 (chýbajú fotky – `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave
