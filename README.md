@@ -829,6 +829,18 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   medené oplechovanie rímsy a 4 vikiere. Okrové **nádvorie** s pavlačami na konzolách, arkádou severného krídla, oblou
   stenou schodiska a fontánou s bronzovým súsoším. Model sa kladie na dlažbu námestia pred stredom fasády. Podklady:
   `napady/pamiatky-podklady.md` („Mirbachov palác“), kontrola `mirbach-presny-model`.
+- **Grasalkovičov palác – presný model** (28. 11.; `tools/blender/presne/grassalkovic.py`,
+  `blender -b --factory-startup -P tools/blender/presne_blender.py -- grasalkovicov-palac`): pôdorys z OSM (aj šikmé
+  konce traktu podľa ulíc), výšky z laserového skenovania ÚGKK – dvojpodlažný trakt s **nárožnými pavilónmi
+  s mansardovými strechami** (vikiere, biele komíny), krídla so strmými strechami, prevýšený **stredný pavilón**
+  so zvonovitou kupolovou strechou (20,4 m, hroty, stožiar s vlajkou), pilastrami so zlatými hlavicami, troma vysokými
+  oknami Veľkej sály a štítmi so sochami (na juhu štátny znak v pozlátenej kartuši). Biele lizény a šambrány, sivé
+  zrkadlá na poschodí, okná s polkruhovým záverom a pozlátenými kartušami (farby po obnove 2019). Pred palácom
+  murovaný **portikus s arkádami** a terasou s balustrádou, na záhradnej strane balkón na konzolách a dvere sala
+  terreny. **Bellušova mreža čestného dvora** (kamenný sokel, piliere s urnami, čierna mreža so zlatom, dve brány),
+  5 stožiarov s vlajkami a svetlá dlažba dvora. Model sa kladie na dlažbu čestného dvora pred portikom (záhrada je
+  o 1,1 m nižšie). Podklady: `napady/pamiatky-podklady.md` („Grasalkovičov palác“), kontrola
+  `grassalkovic-presny-model`.
 - **LOD2 strechy, stromy a detailný terén z lasera v širšom centre, v Mlynskej doline, na Nivách a v Petržalke**
   (#53, #64; noc 22. 11.): predtým len 11 dlaždíc (výrez Starého Mesta a Mlynská dolina), teraz **96** – Staré Mesto
   od Palisád po Landererovu a od Hlavnej stanice po Dunaj, Karlova Ves – Mlynská dolina – Družba, Mlynské nivy – Nivy –
@@ -1493,7 +1505,8 @@ dlaždíc sú vyriešené v nej); po zlúčení do `main` pribudli:
   oblúkov arkád, fasády južného krídla a severná strana v Kostolnej, pri Primaciálnom paláci strana do Uršulínskej,
   zadné fasády a presná ružová, pri Jezuitskom kostole východný koniec a južná strana strechy, pri Františkánskom
   kostole spodná časť veže a presný polygón záveru, pri Mirbachovom paláci severná štítová stena a farba nádvoria po
-  obnove 2026 (chýbajú fotky – `napady/pamiatky-podklady.md`).
+  obnove 2026, pri Grasalkovičovom paláci koncové (šikmé) fasády a tvar portiku (chýbajú fotky –
+  `napady/pamiatky-podklady.md`).
 - Pri ďalšom pregenerovaní dlaždíc (`tools/mesto/`) pribudne `typOsm` – triedenie budov bude presnejšie (dnes ~60 % budov
   má v OSM len `building=yes` a typ sa háda z pôdorysu).
 - Cesty ako plochy podľa skutočného tvaru (námestia, pešie zóny, podchody, zastávky; OSM `area:highway` v Bratislave

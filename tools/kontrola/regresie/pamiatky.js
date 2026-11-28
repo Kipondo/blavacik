@@ -371,4 +371,28 @@ export const kontrolyPamiatok = [
       return { skontrolovane: 1, chyby };
     },
   },
+  {
+    id: 'grassalkovic-presny-model',
+    popis: 'Grasalkovičov palác: presný model podľa prieskumu a lasera (trakt s nárožnými pavilónmi, stredný pavilón '
+      + 's kupolovou strechou ~20,4 m a stožiarom, portikus, Bellušova mreža s bránami a 5 stožiarmi) sa kladie na dlažbu '
+      + 'čestného dvora pred portikom, nie na najnižší bod pod obrysom (záhrada je o 1,1 m nižšie)',
+    oprava: 'feature/grassalkovicov-palac-presne – tools/blender/presne/grassalkovic.py, tools/blender/presne_blender.py',
+    tolerancia: 0,
+    async spusti() {
+      const chyby = [];
+      const r = await fetch('assets/pamiatky/sm-grasalkovicov-palac.json');
+      if (!r.ok) return { skontrolovane: 0, chyby: [{ text: 'chýba assets/pamiatky/sm-grasalkovicov-palac.json' }] };
+      const info = await r.json();
+      const o = info.obrysy ?? [];
+      if (!(info.vyska > 22 && info.vyska < 27)) chyby.push({ text: `výška ${info.vyska} m – stožiar na kupole má byť ~24,4 m nad dvorom` });
+      if (!o.some((b) => vnutri(0, 0, b))) chyby.push({ text: 'stred paláca nie je v obryse modelu' });
+      const zb = info.zakladnaBod;
+      if (!Array.isArray(zb)) chyby.push({ text: 'chýba zakladnaBod – model by sa položil na najnižší bod pod obrysom (záhrada)' });
+      // hlavná fasáda sa obracia na juh do čestného dvora: bod je južne od portiku (z > 19), mimo obrysu
+      else if (o.some((b) => vnutri(zb[0], zb[1], b)) || zb[1] < 19 || Math.hypot(zb[0], zb[1]) > 35) {
+        chyby.push({ text: `zakladnaBod [${zb}] nie je na dlažbe čestného dvora pred portikom` });
+      }
+      return { skontrolovane: 1, chyby };
+    },
+  },
 ];
