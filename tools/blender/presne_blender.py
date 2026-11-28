@@ -1,9 +1,10 @@
 # Presné modely vybraných pamiatok (noc 22. 11.): Slavín, Modrý kostolík; 26. 11.: historická budova SND, Reduta,
-# Dóm sv. Martina, Stará radnica; 27. 11.: Primaciálny palác, Jezuitský a Františkánsky kostol, Mirbachov palác. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz,
-# záznamy v data/mapa/pamiatky.json aj obrysy (kolízie) ostávajú. Postup a zdroje sú v hlavičke každého súboru
-# v tools/blender/presne/.
+# Dóm sv. Martina, Stará radnica; 27. 11.: Primaciálny palác, Jezuitský a Františkánsky kostol, Mirbachov palác;
+# 28. 11.: Grasalkovičov palác. Prepíšu assets/pamiatky/sm-<kľúč>.glb.gz, záznamy v data/mapa/pamiatky.json
+# aj obrysy (kolízie) ostávajú. Postup a zdroje sú v hlavičke každého súboru v tools/blender/presne/.
 # Spustenie: python3 tools/blender/presne_blender.py [slavin] [modry-kostolik] [snd] [reduta] [dom-sv-martina]
 #             [stara-radnica] [primacialny-palac] [jezuitsky-kostol] [frantiskansky-kostol] [mirbachov-palac]
+#             [grasalkovicov-palac]
 
 import json
 import os
@@ -14,7 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from veze import uloz, z_hry, ccw  # noqa: E402
 from historicke.budova import nacitaj  # noqa: E402
-from presne import slavin, modry_kostolik, snd, reduta, dom, radnica, primacialny, jezuiti, frantiskani, mirbach  # noqa: E402
+from presne import slavin, modry_kostolik, snd, reduta, dom, radnica, primacialny, jezuiti, frantiskani  # noqa: E402
+from presne import mirbach, grassalkovic  # noqa: E402
 
 KOREN = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -31,7 +33,8 @@ def bez_konca(b):
 # argumenty za „--“ (blender -b -P presne_blender.py -- snd) alebo priamo (python3 s modulom bpy)
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
 for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martina', 'stara-radnica', 'primacialny-palac',
-                         'jezuitsky-kostol', 'frantiskansky-kostol', 'mirbachov-palac']:
+                         'jezuitsky-kostol', 'frantiskansky-kostol', 'mirbachov-palac',
+                         'grasalkovicov-palac']:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     subor = f'sm-{kluc}'
     i = info(subor)
@@ -78,6 +81,11 @@ for kluc in ARGS or ['slavin', 'modry-kostolik', 'snd', 'reduta', 'dom-sv-martin
         # obrys z OSM (relácia 207207) ostáva pre kolízie; model sa kladie na dlažbu námestia pred stredom fasády
         G, H = mirbach.postav()
         i['zakladnaBod'] = mirbach.ZAKLADNA_BOD
+    elif kluc == 'grasalkovicov-palac':
+        # obrys z OSM (way 78068599) ostáva pre kolízie; model (aj s Bellušovou mrežou a stožiarmi) sa kladie
+        # na dlažbu čestného dvora pred portikom (záhrada je o 1,1 m nižšie)
+        G, H = grassalkovic.postav()
+        i['zakladnaBod'] = grassalkovic.ZAKLADNA_BOD
     else:
         raise SystemExit(f'neznáma pamiatka {kluc}')
     uloz(G, subor, obrysy, H, info={k: v for k, v in i.items() if k not in ('obrysy', 'vyska')}, minimum=0.72, vzdialenost=2.5)

@@ -2252,3 +2252,65 @@ https://commons.wikimedia.org/wiki/File:Gal%C3%A9ria_mesta_Bratislavy14.jpg)
 1. Severná štítová stena nad nárožným domom – fotka zo Zámočníckej alebo od kostola smerom na JZ.
 2. Farba nádvoria po obnove 2026 a poloha tympanónu v dvore – fotky nádvoria zo všetkých štyroch rohov.
 3. Predstup rizalitu a presné rozmery okien – kolmá fotka fasády od františkánov s mierkou (človek pri bráne).
+
+## Grasalkovičov palác – Hodžovo nám. 1 (28. 11. 2026)
+
+Model: `tools/blender/presne/grassalkovic.py` (spustenie cez `tools/blender/presne_blender.py -- grasalkovicov-palac`).
+Spoľahlivosť: **V** = vysoká, **S** = stredná, **N** = nízka. Fotky z Wikimedia Commons sa len prezreli, do repozitára
+nejdú. Verejné výkresy paláca sa nenašli. Bez Google Maps/Earth/Street View.
+
+### História a skladba
+- Letný palác grófa A. Grasalkoviča, okolo 1760–1765, pripisovaný A. Mayerhofferovi (vzor zámok Gödöllő – prevýšený
+  stredný pavilón v osi blokovej stavby); v 70. rokoch 18. st. pristavané nárožné pavilóny a portikus s terasou
+  a krytým prejazdom (M. Walch). 1939–41 úprava E. Belluša: zbúrané prízemné krídla a múry dvora, nová kovaná mreža
+  čestného dvora. Od 1996 sídlo prezidenta SR, obnova fasád 2019
+  (https://sk.wikipedia.org/wiki/Grasalkovičov_palác, https://de.wikipedia.org/wiki/Palais_Grassalkovich,
+  https://www.prezident.sk/en/presidential-palace, J. Bencová, AL-FA 2/1999,
+  https://alfa.stuba.sk/wp-content/uploads/2021/07/02_1999_Bencova.pdf). **V/S**
+- OSM: **way 78068599** (trakt), mreža **way 90854517**, dlažba dvora way 1498647870, 5 stožiarov (uzly 5939887113–117).
+  Jeden rovný dvojpodlažný trakt (os azimut 95,1°): západný nárožný pavilón (5 osí) – krídlo (6) – stredný pavilón (3)
+  – krídlo (6) – východný nárožný pavilón (5); južné líce ~87 m, severné ~98 m, lebo konce sú šikmé podľa Štefánikovej
+  a Banskobystrickej (potvrdzuje laser). Nárožné pavilóny predstupujú na juhu o ~0,6 m. **V**
+- Lokálna sústava: začiatok = JZ nárožie západného pavilónu, **u** pozdĺž traktu na východ, **v** na sever (záhrada).
+
+### Výšky – laser ÚGKK (DMP 2.0 / DMR, INSPIRE WMS https://inspirews.skgeodesy.sk/geoserver/el_dsm/ows)
+Mriežka 1 m (5 100 bodov) a terén po 2,5 m. Nula = dlažba čestného dvora pred portikom (≈ 155,7 m v hodnotách služby po
+odčítaní 43,8); záhrada na severe −1,1 m, Štefánikova +1,5 m.
+
+| prvok | výška | istota |
+|---|---|---|
+| hlavná rímsa krídel a nárožných pavilónov | ~10,4 m | V |
+| mansarda nárožných pavilónov – zlom (1,5 m za lícom) / vrchol | ~14,1 / 15,8 m | S |
+| strechy krídel (sklon ~35°) – hrebeň | ~15,9 m | V |
+| stredný pavilón – rímsa | ~14,3 m | S |
+| vrchol štítu stredného pavilónu | ~17,9 m | S |
+| plochý vrchol kupolovej strechy (≈ 6 × 17 m) | ~20,4 m | V |
+| terasa portiku / balustráda | ~4,1 / 5,1 m | V |
+| komíny | ~17,4–19,2 m | S |
+
+### Fasády (fotky https://commons.wikimedia.org/wiki/Category:Grassalkovich_Palace,_Bratislava – najmä
+https://commons.wikimedia.org/wiki/File:Bratislava_Grasalkovi%C4%8Dov_pal%C3%A1c_(52096010519).jpg ,
+https://commons.wikimedia.org/wiki/File:Palacio_Grassalkovich,_Bratislava,_Eslovaquia,_2020-02-01,_DD_23.jpg ,
+https://commons.wikimedia.org/wiki/File:Grassalkovich_palota.jpg ,
+https://commons.wikimedia.org/wiki/File:Grassalkovich_Palace_-_view_from_gardens.JPG)
+- Po obnove 2019: biele lizény, šambrány, rímsy a celé prízemie (#EFEEEB), sivé zrkadlá na poschodí (#CFCCC6), sivý
+  tympanón (#C8C6C1), pozlátené hlavice pilastrov a kartuše (#C9A13B); okenné rámy tmavohnedé, mreže prízemia čierne. **V/S**
+- Krídla a pavilóny: prízemie s obdĺžnikovými oknami s mrežami (v strednej osi pavilónov oblúkové dvere), na poschodí
+  okná s polkruhovým záverom a segmentovou rímsou s pozlátenou kartušou. **V**
+- Stredný pavilón: 4 pilastre veľkého rádu s pozlátenými rokajovými hlavicami, 3 vysoké okná Veľkej sály
+  s polkruhovým záverom, trojuholníkový štít s 2 sediacimi sochami (na juhu štátny znak v pozlátenej kartuši);
+  zvonovitá kupolová strecha (#3D3F46) s hrotmi a stožiarom. Na severe balkón na kamenných konzolách po celej šírke
+  a 3 oblúkové dvere sala terreny. **V**
+- Portikus (70. roky 18. st.): murovaný blok bez stĺpov, širší než pavilón, so zaoblenými rohmi, na čele 3 oblúky
+  (v strede hlavné dvere), na bokoch veľké oblúky prejazdu, hore terasa s bielou balustrádou a pozláteným kovaným
+  úsekom. **V** (tvar rohov **S**)
+- Strechy: nárožné pavilóny mansardové s valbou a 3 vikiermi na juhu, krídla strmé so 2 vikiermi na svah, šablónová
+  krytina sivá s nazelenalým nádychom (#63655F), biele komíny s tmavou krycou doskou. **V/S**
+- Bellušova mreža (samostatná pamiatka): kamenný sokel (#C1B4A2), hranolové piliere s urnami, čierna kovaná mreža
+  s pozlátenými rozetami, vpredu vypuklý úsek, dve hlavné brány s oblúkovým horným okrajom a pozláteným nástavcom;
+  v dvore 5 stožiarov s vlajkami SR a EÚ a svetlá kamenná dlažba (#C7BFB8). **V**
+
+### Čo chýba (aké fotky by pomohli)
+1. Koncové (šikmé) fasády – čelné fotky zo Štefánikovej a z Banskobystrickej.
+2. Presný tvar a hĺbka portiku (rohy, bočné oblúky prejazdu) – šikmé fotky zo západu a z východu čestného dvora.
+3. Severná strana striech a komíny – pohľad z vyššej budovy nad záhradou.
